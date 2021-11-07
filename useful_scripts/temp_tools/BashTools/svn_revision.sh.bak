@@ -1,0 +1,10 @@
+# extra build information
+
+BUILD_VERSION=$(shell svn info --xml > /tmp/revision && expr substr `head -13 /tmp/revision|grep "revision"` 11 2)
+ifeq ($(BUILD_VERSION), )
+BUILD_VERSION=999
+endif
+BUILD_DATE=$(shell date +%Y%m%d_%T)
+BUILD_BY="$(shell whoami)"
+
+DEFS += -D_ARM_ -DFIXED_POINT=32 -D_REVISION=$(BUILD_VERSION) -D_BUILD_DATE=$(BUILD_DATE) -D_BUILD_BY=$(BUILD_BY)
