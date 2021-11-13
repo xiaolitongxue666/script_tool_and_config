@@ -2,7 +2,7 @@
 
 set -x 
 
-cat >/etc/pacman.conf/ <<EOL
+cat >/etc/pacman.conf <<EOL
 
 [archlinuxcn]
 SigLevel = Optional TrustedOnly
