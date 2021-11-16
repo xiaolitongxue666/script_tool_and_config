@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# https://unix.stackexchange.com/questions/454880/open-multiple-terminal-but-without-closing-the-previous-one-using-shell-script
+
 set -x
 
 # https://unix.stackexchange.com/questions/454880/open-multiple-terminal-but-without-closing-the-previous-one-using-shell-script
