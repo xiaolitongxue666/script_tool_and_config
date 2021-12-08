@@ -93,6 +93,16 @@ ffmpeg -re -c:v h265_ni_dec -i udp://127.0.0.1:5000?fifo_size=100000000 -c:v h26
 
 ================================================================================================================================================
 
+//多路进多路出带滤镜
+ffmpeg -re -c:v h265_ni_dec \
+-i udp://127.0.0.1:5000?fifo_size=100000000 \
+-i 1080P.png \
+-filter_complex \
+'[1]format=rgba,colorchannelmixer=aa=0.5[logo];[0][logo]overlay=W/2:0:format=auto' \
+-c:v h264_ni_enc -xcoder-params  "RcEnable=1:bitrate=20000000:repeatHeaders=1" -s 1920x1080 -f  rtp_mpegts rtp://192.168.1.139:9900
+
+================================================================================================================================================
+
 //一入多出转码无滤镜(测试播放正常 )
 ffmpeg -re -c:v h265_ni_dec -i udp://127.0.0.1:5000?fifo_size=100000000 \
 -c:v h264_ni_enc -xcoder-params  "RcEnable=1:bitrate=20000000:repeatHeaders=1" -s 1920x1080 -f  rtp_mpegts rtp://192.168.1.139:9900 \
@@ -101,17 +111,83 @@ ffmpeg -re -c:v h265_ni_dec -i udp://127.0.0.1:5000?fifo_size=100000000 \
 -c:v h264_ni_enc -xcoder-params  "RcEnable=1:bitrate=20000000:repeatHeaders=1" -s 640x480 -f  rtp_mpegts rtp://192.168.1.139:9903 \
 -c:v h264_ni_enc -xcoder-params  "RcEnable=1:bitrate=20000000:repeatHeaders=1" -s 320x240 -f  rtp_mpegts rtp://192.168.1.139:9904
 
-//一入多出转码同一滤镜 透明水印(测试播放正常 )
+//一入多出转码同一滤镜 透明水印  * 2 (测试01)
 ffmpeg -re -c:v h265_ni_dec \
 -i udp://127.0.0.1:5000?fifo_size=100000000 \
 -i 1080P.png \
 -filter_complex \
-'[1]format=rgba,colorchannelmixer=aa=0.5[logo];[0][logo]overlay=W/2:0:format=auto[transparent];[0]asplit=3[aout1][aout2][aout3];[transparent]split=3[out1][out2][out3]' \
+'[1]format=rgba,colorchannelmixer=aa=0.5[logo];[0][logo]overlay=W/2:0:format=auto[transparent];[0]asplit=5[aout1][aout2][aout3][aout4][aout5];[transparent]split=5[out1][out2][out3][out4][out5]' \
 -c:v h264_ni_enc -xcoder-params  "RcEnable=1:bitrate=20000000:repeatHeaders=1" -map [out1] -map [aout1] -s 1920x1080 -f  rtp_mpegts rtp://192.168.1.139:9900 \
--c:v h264_ni_enc -xcoder-params  "RcEnable=1:bitrate=20000000:repeatHeaders=1" -map [out2] -map [aout2] -s 1280x720 -f  rtp_mpegts rtp://192.168.1.139:9901 \
--c:v h264_ni_enc -xcoder-params  "RcEnable=1:bitrate=20000000:repeatHeaders=1" -map [out3] -map [aout3] -s 640x480 -f  rtp_mpegts rtp://192.168.1.139:9902
+-c:v h264_ni_enc -xcoder-params  "RcEnable=1:bitrate=20000000:repeatHeaders=1" -map [out2] -map [aout2] -s 1920x1080 -r 30 -f  rtp_mpegts rtp://192.168.1.139:9901 \
+-c:v h264_ni_enc -xcoder-params  "RcEnable=1:bitrate=20000000:repeatHeaders=1" -map [out3] -map [aout3] -s 1280x720 -r 30 -f  rtp_mpegts rtp://192.168.1.139:9902 \
+-c:v h264_ni_enc -xcoder-params  "RcEnable=1:bitrate=20000000:repeatHeaders=1" -map [out4] -map [aout4] -s 640x480 -r 30 -f  rtp_mpegts rtp://192.168.1.139:9903 \
+-c:v h264_ni_enc -xcoder-params  "RcEnable=1:bitrate=20000000:repeatHeaders=1" -map [out5] -map [aout5] -s 480x360 -r 30 -f  rtp_mpegts rtp://192.168.1.139:9904
 
-//一入多出转码同各自滤镜 透明水印(测试)
+//一入多出转码同一滤镜 透明水印  * 2 (测试02)
+ffmpeg -re -c:v h265_ni_dec \
+-i udp://127.0.0.1:5001?fifo_size=100000000 \
+-i 1080P.png \
+-filter_complex \
+'[1]format=rgba,colorchannelmixer=aa=0.5[logo];[0][logo]overlay=W/2:0:format=auto[transparent];[0]asplit=5[aout1][aout2][aout3][aout4][aout5];[transparent]split=5[out1][out2][out3][out4][out5]' \
+-c:v h264_ni_enc -xcoder-params  "RcEnable=1:bitrate=20000000:repeatHeaders=1" -map [out1] -map [aout1] -s 1920x1080 -f  rtp_mpegts rtp://192.168.1.139:9905 \
+-c:v h264_ni_enc -xcoder-params  "RcEnable=1:bitrate=20000000:repeatHeaders=1" -map [out2] -map [aout2] -s 1920x1080 -r 30 -f  rtp_mpegts rtp://192.168.1.139:9906 \
+-c:v h264_ni_enc -xcoder-params  "RcEnable=1:bitrate=20000000:repeatHeaders=1" -map [out3] -map [aout3] -s 1280x720 -r 30 -f  rtp_mpegts rtp://192.168.1.139:9907 \
+-c:v h264_ni_enc -xcoder-params  "RcEnable=1:bitrate=20000000:repeatHeaders=1" -map [out4] -map [aout4] -s 640x480 -r 30 -f  rtp_mpegts rtp://192.168.1.139:9908 \
+-c:v h264_ni_enc -xcoder-params  "RcEnable=1:bitrate=20000000:repeatHeaders=1" -map [out5] -map [aout5] -s 480x360 -r 30 -f  rtp_mpegts rtp://192.168.1.139:9909
+
+
+//一入多出转码同一滤镜 透明水印 (测试设置使用CPU核心数)
+ffmpeg -re -c:v h265_ni_dec \
+-threads 1 \
+-i udp://127.0.0.1:5000?fifo_size=100000000 \
+-i 1080P.png \
+-filter_complex \
+'[1]format=rgba,colorchannelmixer=aa=0.5[logo];[0][logo]overlay=W/2:0:format=auto[transparent];[0]asplit=5[aout1][aout2][aout3][aout4][aout5];[transparent]split=5[out1][out2][out3][out4][out5]' \
+-c:v h264_ni_enc -xcoder-params  "RcEnable=1:bitrate=20000000:repeatHeaders=1" -map [out1] -map [aout1] -s 1920x1080 -f  rtp_mpegts rtp://192.168.1.139:9900 \
+-c:v h264_ni_enc -xcoder-params  "RcEnable=1:bitrate=20000000:repeatHeaders=1" -map [out2] -map [aout2] -s 1920x1080 -r 30 -f  rtp_mpegts rtp://192.168.1.139:9901 \
+-c:v h264_ni_enc -xcoder-params  "RcEnable=1:bitrate=20000000:repeatHeaders=1" -map [out3] -map [aout3] -s 1280x720 -r 30 -f  rtp_mpegts rtp://192.168.1.139:9902 \
+-c:v h264_ni_enc -xcoder-params  "RcEnable=1:bitrate=20000000:repeatHeaders=1" -map [out4] -map [aout4] -s 640x480 -r 30 -f  rtp_mpegts rtp://192.168.1.139:9903 \
+-c:v h264_ni_enc -xcoder-params  "RcEnable=1:bitrate=20000000:repeatHeaders=1" -map [out5] -map [aout5] -s 480x360 -r 30 -f  rtp_mpegts rtp://192.168.1.139:9904
+
+//测试1  正常播放
+ffmpeg -re -c:v h265_ni_dec \
+-threads 1 \
+-i udp://127.0.0.1:5000?fifo_size=100000000 \
+-i 1080P.png \
+-filter_complex \
+'[1]format=rgba,colorchannelmixer=aa=0.5[logo];[0][logo]overlay=W/2:0:format=auto[transparent];[0]asplit=4[aout1][aout2][aout3][aout4];[transparent]split=4[out1][out2][out3][out4]' \
+-c:v h264_ni_enc -xcoder-params  "RcEnable=1:bitrate=20000000:repeatHeaders=1" -map [out1] -map [aout1] -s 1920x1080 -f  rtp_mpegts rtp://192.168.1.139:9900 \
+-c:v h264_ni_enc -xcoder-params  "RcEnable=1:bitrate=20000000:repeatHeaders=1" -map [out2] -map [aout2] -s 1280x720 -r 30 -f  rtp_mpegts rtp://192.168.1.139:9901 \
+-c:v h264_ni_enc -xcoder-params  "RcEnable=1:bitrate=20000000:repeatHeaders=1" -map [out3] -map [aout3] -s 640x480 -r 30 -f  rtp_mpegts rtp://192.168.1.139:9902 \
+-c:v h264_ni_enc -xcoder-params  "RcEnable=1:bitrate=20000000:repeatHeaders=1" -map [out4] -map [aout4] -s 480x360 -r 30 -f  rtp_mpegts rtp://192.168.1.139:9903
+
+//测试2  正常播放
+ffmpeg -re -c:v h265_ni_dec \
+-threads 1 \
+-i udp://127.0.0.1:5001?fifo_size=100000000 \
+-i 1080P.png \
+-filter_complex \
+'[1]format=rgba,colorchannelmixer=aa=0.5[logo];[0][logo]overlay=W/2:0:format=auto[transparent];[0]asplit=4[aout1][aout2][aout3][aout4];[transparent]split=4[out1][out2][out3][out4]' \
+-c:v h264_ni_enc -xcoder-params  "RcEnable=1:bitrate=20000000:repeatHeaders=1" -map [out1] -map [aout1] -s 1920x1080 -f  rtp_mpegts rtp://192.168.1.139:9905 \
+-c:v h264_ni_enc -xcoder-params  "RcEnable=1:bitrate=20000000:repeatHeaders=1" -map [out2] -map [aout2] -s 1280x720 -r 30 -f  rtp_mpegts rtp://192.168.1.139:9906 \
+-c:v h264_ni_enc -xcoder-params  "RcEnable=1:bitrate=20000000:repeatHeaders=1" -map [out3] -map [aout3] -s 640x480 -r 30 -f  rtp_mpegts rtp://192.168.1.139:9907 \
+-c:v h264_ni_enc -xcoder-params  "RcEnable=1:bitrate=20000000:repeatHeaders=1" -map [out4] -map [aout4] -s 480x360 -r 30 -f  rtp_mpegts rtp://192.168.1.139:9908
+
+
+//一入多出转码同一滤镜 透明水印 (测试不修改帧率)
+ffmpeg -re -c:v h265_ni_dec \
+-threads 1 \
+-i udp://127.0.0.1:5000?fifo_size=100000000 \
+-i 1080P.png \
+-filter_complex \
+'[1]format=rgba,colorchannelmixer=aa=0.5[logo];[0][logo]overlay=W/2:0:format=auto[transparent];[0]asplit=5[aout1][aout2][aout3][aout4][aout5];[transparent]split=5[out1][out2][out3][out4][out5]' \
+-c:v h264_ni_enc -xcoder-params  "RcEnable=1:bitrate=20000000:repeatHeaders=1" -map [out1] -map [aout1] -s 1920x1080 -f  rtp_mpegts rtp://192.168.1.139:9900 \
+-c:v h264_ni_enc -xcoder-params  "RcEnable=1:bitrate=20000000:repeatHeaders=1" -map [out2] -map [aout2] -s 1920x1080 -f  rtp_mpegts rtp://192.168.1.139:9901 \
+-c:v h264_ni_enc -xcoder-params  "RcEnable=1:bitrate=20000000:repeatHeaders=1" -map [out3] -map [aout3] -s 1280x720 -f  rtp_mpegts rtp://192.168.1.139:9902 \
+-c:v h264_ni_enc -xcoder-params  "RcEnable=1:bitrate=20000000:repeatHeaders=1" -map [out4] -map [aout4] -s 640x480 -f  rtp_mpegts rtp://192.168.1.139:9903 \
+-c:v h264_ni_enc -xcoder-params  "RcEnable=1:bitrate=20000000:repeatHeaders=1" -map [out5] -map [aout5] -s 480x360 -f  rtp_mpegts rtp://192.168.1.139:9904
+
+//一入多出转码同各自滤镜 透明水印(正常播放)
 ffmpeg -re -c:v h265_ni_dec \
 -i udp://127.0.0.1:5000?fifo_size=100000000 \
 -i 1080P.png \
@@ -277,6 +353,9 @@ echo "umount ${mount_point}"
 echo "diskutil eject ${ramdisk_dev}"
 
 =================================================================================
+# 显示T408固件信息
+nvme list
+
 # 初始化NETINT设备
 init_rsrc
 
@@ -308,6 +387,10 @@ FFmpeg https://ffmpeg.org/ffmpeg.html
 RcEnable 		- 使能rate控制(1:Enable)
 bitrate 		- 设置编码比特率(bps), 
 repeatHeaders - 指定编码器是否在所有i帧上重复VPS/SPS/PPS报头(1:Enable)
+
+# taskset 命令使用
+taskset -c -p <PID>
+taskset -pc <CORE_INDEX> <PID>
 
 
 

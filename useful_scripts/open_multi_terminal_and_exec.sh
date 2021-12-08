@@ -43,7 +43,7 @@ set -x
 
 #                 read -p "Press [1~8] to confirm the use of multi input number. " -n 1 -r
 #                 echo ""
-#                #  if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+#                #  if [[ ! $REPLY =~ ^[Yy]$ ]]; thenkkk
 #                #    echo "Please remove release package files you do not wish to use and try again."
 #                #    end_script
 #                #  fi
@@ -70,7 +70,7 @@ do
    # None
    #xterm -title "Terminal $i" -e bash -c "ffmpeg -re -c:v h265_ni_dec -i udp://127.0.0.1:$src_port?fifo_size=100000000 -c:v h264_ni_enc -xcoder-params  \"RcEnable=1:bitrate=20000000:repeatHeaders=1\"  -f  rtp_mpegts rtp://192.168.1.139:$dst_port" &
 
-   # Overlay
+   # Overlayi
    #xterm -title "Terminal $i" -e bash -c "ffmpeg -re -c:v h265_ni_dec -i udp://127.0.0.1:$src_port?fifo_size=100000000 -i 1080P.png -filter_complex overlay=0:0 -c:v h264_ni_enc -xcoder-params  \"RcEnable=1:bitrate=20000000:repeatHeaders=1\"  -f  rtp_mpegts rtp://192.168.1.139:$dst_port" &
 
    # Transparent
