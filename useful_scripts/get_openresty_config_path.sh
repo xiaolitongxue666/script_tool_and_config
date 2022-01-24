@@ -3,4 +3,5 @@
 #set -x
 
 x=`openresty -V 2>&1`
-echo $x | sed -r 's/ /\n/g' | grep "\-\-prefix"
+echo $x | sed -r 's/ /\n/g' | grep "\-\-prefix" | awk -F [=] {'printf $2'} | tr -d '\r'
+echo "!"
