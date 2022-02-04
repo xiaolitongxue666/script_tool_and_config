@@ -23,8 +23,8 @@ echo privkey[$ts_privkey]
 #sed -i "" 's|.*'$replaced_pubkey_string'.*|'-DPUB_KEY='a7ac30cc953516b3e2c2edd5e1319070754623062fd126c400fcc579a651d6de \\''|' run-java-local.sh
 
 #sed -i -e 's|-DPUB_KEY='.*'|'-DPUB_KEY="$ts_pubkey"'|' run-java-local.sh
-sed -i -e 's|-DPUB_KEY='.*'\ |'-DPUB_KEY=\'"$ts_pubkey"\'\ '|g' run-java-local.sh
-sed -i -e 's|-DPRIV_KEY='.*'\ |'-DPRIV_KEY=\'"$ts_privkey"\'\ '|g' run-java-local.sh
+sed -i "" 's|-DPUB_KEY='.*'\ |'-DPUB_KEY=\'"$ts_pubkey"\'\ '|g' run-java-local.sh
+sed -i "" 's|-DPRIV_KEY='.*'\ |'-DPRIV_KEY=\'"$ts_privkey"\'\ '|g' run-java-local.sh
 
 cat run-java-local.sh
 cp run-java-local.sh.bak run-java-local.sh
