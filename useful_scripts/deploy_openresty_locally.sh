@@ -16,10 +16,10 @@ openresty_config_path=${openresty_config_file_path%/*}
 echo $openresty_config_path
 
 # Copy music-room-test.conf to openresty_config_path
-echo "Copy music-room-test.conf to $openresty_config_path"
-cp ./music-room-test.conf $openresty_config_path
+# echo "Copy music-room-test.conf to $openresty_config_path"
+# cp ./music-room-test.conf $openresty_config_path
 
 # Add music room sub config to oprensty main config file
-echo "Add music room sub config to openresty main config file"
-echo "include $openresty_config_path/music-room-test.conf;"
+# echo "Add music room sub config to openresty main config file"
+# echo "include $openresty_config_path/music-room-test.conf;"
 
