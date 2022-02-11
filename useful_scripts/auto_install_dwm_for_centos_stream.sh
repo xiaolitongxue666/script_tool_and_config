@@ -1,5 +1,8 @@
 #!/bin/sh
 
+# https://askubuntu.com/questions/25251/how-do-i-select-dwm-or-fluxbox-to-start-on-login
+# https://unix.stackexchange.com/questions/594636/the-default-keybinding-for-opening-a-terminal-in-dwm-does-not-work
+
 set -x
 
 # Install Xlib and include headers
