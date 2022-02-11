@@ -20,3 +20,14 @@ tar -zxvf st-0.8.5.tar.gz
 cd st-0.8.5
 make clean isntall
 tic -sx st.info
+
+# Add choose dwm in login screen
+cat << EOF > /user/share/xsessions/dwm.desktop
+[Desktop Entry]
+> Encoding=UTF-8
+> Name=Dwm
+> Comment=Dynamic window manager
+> Exec=dwm
+> Icon=dwm
+> Type=XSession
+> EOF
