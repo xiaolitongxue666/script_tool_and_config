@@ -12,5 +12,11 @@ alias la='exa -a'
 alias ll='exa -lah'
 alias ls='exa --color=auto'
 
-# Add cargo path : fish version >= 3.3.1
+# Add path : fish version >= 3.3.1
 fish_add_path ~/.cargo/bin
+
+# Pyenv
+status is-login; and pyenv init --path | source
+status is-interactive; and pyenv init - | source
+pyenv init -
+fish_add_path ~/.pyenv/shims
