@@ -2,6 +2,11 @@ if status is-interactive
     # Commands to run in interactive sessions can go here
 end
 
+# Npm
+function nvm
+     bass source ~/.nvm/nvm.sh --no-use ';' nvm $argv
+end
+
 # Add alias
 alias h_proxy='export http_proxy=http://127.0.0.1:1087;export https_proxy=http://127.0.0.1:1087'
 alias unset_h='unset http_proxy; unset https_proxy'
