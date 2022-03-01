@@ -19,6 +19,7 @@ alias ls='exa --color=auto'
 
 # Add path : fish version >= 3.3.1
 fish_add_path ~/.cargo/bin
+export PATH="/usr/local/opt/make/libexec/gnubin:$PATH"
 
 # Pyenv
 status is-login; and pyenv init --path | source
