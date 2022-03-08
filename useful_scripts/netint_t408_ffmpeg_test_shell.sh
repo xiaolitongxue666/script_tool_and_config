@@ -392,5 +392,47 @@ repeatHeaders - 指定编码器是否在所有i帧上重复VPS/SPS/PPS报头(1:E
 taskset -c -p <PID>
 taskset -pc <CORE_INDEX> <PID>
 
+# How to use example
+./ni_demuxing_decoding ./akiyo_352x288p25.265 output_352x288p25.yuv
+
+ffplay -f rawvideo -video_size 352x288 output_352x288p25.yuv 
+
+./ni_encode_video -i input_352x288p25.yuv \
+	--size 352x288 \
+	-r 25 \
+	-c h265_ni_enc \
+	-x gopPresetIdx=5:intraPeriod=120:RcEnable=1 \
+	-b 100000 \
+	-o output.h265
+
+fflpay output_352x288p25.h265
+
+# Remote gdb debug
+在目标设备上运行gdbserver
+
+gdbserver localhost:8080 ./ExecutableFile
+
+然后在Clion上设置断点,点击调试
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
