@@ -326,6 +326,7 @@ ffmpeg -re -c:v h265_ni_dec -i udp://127.0.0.1:5000?fifo_size=400000000 -c:v h26
 //添加osd
 #播放yuv raw视频
 ffplay -i overlap.yuv -f rawvideo -vcodec rawvideo -pixel_format yuv420p -video_size 1920x1080 -framerate 30
+ffplay -i output_352x288p25.yuv -f rawvideo -vcodec rawvideo -pixel_format yuv420p -video_size 352x288 -framerate 25
 
 #保存网络串流到YUV
 ffmpeg -i rtp://192.168.2.102:5004 -f rawvideo -vcodec rawvideo -pix_fmt yuv420p -s 1920x1080 -r 30 -t 5 rawvideo5.yuv
@@ -353,6 +354,9 @@ echo "umount ${mount_point}"
 echo "diskutil eject ${ramdisk_dev}"
 
 =================================================================================
+# 编译 FFmpeg
+./build_ffmpeg.sh --ffplay --ffprobe --libx264 --libx265
+
 # 显示T408固件信息
 nvme list
 
