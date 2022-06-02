@@ -8,6 +8,7 @@ function nvm
 end
 
 # Add alias
+alias unset 'set --earse'  # Some OS can't find unset command
 alias h_proxy='export http_proxy=http://127.0.0.1:1087;export https_proxy=http://127.0.0.1:1087'
 alias unset_h='unset http_proxy; unset https_proxy'
 alias c_google='curl cip.cc'
