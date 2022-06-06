@@ -25,3 +25,5 @@ rm -rf fonts
 # Instlal and apply new fish theme
 omf install agnoster
 
+# Install bass for run bash scripts
+omf install bass
