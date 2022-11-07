@@ -7,9 +7,16 @@ echo "Project name is $project_name"
 
 #Input parameters number
 if [ $# != 1 ]; then
-    echo "Usage: $0 <Project type>" 
-    echo "e.g. : $0 c" 
-    exit
+
+cat << EOF
+usage: up [--level <n> | -n <levels>][--help][--version]
+
+Report bugs to:
+up home page:
+EOF
+
+exit
+
 fi
 
 #Create project type C
@@ -28,7 +35,7 @@ fi
 #If dir not exist , create it.
 #build contains different projects build shell
 if [ ! -d "./build" ]; then
-  mkdir ./build
+  mkdir -p ./build
   echo -e "#!/bin/sh" >> ./build/cmake_all_project.sh
   echo -e "" >> ./build/cmake_all_project.sh
   echo -e "cmake .." >> ./build/cmake_all_project.sh
@@ -39,19 +46,19 @@ fi
 #If dir not exist , create it.
 #tools contains extern tools 
 if [ ! -d "./tools" ]; then
-  mkdir ./tools
+  mkdir -p ./tools
 fi
 
 #If dir not exist , create it.
 #work_note contains project key note
 if [ ! -d "./work_note" ]; then
-  mkdir ./work_note
+  mkdir -p ./work_note
 fi
 
 #If dir not exist , create it.
 #src contains all source code
 if [ ! -d "./src" ]; then
-  mkdir ./src
+  mkdir -p ./src
   echo "Please add source code files to die src and run this shell again !"
 fi
 
