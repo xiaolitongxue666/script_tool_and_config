@@ -13,3 +13,5 @@ mkdir -p ~/.config/nvim/
 cd ~/.config
 git clone git@github.com:xiaolitongxue666/nvim.git
 
+#Install plugs
+nvim +'PlugInstall --sync' +qa

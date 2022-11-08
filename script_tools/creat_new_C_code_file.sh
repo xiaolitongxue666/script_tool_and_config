@@ -4,7 +4,7 @@
 touch $1
 
 echo "/* File: $1 */" > $1
-echo "/* Author: YOU NAME */" >> $1
+echo "/* Author: Leon Li */" >> $1
 echo "/* Date: `date` */" >> $1
 
 filename="${1%.*}"
