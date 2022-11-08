@@ -28,6 +28,7 @@ get_dirs $root_dir
 # Use blow command save to file
 # xclip -o > ./include_dir_lists.txt
 
-
+# If want to echo to CMake.txt
+# ls_all_dirs_name.sh . | awk '{print "include_directories(" $0 ")" > "include_directories.cmake" }' 
 
 
