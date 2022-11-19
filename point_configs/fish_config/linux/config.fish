@@ -17,6 +17,7 @@ alias l='exa'
 alias la='exa -a'
 alias ll='exa -lah'
 alias ls='exa --color=auto'
+alias rm='trash -v'
 
 # Add path : fish version >= 3.3.1
 fish_add_path ~/.cargo/bin
