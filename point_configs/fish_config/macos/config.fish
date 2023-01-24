@@ -3,8 +3,7 @@ if status is-interactive
 end
 
 # Add nvm path to fish shell
-fish_add_path /Users/liyong/.nvm/versions/node/v16.4.0/bin /usr/local/bin
-export PATH="/usr/local/opt/make/libexec/gnubin:$PATH"
+load_nvm > /dev/stderr
 
 
 # Add by xiaoli
@@ -20,3 +19,9 @@ alias la='exa -a'
 alias ll='exa -lah'
 alias ls='exa --color=auto'
 alias rm='trash -v'
+
+# Autojump
+source /usr/local/share/autojump/autojump.fish
+
+# Start starrship
+starship init fish | source
