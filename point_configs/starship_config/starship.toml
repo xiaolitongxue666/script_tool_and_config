@@ -1,4 +1,7 @@
-# ~/.config/starship.toml
+format = """
+[\uE0B0](fg:#1C4961 bg:#2F79A1)$git_branch[\uE0B0](fg:#2F79A1 bg:#3A95C7)$git_status[\uE0B0](#3A95C7 bg:#40A9E0)$time[\uE0B0](#40A9E0 bg:none) $all$character """
+
+add_newline = false
 
 [battery]
 full_symbol = "🔋"
@@ -19,6 +22,7 @@ format = " took [$duration]($style)"
 [directory]
 truncation_length = 5
 format = "[$path]($style)[$lock_symbol]($lock_style) "
+style = "bg:#1C4961 fg:white"
 
 [git_branch]
 format = " [$symbol$branch]($style) "
@@ -75,15 +79,20 @@ style = "bold green"
 format = "[$symbol$version]($style) "
 style = "bold green"
 
+#[time]
+#time_format = "%T"
+#format = "🕙 $time($style) "
+#style = "bright-white"
+#disabled = false
+
 [time]
-time_format = "%T"
-format = "🕙 $time($style) "
-style = "bright-white"
 disabled = false
+format = "[ $time ]($style)"
+style = "bg:#40A9E0 fg:white"
 
 [username]
 style_user = "bold dimmed blue"
-show_always = true
+show_always = false
 
 [nodejs]
 format = "via [🤖 $version](bold green) "
