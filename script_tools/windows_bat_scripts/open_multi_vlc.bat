@@ -3,7 +3,7 @@ setlocal enabledelayedexpansion
 set "address=udp://@192.168.10.214"
 set "pkt_size=1316"
 set "start_num=9900"
-set "repeat_count=5"
+set "repeat_count=4"
 
 set /a max_index=%repeat_count%-1
 
