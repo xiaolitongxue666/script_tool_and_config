@@ -1,23 +1,17 @@
 #!/bin/bash
 
+# ============================================
+# 通用脚本函数库
+# 提供颜色输出、日志记录、错误处理等功能
+# ============================================
+
 readonly PROGNAME=$(basename $0)
-readonly PROGDIR=$(readlink -m $(dirname $0))
+readonly PROGDIR=$(readlink -m $(dirname $0) 2>/dev/null || cd "$(dirname "$0")" && pwd)
 readonly ARGS="$@"
 
-function start_script() {
-    printf "\n"
-    printf "Start $1 script\n"
-}
-
-function end_script() {
-    printf "\n"
-    printf "End script\n"
-
-    trap - EXIT
-    exit 0
-}
-
-
+# ============================================
+# 颜色定义
+# ============================================
 # 黑色        0;30     深灰色       1;30
 # 红色        0;31     浅红色       1;31
 # 绿色        0;32     浅绿色       1;32
@@ -46,7 +40,136 @@ readonly LIGHT_CYAN='\e[1;36m'
 readonly WHITE='\e[1;37m'
 readonly NO_COLOR='\e[0m'
 
-function echo_color_message(){
-    echo -e "$1 $2 $NO_COLOR"
+# ============================================
+# 日志输出函数
+# ============================================
+
+# 输出带颜色的消息
+function echo_color_message() {
+    echo -e "${1}${2}${NO_COLOR}"
 }
 
+# 信息日志（蓝色）
+function log_info() {
+    echo_color_message "${BLUE}" "[信息] $*"
+}
+
+# 成功日志（绿色）
+function log_success() {
+    echo_color_message "${GREEN}" "[成功] $*"
+}
+
+# 警告日志（黄色）
+function log_warning() {
+    echo_color_message "${YELLOW}" "[警告] $*"
+}
+
+# 错误日志（红色）
+function log_error() {
+    echo_color_message "${RED}" "[错误] $*" >&2
+}
+
+# 调试日志（青色）
+function log_debug() {
+    if [[ "${DEBUG:-0}" == "1" ]]; then
+        echo_color_message "${CYAN}" "[调试] $*"
+    fi
+}
+
+# ============================================
+# 脚本生命周期函数
+# ============================================
+
+# 脚本开始
+function start_script() {
+    echo ""
+    echo_color_message "${CYAN}" "=========================================="
+    echo_color_message "${CYAN}" "开始执行: $1"
+    echo_color_message "${CYAN}" "=========================================="
+    echo ""
+}
+
+# 脚本结束
+function end_script() {
+    echo ""
+    echo_color_message "${CYAN}" "=========================================="
+    echo_color_message "${CYAN}" "脚本执行完成"
+    echo_color_message "${CYAN}" "=========================================="
+    echo ""
+    trap - EXIT
+    exit 0
+}
+
+# 脚本错误退出
+function error_exit() {
+    local error_msg="${1:-未知错误}"
+    local exit_code="${2:-1}"
+    log_error "$error_msg"
+    exit "$exit_code"
+}
+
+# ============================================
+# 错误处理
+# ============================================
+
+# 检查命令是否存在
+function check_command() {
+    if ! command -v "$1" &> /dev/null; then
+        error_exit "命令 '$1' 未找到，请先安装"
+    fi
+}
+
+# 检查文件是否存在
+function check_file() {
+    if [[ ! -f "$1" ]]; then
+        error_exit "文件不存在: $1"
+    fi
+}
+
+# 检查目录是否存在
+function check_directory() {
+    if [[ ! -d "$1" ]]; then
+        error_exit "目录不存在: $1"
+    fi
+}
+
+# 检查是否为 root 用户
+function check_root() {
+    if [[ $EUID -ne 0 ]]; then
+        error_exit "此脚本需要 root 权限，请使用 sudo 运行"
+    fi
+}
+
+# ============================================
+# 工具函数
+# ============================================
+
+# 确认操作
+function confirm() {
+    local prompt="${1:-是否继续？}"
+    read -p "$(echo_color_message "${YELLOW}" "$prompt (y/n): ")" -n 1 -r
+    echo
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        return 1
+    fi
+    return 0
+}
+
+# 创建目录（如果不存在）
+function ensure_directory() {
+    if [[ ! -d "$1" ]]; then
+        mkdir -p "$1"
+        log_info "已创建目录: $1"
+    fi
+}
+
+# 备份文件
+function backup_file() {
+    local file="$1"
+    if [[ -f "$file" ]]; then
+        local backup="${file}.backup.$(date +%Y%m%d_%H%M%S)"
+        cp "$file" "$backup"
+        log_info "已备份文件: $backup"
+        echo "$backup"
+    fi
+}

@@ -1,6 +1,7 @@
 #!/bin/bash
 
-echo -n "How many random numbers do you want to generate? "
+# 生成随机数示例脚本
+echo -n "您想生成多少个随机数？ "
 read max
 
 for (( start = 1; start <= $max; start++ ))

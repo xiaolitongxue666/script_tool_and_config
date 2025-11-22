@@ -10,7 +10,7 @@ target_ac=2
 get_duration() {
     local file="$1"
     ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "$file" 2>/dev/null || {
-        echo "Error getting duration of $file" >&2
+        echo "错误: 无法获取文件时长: $file" >&2
         return 1 # 指示失败
     }
 }
@@ -22,13 +22,13 @@ resample_audio() {
 
     # 检查输出文件是否存在且有内容
     if [[ -f "$output" && -s "$output" ]]; then
-        echo "$output already exists, skipping resampling."
+        echo "$output 已存在，跳过重采样。"
         echo "$output"
         return 0 # 成功，跳过
     fi
 
     ffmpeg -i "$input" -ar "$target_ar" -ac "$target_ac" "$output" 2>/dev/null || {
-        echo "Error resampling $input" >&2
+        echo "错误: 重采样失败: $input" >&2
         return 1
     }
 
@@ -53,7 +53,7 @@ done
 # 检查时长是否为有效数字
 for duration in "${durations[@]}"; do
     if [[ ! "$duration" =~ ^[0-9]+(\.[0-9]+)?$ ]]; then
-        echo "Invalid duration value: $duration" >&2
+        echo "错误: 无效的时长值: $duration" >&2
         exit 1
     fi
 done
@@ -62,7 +62,7 @@ done
 min_duration="${durations[0]}"
 for duration in "${durations[@]}"; do
     if [[ -z "$duration" ]]; then
-        echo "One or more durations are empty." >&2
+        echo "错误: 一个或多个时长为空。" >&2
         exit 1
     fi
     if (( $(echo "$duration < $min_duration" | bc -l) )); then
@@ -71,7 +71,7 @@ for duration in "${durations[@]}"; do
 done
 
 if (( $(echo "$min_duration == 0" | bc -l) )); then
-    echo "Minimum duration is zero. Cannot proceed." >&2
+    echo "错误: 最小时长为零，无法继续。" >&2
     exit 1
 fi
 
