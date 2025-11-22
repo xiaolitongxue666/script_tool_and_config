@@ -64,19 +64,27 @@ script_tool_and_config/
 │       ├── install.sh              # 自动安装脚本（支持多平台，包含配置同步功能）
 │       └── README.md               # 配置说明
 │
-└── scripts/                        # 脚本工具集合
-    ├── cpp_project_generator/       # C/C++ 项目自动创建工具
-    ├── auto_edit_redis_config/      # Redis 配置自动编辑
-    ├── media_tools/                 # 媒体处理工具（FFmpeg 相关）
-    │   ├── concat_audio/            # 音频连接
-    │   ├── mix_audio/               # 音频混合
-    │   ├── open_multi_ffmpeg_srt.sh # 打开多个 FFmpeg SRT 流
-    │   └── open_multi_ffmpeg_udp.sh  # 打开多个 FFmpeg UDP 流
-    ├── git_templates/               # Git 相关模板和参考
-    ├── patch_examples/              # diff 和 patch 使用示例
-    ├── shc/                         # Shell 脚本加密工具示例
-    ├── windows_scripts/             # Windows 批处理脚本
-    └── [各种实用脚本]               # 详见下方脚本说明
+└── scripts/                        # 脚本工具集合（按系统分类）
+    ├── common.sh                    # 通用函数库（所有脚本共享）
+    ├── README.md                    # 脚本目录说明
+    ├── PROJECT_HISTORY.md           # 项目优化历史记录
+    ├── windows/                     # Windows 专用脚本
+    │   └── windows_scripts/         # Windows 批处理脚本
+    │       ├── open_multi_vlc.bat  # 打开多个 VLC 播放器
+    │       └── open_16_vlc.bat      # 打开 16 个 VLC 播放器
+    ├── macos/                       # macOS 专用脚本（预留）
+    └── linux/                       # Linux 专用脚本和跨平台脚本
+        ├── system/                  # 系统安装脚本
+        │   └── archlinux/           # ArchLinux 相关
+        ├── network/                 # 网络配置脚本
+        ├── hardware/                # 硬件安装脚本
+        ├── utils/                   # 通用工具脚本（跨平台）
+        ├── project_tools/           # 项目生成和管理工具（跨平台）
+        ├── media_tools/             # 媒体处理工具（跨平台）
+        ├── git_templates/           # Git 相关模板（跨平台）
+        ├── patch_examples/          # 补丁使用示例（跨平台）
+        ├── shc/                     # Shell 脚本编译器示例（跨平台）
+        └── auto_edit_redis_config/  # Redis 配置编辑（跨平台）
 ```
 
 ## 主要功能分类
@@ -170,81 +178,88 @@ script_tool_and_config/
 
 ### 3. 脚本工具 (scripts)
 
-#### 项目创建和管理
-- `cpp_project_generator/`: C/C++ 项目自动创建工具
-  - `generate_project.sh`: 自动创建项目结构（CMake、.gitignore 等）
-  - `cmake_all_project.sh`: 使用 CMake 构建项目
-  - `ls_dirs_name.sh`: 递归列出目录名称
-- `clion_cmakelists_create.sh`: 为 CLion IDE 自动生成 CMakeLists.txt
-- `create_c_file.sh`: 创建新的 C 代码文件（自动添加头文件保护等）
+脚本按操作系统分类组织，详见 `scripts/README.md`。
 
-#### 系统环境配置
-- `archlinux_environment_auto_install.sh`: ArchLinux 环境自动安装
-- `auto_install_common_software_for_archlinux.sh`: ArchLinux 常用软件安装
-- `auto_install_gnome_for_archlinux.sh`: ArchLinux GNOME 桌面环境安装
-- ~~`auto_install_dwm_for_centos_stream.sh`~~: 已迁移到 `dotfiles/dwm/install.sh`
-- `auto_install_net_control_for_archlinux.sh`: ArchLinux 网络控制工具安装
-
-#### 开发工具
-- `auto_edit_redis_config/`: Redis 配置文件自动编辑
-- `get_cflags_and_libs_for_makefile.sh`: 获取 Makefile 所需的 CFLAGS 和 LIBS
-- `svn_revision.sh`: 获取 SVN 版本号
-- `compare_object_file_name.sh`: 比较目标文件名
-
-#### 文件操作
-- `append_multi_lines_to_file.sh`: 向文件追加多行内容
-- `append_txt_to_file.sh`: 向文件追加文本
-- `replace_text_in_files.sh`: 在文件中替换文本
-- `cut_string_between_special_begin_and_end.sh`: 截取特殊标记之间的字符串
-- `delete_first_three_char_each_line.sh`: 删除每行前三个字符
-- `ls_all_dirs_name.sh`: 列出所有目录名
-- `ls_all_files_and_dirs_name.sh`: 列出所有文件和目录名
-- `get_dir_name.sh`: 获取目录名
-
-#### 媒体处理 (media_tools)
-- `media_tools/concat_audio/`: 音频连接脚本（concat_audio.sh）
-- `media_tools/mix_audio/`: 音频混合脚本（支持多文件混合、重采样等）
-- `media_tools/open_multi_ffmpeg_srt.sh`: 打开多个 FFmpeg SRT 流
-- `media_tools/open_multi_ffmpeg_udp.sh`: 打开多个 FFmpeg UDP 流
-- `send_srt.sh`: 发送 SRT 流
-
-#### 网络和部署
-- `deploy_openresty_locally.sh`: 本地部署 OpenResty
-- `get_openresty_config_path.sh`: 获取 OpenResty 配置路径
-- `eth_name_mac_config.sh`: 以太网名称和 MAC 地址配置
-
-#### 工具和实用脚本
-- `common.sh`: 通用脚本函数库（颜色输出、脚本开始/结束函数等）
-- `construct_logs.sh`: 构建日志目录结构（log4c 配置）
-- `printf_format_output.sh`: 格式化输出
-- `show_multi_lines.sh`: 显示多行内容
-- `open_multi_terminal_and_exec.sh`: 打开多个终端并执行命令
-- `auto_write_ts_key_pair.sh`: 自动生成 TypeScript 密钥对
-- `ar_multi_static_lib_to_one.sh`: 合并多个静态库为一个
-- `t4xx_quick_installer_china.sh`: T4xx 快速安装器（中国版）
-
-#### 脚本加密
-- `shc/`: Shell 脚本编译器 (shc) 使用示例
-  - **shc** 是 "Shell Script Compiler" 的缩写，用于将 Shell 脚本编译为二进制可执行文件
-  - 通过编译可以保护脚本源代码，防止被查看或修改
-  - 包含示例脚本和编译后的二进制文件（.sh.x）及生成的 C 源代码（.sh.x.c）
-  - 使用方法：`shc -f script.sh` 将生成 `script.sh.x` 可执行文件
-
-#### 版本控制和补丁
-- `patch_examples/`: diff 和 patch 工具使用示例和说明
-  - `create_patch.sh`: 创建补丁文件
-  - `use_patch.sh`: 应用补丁文件
-  - `README.md`: 详细使用说明
-
-#### Git 相关
-- `git_templates/`: Git 相关模板和参考
-  - `github_common_config.sh`: GitHub 常用配置
-  - `default_gitignore_files/`: 默认 .gitignore 文件模板
-
-#### Windows 脚本
-- `windows_scripts/`: Windows 批处理脚本
+#### Windows 专用脚本 (`scripts/windows/`)
+- **windows_scripts/**: Windows 批处理脚本
   - `open_multi_vlc.bat`: 打开多个 VLC 播放器实例
   - `open_16_vlc.bat`: 打开 16 个 VLC 播放器实例
+
+#### macOS 专用脚本 (`scripts/macos/`)
+- 预留目录，用于 macOS 专用脚本
+
+#### Linux 专用脚本和跨平台脚本 (`scripts/linux/`)
+
+**系统安装脚本 (`system/`)**
+- **archlinux/**: ArchLinux 相关脚本
+  - `configure_china_mirrors.sh`: 配置中国镜像源
+  - `install_environment.sh`: 安装开发环境
+  - `install_neovim.sh`: 安装 Neovim
+  - `install_common_software.sh`: 安装常用软件
+  - `install_gnome.sh`: 安装 GNOME 桌面环境
+  - `install_network_manager.sh`: 安装网络管理器
+
+**网络配置脚本 (`network/`)**
+- `configure_ethernet_mac.sh`: 配置以太网 MAC 地址
+- `deploy_openresty.sh`: 部署 OpenResty
+- `send_srt_stream.sh`: 发送 SRT 流
+
+**硬件安装脚本 (`hardware/`)**
+- `install_netint_t4xx.sh`: 安装 Netint T4XX 硬件加速卡
+
+**通用工具脚本 (`utils/`) - 跨平台**
+- `append_text_to_file.sh`: 追加文本到文件
+- `append_lines_to_file.sh`: 追加多行文本到文件
+- `replace_text_in_files.sh`: 替换文件中的文本
+- `list_all_directories.sh`: 列出所有目录
+- `list_all_files_and_directories.sh`: 列出所有文件和目录
+- `get_directory_name.sh`: 获取目录名称
+- `get_openresty_path.sh`: 获取 OpenResty 路径
+- `get_pkg_config_flags.sh`: 获取 pkg-config 编译标志
+- `get_svn_revision.sh`: 获取 SVN 版本号
+- `update_ts_key_pair.sh`: 更新 TS 密钥对
+- `open_multiple_terminals.sh`: 打开多个终端
+- `compare_static_lib_objects.sh`: 比较静态库对象文件
+- `demo_printf_formatting.sh`: printf 格式化示例
+- `demo_heredoc.sh`: heredoc 示例
+
+**项目工具 (`project_tools/`) - 跨平台**
+- `create_c_source_file.sh`: 创建 C 源文件
+- `generate_cmake_lists.sh`: 生成 CMakeLists.txt
+- `generate_log4c_config.sh`: 生成 log4c 配置
+- `merge_static_libraries.sh`: 合并多个静态库
+- **cpp_project_generator/**: C/C++ 项目生成器
+  - `generate_project.sh`: 自动创建项目结构
+  - `cmake_all_project.sh`: CMake 构建脚本
+  - `ls_dirs_name.sh`: 列出目录名称
+
+**媒体处理工具 (`media_tools/`) - 跨平台**
+- `open_multiple_ffmpeg_srt.sh`: 打开多个 FFmpeg SRT 流
+- `open_multiple_ffmpeg_udp.sh`: 打开多个 FFmpeg UDP 流
+- **concat_audio/**: 音频连接脚本
+- **mix_audio/**: 音频混合脚本（支持多文件混合、重采样等）
+
+**Git 模板 (`git_templates/`) - 跨平台**
+- `github_common_config.sh`: GitHub 常用配置
+- `default_gitignore_files/`: 默认 .gitignore 文件模板
+
+**补丁示例 (`patch_examples/`) - 跨平台**
+- `create_patch.sh`: 创建补丁文件
+- `use_patch.sh`: 应用补丁文件
+- `README.md`: 详细使用说明
+
+**Shell 脚本编译器 (`shc/`) - 跨平台**
+- **shc** 是 "Shell Script Compiler" 的缩写，用于将 Shell 脚本编译为二进制可执行文件
+- 通过编译可以保护脚本源代码，防止被查看或修改
+- 包含示例脚本和编译后的二进制文件（.sh.x）及生成的 C 源代码（.sh.x.c）
+- 使用方法：`shc -f script.sh` 将生成 `script.sh.x` 可执行文件
+
+**Redis 配置编辑 (`auto_edit_redis_config/`) - 跨平台**
+- `auto_edit_redis_config.sh`: 自动编辑 Redis 配置
+
+**通用函数库 (`common.sh`)**
+- 提供颜色输出、日志记录、错误处理等功能
+- 所有脚本可以引用此函数库
 
 ## 使用说明
 
@@ -259,15 +274,15 @@ script_tool_and_config/
 
 #### 创建 C/C++ 项目
 ```bash
-cd scripts/cpp_project_generator
+cd scripts/linux/project_tools/cpp_project_generator
 ./generate_project.sh c    # 创建 C 项目
 ./generate_project.sh cpp  # 创建 C++ 项目
 ```
 
 #### 配置 ArchLinux 镜像源
 ```bash
-cd scripts
-sudo ./add_china_source_for_archlinux_pacman_config.sh
+cd scripts/linux/system/archlinux
+sudo ./configure_china_mirrors.sh
 ```
 
 #### 安装和配置工具（使用统一安装脚本）
@@ -405,6 +420,9 @@ chmod +x install.sh
 - ✅ 统一工具配置结构（工具名/配置文件/README.md/install.sh）
 - ✅ 为多系统配置工具创建统一配置加载脚本
 - ✅ 移动安装脚本到对应工具目录
+- ✅ 添加 dwm (Dynamic Window Manager) 配置
+- ✅ 按系统分类重组 scripts 目录（windows/、macos/、linux/）
+- ✅ 更新 .gitignore（注释翻译为中文，添加项目特定规则）
 - ✅ 更新项目文档
 
 ### 重命名说明

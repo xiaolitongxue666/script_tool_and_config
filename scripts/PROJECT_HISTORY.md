@@ -8,19 +8,13 @@
 
 所有脚本的注释已翻译为中文，翻译完成率 100%。
 
-**详情**: 见 `COMMENT_TRANSLATION_SUMMARY.md` 和 `FINAL_TRANSLATION_REPORT.md`
-
 ### 2. 脚本重命名和重组（2024）
 
 按照功能对脚本进行了重命名和目录重组，提高了项目的可维护性。
 
-**详情**: 见 `RENAME_PLAN.md` 和 `RENAME_SUMMARY.md`
-
 ### 3. 脚本优化（2024）
 
 优化了脚本结构，添加了统一的日志和错误处理函数。
-
-**详情**: 见 `OPTIMIZATION_PROGRESS.md`
 
 ### 4. 通用函数库（common.sh）
 
@@ -32,20 +26,30 @@
 
 **位置**: `scripts/common.sh`（放在 scripts 根目录，便于所有子目录的脚本引用）
 
+### 5. 按系统分类重组（2024）
+
+按照操作系统（Windows、macOS、Linux）重新组织脚本目录结构。
+
 ## 目录结构
 
 ```
 scripts/
 ├── common.sh                    # 通用函数库（所有脚本共享）
-├── system/                      # 系统安装脚本
-│   ├── archlinux/
-│   └── centos/
-├── network/                     # 网络配置脚本
-├── hardware/                    # 硬件安装脚本
-├── utils/                       # 通用工具脚本
-├── project_tools/               # 项目生成和管理工具
-├── media_tools/                 # 媒体处理工具
-└── [其他工具目录]
+├── windows/                     # Windows 专用脚本
+│   └── windows_scripts/         # Windows 批处理脚本
+├── macos/                       # macOS 专用脚本（预留）
+└── linux/                       # Linux 专用脚本和跨平台脚本
+    ├── system/                  # 系统安装脚本
+    │   └── archlinux/           # ArchLinux 相关
+    ├── network/                 # 网络配置脚本
+    ├── hardware/                # 硬件安装脚本
+    ├── utils/                    # 通用工具脚本（跨平台）
+    ├── project_tools/            # 项目生成和管理工具（跨平台）
+    ├── media_tools/             # 媒体处理工具（跨平台）
+    ├── git_templates/           # Git 模板（跨平台）
+    ├── patch_examples/          # 补丁示例（跨平台）
+    ├── shc/                     # Shell 脚本编译器示例（跨平台）
+    └── auto_edit_redis_config/  # Redis 配置编辑（跨平台）
 ```
 
 ## 命名规范
@@ -63,7 +67,7 @@ scripts/
 ```bash
 # 加载通用函数库
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source "$SCRIPT_DIR/../common.sh" 2>/dev/null || {
+source "$SCRIPT_DIR/../../common.sh" 2>/dev/null || {
     echo "错误: 无法加载 common.sh"
     exit 1
 }
@@ -77,10 +81,12 @@ log_error "这是一条错误"
 end_script
 ```
 
+**注意**: 由于目录结构变化，引用路径从 `../common.sh` 改为 `../../common.sh`（从 linux/ 子目录向上两级到 scripts/ 根目录）
+
 ## 注意事项
 
 - 所有脚本注释已翻译为中文
 - 所有脚本遵循统一的命名规范
 - 优化后的脚本使用 `common.sh` 中的函数
 - `common.sh` 放在 `scripts/` 根目录，便于所有子目录引用
-
+- 脚本按操作系统分类组织，跨平台脚本默认放在 `linux/` 目录

@@ -1,8 +1,10 @@
-### JetBrains template
-# Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm, CLion, Android Studio, WebStorm and Rider
-# Reference: https://intellij-support.jetbrains.com/hc/en-us/articles/206544839
+# ============================================
+# JetBrains IDE 配置
+# ============================================
+# 适用于 JetBrains IDE: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm, CLion, Android Studio, WebStorm 和 Rider
+# 参考: https://intellij-support.jetbrains.com/hc/en-us/articles/206544839
 
-# User-specific stuff
+# 用户特定文件
 .idea/
 .idea/**/workspace.xml
 .idea/**/tasks.xml
@@ -11,10 +13,10 @@
 .idea/**/shelf
 .DS_Store
 
-# Generated files
+# 生成的文件
 .idea/**/contentModel.xml
 
-# Sensitive or high-churn files
+# 敏感或高频变更文件
 .idea/**/dataSources/
 .idea/**/dataSources.ids
 .idea/**/dataSources.local.xml
@@ -27,10 +29,9 @@
 .idea/**/gradle.xml
 .idea/**/libraries
 
-# Gradle and Maven with auto-import
-# When using Gradle or Maven with auto-import, you should exclude module files,
-# since they will be recreated, and may cause churn.  Uncomment if using
-# auto-import.
+# Gradle 和 Maven 自动导入
+# 使用 Gradle 或 Maven 自动导入时，应排除模块文件，
+# 因为它们会被重新创建，可能导致变更。如果使用自动导入，请取消注释。
 # .idea/artifacts
 # .idea/compiler.xml
 # .idea/jarRepositories.xml
@@ -40,36 +41,202 @@
 # *.iml
 # *.ipr
 
-# CMake
+# CMake 构建目录
 cmake-build-*/
 
-# Mongo Explorer plugin
+# Mongo Explorer 插件
 .idea/**/mongoSettings.xml
 
-# File-based project format
+# 基于文件的项目格式
 *.iws
 
-# IntelliJ
+# IntelliJ 输出目录
 out/
 
-# mpeltonen/sbt-idea plugin
+# mpeltonen/sbt-idea 插件
 .idea_modules/
 
-# JIRA plugin
+# JIRA 插件
 atlassian-ide-plugin.xml
 
-# Cursive Clojure plugin
+# Cursive Clojure 插件
 .idea/replstate.xml
 
-# Crashlytics plugin (for Android Studio and IntelliJ)
+# Crashlytics 插件（用于 Android Studio 和 IntelliJ）
 com_crashlytics_export_strings.xml
 crashlytics.properties
 crashlytics-build.properties
 fabric.properties
 
-# Editor-based Rest Client
+# 基于编辑器的 Rest Client
 .idea/httpRequests
 
-# Android studio 3.1+ serialized cache file
+# Android Studio 3.1+ 序列化缓存文件
 .idea/caches/build_file_checksums.ser
 
+# ============================================
+# 系统文件
+# ============================================
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+.directory
+
+# ============================================
+# 备份文件
+# ============================================
+
+# 备份文件
+*.bak
+*.backup
+*.backup.*
+*.old
+*.orig
+*.swp
+*.swo
+*~
+
+# ============================================
+# 编译和构建文件
+# ============================================
+
+# C/C++ 编译文件
+*.o
+*.obj
+*.exe
+*.out
+*.a
+*.so
+*.dylib
+*.dll
+
+# CMake
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+*.cmake
+!CMakeLists.txt
+
+# 构建目录
+build/
+dist/
+bin/
+lib/
+obj/
+
+# ============================================
+# 脚本编译文件（shc）
+# ============================================
+
+# shc 编译后的二进制文件和 C 源代码
+*.sh.x
+*.sh.x.c
+
+# ============================================
+# 临时文件和日志
+# ============================================
+
+# 临时文件
+*.tmp
+*.temp
+*.log
+*.pid
+*.lock
+
+# 测试文件
+*.test
+*.spec
+
+# ============================================
+# 项目特定文件
+# ============================================
+
+# 项目生成器生成的文件（cpp_project_generator）
+scripts/linux/project_tools/cpp_project_generator/src/
+scripts/linux/project_tools/cpp_project_generator/build/
+scripts/linux/project_tools/cpp_project_generator/CMakeLists.txt
+scripts/linux/project_tools/cpp_project_generator/.gitignore
+
+# 补丁示例的备份文件
+scripts/linux/patch_examples/*.bak
+
+# Redis 配置备份
+scripts/linux/auto_edit_redis_config/redis.conf.bak
+
+# ============================================
+# 环境变量和敏感信息
+# ============================================
+
+# 环境变量文件
+.env
+.env.local
+.env.*.local
+
+# 密钥和证书
+*.key
+*.pem
+*.cert
+*.crt
+*.p12
+*.pfx
+
+# 配置文件中的敏感信息（如果包含密码等）
+# config.local.*
+# *.secret
+
+# ============================================
+# 包管理器和依赖
+# ============================================
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+yarn.lock
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.venv
+pip-log.txt
+pip-debug.log
+
+# ============================================
+# 其他
+# ============================================
+
+# Vim 交换文件
+*.swp
+*.swo
+*.swn
+
+# Emacs 备份文件
+*~
+\#*\#
+.\#*
+
+# 压缩包（如果不需要版本控制）
+# *.tar.gz
+# *.zip
+# *.rar
