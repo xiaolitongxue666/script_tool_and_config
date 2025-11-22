@@ -74,8 +74,7 @@ script_tool_and_config/
     │       └── open_16_vlc.bat      # 打开 16 个 VLC 播放器
     ├── macos/                       # macOS 专用脚本（预留）
     └── linux/                       # Linux 专用脚本和跨平台脚本
-        ├── system/                  # 系统安装脚本
-        │   └── archlinux/           # ArchLinux 相关
+        ├── system_basic_env/        # 系统基础环境安装脚本（ArchLinux）
         ├── network/                 # 网络配置脚本
         ├── hardware/                # 硬件安装脚本
         ├── utils/                   # 通用工具脚本（跨平台）
@@ -190,8 +189,8 @@ script_tool_and_config/
 
 #### Linux 专用脚本和跨平台脚本 (`scripts/linux/`)
 
-**系统安装脚本 (`system/`)**
-- **archlinux/**: ArchLinux 相关脚本
+**系统基础环境安装脚本 (`system_basic_env/`)**
+- ArchLinux 系统基础环境安装和配置脚本
   - `configure_china_mirrors.sh`: 配置中国镜像源
   - `install_environment.sh`: 安装开发环境
   - `install_neovim.sh`: 安装 Neovim
@@ -281,7 +280,7 @@ cd scripts/linux/project_tools/cpp_project_generator
 
 #### 配置 ArchLinux 镜像源
 ```bash
-cd scripts/linux/system/archlinux
+cd scripts/linux/system_basic_env
 sudo ./configure_china_mirrors.sh
 ```
 

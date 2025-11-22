@@ -18,14 +18,13 @@ scripts/
 ├── macos/                       # macOS 专用脚本（预留）
 │
 └── linux/                       # Linux 专用脚本和跨平台脚本
-    ├── system/                  # 系统安装脚本
-    │   └── archlinux/           # ArchLinux 相关
-    │       ├── configure_china_mirrors.sh
-    │       ├── install_environment.sh
-    │       ├── install_neovim.sh
-    │       ├── install_common_software.sh
-    │       ├── install_gnome.sh
-    │       └── install_network_manager.sh
+    ├── system_basic_env/        # 系统基础环境安装脚本（ArchLinux）
+    │   ├── configure_china_mirrors.sh
+    │   ├── install_environment.sh
+    │   ├── install_neovim.sh
+    │   ├── install_common_software.sh
+    │   ├── install_gnome.sh
+    │   └── install_network_manager.sh
     │
     ├── network/                 # 网络配置脚本
     │   ├── configure_ethernet_mac.sh
@@ -86,7 +85,7 @@ scripts/
 ### Linux 专用脚本
 
 位于 `linux/` 目录，包含：
-- **system/**: 系统安装和配置脚本
+- **system_basic_env/**: 系统基础环境安装脚本（ArchLinux）
 - **network/**: 网络配置脚本
 - **hardware/**: 硬件安装脚本
 

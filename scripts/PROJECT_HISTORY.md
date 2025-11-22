@@ -39,8 +39,7 @@ scripts/
 │   └── windows_scripts/         # Windows 批处理脚本
 ├── macos/                       # macOS 专用脚本（预留）
 └── linux/                       # Linux 专用脚本和跨平台脚本
-    ├── system/                  # 系统安装脚本
-    │   └── archlinux/           # ArchLinux 相关
+    ├── system_basic_env/        # 系统基础环境安装脚本（ArchLinux）
     ├── network/                 # 网络配置脚本
     ├── hardware/                # 硬件安装脚本
     ├── utils/                    # 通用工具脚本（跨平台）
