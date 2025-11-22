@@ -4,4 +4,7 @@ set -q XDG_DATA_HOME
   or set -gx OMF_PATH "$HOME/.local/share/omf"
 
 # 加载 Oh My Fish 配置
-source $OMF_PATH/init.fish
+if test -f "$OMF_PATH/init.fish"
+    source $OMF_PATH/init.fish
+end
+

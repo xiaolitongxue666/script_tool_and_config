@@ -21,20 +21,49 @@ script_tool_and_config/
 │       └── no_more_use_cmder_config/           # 已废弃的 Cmder 配置
 │
 ├── dotfiles/                       # 点配置文件（各种工具的配置文件）
-│   ├── bash_config/                # Bash 配置
-│   │   ├── macos/                  # macOS 版本
-│   │   └── windows/                # Windows 版本
-│   ├── fish_config/                # Fish Shell 配置
-│   │   ├── linux/                  # Linux 版本
-│   │   └── macos/                  # macOS 版本
-│   ├── i3wm_config/                # i3 窗口管理器配置
+│   │                               # 每个工具遵循统一结构：工具名/配置文件/README.md/install.sh
+│   ├── alacritty/                  # Alacritty 终端配置
+│   │   ├── alacritty.toml          # Alacritty 配置文件（TOML 格式）
+│   │   ├── install.sh              # 自动安装脚本（macOS）
+│   │   └── README.md               # 配置说明
+│   ├── bash/                       # Bash 配置
+│   │   ├── macos/                  # macOS 平台配置
+│   │   ├── windows/                # Windows 平台配置
+│   │   ├── install.sh              # 自动安装脚本
+│   │   ├── config_loader.sh       # 配置加载脚本（自动检测系统）
+│   │   └── README.md               # 配置说明
+│   ├── fish/                       # Fish Shell 配置
+│   │   ├── linux/                  # Linux 平台配置
+│   │   ├── macos/                  # macOS 平台配置
+│   │   ├── install.sh              # 自动安装脚本（支持多平台）
+│   │   ├── config_loader.sh       # 配置加载脚本（自动检测系统）
+│   │   └── README.md               # 配置说明
+│   ├── i3wm/                       # i3 窗口管理器配置
+│   │   ├── config                  # i3 配置文件
+│   │   ├── install.sh              # 自动安装脚本（仅 Linux）
+│   │   └── README.md               # 配置说明
 │   ├── secure_crt/                 # SecureCRT 配置和脚本
+│   │   ├── SecureCRTV8_VM_Login_TOP.vbs  # VBScript 自动化脚本
+│   │   ├── windows7_securecrt_config.xml   # SecureCRT 配置文件
+│   │   ├── install.sh              # 自动安装脚本（Windows）
+│   │   └── README.md               # 配置说明
 │   ├── skhd/                       # skhd (macOS 快捷键配置)
-│   ├── tmux_config/                # Tmux 配置
+│   │   ├── skhdrc                  # skhd 配置文件
+│   │   ├── install.sh              # 自动安装脚本（仅 macOS）
+│   │   └── README.md               # 配置说明
+│   ├── tmux/                       # Tmux 配置
+│   │   ├── tmux.conf               # Tmux 配置文件
+│   │   ├── install.sh              # 自动安装脚本（支持多平台）
+│   │   └── README.md               # 配置说明
 │   ├── yabai/                      # Yabai (macOS 窗口管理)
-│   ├── zsh_install_and_config/      # Zsh 安装和配置
-│   ├── no_more_use_alacritty/       # 已废弃的 Alacritty 配置
-│   └── no_more_use_cmder_config/    # 已废弃的 Cmder 配置
+│   │   ├── yabairc                 # Yabai 配置文件
+│   │   ├── install.sh              # 自动安装脚本（仅 macOS）
+│   │   └── README.md               # 配置说明
+│   └── zsh/                        # Zsh 安装和配置
+│       ├── zsh_with_oh_my_zsh_config/  # Oh My Zsh 配置
+│       ├── how_to_config_zsh.md    # 配置指南
+│       ├── install.sh              # 自动安装脚本（支持多平台）
+│       └── README.md               # 配置说明
 │
 └── scripts/                        # 脚本工具集合
     ├── cpp_project_generator/       # C/C++ 项目自动创建工具
@@ -74,26 +103,62 @@ script_tool_and_config/
 
 ### 2. 点配置文件 (dotfiles)
 
-#### Shell 配置
-- **Fish Shell**
-  - `fish_config/linux/`: Linux 平台 Fish Shell 配置
-  - `fish_config/macos/`: macOS 平台 Fish Shell 配置
-  - 包含常用别名、路径配置、NVM、Pyenv 等工具集成
+所有工具配置遵循统一的结构：**工具名/配置文件/README.md/install.sh**
 
-- **Bash/Zsh**
-  - `bash_config/`: Bash 配置文件
-  - `zsh_install_and_config/`: Zsh 安装和配置指南
+#### Shell 配置
+- **Fish Shell** (`fish/`)
+  - 支持多平台（Linux、macOS）
+  - `config.fish`: **统一配置文件**，自动检测系统并加载对应配置
+  - `install.sh`: 自动安装脚本，支持自动检测系统并安装对应配置
+  - `sync_config.sh`: 配置同步脚本，将配置文件同步到用户目录
+  - `completions/`: 补全脚本目录
+  - `conf.d/fnm.fish`: fnm (Fast Node Manager) 配置
+  - **主要特性**:
+    - fnm 自动切换（根据 `.nvmrc` 或 `.node-version` 文件）
+    - Pyenv 集成
+    - 智能工具别名（lsd/bat/trash）
+    - 完整代理支持（http/https/socks5）
+    - 路径自动管理
+
+- **Bash** (`bash/`)
+  - 支持多平台（macOS、Windows、Linux）
+  - `config.sh`: **统一配置文件**，自动检测系统并加载对应配置
+  - `install.sh`: 自动安装脚本
+  - `sync_config.sh`: 配置同步脚本，将配置添加到用户的 .bashrc 或 .bash_profile
+
+- **Zsh** (`zsh/`)
+  - 支持多平台（macOS、Linux）
+  - `install.sh`: 自动安装脚本，包含 Oh My Zsh 安装
+  - `zsh_with_oh_my_zsh_config/`: Oh My Zsh 配置
 
 #### 终端和窗口管理
-- `i3wm_config/`: i3 窗口管理器配置
-- `tmux_config/`: Tmux 终端复用器配置
-- `yabai/`: macOS 窗口管理器 Yabai 配置
-- `skhd/`: macOS 快捷键配置工具
+- **Alacritty** (`alacritty/`): GPU 加速终端模拟器
+  - `alacritty.toml`: 完整的配置文件（TOML 格式，从 0.13.0 版本开始使用）
+  - `install.sh`: 自动安装脚本（macOS）
+  - 支持 macOS、Linux、Windows 平台
+  - 参考: [Alacritty GitHub](https://github.com/alacritty/alacritty)
+
+- **Tmux** (`tmux/`): 终端复用器
+  - `tmux.conf`: Tmux 配置文件
+  - `install.sh`: 自动安装脚本（支持多平台）
+
+- **i3** (`i3wm/`): 平铺式窗口管理器（仅 Linux）
+  - `config`: i3 配置文件
+  - `install.sh`: 自动安装脚本（仅 Linux）
+
+- **Yabai** (`yabai/`): macOS 平铺式窗口管理器
+  - `yabairc`: Yabai 配置文件
+  - `install.sh`: 自动安装脚本（仅 macOS）
+
+- **skhd** (`skhd/`): macOS 快捷键守护进程
+  - `skhdrc`: skhd 配置文件
+  - `install.sh`: 自动安装脚本（仅 macOS）
 
 #### 其他工具配置
-- `secure_crt/`: SecureCRT SSH 客户端配置和自动化脚本
-- `no_more_use_alacritty/`: 已废弃的 Alacritty 终端配置
-- `no_more_use_cmder_config/`: 已废弃的 Cmder 配置
+- **SecureCRT** (`secure_crt/`): SSH 客户端配置和自动化脚本
+  - `SecureCRTV8_VM_Login_TOP.vbs`: VBScript 自动化脚本
+  - `windows7_securecrt_config.xml`: SecureCRT 配置文件
+  - `install.sh`: 自动安装脚本（Windows）
 
 ### 3. 脚本工具 (scripts)
 
@@ -194,18 +259,105 @@ cd scripts
 sudo ./add_china_source_for_archlinux_pacman_config.sh
 ```
 
-#### 安装 Fish Shell 和 Oh My Fish
+#### 安装和配置工具（使用统一安装脚本）
+
+所有 dotfiles 工具都提供了统一的安装脚本，位于各工具目录下：
+
+**Fish Shell**
 ```bash
-cd scripts
-sudo ./auto_install_fish_and_omf.sh
+cd dotfiles/fish
+chmod +x install.sh
+./install.sh
 ```
+
+**Bash**
+```bash
+cd dotfiles/bash
+chmod +x install.sh
+./install.sh
+```
+
+**Alacritty 终端（macOS）**
+```bash
+# 方法 1: 使用 Homebrew（推荐）
+brew install --cask alacritty
+
+# 方法 2: 使用安装脚本
+cd dotfiles/alacritty
+chmod +x install.sh
+./install.sh
+
+# 安装后，复制配置文件（注意：使用 TOML 格式）
+mkdir -p ~/.config/alacritty
+cp alacritty.toml ~/.config/alacritty/
+```
+
+**Tmux**
+```bash
+cd dotfiles/tmux
+chmod +x install.sh
+./install.sh
+```
+
+**同步配置**
+
+对于支持多系统的工具（如 Fish、Bash），可以使用配置同步脚本将配置文件同步到用户目录：
+
+```bash
+# Fish Shell
+cd dotfiles/fish
+chmod +x sync_config.sh
+./sync_config.sh
+
+# Bash
+cd dotfiles/bash
+chmod +x sync_config.sh
+./sync_config.sh
+```
+
+**注意**: 
+- Alacritty 从 0.13.0 版本开始使用 TOML 格式配置文件（`alacritty.toml`），旧版 YAML 格式（`alacritty.yml`）已不再支持
+- 所有安装脚本都会自动检测操作系统并安装对应配置
+
+## 工具配置结构说明
+
+所有 dotfiles 工具遵循统一的结构：
+
+```
+工具名/
+├── 配置文件              # 工具的主配置文件
+├── install.sh            # 自动安装脚本（自动检测系统）
+├── config_loader.sh      # 配置加载脚本（多系统工具，自动检测系统）
+└── README.md             # 配置说明和使用指南
+```
+
+### 多系统配置工具
+
+对于支持多系统的工具（如 Fish、Bash），使用**统一配置文件**，通过条件判断自动检测系统并加载对应配置：
+
+```
+工具名/
+├── config.fish 或 config.sh  # 统一配置文件（自动检测系统）
+├── completions/             # 补全脚本目录（如适用）
+├── install.sh               # 自动安装脚本（自动检测系统）
+├── sync_config.sh           # 配置同步脚本（同步配置到用户目录）
+└── README.md                # 配置说明
+```
+
+**优势**：
+- ✅ 只需维护一个配置文件
+- ✅ 自动检测操作系统
+- ✅ 条件判断加载平台特定配置
+- ✅ 减少配置重复和冗余
+- ✅ 结构更简洁清晰
 
 ## 注意事项
 
-1. **已废弃的配置**: 标记为 `no_more_use_*` 的目录包含已不再使用的配置，仅供参考
-2. **权限要求**: 某些脚本需要 root 权限（使用 `sudo`）
-3. **平台特定**: 部分脚本仅适用于特定操作系统，请根据实际情况使用
-4. **备份**: 修改系统配置文件前，建议先备份原文件
+1. **统一结构**: 所有工具配置遵循统一的结构，便于管理和使用
+2. **自动检测**: 安装脚本和配置加载脚本会自动检测操作系统
+3. **权限要求**: 某些脚本需要 root 权限（使用 `sudo`）
+4. **平台特定**: 部分脚本仅适用于特定操作系统，请根据实际情况使用
+5. **备份**: 修改系统配置文件前，建议先备份原文件
 
 ## 许可证
 
@@ -219,6 +371,10 @@ sudo ./auto_install_fish_and_omf.sh
 - ✅ 将所有注释翻译为中文
 - ✅ 重命名拼写错误的文件和目录
 - ✅ 根据功能和作用重命名文件和文件夹
+- ✅ 添加 Alacritty 终端安装脚本和配置文件
+- ✅ 统一工具配置结构（工具名/配置文件/README.md/install.sh）
+- ✅ 为多系统配置工具创建统一配置加载脚本
+- ✅ 移动安装脚本到对应工具目录
 - ✅ 更新项目文档
 
 ### 重命名说明
