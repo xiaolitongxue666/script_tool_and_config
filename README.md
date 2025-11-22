@@ -128,8 +128,16 @@ script_tool_and_config/
 
 - **Zsh** (`zsh/`)
   - 支持多平台（macOS、Linux）
-  - `install.sh`: 自动安装脚本，包含 Oh My Zsh 安装
-  - `zsh_with_oh_my_zsh_config/`: Oh My Zsh 配置
+  - `.zshrc`: **统一配置文件**，基于 Oh My Zsh 框架
+  - `install.sh`: 自动安装脚本，包含 Zsh 和 Oh My Zsh 安装
+  - `sync_config.sh`: 配置同步脚本，将配置文件同步到用户目录
+  - **主要特性**:
+    - Oh My Zsh 集成（主题、插件）
+    - fnm 自动检测和加载
+    - Pyenv 集成
+    - 智能工具别名（lsd/bat/trash）
+    - 完整代理支持（http/https/socks5）
+    - 历史记录优化配置
 
 #### 终端和窗口管理
 - **Alacritty** (`alacritty/`): GPU 加速终端模拟器

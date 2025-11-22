@@ -72,15 +72,22 @@ fi
 # 复制配置文件
 echo ""
 echo "正在复制配置文件..."
-ZSH_CONFIG_DIR="$HOME"
 ZSH_CONFIG_FILE="$HOME/.zshrc"
 
-# 如果存在 Oh My Zsh 配置目录，复制配置
-if [ -d "$SCRIPT_DIR/zsh_with_oh_my_zsh_config" ]; then
-    if [ -f "$SCRIPT_DIR/zsh_with_oh_my_zsh_config/.zshrc" ]; then
-        cp "$SCRIPT_DIR/zsh_with_oh_my_zsh_config/.zshrc" "$ZSH_CONFIG_FILE"
-        echo "已复制配置文件到 $ZSH_CONFIG_FILE"
-    fi
+# 备份现有配置（如果存在）
+if [ -f "$ZSH_CONFIG_FILE" ]; then
+    BACKUP_FILE="${ZSH_CONFIG_FILE}.backup.$(date +%Y%m%d_%H%M%S)"
+    cp "$ZSH_CONFIG_FILE" "$BACKUP_FILE"
+    echo "已备份现有配置到: $BACKUP_FILE"
+fi
+
+# 复制统一配置文件
+if [ -f "$SCRIPT_DIR/.zshrc" ]; then
+    cp "$SCRIPT_DIR/.zshrc" "$ZSH_CONFIG_FILE"
+    echo "已复制配置文件到 $ZSH_CONFIG_FILE"
+else
+    echo "警告: 未找到统一配置文件: $SCRIPT_DIR/.zshrc"
+    echo "将使用 Oh My Zsh 默认配置"
 fi
 
 # 设置 Zsh 为默认 Shell
