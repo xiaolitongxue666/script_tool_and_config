@@ -12,9 +12,7 @@ Zsh (Z Shell) 是一个功能强大的 Shell，具有自动补全、语法高亮
 ```
 zsh/
 ├── .zshrc              # 统一配置文件（自动检测系统）
-├── install.sh          # 自动安装脚本（支持多平台）
-├── sync_config.sh      # 配置同步脚本
-├── how_to_config_zsh.md  # 配置指南（参考）
+├── install.sh          # 自动安装脚本（支持多平台，包含配置同步功能）
 └── README.md           # 本文件
 ```
 
@@ -77,15 +75,21 @@ sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/too
 
 ## 配置使用
 
-### 同步配置
+### 使用安装脚本（自动同步配置）
 
-使用配置同步脚本将配置文件同步到用户目录：
+安装脚本会自动同步配置文件：
 
 ```bash
 cd dotfiles/zsh
-chmod +x sync_config.sh
-./sync_config.sh
+chmod +x install.sh
+./install.sh
 ```
+
+安装脚本会：
+- 安装 Zsh（如未安装）
+- 安装 Oh My Zsh（可选）
+- 自动备份现有配置
+- 同步统一配置文件到 `~/.zshrc`
 
 ### 手动复制配置
 

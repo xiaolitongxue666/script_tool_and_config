@@ -109,30 +109,55 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
     echo "Powerline 字体安装完成"
 fi
 
-# 复制配置文件
+# 复制配置文件（同步配置）
 echo ""
-echo "正在复制配置文件..."
+echo "=========================================="
+echo "同步配置文件"
+echo "=========================================="
 FISH_CONFIG_DIR="$HOME/.config/fish"
 mkdir -p "$FISH_CONFIG_DIR"
 
-# 复制统一配置文件
-if [ -f "$SCRIPT_DIR/config.fish" ]; then
+# 检查统一配置文件是否存在
+if [ ! -f "$SCRIPT_DIR/config.fish" ]; then
+    echo "❌ 警告: 未找到统一配置文件: $SCRIPT_DIR/config.fish"
+    echo "将跳过配置文件同步"
+else
+    # 备份现有配置（如果存在）
+    if [ -f "$FISH_CONFIG_DIR/config.fish" ]; then
+        BACKUP_FILE="${FISH_CONFIG_DIR}/config.fish.backup.$(date +%Y%m%d_%H%M%S)"
+        cp "$FISH_CONFIG_DIR/config.fish" "$BACKUP_FILE"
+        echo "✅ 已备份现有配置到: $BACKUP_FILE"
+    fi
+
+    # 复制统一配置文件
     cp "$SCRIPT_DIR/config.fish" "$FISH_CONFIG_DIR/"
-    echo "已复制统一配置文件: config.fish"
+    echo "✅ 已同步配置文件到: $FISH_CONFIG_DIR/config.fish"
 fi
 
 # 复制 conf.d 目录（如果存在）
 if [ -d "$SCRIPT_DIR/conf.d" ]; then
     mkdir -p "$FISH_CONFIG_DIR/conf.d"
+    # 备份现有 conf.d（如果存在且不为空）
+    if [ -d "$FISH_CONFIG_DIR/conf.d" ] && [ "$(ls -A $FISH_CONFIG_DIR/conf.d 2>/dev/null)" ]; then
+        BACKUP_DIR="${FISH_CONFIG_DIR}/conf.d.backup.$(date +%Y%m%d_%H%M%S)"
+        cp -r "$FISH_CONFIG_DIR/conf.d" "$BACKUP_DIR" 2>/dev/null || true
+        echo "✅ 已备份现有 conf.d 到: $BACKUP_DIR"
+    fi
     cp -r "$SCRIPT_DIR/conf.d/"* "$FISH_CONFIG_DIR/conf.d/" 2>/dev/null || true
-    echo "已复制 conf.d 目录"
+    echo "✅ 已同步 conf.d 目录"
 fi
 
 # 复制 completions 目录（如果存在）
 if [ -d "$SCRIPT_DIR/completions" ]; then
     mkdir -p "$FISH_CONFIG_DIR/completions"
+    # 备份现有 completions（如果存在且不为空）
+    if [ -d "$FISH_CONFIG_DIR/completions" ] && [ "$(ls -A $FISH_CONFIG_DIR/completions 2>/dev/null)" ]; then
+        BACKUP_DIR="${FISH_CONFIG_DIR}/completions.backup.$(date +%Y%m%d_%H%M%S)"
+        cp -r "$FISH_CONFIG_DIR/completions" "$BACKUP_DIR" 2>/dev/null || true
+        echo "✅ 已备份现有 completions 到: $BACKUP_DIR"
+    fi
     cp -r "$SCRIPT_DIR/completions/"* "$FISH_CONFIG_DIR/completions/" 2>/dev/null || true
-    echo "已复制 completions 目录"
+    echo "✅ 已同步 completions 目录"
 fi
 
 echo ""

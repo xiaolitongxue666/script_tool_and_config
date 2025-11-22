@@ -12,8 +12,7 @@ fish/
 │   └── fnm.fish        # Fast Node Manager (fnm) 配置
 ├── completions/        # 补全脚本目录
 │   └── alacritty.fish  # Alacritty 补全脚本
-├── install.sh          # 自动安装脚本（支持多平台）
-├── sync_config.sh      # 配置同步脚本
+├── install.sh          # 自动安装和配置脚本（支持多平台）
 └── README.md           # 本文件
 ```
 
@@ -48,15 +47,7 @@ sudo apt-get install fish
 
 ## 配置加载
 
-### 同步配置
-
-使用配置同步脚本将配置文件同步到用户目录：
-
-```bash
-cd dotfiles/fish
-chmod +x sync_config.sh
-./sync_config.sh
-```
+安装脚本会自动同步配置文件到用户目录（`~/.config/fish/`），并自动备份现有配置。
 
 ### 手动复制配置
 

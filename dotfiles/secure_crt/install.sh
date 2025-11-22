@@ -46,17 +46,7 @@ echo "正在复制配置文件..."
 
 if [ -f "$SCRIPT_DIR/SecureCRTV8_VM_Login_TOP.vbs" ]; then
     cp "$SCRIPT_DIR/SecureCRTV8_VM_Login_TOP.vbs" "$SECURECRT_CONFIG_DIR/"
-    echo "已复制 VBScript: SecureCRTV8_VM_Login_TOP.vbs"
-fi
-
-if [ -f "$SCRIPT_DIR/windows7_securecrt_config.xml" ]; then
-    cp "$SCRIPT_DIR/windows7_securecrt_config.xml" "$SECURECRT_CONFIG_DIR/"
-    echo "已复制配置文件: windows7_securecrt_config.xml"
-fi
-
-if [ -f "$SCRIPT_DIR/windows7_securecrt_config.log" ]; then
-    cp "$SCRIPT_DIR/windows7_securecrt_config.log" "$SECURECRT_CONFIG_DIR/"
-    echo "已复制日志文件: windows7_securecrt_config.log"
+    echo "✅ 已复制 VBScript: SecureCRTV8_VM_Login_TOP.vbs"
 fi
 
 echo ""

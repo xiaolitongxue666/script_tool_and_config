@@ -84,12 +84,46 @@ tmux source-file ~/.tmux.conf
 - `<Ctrl+b> + |`: 垂直分割窗口
 - `<Ctrl+b> + -`: 水平分割窗口
 - `<Ctrl+b> + h/j/k/l`: 切换面板
+- `<Ctrl+b> + H/J/K/L`: 调整面板大小（重复按键）
+- `<Ctrl+b> + I/K/J/L`: 调整面板大小（单次按键）
 - `<Ctrl+b> + x`: 关闭当前面板
 - `<Ctrl+b> + z`: 最大化/恢复面板
+- `<Ctrl+b> + Ctrl+c`: 复制到剪贴板
+- `<Ctrl+b> + Ctrl+v`: 从剪贴板粘贴
 
 ### 其他
 - `<Ctrl+b> + r`: 重新加载配置文件
 - `<Ctrl+b> + ?`: 显示快捷键帮助
+
+## 安装 TPM (Tmux Plugin Manager)
+
+如果使用插件功能，需要先安装 TPM：
+
+```bash
+git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
+```
+
+安装插件：
+在 tmux 中按 `<Ctrl+b> + I` 安装配置文件中列出的插件
+
+更新插件：
+在 tmux 中按 `<Ctrl+b> + U` 更新所有插件
+
+## 安装剪贴板工具
+
+### macOS
+macOS 已内置 `pbcopy` 和 `pbpaste`，无需额外安装
+
+### Linux
+需要安装 `xclip`：
+
+```bash
+# Arch Linux
+sudo pacman -S xclip
+
+# Ubuntu/Debian
+sudo apt-get install xclip
+```
 
 ## 配置文件位置
 

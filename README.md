@@ -60,9 +60,8 @@ script_tool_and_config/
 │   │   ├── install.sh              # 自动安装脚本（仅 macOS）
 │   │   └── README.md               # 配置说明
 │   └── zsh/                        # Zsh 安装和配置
-│       ├── zsh_with_oh_my_zsh_config/  # Oh My Zsh 配置
-│       ├── how_to_config_zsh.md    # 配置指南
-│       ├── install.sh              # 自动安装脚本（支持多平台）
+│       ├── .zshrc                 # 统一配置文件（自动检测系统）
+│       ├── install.sh              # 自动安装脚本（支持多平台，包含配置同步功能）
 │       └── README.md               # 配置说明
 │
 └── scripts/                        # 脚本工具集合
@@ -109,8 +108,7 @@ script_tool_and_config/
 - **Fish Shell** (`fish/`)
   - 支持多平台（Linux、macOS）
   - `config.fish`: **统一配置文件**，自动检测系统并加载对应配置
-  - `install.sh`: 自动安装脚本，支持自动检测系统并安装对应配置
-  - `sync_config.sh`: 配置同步脚本，将配置文件同步到用户目录
+  - `install.sh`: 自动安装和配置脚本，支持自动检测系统、安装 Fish、同步配置（包含自动备份）
   - `completions/`: 补全脚本目录
   - `conf.d/fnm.fish`: fnm (Fast Node Manager) 配置
   - **主要特性**:
@@ -123,14 +121,12 @@ script_tool_and_config/
 - **Bash** (`bash/`)
   - 支持多平台（macOS、Windows、Linux）
   - `config.sh`: **统一配置文件**，自动检测系统并加载对应配置
-  - `install.sh`: 自动安装脚本
-  - `sync_config.sh`: 配置同步脚本，将配置添加到用户的 .bashrc 或 .bash_profile
+  - `install.sh`: 自动安装和配置脚本，支持自动检测系统、同步配置（包含自动备份）
 
 - **Zsh** (`zsh/`)
   - 支持多平台（macOS、Linux）
   - `.zshrc`: **统一配置文件**，基于 Oh My Zsh 框架
-  - `install.sh`: 自动安装脚本，包含 Zsh 和 Oh My Zsh 安装
-  - `sync_config.sh`: 配置同步脚本，将配置文件同步到用户目录
+  - `install.sh`: 自动安装脚本，包含 Zsh 和 Oh My Zsh 安装，以及配置同步功能
   - **主要特性**:
     - Oh My Zsh 集成（主题、插件）
     - fnm 自动检测和加载
@@ -165,7 +161,6 @@ script_tool_and_config/
 #### 其他工具配置
 - **SecureCRT** (`secure_crt/`): SSH 客户端配置和自动化脚本
   - `SecureCRTV8_VM_Login_TOP.vbs`: VBScript 自动化脚本
-  - `windows7_securecrt_config.xml`: SecureCRT 配置文件
   - `install.sh`: 自动安装脚本（Windows）
 
 ### 3. 脚本工具 (scripts)
@@ -309,18 +304,23 @@ chmod +x install.sh
 
 **同步配置**
 
-对于支持多系统的工具（如 Fish、Bash），可以使用配置同步脚本将配置文件同步到用户目录：
+对于支持多系统的工具，可以使用配置同步脚本将配置文件同步到用户目录：
 
 ```bash
-# Fish Shell
+# Fish Shell（配置同步已集成到 install.sh 中）
 cd dotfiles/fish
-chmod +x sync_config.sh
-./sync_config.sh
+chmod +x install.sh
+./install.sh  # 安装脚本会自动同步配置（包含自动备份）
 
-# Bash
+# Bash（配置同步已集成到 install.sh 中）
 cd dotfiles/bash
-chmod +x sync_config.sh
-./sync_config.sh
+chmod +x install.sh
+./install.sh  # 安装脚本会自动同步配置（包含自动备份）
+
+# Zsh（配置同步已集成到 install.sh 中）
+cd dotfiles/zsh
+chmod +x install.sh
+./install.sh  # 安装脚本会自动同步配置
 ```
 
 **注意**: 
@@ -347,8 +347,7 @@ chmod +x sync_config.sh
 工具名/
 ├── config.fish 或 config.sh  # 统一配置文件（自动检测系统）
 ├── completions/             # 补全脚本目录（如适用）
-├── install.sh               # 自动安装脚本（自动检测系统）
-├── sync_config.sh           # 配置同步脚本（同步配置到用户目录）
+├── install.sh               # 自动安装脚本（自动检测系统，包含配置同步和备份）
 └── README.md                # 配置说明
 ```
 

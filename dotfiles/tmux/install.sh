@@ -60,14 +60,19 @@ echo "正在复制配置文件..."
 TMUX_CONFIG_DIR="$HOME/.config/tmux"
 mkdir -p "$TMUX_CONFIG_DIR"
 
+# 备份现有配置（如果存在）
+if [ -f "$HOME/.tmux.conf" ] && [ ! -L "$HOME/.tmux.conf" ]; then
+    BACKUP_FILE="$HOME/.tmux.conf.backup.$(date +%Y%m%d_%H%M%S)"
+    cp "$HOME/.tmux.conf" "$BACKUP_FILE"
+    echo "✅ 已备份现有配置到: $BACKUP_FILE"
+fi
+
+# 复制统一配置文件
 if [ -f "$SCRIPT_DIR/tmux.conf" ]; then
-    cp "$SCRIPT_DIR/tmux.conf" "$TMUX_CONFIG_DIR/"
-    echo "已复制配置文件到 $TMUX_CONFIG_DIR/tmux.conf"
-elif [ -f "$SCRIPT_DIR/config" ]; then
-    cp "$SCRIPT_DIR/config" "$TMUX_CONFIG_DIR/tmux.conf"
-    echo "已复制配置文件到 $TMUX_CONFIG_DIR/tmux.conf"
+    cp "$SCRIPT_DIR/tmux.conf" "$TMUX_CONFIG_DIR/tmux.conf"
+    echo "✅ 已复制配置文件到 $TMUX_CONFIG_DIR/tmux.conf"
 else
-    echo "警告: 未找到配置文件"
+    echo "❌ 警告: 未找到配置文件: $SCRIPT_DIR/tmux.conf"
 fi
 
 # 创建符号链接（如果使用 ~/.tmux.conf）

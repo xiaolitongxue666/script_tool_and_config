@@ -69,25 +69,28 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
     fi
 fi
 
-# 复制配置文件
+# 复制配置文件（同步配置）
 echo ""
-echo "正在复制配置文件..."
+echo "=========================================="
+echo "同步配置文件"
+echo "=========================================="
 ZSH_CONFIG_FILE="$HOME/.zshrc"
 
-# 备份现有配置（如果存在）
-if [ -f "$ZSH_CONFIG_FILE" ]; then
-    BACKUP_FILE="${ZSH_CONFIG_FILE}.backup.$(date +%Y%m%d_%H%M%S)"
-    cp "$ZSH_CONFIG_FILE" "$BACKUP_FILE"
-    echo "已备份现有配置到: $BACKUP_FILE"
-fi
-
-# 复制统一配置文件
-if [ -f "$SCRIPT_DIR/.zshrc" ]; then
-    cp "$SCRIPT_DIR/.zshrc" "$ZSH_CONFIG_FILE"
-    echo "已复制配置文件到 $ZSH_CONFIG_FILE"
-else
-    echo "警告: 未找到统一配置文件: $SCRIPT_DIR/.zshrc"
+# 检查统一配置文件是否存在
+if [ ! -f "$SCRIPT_DIR/.zshrc" ]; then
+    echo "❌ 警告: 未找到统一配置文件: $SCRIPT_DIR/.zshrc"
     echo "将使用 Oh My Zsh 默认配置"
+else
+    # 备份现有配置（如果存在）
+    if [ -f "$ZSH_CONFIG_FILE" ]; then
+        BACKUP_FILE="${ZSH_CONFIG_FILE}.backup.$(date +%Y%m%d_%H%M%S)"
+        cp "$ZSH_CONFIG_FILE" "$BACKUP_FILE"
+        echo "✅ 已备份现有配置到: $BACKUP_FILE"
+    fi
+
+    # 复制统一配置文件
+    cp "$SCRIPT_DIR/.zshrc" "$ZSH_CONFIG_FILE"
+    echo "✅ 已同步配置文件到: $ZSH_CONFIG_FILE"
 fi
 
 # 设置 Zsh 为默认 Shell

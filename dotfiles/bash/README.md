@@ -7,8 +7,7 @@ Bash (Bourne Again Shell) 是大多数 Linux 和 macOS 系统的默认 Shell。
 ```
 bash/
 ├── config.sh           # 统一配置文件（自动检测系统）
-├── install.sh          # 自动安装脚本（支持多平台）
-├── sync_config.sh      # 配置同步脚本
+├── install.sh          # 自动安装和配置脚本（支持多平台，包含配置同步和备份）
 └── README.md           # 本文件
 ```
 
@@ -16,7 +15,7 @@ bash/
 
 ### 自动安装配置
 
-使用安装脚本自动检测系统并安装对应配置：
+使用安装脚本自动检测系统并安装对应配置（包含自动备份）：
 
 ```bash
 cd dotfiles/bash
@@ -24,15 +23,10 @@ chmod +x install.sh
 ./install.sh
 ```
 
-### 同步配置
-
-使用配置同步脚本将配置文件添加到用户的 .bashrc 或 .bash_profile：
-
-```bash
-cd dotfiles/bash
-chmod +x sync_config.sh
-./sync_config.sh
-```
+安装脚本会自动：
+- 检测操作系统（macOS/Linux/Windows）
+- 备份现有配置文件（如果存在）
+- 将配置添加到对应的配置文件（`.bashrc` 或 `.bash_profile`）
 
 ### 手动复制配置
 

@@ -7,8 +7,6 @@ SecureCRT 是一个终端模拟器和 SSH 客户端，主要用于 Windows 系�
 ```
 secure_crt/
 ├── SecureCRTV8_VM_Login_TOP.vbs    # VBScript 自动化脚本
-├── windows7_securecrt_config.xml   # SecureCRT 配置文件
-├── windows7_securecrt_config.log   # 配置日志
 ├── install.sh                       # 自动安装脚本（Windows）
 └── README.md                        # 本文件
 ```
@@ -46,18 +44,21 @@ VBScript 自动化脚本，用于：
 2. 选择 "Run Script"
 3. 选择 `SecureCRTV8_VM_Login_TOP.vbs`
 
-### windows7_securecrt_config.xml
+### 配置备份和恢复
 
-SecureCRT 的主配置文件，包含：
-- 会话配置
-- 外观设置
-- 键盘映射
-- 其他个性化设置
+如果需要备份 SecureCRT 配置：
 
-导入方法：
-1. 打开 SecureCRT
-2. 进入 "Options" > "Import Settings"
-3. 选择 `windows7_securecrt_config.xml`
+1. **导出配置**：
+   - 打开 SecureCRT
+   - 进入 "Options" > "Export Settings"
+   - 选择导出位置和文件名
+
+2. **导入配置**：
+   - 打开 SecureCRT
+   - 进入 "Options" > "Import Settings"
+   - 选择之前导出的配置文件
+
+**注意**: 导出的配置文件可能包含敏感信息（如许可证密钥、会话密码等），请妥善保管。
 
 ## 配置文件位置
 
