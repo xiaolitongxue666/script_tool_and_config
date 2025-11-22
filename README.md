@@ -150,6 +150,11 @@ script_tool_and_config/
   - `config`: i3 配置文件
   - `install.sh`: 自动安装脚本（仅 Linux）
 
+- **dwm** (`dwm/`): 动态窗口管理器（仅 Linux）
+  - `install.sh`: 自动安装脚本（支持多 Linux 发行版）
+  - `config.h`: 自定义配置文件（可选）
+  - 参考: [dwm 官网](https://dwm.suckless.org/)
+
 - **Yabai** (`yabai/`): macOS 平铺式窗口管理器
   - `yabairc`: Yabai 配置文件
   - `install.sh`: 自动安装脚本（仅 macOS）
@@ -177,7 +182,7 @@ script_tool_and_config/
 - `archlinux_environment_auto_install.sh`: ArchLinux 环境自动安装
 - `auto_install_common_software_for_archlinux.sh`: ArchLinux 常用软件安装
 - `auto_install_gnome_for_archlinux.sh`: ArchLinux GNOME 桌面环境安装
-- `auto_install_dwm_for_centos_stream.sh`: CentOS Stream 上安装 DWM
+- ~~`auto_install_dwm_for_centos_stream.sh`~~: 已迁移到 `dotfiles/dwm/install.sh`
 - `auto_install_net_control_for_archlinux.sh`: ArchLinux 网络控制工具安装
 
 #### 开发工具
@@ -304,6 +309,21 @@ cd dotfiles/tmux
 chmod +x install.sh
 ./install.sh
 ```
+
+**dwm (Dynamic Window Manager)**
+```bash
+cd dotfiles/dwm
+chmod +x install.sh
+./install.sh
+```
+
+安装脚本会自动：
+- 检测 Linux 发行版并安装依赖
+- 克隆 dwm 源码并编译安装
+- 可选安装 st (Simple Terminal)
+- 创建 XSession 桌面文件
+
+**注意**: dwm 的配置通过编辑源代码（`config.h`）完成，需要重新编译。详见 `dotfiles/dwm/README.md`。
 
 **同步配置**
 
