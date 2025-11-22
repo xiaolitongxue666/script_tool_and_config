@@ -219,8 +219,11 @@ script_tool_and_config/
 - `t4xx_quick_installer_china.sh`: T4xx 快速安装器（中国版）
 
 #### 脚本加密
-- `shc/`: Shell 脚本加密工具 (shc) 使用示例
-  - 演示如何使用 shc 将 Shell 脚本编译为二进制文件
+- `shc/`: Shell 脚本编译器 (shc) 使用示例
+  - **shc** 是 "Shell Script Compiler" 的缩写，用于将 Shell 脚本编译为二进制可执行文件
+  - 通过编译可以保护脚本源代码，防止被查看或修改
+  - 包含示例脚本和编译后的二进制文件（.sh.x）及生成的 C 源代码（.sh.x.c）
+  - 使用方法：`shc -f script.sh` 将生成 `script.sh.x` 可执行文件
 
 #### 版本控制和补丁
 - `patch_examples/`: diff 和 patch 工具使用示例和说明
