@@ -1145,6 +1145,35 @@
 | MinerU | [opendatalab/MinerU](https://github.com/opendatalab/MinerU) | 文档提取工具 | Python | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | understanding-math | [nbro/understanding-math](https://github.com/nbro/understanding-math) | 数学概念理解 | Python | X86/ARM | Linux/macOS/Windows | 文档 | 否 | 中 |
 
+## 四十九、Linux 桌面环境与 Wayland 工具
+
+| 仓库名称 | 链接 | 基本描述 | 编程语言 | 架构支持 | 系统支持 | 类型 | 可二次开发 | 推荐度 |
+|---------|------|---------|---------|---------|--------|------|-----------|--------|
+| Waybar | [Alexays/Waybar](https://github.com/Alexays/Waybar) | 高度可定制的 Wayland 状态栏，支持多种模块和主题 | C++ | X86/ARM | Linux | 工具 | 是 | 高 |
+| Swaybg | [swaywm/swaybg](https://github.com/swaywm/swaybg) | Wayland 壁纸设置工具，支持静态和动态壁纸 | C | X86/ARM | Linux | 工具 | 是 | 中 |
+| Wofi | [dylanaraps/wofi](https://github.com/dylanaraps/wofi) | 轻量级的 Wayland 应用启动器和菜单工具 | C | X86/ARM | Linux | 工具 | 是 | 高 |
+| Grim | [emersion/grim](https://github.com/emersion/grim) | Wayland 屏幕截图工具，支持全屏和区域截图 | C | X86/ARM | Linux | 工具 | 是 | 高 |
+| Slurp | [emersion/slurp](https://github.com/emersion/slurp) | Wayland 区域选择工具，常与 grim 配合使用 | C | X86/ARM | Linux | 工具 | 是 | 高 |
+| Swappy | [jtheoof/swappy](https://github.com/jtheoof/swappy) | Wayland 截图编辑工具，支持添加注释和裁剪 | C | X86/ARM | Linux | 工具 | 是 | 中 |
+| Pipewire | [PipeWire/pipewire](https://github.com/PipeWire/pipewire) | 低延迟的音频和视频处理框架，替代 PulseAudio | C | X86/ARM | Linux | 库 | 是 | 高 |
+| Wireplumber | [PipeWire/wireplumber](https://github.com/PipeWire/wireplumber) | PipeWire 的会话管理器，处理音频路由和策略 | C | X86/ARM | Linux | 工具 | 是 | 高 |
+| Foot | [dylanaraps/foot](https://github.com/dylanaraps/foot) | 快速、轻量级的 Wayland 终端模拟器 | C | X86/ARM | Linux | 工具 | 是 | 高 |
+| Mako | [emersion/mako](https://github.com/emersion/mako) | 轻量级的 Wayland 通知守护程序 | C | X86/ARM | Linux | 工具 | 是 | 高 |
+| Dunst | [dunst-project/dunst](https://github.com/dunst-project/dunst) | 轻量级且高度可定制的通知守护程序 | C | X86/ARM | Linux | 工具 | 是 | 高 |
+| Cliphist | [sentriz/cliphist](https://github.com/sentriz/cliphist) | Wayland 剪贴板历史管理工具 | Go | X86/ARM | Linux | 工具 | 是 | 中 |
+| Swayidle | [swaywm/swayidle](https://github.com/swaywm/swayidle) | Wayland 空闲管理守护程序，处理锁屏和电源管理 | C | X86/ARM | Linux | 工具 | 是 | 高 |
+| Swaylock | [swaywm/swaylock](https://github.com/swaywm/swaylock) | Wayland 屏幕锁定工具，支持自定义主题 | C | X86/ARM | Linux | 工具 | 是 | 高 |
+| Neofetch | [dylanaraps/neofetch](https://github.com/dylanaraps/neofetch) | 命令行系统信息显示工具，支持自定义输出 | Shell | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 高 |
+| mpv | [mpv-player/mpv](https://github.com/mpv-player/mpv) | 高性能的跨平台媒体播放器，支持多种格式 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 高 |
+| Pavucontrol | [pulseaudio/pavucontrol](https://github.com/pulseaudio/pavucontrol) | PulseAudio 音量控制图形界面工具 | C++ | X86/ARM | Linux | 工具 | 是 | 中 |
+| Nautilus | [GNOME/nautilus](https://github.com/GNOME/nautilus) | GNOME 文件管理器，提供直观的文件操作界面 | C | X86/ARM | Linux | 工具 | 是 | 高 |
+| Thunar | [xfce-mirror/thunar](https://github.com/xfce-mirror/thunar) | Xfce 轻量级文件管理器，快速且易用 | C | X86/ARM | Linux | 工具 | 是 | 高 |
+| LibreOffice | [LibreOffice/core](https://github.com/LibreOffice/core) | 功能强大的开源办公套件，支持多种文档格式 | C++ | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 高 |
+| GIMP | [GIMP/gimp](https://github.com/GIMP/gimp) | 强大的开源图像编辑软件，功能丰富 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 高 |
+| Pacman | [archlinux/pacman](https://github.com/archlinux/pacman) | Arch Linux 包管理器，提供高效的软件安装和管理 | C | X86/ARM | Linux | 工具 | 是 | 高 |
+| Yay | [Jguer/yay](https://github.com/Jguer/yay) | Arch Linux AUR 助手，简化 AUR 包的安装和更新 | Go | X86/ARM | Linux | 工具 | 是 | 高 |
+| Firefox | [mozilla/gecko-dev](https://github.com/mozilla/gecko-dev) | 开源的网页浏览器，注重隐私和安全 | C++ | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 高 |
+
 ## 四十八、其他未分类工具与资源
 
 | 仓库名称 | 链接 | 基本描述 | 编程语言 | 架构支持 | 系统支持 | 类型 | 可二次开发 | 推荐度 |
@@ -1589,7 +1618,7 @@
 | bumpalo | [fitzgen/bumpalo](https://github.com/fitzgen/bumpalo) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | pipx | [pypa/pipx](https://github.com/pypa/pipx) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | hls.js | [video-dev/hls.js](https://github.com/video-dev/hls.js) | 查看详情 | JavaScript | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| Hyprland | [hyprwm/Hyprland](https://github.com/hyprwm/Hyprland) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| Hyprland | [hyprwm/Hyprland](https://github.com/hyprwm/Hyprland) | 基于 Wayland 的动态平铺窗口管理器，提供现代化的桌面体验 | C++ | X86/ARM | Linux | 工具 | 是 | 高 |
 | Huatuo-Llama-Med-Chinese | [SCIR-HI/Huatuo-Llama-Med-Chinese](https://github.com/SCIR-HI/Huatuo-Llama-Med-Chinese) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | ShareX | [ShareX/ShareX](https://github.com/ShareX/ShareX) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | dev-environment-files | [josean-dev/dev-environment-files](https://github.com/josean-dev/dev-environment-files) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
