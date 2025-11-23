@@ -16,14 +16,18 @@
 # to the user's home directory starting with `~/`.
 # 所有导入文件的路径必须采用绝对路径或者 home 路径下的相对路径
 #
-# 示例：导入主题文件
-# import = [
-#   "~/.config/alacritty/themes/catppuccin-mocha.toml",
-# ]
-
-# Live config reload (changes require restart)
-# 实时配置重载（某些更改需要重启）
-live_config_reload = true
+# General configuration
+# 通用配置
+[general]
+  # Live config reload (changes require restart)
+  # 实时配置重载（某些更改需要重启）
+  live_config_reload = true
+  
+  # 导入 Dracula 主题
+  # 更多主题: https://github.com/alacritty/alacritty-theme
+  import = [
+    "~/.config/alacritty/themes/dracula.toml",
+  ]
 
 # Environment variables
 # 环境变量
@@ -90,14 +94,14 @@ live_config_reload = true
   # Values for `decorations` (macOS only): # (仅限 macOS)
   #     - "Transparent": Title bar, transparent background and title bar buttons # 标题栏、透明背景和标题栏按钮
   #     - "Buttonless": Title bar, transparent background and no title bar buttons # 标题栏、透明背景和无标题栏按钮
-  decorations = "Full"
+  # decorations = "Full"  # 在新版本中已废弃，但保留以兼容旧配置
 
   # Background opacity # 背景不透明度
   #
   # Window opacity as a floating point number from `0.0` to `1.0`.
   # The value `0.0` is completely transparent and `1.0` is opaque.
   # 值 `0.0` 是完全透明的，`1.0` 是不透明的。
-  opacity = 0.9
+  # opacity = 0.9  # 在新版本中已废弃，但保留以兼容旧配置
 
   # Startup Mode (changes require restart)
   # 启动模式（更改需要重启）
@@ -109,14 +113,14 @@ live_config_reload = true
   #
   # Values for `startup_mode` (macOS only): #（仅限 macOS）
   #   - "SimpleFullscreen" # 简单全屏
-  startup_mode = "Windowed"
+  # startup_mode = "Windowed"  # 在新版本中已废弃，但保留以兼容旧配置
 
   # Window title # 窗口标题
-  title = "Alacritty"
+  # title = "Alacritty"  # 在新版本中已废弃，但保留以兼容旧配置
 
   # Allow terminal applications to change Alacritty's window title.
   # 允许终端应用程序更改 Alacritty 的窗口标题（例如：tmux）
-  dynamic_title = true
+  # dynamic_title = true  # 在新版本中已废弃，新版本默认启用
 
   # GTK theme variant (Linux/BSD only) # GTK 主题变体（仅限 Linux/BSD）
   #
@@ -149,7 +153,11 @@ live_config_reload = true
     #   - (macOS) Menlo
     #   - (Linux/BSD) monospace
     #   - (Windows) Consolas
-    family = "Menlo"
+    #
+    # 推荐使用 Nerd Fonts 以支持图标显示（如 lsd、exa 等工具）
+    # 如果未安装 Nerd Fonts，可以改回 "Menlo"
+    # 可用的 Nerd Fonts: "CaskaydiaCove Nerd Font Mono", "FiraCode Nerd Font Mono", "Hack Nerd Font Mono"
+    family = "CaskaydiaCove Nerd Font Mono"
     # The `style` can be specified to pick a specific face.
     style = "Regular"
 
@@ -159,7 +167,7 @@ live_config_reload = true
     #
     # If the bold family is not specified, it will fall back to the
     # value specified for the normal font.
-    family = "Menlo"
+    family = "CaskaydiaCove Nerd Font Mono"
     # The `style` can be specified to pick a specific face.
     style = "Bold"
 
@@ -169,7 +177,7 @@ live_config_reload = true
     #
     # If the italic family is not specified, it will fall back to the
     # value specified for the normal font.
-    family = "Menlo"
+    family = "CaskaydiaCove Nerd Font Mono"
     # The `style` can be specified to pick a specific face.
     style = "Italic"
 
@@ -179,7 +187,7 @@ live_config_reload = true
     #
     # If the bold italic family is not specified, it will fall back to the
     # value specified for the normal font.
-    family = "Menlo"
+    family = "CaskaydiaCove Nerd Font Mono"
     # The `style` can be specified to pick a specific face.
     style = "Bold Italic"
 
@@ -206,87 +214,23 @@ live_config_reload = true
   #
   # Thin strokes are suitable for retina displays, but for non-retina screens
   # it is recommended to set `use_thin_strokes` to `false`.
-  use_thin_strokes = true
+  # use_thin_strokes = true  # 已废弃，不再支持
 
 # If `true`, bold text is drawn using the bright color variants.
 # 如果为 `true`，粗体文本使用明亮颜色变体绘制。
 # draw_bold_text_with_bright_colors = false
 
-# Colors configuration (Tomorrow Night theme)
-# 颜色配置（Tomorrow Night 主题）
-[colors]
-  # Default colors
-  # 默认颜色
-  [colors.primary]
-    background = "#282828"  # 背景
-    foreground = "#ebdbb2"  # 前景
-
-    # Bright and dim foreground colors # 明亮和暗淡的前景色
-    #
-    # The dimmed foreground color is calculated automatically if it is not
-    # present. If the bright foreground color is not set, or
-    # `draw_bold_text_with_bright_colors` is `false`, the normal foreground
-    # color will be used.
-    # dim_foreground = "#828482"
-    # bright_foreground = "#eaeaea"
-
-  # Cursor colors # 光标颜色
-  #
-  # Colors which should be used to draw the terminal cursor.
-  #
-  # Allowed values are CellForeground/CellBackground, which reference the
-  # affected cell, or hexadecimal colors like #ff00ff.
-  # [colors.cursor]
-  #   text = "CellBackground"
-  #   cursor = "CellForeground"
-
-  # Vi mode cursor colors # Vi 模式光标颜色
-  #
-  # Colors for the cursor when the vi mode is active.
-  #
-  # Allowed values are CellForeground/CellBackground, which reference the
-  # affected cell, or hexadecimal colors like #ff00ff.
-  # [colors.vi_mode_cursor]
-  #   text = "CellBackground"
-  #   cursor = "CellForeground"
-
-  # Normal colors
-  # 正常颜色
-  [colors.normal]
-    black   = "#282828"
-    red     = "#cc241d"
-    green   = "#98971a"
-    yellow  = "#d79921"
-    blue    = "#458588"
-    magenta = "#b16286"
-    cyan    = "#689d6a"
-    white   = "#a89984"
-
-  # Bright colors
-  # 明亮颜色
-  [colors.bright]
-    black   = "#928374"
-    red     = "#fb4934"
-    green   = "#b8bb26"
-    yellow  = "#fabd2f"
-    blue    = "#83a598"
-    magenta = "#d3869b"
-    cyan    = "#8ec07c"
-    white   = "#ebdbb2"
-
-  # Dim colors
-  #
-  # If the dim colors are not set, they will be calculated automatically based
-  # on the `normal` colors.
-  # [colors.dim]
-  #   black   = "#131415"
-  #   red     = "#864343"
-  #   green   = "#777c44"
-  #   yellow  = "#9e824c"
-  #   blue    = "#556a7d"
-  #   magenta = "#75617b"
-  #   cyan    = "#5b7d78"
-  #   white   = "#828482"
+# Colors configuration
+# 颜色配置
+# 注意：Dracula 主题通过 import 导入，以下颜色配置会被主题文件覆盖
+# 如果需要自定义颜色，可以在主题文件之后添加覆盖配置
+# 
+# Dracula 主题颜色说明：
+# - 背景: #282a36 (深灰蓝)
+# - 前景: #f8f8f2 (浅灰白)
+# - 主要颜色: 紫色系 (#bd93f9, #ff79c6 等)
+# 
+# 更多信息: https://draculatheme.com/alacritty
 
 # Bell configuration # 声音提示配置
 #

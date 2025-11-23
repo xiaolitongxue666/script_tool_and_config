@@ -6,86 +6,187 @@
 
 set -e
 
-echo "=========================================="
-echo "Alacritty 安装脚本 (macOS)"
-echo "=========================================="
+# 加载通用脚本函数
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ -f "$SCRIPT_DIR/../../scripts/common.sh" ]; then
+    source "$SCRIPT_DIR/../../scripts/common.sh"
+else
+    # 如果没有 common.sh，定义基本函数
+    function log_info() { echo "[信息] $*"; }
+    function log_success() { echo "[成功] $*"; }
+    function log_warning() { echo "[警告] $*"; }
+    function log_error() { echo "[错误] $*" >&2; }
+fi
+
+start_script "Alacritty 安装脚本 (macOS)"
+
+# ============================================
+# 代理设置（可选）
+# ============================================
+# 如果网络不通，可以通过环境变量设置代理
+# export http_proxy=http://127.0.0.1:7890
+# export https_proxy=http://127.0.0.1:7890
+
+# 检查并设置代理
+if [ -n "$http_proxy" ] || [ -n "$https_proxy" ]; then
+    export HTTP_PROXY="${http_proxy:-$HTTP_PROXY}"
+    export HTTPS_PROXY="${https_proxy:-$HTTPS_PROXY}"
+    log_info "使用代理: $HTTP_PROXY"
+fi
+
+# ============================================
+# 检查并删除旧版本
+# ============================================
+log_info "检查已安装的 Alacritty..."
+
+# 检查 Applications 目录中的旧版本
+if [ -d "/Applications/Alacritty.app" ]; then
+    OLD_VERSION=$(/Applications/Alacritty.app/Contents/MacOS/alacritty --version 2>/dev/null | head -1 || echo "未知版本")
+    log_warning "检测到已安装的 Alacritty: $OLD_VERSION"
+    
+    # 备份旧版本
+    BACKUP_NAME="Alacritty.app.backup.$(date +%Y%m%d_%H%M%S)"
+    if [ -d "/Applications/$BACKUP_NAME" ]; then
+        rm -rf "/Applications/$BACKUP_NAME"
+    fi
+    mv "/Applications/Alacritty.app" "/Applications/$BACKUP_NAME" 2>/dev/null && \
+        log_info "已备份旧版本到: $BACKUP_NAME" || \
+        log_warning "无法备份旧版本，可能正在使用中"
+fi
+
+# 检查并处理 terminfo 文件冲突
+# Terminfo 文件说明：
+# - 作用：终端信息数据库，用于描述终端的特性和功能
+# - 位置：~/.terminfo/61/alacritty (用户目录) 或系统目录
+# - 权限问题：旧版本可能以 root 权限安装，导致新版本无法覆盖
+# - 影响：如果不处理，brew 安装会失败，但手动安装不受影响
+if [ -f "$HOME/.terminfo/61/alacritty" ]; then
+    log_info "检测到 terminfo 文件: $HOME/.terminfo/61/alacritty"
+    FILE_OWNER=$(stat -f "%Su" "$HOME/.terminfo/61/alacritty" 2>/dev/null || echo "unknown")
+    if [ "$FILE_OWNER" = "root" ]; then
+        log_warning "terminfo 文件属于 root，可能需要 sudo 权限删除"
+        log_info "如果 brew 安装失败，将使用手动安装方式"
+    fi
+fi
+
+# ============================================
+# 安装方法选择
+# ============================================
+INSTALL_METHOD=""
 
 # 检查是否已安装 Homebrew
 if command -v brew &> /dev/null; then
-    echo ""
-    echo "检测到 Homebrew，使用 Homebrew 安装（推荐）..."
-    echo "执行: brew install --cask alacritty"
-    echo ""
-    read -p "是否使用 Homebrew 安装？(y/n) " -n 1 -r
-    echo
-    if [[ $REPLY =~ ^[Yy]$ ]]; then
-        brew install --cask alacritty
-        INSTALL_METHOD="homebrew"
-    fi
-fi
-
-# 如果未使用 Homebrew，则从源码编译
-if [ "$INSTALL_METHOD" != "homebrew" ]; then
-    echo ""
-    echo "从源码编译安装 Alacritty..."
-    echo ""
+    log_info "检测到 Homebrew，尝试使用 Homebrew 安装（推荐）..."
     
-    # 检查 Rust 是否已安装
-    if ! command -v cargo &> /dev/null; then
-        echo "错误: 未找到 Rust/Cargo"
-        echo "请先安装 Rust: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh"
-        exit 1
-    fi
-    
-    # 检查 cmake 是否已安装
-    if ! command -v cmake &> /dev/null; then
-        echo "错误: 未找到 cmake"
-        echo "请先安装 cmake: brew install cmake"
-        exit 1
-    fi
-    
-    # 创建临时目录
-    TEMP_DIR=$(mktemp -d)
-    cd "$TEMP_DIR"
-    
-    # 克隆 Alacritty 仓库
-    echo "正在克隆 Alacritty 仓库..."
-    git clone https://github.com/alacritty/alacritty.git
-    cd alacritty
-    
-    # 构建应用
-    echo "正在构建 Alacritty 应用..."
-    make app
-    
-    # 复制应用到 Applications 目录
-    echo "正在安装 Alacritty 到 Applications..."
-    cp -r target/release/osx/Alacritty.app /Applications/
-    
-    # 清理临时目录
-    cd /
-    rm -rf "$TEMP_DIR"
-fi
-
-# 安装 Terminfo
-# Terminfo 用于终端信息数据库，确保 Alacritty 能正确识别终端类型
-echo ""
-echo "正在安装 Terminfo..."
-if [ -d "/usr/local/share/terminfo" ] || [ -d "/usr/share/terminfo" ]; then
-    # 尝试从已安装的 Alacritty 获取 terminfo
-    if [ -f "/Applications/Alacritty.app/Contents/Resources/alacritty.info" ]; then
-        sudo tic -xe alacritty,alacritty-direct /Applications/Alacritty.app/Contents/Resources/alacritty.info
-    elif [ -f "$HOME/.cargo/bin/alacritty" ]; then
-        # 如果通过 cargo 安装，查找 terminfo 文件
-        ALACRITTY_DIR=$(dirname $(dirname $(which alacritty)))
-        if [ -f "$ALACRITTY_DIR/share/alacritty/alacritty.info" ]; then
-            sudo tic -xe alacritty,alacritty-direct "$ALACRITTY_DIR/share/alacritty/alacritty.info"
+    # 尝试通过 brew 安装
+    if [ -z "$INSTALL_METHOD" ]; then
+        log_info "执行: brew install --cask alacritty"
+        if brew install --cask alacritty 2>&1 | tee /tmp/brew_install.log; then
+            INSTALL_METHOD="homebrew"
+            log_success "通过 Homebrew 安装成功"
+        else
+            # 检查是否是 terminfo 冲突
+            if grep -q "terminfo" /tmp/brew_install.log; then
+                log_warning "Homebrew 安装失败：terminfo 文件冲突"
+                log_info "将使用手动安装方式（DMG 下载）"
+            else
+                log_warning "Homebrew 安装失败，将尝试其他方法"
+            fi
         fi
+    fi
+fi
+
+# ============================================
+# 手动安装（如果 Homebrew 失败）
+# ============================================
+if [ "$INSTALL_METHOD" != "homebrew" ]; then
+    log_info "使用手动安装方式（下载 DMG 文件）..."
+    
+    # 获取最新版本号（从 GitHub API）
+    ALACRITTY_VERSION="v0.16.1"  # 默认版本，可以从 API 获取最新版本
+    DMG_URL="https://github.com/alacritty/alacritty/releases/download/${ALACRITTY_VERSION}/Alacritty-${ALACRITTY_VERSION}.dmg"
+    DMG_FILE="/tmp/Alacritty-${ALACRITTY_VERSION}.dmg"
+    
+    log_info "下载 Alacritty ${ALACRITTY_VERSION}..."
+    if curl -L -f -o "$DMG_FILE" "$DMG_URL" 2>/dev/null; then
+        log_success "下载完成: $(du -h "$DMG_FILE" | cut -f1)"
+        
+        # 挂载 DMG
+        log_info "挂载 DMG 文件..."
+        hdiutil attach "$DMG_FILE" -quiet -nobrowse
+        
+        # 查找挂载的卷名
+        VOLUME_NAME=$(ls /Volumes/ | grep -i alacritty | head -1)
+        if [ -n "$VOLUME_NAME" ] && [ -d "/Volumes/$VOLUME_NAME/Alacritty.app" ]; then
+            log_info "找到安装包: /Volumes/$VOLUME_NAME/Alacritty.app"
+            
+            # 复制应用到 Applications
+            log_info "安装到 /Applications..."
+            cp -R "/Volumes/$VOLUME_NAME/Alacritty.app" /Applications/
+            
+            # 卸载 DMG
+            hdiutil detach "/Volumes/$VOLUME_NAME" -quiet
+            
+            # 验证安装
+            if [ -d "/Applications/Alacritty.app" ]; then
+                INSTALLED_VERSION=$(/Applications/Alacritty.app/Contents/MacOS/alacritty --version 2>/dev/null | head -1 || echo "未知")
+                log_success "安装成功: $INSTALLED_VERSION"
+                INSTALL_METHOD="manual"
+            else
+                log_error "安装失败：应用未正确复制"
+                exit 1
+            fi
+        else
+            log_error "无法找到安装包"
+            hdiutil detach "/Volumes/$VOLUME_NAME" -quiet 2>/dev/null
+            exit 1
+        fi
+        
+        # 清理临时文件
+        rm -f "$DMG_FILE"
     else
-        echo "警告: 未找到 alacritty.info 文件，跳过 Terminfo 安装"
-        echo "你可以手动安装: sudo tic -xe alacritty,alacritty-direct <path-to-alacritty.info>"
+        log_error "下载失败，请检查网络连接或代理设置"
+        log_info "提示：如果网络不通，可以设置代理："
+        log_info "  export http_proxy=http://127.0.0.1:7890"
+        log_info "  export https_proxy=http://127.0.0.1:7890"
+        exit 1
+    fi
+fi
+
+# ============================================
+# 安装 Terminfo（可选但推荐）
+# ============================================
+# Terminfo 说明：
+# - 作用：终端信息数据库，描述终端的特性和功能（如颜色支持、光标移动等）
+# - 位置：系统目录 (/usr/share/terminfo) 或用户目录 (~/.terminfo)
+# - 权限问题：旧版本可能以 root 权限安装到用户目录，导致新版本无法覆盖
+# - 影响：如果不安装，某些程序可能无法正确识别 Alacritty 终端类型
+# - 解决方案：通常 Homebrew 会自动处理，手动安装时可选
+log_info "检查 Terminfo 安装..."
+
+# 检查是否已安装 terminfo
+if command -v infocmp &> /dev/null; then
+    if infocmp alacritty &> /dev/null; then
+        log_success "Terminfo 已安装"
+    else
+        log_info "Terminfo 未安装，尝试安装..."
+        
+        # 尝试从已安装的 Alacritty 获取 terminfo
+        if [ -f "/Applications/Alacritty.app/Contents/Resources/alacritty.info" ]; then
+            log_info "找到 alacritty.info 文件，安装 Terminfo..."
+            if sudo tic -xe alacritty,alacritty-direct /Applications/Alacritty.app/Contents/Resources/alacritty.info 2>/dev/null; then
+                log_success "Terminfo 安装成功"
+            else
+                log_warning "Terminfo 安装失败（可能需要 sudo 权限）"
+                log_info "可以稍后手动安装: sudo tic -xe alacritty,alacritty-direct /Applications/Alacritty.app/Contents/Resources/alacritty.info"
+            fi
+        else
+            log_warning "未找到 alacritty.info 文件，跳过 Terminfo 安装"
+            log_info "这通常不影响 Alacritty 的正常使用"
+        fi
     fi
 else
-    echo "警告: 未找到 terminfo 目录，跳过 Terminfo 安装"
+    log_warning "未找到 infocmp 命令，跳过 Terminfo 检查"
 fi
 
 # 安装 Shell 自动补全
@@ -136,10 +237,45 @@ if command -v bash &> /dev/null; then
     fi
 fi
 
+# ============================================
+# 安装配置文件（可选）
+# ============================================
+log_info "检查配置文件..."
+
+CONFIG_DIR="$HOME/.config/alacritty"
+CONFIG_FILE="$CONFIG_DIR/alacritty.toml"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SOURCE_CONFIG="$SCRIPT_DIR/alacritty.toml"
+
+if [ -f "$SOURCE_CONFIG" ]; then
+    if [ ! -f "$CONFIG_FILE" ]; then
+        log_info "复制配置文件..."
+        mkdir -p "$CONFIG_DIR"
+        cp "$SOURCE_CONFIG" "$CONFIG_FILE"
+        log_success "配置文件已复制到: $CONFIG_FILE"
+    else
+        log_info "配置文件已存在: $CONFIG_FILE"
+        log_info "如需更新，请手动复制: cp $SOURCE_CONFIG $CONFIG_FILE"
+    fi
+else
+    log_warning "未找到源配置文件: $SOURCE_CONFIG"
+fi
+
+# ============================================
+# 安装完成
+# ============================================
+end_script
+
 echo ""
-echo "=========================================="
-echo "Alacritty 安装完成！"
-echo "=========================================="
+log_success "Alacritty 安装完成！"
+echo ""
+echo "安装信息："
+echo "  - 安装方法: $INSTALL_METHOD"
+if [ -d "/Applications/Alacritty.app" ]; then
+    INSTALLED_VERSION=$(/Applications/Alacritty.app/Contents/MacOS/alacritty --version 2>/dev/null | head -1 || echo "未知")
+    echo "  - 版本: $INSTALLED_VERSION"
+fi
+echo "  - 位置: /Applications/Alacritty.app"
 echo ""
 echo "配置文件位置（按优先级顺序）："
 echo "  1. \$XDG_CONFIG_HOME/alacritty/alacritty.toml"
@@ -147,9 +283,9 @@ echo "  2. \$XDG_CONFIG_HOME/alacritty.toml"
 echo "  3. ~/.config/alacritty/alacritty.toml (推荐)"
 echo "  4. ~/.alacritty.toml"
 echo ""
-echo "快速配置："
-echo "  mkdir -p ~/.config/alacritty"
-echo "  cp dotfiles/alacritty/alacritty.toml ~/.config/alacritty/"
+echo "启动方式："
+echo "  open -a Alacritty"
+echo "  或从应用程序文件夹打开"
 echo ""
 echo "注意：Alacritty 从 0.13.0 版本开始使用 TOML 格式配置文件"
 echo "旧版本的 YAML 格式配置文件 (alacritty.yml) 已不再支持"

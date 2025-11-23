@@ -44,16 +44,17 @@ alias cat='bat --style=plain'
 
 # 使用 lsd 替换 ls，提供增强的目录列表功能（如果已安装）
 # 如果未安装 lsd，则使用 exa 作为备选
+# 注意：需要安装 Nerd Fonts 才能正确显示图标
 if command -v lsd > /dev/null
-    alias l='lsd'
-    alias la='lsd -a'
-    alias ll='lsd -lah'
-    alias ls='lsd --color=auto'
+    alias l='lsd --icon=always'
+    alias la='lsd --icon=always -a'
+    alias ll='lsd --icon=always -lah'
+    alias ls='lsd --icon=always --color=auto'
 else if command -v exa > /dev/null
-    alias l='exa'
-    alias la='exa -a'
-    alias ll='exa -lah'
-    alias ls='exa --color=auto'
+    alias l='exa --icons'
+    alias la='exa --icons -a'
+    alias ll='exa --icons -lah'
+    alias ls='exa --icons --color=auto'
 end
 
 # 使用 trash 替换 rm，实现更安全的删除操作
