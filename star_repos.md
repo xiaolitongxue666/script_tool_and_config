@@ -43,6 +43,25 @@
 
 | 仓库名称 | 链接 | 基本描述 | 编程语言 | 架构支持 | 系统支持 | 类型 | 可二次开发 | 推荐度 |
 |---------|------|---------|---------|---------|--------|------|-----------|--------|
+| github-cheat-sheet | [tiimgreen/github-cheat-sheet](https://github.com/tiimgreen/github-cheat-sheet) | GitHub 工具 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| git-trim | [foriequal0/git-trim](https://github.com/foriequal0/git-trim) | Git 工具/插件 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| missing-semester-cn.github.io | [missing-semester-cn/missing-semester-cn.github.io](https://github.com/missing-semester-cn/missing-semester-cn.github.io) | GitHub 工具 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| git-filter-repo | [newren/git-filter-repo](https://github.com/newren/git-filter-repo) | Git 工具/插件 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| haoel.github.io | [haoel/haoel.github.io](https://github.com/haoel/haoel.github.io) | GitHub 工具 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| git-tips | [521xueweihan/git-tips](https://github.com/521xueweihan/git-tips) | Git 工具/插件 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| gptcommit | [zurawiki/gptcommit](https://github.com/zurawiki/gptcommit) | Git 提交工具 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| git-sim | [initialcommit-com/git-sim](https://github.com/initialcommit-com/git-sim) | Git 工具/插件 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| git-extras | [tj/git-extras](https://github.com/tj/git-extras) | Git 工具/插件 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| git-absorb | [tummychow/git-absorb](https://github.com/tummychow/git-absorb) | Git 工具/插件 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| git-internals-pdf | [pluralsight/git-internals-pdf](https://github.com/pluralsight/git-internals-pdf) | Git 工具/插件 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| github-readme-stats | [anuraghazra/github-readme-stats](https://github.com/anuraghazra/github-readme-stats) | GitHub 工具 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| git-branchless | [arxanas/git-branchless](https://github.com/arxanas/git-branchless) | Git 工具/插件 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| git-cliff | [orhun/git-cliff](https://github.com/orhun/git-cliff) | Git 工具/插件 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| refined-github | [refined-github/refined-github](https://github.com/refined-github/refined-github) | GitHub 工具 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| github-tag-action | [anothrNick/github-tag-action](https://github.com/anothrNick/github-tag-action) | GitHub 工具 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| github-breakout | [SIY1121/github-breakout](https://github.com/SIY1121/github-breakout) | GitHub 工具 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| xiaolai.github.io | [xiaolai/xiaolai.github.io](https://github.com/xiaolai/xiaolai.github.io) | GitHub 工具 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| paint-github | [muan/paint-github](https://github.com/muan/paint-github) | GitHub 工具 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | onefetch | [o2sh/onefetch](https://github.com/o2sh/onefetch) | 在终端显示 Git 仓库统计信息 | Rust | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 高 |
 | gitui | [gitui-org/gitui](https://github.com/gitui-org/gitui) | 快速的 Git TUI 客户端 | Rust | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 高 |
 | lazygit | [jesseduffield/lazygit](https://github.com/jesseduffield/lazygit) | 简单的终端 Git UI | Go | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 高 |
@@ -113,6 +132,9 @@
 
 | 仓库名称 | 链接 | 基本描述 | 编程语言 | 架构支持 | 系统支持 | 类型 | 可二次开发 | 推荐度 |
 |---------|------|---------|---------|---------|--------|------|-----------|--------|
+| pgmock | [stack-auth/pgmock](https://github.com/stack-auth/pgmock) | PostgreSQL 模拟工具 | Go | X86/ARM | Linux/macOS/Windows | 库 | 是 | 中 |
+| drawdb | [drawdb-io/drawdb](https://github.com/drawdb-io/drawdb) | 数据库关系图设计器 | TypeScript | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| redis-mindmap | [huangzworks/redis-mindmap](https://github.com/huangzworks/redis-mindmap) | Redis 知识点思维导图 | Markdown | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
 | mdp | [visit1985/mdp](https://github.com/visit1985/mdp) | 终端 Markdown 演示工具 | C++ | X86/ARM | Linux/macOS | 工具 | 是 | 中 |
 | tldr | [tldr-pages/tldr](https://github.com/tldr-pages/tldr) | 简化的命令手册（man 的替代品） | Markdown | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 高 |
 | glow | [charmbracelet/glow](https://github.com/charmbracelet/glow) | 终端 Markdown 阅读器 | Go | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 高 |
@@ -126,6 +148,22 @@
 
 | 仓库名称 | 链接 | 基本描述 | 编程语言 | 架构支持 | 系统支持 | 类型 | 可二次开发 | 推荐度 |
 |---------|------|---------|---------|---------|--------|------|-----------|--------|
+| vitest | [vitest-dev/vitest](https://github.com/vitest-dev/vitest) | 测试框架/工具 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| neotest | [nvim-neotest/neotest](https://github.com/nvim-neotest/neotest) | 测试框架/工具 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| Pentest-Windows | [arch3rPro/Pentest-Windows](https://github.com/arch3rPro/Pentest-Windows) | 测试框架/工具 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| speedtest-cli | [sivel/speedtest-cli](https://github.com/sivel/speedtest-cli) | 测试框架/工具 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| go-stress-testing | [link1st/go-stress-testing](https://github.com/link1st/go-stress-testing) | 测试框架/工具 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| pytest | [pytest-dev/pytest](https://github.com/pytest-dev/pytest) | 测试框架/工具 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| nextest | [nextest-rs/nextest](https://github.com/nextest-rs/nextest) | 测试框架/工具 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| googletest | [google/googletest](https://github.com/google/googletest) | 测试框架/工具 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| test-nginx | [openresty/test-nginx](https://github.com/openresty/test-nginx) | 测试框架/工具 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| testify | [stretchr/testify](https://github.com/stretchr/testify) | 测试框架/工具 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| lua-resty-test | [iresty/lua-resty-test](https://github.com/iresty/lua-resty-test) | 测试框架/工具 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| zed | [zed-industries/zed](https://github.com/zed-industries/zed) | 高性能代码编辑器 | Rust | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 高 |
+| jj | [jj-vcs/jj](https://github.com/jj-vcs/jj) | Git 兼容的 VCS 工具 | Rust | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 高 |
+| cloc | [AlDanial/cloc](https://github.com/AlDanial/cloc) | 代码行数统计工具 | Perl | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 高 |
+| mkcert | [FiloSottile/mkcert](https://github.com/FiloSottile/mkcert) | 本地 HTTPS 证书生成工具 | Go | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 高 |
+| cargo-binstall | [cargo-bins/cargo-binstall](https://github.com/cargo-bins/cargo-binstall) | Rust 二进制文件安装工具 | Rust | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | just | [casey/just](https://github.com/casey/just) | 命令运行器（make 的替代品） | Rust | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 高 |
 | hyperfine | [sharkdp/hyperfine](https://github.com/sharkdp/hyperfine) | 命令行基准测试工具 | Rust | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 高 |
 | shc | [neurobin/shc](https://github.com/neurobin/shc) | Shell 脚本编译器 | C | X86/ARM | Linux/macOS | 工具 | 是 | 中 |
@@ -138,6 +176,29 @@
 
 | 仓库名称 | 链接 | 基本描述 | 编程语言 | 架构支持 | 系统支持 | 类型 | 可二次开发 | 推荐度 |
 |---------|------|---------|---------|---------|--------|------|-----------|--------|
+| dockerc | [NilsIrl/dockerc](https://github.com/NilsIrl/dockerc) | Docker 工具 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| docker-monitoring-stack-gpnc | [ruanbekker/docker-monitoring-stack-gpnc](https://github.com/ruanbekker/docker-monitoring-stack-gpnc) | Docker 工具 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| kubernetes-in-action-2nd-edition | [luksa/kubernetes-in-action-2nd-edition](https://github.com/luksa/kubernetes-in-action-2nd-edition) | Kubernetes 工具 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| docker-compose-viz | [pmsipilot/docker-compose-viz](https://github.com/pmsipilot/docker-compose-viz) | Docker 工具 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| container-desktop | [iongion/container-desktop](https://github.com/iongion/container-desktop) | 容器工具 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| hty-docker-postgres | [liweinan/hty-docker-postgres](https://github.com/liweinan/hty-docker-postgres) | Docker 工具 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| docker-node | [nodejs/docker-node](https://github.com/nodejs/docker-node) | Docker 工具 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| container-diff | [GoogleContainerTools/container-diff](https://github.com/GoogleContainerTools/container-diff) | 容器工具 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| docker-openresty | [openresty/docker-openresty](https://github.com/openresty/docker-openresty) | Docker 工具 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| docker-registry-web | [mkuchin/docker-registry-web](https://github.com/mkuchin/docker-registry-web) | Docker 工具 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| docker-registry | [wshihadeh/docker-registry](https://github.com/wshihadeh/docker-registry) | Docker 工具 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| rust-memory-container-cs | [usagi/rust-memory-container-cs](https://github.com/usagi/rust-memory-container-cs) | 容器工具 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| Docker-OSX | [sickcodes/Docker-OSX](https://github.com/sickcodes/Docker-OSX) | Docker 工具 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| containerd | [containerd/containerd](https://github.com/containerd/containerd) | 容器工具 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| dockerfile-hisilicon | [kelvinlawson/dockerfile-hisilicon](https://github.com/kelvinlawson/dockerfile-hisilicon) | Docker 工具 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| kata-containers | [kata-containers/kata-containers](https://github.com/kata-containers/kata-containers) | 容器工具 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| docker-maven-plugin | [fabric8io/docker-maven-plugin](https://github.com/fabric8io/docker-maven-plugin) | Docker 工具 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| chrome-headless-browser-docker | [yukinying/chrome-headless-browser-docker](https://github.com/yukinying/chrome-headless-browser-docker) | Docker 工具 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| docker-headless-vnc-container | [ConSol/docker-headless-vnc-container](https://github.com/ConSol/docker-headless-vnc-container) | Docker 工具 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| dockerlabs | [collabnix/dockerlabs](https://github.com/collabnix/dockerlabs) | Docker 工具 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| dockerpi | [lukechilds/dockerpi](https://github.com/lukechilds/dockerpi) | Docker 工具 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| docker.app | [docker-archive-public/docker.app](https://github.com/docker-archive-public/docker.app) | Docker 工具 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| kubernetes | [kubernetes/kubernetes](https://github.com/kubernetes/kubernetes) | Kubernetes 工具 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | lazydocker | [jesseduffield/lazydocker](https://github.com/jesseduffield/lazydocker) | Docker 的简单终端 UI | Go | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 高 |
 | oxker | [mrjackwills/oxker](https://github.com/mrjackwills/oxker) | Docker 容器监控 TUI | Rust | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 
@@ -180,6 +241,15 @@
 
 | 仓库名称 | 链接 | 基本描述 | 编程语言 | 架构支持 | 系统支持 | 类型 | 可二次开发 | 推荐度 |
 |---------|------|---------|---------|---------|--------|------|-----------|--------|
+| Installer | [Rectify11/Installer](https://github.com/Rectify11/Installer) | 安装工具 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| archinstall | [archlinux/archinstall](https://github.com/archlinux/archinstall) | 安装工具 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| nginxconfig.io | [digitalocean/nginxconfig.io](https://github.com/digitalocean/nginxconfig.io) | 配置管理工具 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| pyenv-installer | [pyenv/pyenv-installer](https://github.com/pyenv/pyenv-installer) | 安装工具 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| nvim-lsp-installer | [williamboman/nvim-lsp-installer](https://github.com/williamboman/nvim-lsp-installer) | 安装工具 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| tmux-config | [samoshkin/tmux-config](https://github.com/samoshkin/tmux-config) | 配置管理工具 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| nvim-lspconfig | [neovim/nvim-lspconfig](https://github.com/neovim/nvim-lspconfig) | 配置管理工具 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| configs | [jonhoo/configs](https://github.com/jonhoo/configs) | 配置管理工具 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| .config | [theniceboy/.config](https://github.com/theniceboy/.config) | 配置管理工具 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | gambit | [maaslalani/gambit](https://github.com/maaslalani/gambit) | 终端国际象棋游戏 | Go | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | gameboy | [raphamorim/gameboy](https://github.com/raphamorim/gameboy) | Game Boy 模拟器 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | supertuxkart | [supertuxkart/stk-code](https://github.com/supertuxkart/stk-code) | 开源卡丁车赛车游戏 | C++ | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
@@ -243,6 +313,15 @@
 
 | 仓库名称 | 链接 | 基本描述 | 编程语言 | 架构支持 | 系统支持 | 类型 | 可二次开发 | 推荐度 |
 |---------|------|---------|---------|---------|--------|------|-----------|--------|
+| python-mastery | [dabeaz-course/python-mastery](https://github.com/dabeaz-course/python-mastery) | Python 工具/库 | Python | X86/ARM | Linux/macOS/Windows | 库 | 是 | 中 |
+| py-spy | [benfred/py-spy](https://github.com/benfred/py-spy) | Python 库 | Python | X86/ARM | Linux/macOS/Windows | 库 | 是 | 中 |
+| python-scripts | [metafy-social/python-scripts](https://github.com/metafy-social/python-scripts) | Python 工具/库 | Python | X86/ARM | Linux/macOS/Windows | 库 | 是 | 中 |
+| python-sdk | [upyun/python-sdk](https://github.com/upyun/python-sdk) | Python 工具/库 | Python | X86/ARM | Linux/macOS/Windows | 库 | 是 | 中 |
+| python-patterns | [faif/python-patterns](https://github.com/faif/python-patterns) | Python 工具/库 | Python | X86/ARM | Linux/macOS/Windows | 库 | 是 | 中 |
+| python-logging-loki | [GreyZmeem/python-logging-loki](https://github.com/GreyZmeem/python-logging-loki) | Python 工具/库 | Python | X86/ARM | Linux/macOS/Windows | 库 | 是 | 中 |
+| python-is-cool | [chiphuyen/python-is-cool](https://github.com/chiphuyen/python-is-cool) | Python 工具/库 | Python | X86/ARM | Linux/macOS/Windows | 库 | 是 | 中 |
+| marked | [markedjs/marked](https://github.com/markedjs/marked) | Markdown 解析器和编译器 | JavaScript | X86/ARM | Linux/macOS/Windows | 库 | 是 | 高 |
+| quasar | [quasarframework/quasar](https://github.com/quasarframework/quasar) | Vue.js 应用框架 | JavaScript | X86/ARM | Linux/macOS/Windows | 框架 | 是 | 高 |
 | bash-commons | [gruntwork-io/bash-commons](https://github.com/gruntwork-io/bash-commons) | Bash 脚本公共函数库 | Bash | X86/ARM | Linux/macOS | 库 | 是 | 中 |
 | regexr | [gskinner/regexr](https://github.com/gskinner/regexr) | 正则表达式在线测试工具 | JavaScript | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 高 |
 | IgushArray | [igushev/IgushArray](https://github.com/igushev/IgushArray) | 动态数组实现 | C++ | X86/ARM | Linux/macOS/Windows | 库 | 是 | 中 |
@@ -292,6 +371,9 @@
 
 | 仓库名称 | 链接 | 基本描述 | 编程语言 | 架构支持 | 系统支持 | 类型 | 可二次开发 | 推荐度 |
 |---------|------|---------|---------|---------|--------|------|-----------|--------|
+| cpp-tbox | [cpp-main/cpp-tbox](https://github.com/cpp-main/cpp-tbox) | C++ 工具/库 | C++ | X86/ARM | Linux/macOS/Windows | 库 | 是 | 中 |
+| cpp-cheat-sheet | [gibsjose/cpp-cheat-sheet](https://github.com/gibsjose/cpp-cheat-sheet) | C++ 工具/库 | C++ | X86/ARM | Linux/macOS/Windows | 库 | 是 | 中 |
+| Cpp-Primer | [Mooophy/Cpp-Primer](https://github.com/Mooophy/Cpp-Primer) | C++ 工具/库 | C++ | X86/ARM | Linux/macOS/Windows | 库 | 是 | 中 |
 | STL | [microsoft/STL](https://github.com/microsoft/STL) | Microsoft 实现的 C++ 标准库（MSVC） | C++ | X86/ARM | Windows | 库 | 是 | 高 |
 
 ## 二十六、密码学
@@ -305,6 +387,9 @@
 
 | 仓库名称 | 链接 | 基本描述 | 编程语言 | 架构支持 | 系统支持 | 类型 | 可二次开发 | 推荐度 |
 |---------|------|---------|---------|---------|--------|------|-----------|--------|
+| prisma | [prisma/prisma](https://github.com/prisma/prisma) | Node.js 和 TypeScript ORM | Rust | X86/ARM | Linux/macOS/Windows | 库 | 是 | 高 |
+| drizzle-orm | [drizzle-team/drizzle-orm](https://github.com/drizzle-team/drizzle-orm) | TypeScript ORM | TypeScript | X86/ARM | Linux/macOS/Windows | 库 | 是 | 高 |
+| sqlglot | [tobymao/sqlglot](https://github.com/tobymao/sqlglot) | SQL 解析器和转译器 | Python | X86/ARM | Linux/macOS/Windows | 库 | 是 | 高 |
 | protobuf | [protocolbuffers/protobuf](https://github.com/protocolbuffers/protobuf) | Protocol Buffers 数据序列化 | C++/Python | X86/ARM | Linux/macOS/Windows | 库 | 是 | 高 |
 | protobuf-c | [protobuf-c/protobuf-c](https://github.com/protobuf-c/protobuf-c) | C 语言实现的 Protocol Buffers | C | X86/ARM | Linux/macOS/Windows | 库 | 是 | 中 |
 
@@ -330,6 +415,18 @@
 
 | 仓库名称 | 链接 | 基本描述 | 编程语言 | 架构支持 | 系统支持 | 类型 | 可二次开发 | 推荐度 |
 |---------|------|---------|---------|---------|--------|------|-----------|--------|
+| js-framework-benchmark | [krausest/js-framework-benchmark](https://github.com/krausest/js-framework-benchmark) | JavaScript 工具 | JavaScript | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| js-lru | [rsms/js-lru](https://github.com/rsms/js-lru) | JavaScript 工具 | JavaScript | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| vue-router | [vuejs/vue-router](https://github.com/vuejs/vue-router) | Vue.js 官方路由管理器 | JavaScript | X86/ARM | Linux/macOS/Windows | 库 | 是 | 高 |
+| create-vue | [vuejs/create-vue](https://github.com/vuejs/create-vue) | Vue 项目脚手架工具 | JavaScript | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 高 |
+| vueuse | [vueuse/vueuse](https://github.com/vueuse/vueuse) | Vue 组合式 API 工具集 | TypeScript | X86/ARM | Linux/macOS/Windows | 库 | 是 | 高 |
+| tailwindcss | [tailwindlabs/tailwindcss](https://github.com/tailwindlabs/tailwindcss) | 实用优先的 CSS 框架 | JavaScript | X86/ARM | Linux/macOS/Windows | 库 | 是 | 高 |
+| sass | [sass/sass](https://github.com/sass/sass) | 强大的 CSS 预处理器 | Ruby | X86/ARM | Linux/macOS/Windows | 库 | 是 | 中 |
+| lit | [lit/lit](https://github.com/lit/lit) | Web Components 应用框架 | TypeScript | X86/ARM | Linux/macOS/Windows | 库 | 是 | 中 |
+| socket.io | [socketio/socket.io](https://github.com/socketio/socket.io) | 实时通信库 | JavaScript | X86/ARM | Linux/macOS/Windows | 库 | 是 | 中 |
+| lodash | [lodash/lodash](https://github.com/lodash/lodash) | JavaScript 实用工具库 | JavaScript | X86/ARM | Linux/macOS/Windows | 库 | 是 | 中 |
+| Chart.js | [chartjs/Chart.js](https://github.com/chartjs/Chart.js) | HTML5 图表绘制库 | JavaScript | X86/ARM | Linux/macOS/Windows | 库 | 是 | 中 |
+| core-js | [zloirock/core-js](https://github.com/zloirock/core-js) | JavaScript 标准库 | JavaScript | X86/ARM | Linux/macOS/Windows | 库 | 是 | 中 |
 | strml.net | [STRML/strml.net](https://github.com/STRML/strml.net) | 前端性能优化知识库 | Markdown | - | - | 资源 | 否 | 中 |
 
 
@@ -356,6 +453,11 @@
 
 | 仓库名称 | 链接 | 基本描述 | 编程语言 | 架构支持 | 系统支持 | 类型 | 可二次开发 | 推荐度 |
 |---------|------|---------|---------|---------|--------|------|-----------|--------|
+| fastfetch | [fastfetch-cli/fastfetch](https://github.com/fastfetch-cli/fastfetch) | 系统信息展示工具 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 高 |
+| termux-packages | [termux/termux-packages](https://github.com/termux/termux-packages) | Termux 包管理系统 | Shell | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| buildroot | [buildroot/buildroot](https://github.com/buildroot/buildroot) | 嵌入式 Linux 构建工具 | Make | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| jq | [jqlang/jq](https://github.com/jqlang/jq) | JSON 处理工具 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| ripgrep | [BurntSushi/ripgrep](https://github.com/BurntSushi/ripgrep) | 快速代码搜索工具 | Rust | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 高 |
 | bmm | [dhth/bmm](https://github.com/dhth/bmm) | 终端书签管理器 | Go | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | pacseek | [moson-mo/pacseek](https://github.com/moson-mo/pacseek) | 终端 AUR 包搜索工具（Arch Linux） | Rust | X86/ARM | Linux | 工具 | 是 | 中 |
 | 1Panel | [1Panel-dev/1Panel](https://github.com/1Panel-dev/1Panel) | 现代化 Linux 服务器管理面板 | Go | X86/ARM | Linux | 工具 | 是 | 高 |
@@ -388,6 +490,169 @@
 
 | 仓库名称 | 链接 | 基本描述 | 编程语言 | 架构支持 | 系统支持 | 类型 | 可二次开发 | 推荐度 |
 |---------|------|---------|---------|---------|--------|------|-----------|--------|
+| regexp-example | [jaywcjlove/regexp-example](https://github.com/jaywcjlove/regexp-example) | 示例代码 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| awesome-iptv | [DangJin/awesome-iptv](https://github.com/DangJin/awesome-iptv) | 精选资源列表 | - | X86/ARM | Linux/macOS/Windows | 资源 | 是 | 中 |
+| react-complete-guide-course-resources | [academind/react-complete-guide-course-resources](https://github.com/academind/react-complete-guide-course-resources) | 课程资源 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| React---The-Complete-Guide-includes-Hooks-React-Router-and-Redux-Second-Edition | [PacktPublishing/React---The-Complete-Guide-includes-Hooks-React-Router-and-Redux-Second-Edition](https://github.com/PacktPublishing/React---The-Complete-Guide-includes-Hooks-React-Router-and-Redux-Second-Edition) | 指南文档 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| prompt-tutorial | [PandaBearLab/prompt-tutorial](https://github.com/PandaBearLab/prompt-tutorial) | 教程资源 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| quick-SQL-cheatsheet | [enochtangg/quick-SQL-cheatsheet](https://github.com/enochtangg/quick-SQL-cheatsheet) | 速查表 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| learnVue | [answershuto/learnVue](https://github.com/answershuto/learnVue) | 学习资源 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| mathematics-roadmap | [TalalAlrawajfeh/mathematics-roadmap](https://github.com/TalalAlrawajfeh/mathematics-roadmap) | 技术路线图 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| typescript-book | [gibbok/typescript-book](https://github.com/gibbok/typescript-book) | 技术书籍 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| linux-tutorial | [dunwu/linux-tutorial](https://github.com/dunwu/linux-tutorial) | 教程资源 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| nginx-tutorial | [dunwu/nginx-tutorial](https://github.com/dunwu/nginx-tutorial) | 教程资源 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| free-programming-books | [EbookFoundation/free-programming-books](https://github.com/EbookFoundation/free-programming-books) | 技术书籍 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| Awesome-LLM | [Hannibal046/Awesome-LLM](https://github.com/Hannibal046/Awesome-LLM) | 精选资源列表 | - | X86/ARM | Linux/macOS/Windows | 资源 | 是 | 中 |
+| learn-kvm | [yifengyou/learn-kvm](https://github.com/yifengyou/learn-kvm) | 学习资源 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| books | [chapin666/books](https://github.com/chapin666/books) | 技术书籍 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| learning-vue-app | [mayashavin/learning-vue-app](https://github.com/mayashavin/learning-vue-app) | 学习资源 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| css_course | [gitdagray/css_course](https://github.com/gitdagray/css_course) | 课程资源 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| interactive-tutorials | [ronreiter/interactive-tutorials](https://github.com/ronreiter/interactive-tutorials) | 教程资源 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| awesome-for-beginners | [MunGell/awesome-for-beginners](https://github.com/MunGell/awesome-for-beginners) | 精选资源列表 | - | X86/ARM | Linux/macOS/Windows | 资源 | 是 | 中 |
+| awesome-actions | [sdras/awesome-actions](https://github.com/sdras/awesome-actions) | 精选资源列表 | - | X86/ARM | Linux/macOS/Windows | 资源 | 是 | 中 |
+| modern-embedded-programming-course | [QuantumLeaps/modern-embedded-programming-course](https://github.com/QuantumLeaps/modern-embedded-programming-course) | 课程资源 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| awesome-lua | [LewisJEllis/awesome-lua](https://github.com/LewisJEllis/awesome-lua) | 精选资源列表 | - | X86/ARM | Linux/macOS/Windows | 资源 | 是 | 中 |
+| awesome-zsh-plugins | [unixorn/awesome-zsh-plugins](https://github.com/unixorn/awesome-zsh-plugins) | 精选资源列表 | - | X86/ARM | Linux/macOS/Windows | 资源 | 是 | 中 |
+| cs-self-learning | [PKUFlyingPig/cs-self-learning](https://github.com/PKUFlyingPig/cs-self-learning) | 学习资源 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| Roadmap-to-Embedded-Engineering | [mateustoin/Roadmap-to-Embedded-Engineering](https://github.com/mateustoin/Roadmap-to-Embedded-Engineering) | 技术路线图 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| awesome-macos-screensavers | [agarrharr/awesome-macos-screensavers](https://github.com/agarrharr/awesome-macos-screensavers) | 精选资源列表 | - | X86/ARM | Linux/macOS/Windows | 资源 | 是 | 中 |
+| nixos-and-flakes-book | [ryan4yin/nixos-and-flakes-book](https://github.com/ryan4yin/nixos-and-flakes-book) | 技术书籍 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| Nmap-Cheatsheet | [jasonniebauer/Nmap-Cheatsheet](https://github.com/jasonniebauer/Nmap-Cheatsheet) | 速查表 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| learning-ebpf | [lizrice/learning-ebpf](https://github.com/lizrice/learning-ebpf) | 学习资源 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| learn-tfjs | [GantMan/learn-tfjs](https://github.com/GantMan/learn-tfjs) | 学习资源 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| awesome-bilibili | [SyMind/awesome-bilibili](https://github.com/SyMind/awesome-bilibili) | 精选资源列表 | - | X86/ARM | Linux/macOS/Windows | 资源 | 是 | 中 |
+| practical-programming-books | [EZLippi/practical-programming-books](https://github.com/EZLippi/practical-programming-books) | 技术书籍 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| practice-qemu-riscv64-buildroot | [hemashushu/practice-qemu-riscv64-buildroot](https://github.com/hemashushu/practice-qemu-riscv64-buildroot) | 实践练习 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| CppCoreGuidelines | [isocpp/CppCoreGuidelines](https://github.com/isocpp/CppCoreGuidelines) | 指南文档 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| awesome-code-review | [joho/awesome-code-review](https://github.com/joho/awesome-code-review) | 精选资源列表 | - | X86/ARM | Linux/macOS/Windows | 资源 | 是 | 中 |
+| bpf-developer-tutorial | [eunomia-bpf/bpf-developer-tutorial](https://github.com/eunomia-bpf/bpf-developer-tutorial) | 教程资源 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| asm_book | [pkivolowitz/asm_book](https://github.com/pkivolowitz/asm_book) | 技术书籍 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| book | [rustwasm/book](https://github.com/rustwasm/book) | 技术书籍 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| devops-directive-docker-course | [sidpalas/devops-directive-docker-course](https://github.com/sidpalas/devops-directive-docker-course) | 课程资源 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| book-cpp-algorithms | [HappyCerberus/book-cpp-algorithms](https://github.com/HappyCerberus/book-cpp-algorithms) | 算法学习资源 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| Programmers-Overseas-Job-Interview-Handbook | [eliaszon/Programmers-Overseas-Job-Interview-Handbook](https://github.com/eliaszon/Programmers-Overseas-Job-Interview-Handbook) | 面试题解 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| abookmark | [pfcao/abookmark](https://github.com/pfcao/abookmark) | 技术书籍 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| grokking_algorithms | [egonSchiele/grokking_algorithms](https://github.com/egonSchiele/grokking_algorithms) | 算法学习资源 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| C-CppLearning | [tangtangcoding/C-CppLearning](https://github.com/tangtangcoding/C-CppLearning) | 学习资源 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| LearningNote | [szza/LearningNote](https://github.com/szza/LearningNote) | 学习资源 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| DeepLearning | [yusugomori/DeepLearning](https://github.com/yusugomori/DeepLearning) | 学习资源 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| learnopencv | [spmallick/learnopencv](https://github.com/spmallick/learnopencv) | 学习资源 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| learn_unsafe_rust | [google/learn_unsafe_rust](https://github.com/google/learn_unsafe_rust) | 学习资源 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| boutique-books | [linghuam/boutique-books](https://github.com/linghuam/boutique-books) | 技术书籍 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| awesome-ebpf | [zoidyzoidzoid/awesome-ebpf](https://github.com/zoidyzoidzoid/awesome-ebpf) | 精选资源列表 | - | X86/ARM | Linux/macOS/Windows | 资源 | 是 | 中 |
+| leetcode-master | [youngyangyang04/leetcode-master](https://github.com/youngyangyang04/leetcode-master) | LeetCode 题解 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| devguide | [python/devguide](https://github.com/python/devguide) | 指南文档 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| pico-examples | [raspberrypi/pico-examples](https://github.com/raspberrypi/pico-examples) | 示例代码 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| awesome-programming-books | [jobbole/awesome-programming-books](https://github.com/jobbole/awesome-programming-books) | 技术书籍 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| qwerty-learner | [RealKai42/qwerty-learner](https://github.com/RealKai42/qwerty-learner) | 学习资源 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| course22 | [fastai/course22](https://github.com/fastai/course22) | 课程资源 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| es6tutorial | [ruanyf/es6tutorial](https://github.com/ruanyf/es6tutorial) | 教程资源 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| awesome-c | [oz123/awesome-c](https://github.com/oz123/awesome-c) | 精选资源列表 | - | X86/ARM | Linux/macOS/Windows | 资源 | 是 | 中 |
+| pytorch-handbook | [zergtant/pytorch-handbook](https://github.com/zergtant/pytorch-handbook) | 技术书籍 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| Inside-Deep-Learning | [EdwardRaff/Inside-Deep-Learning](https://github.com/EdwardRaff/Inside-Deep-Learning) | 学习资源 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| interviews.ai | [BoltzmannEntropy/interviews.ai](https://github.com/BoltzmannEntropy/interviews.ai) | 面试题解 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| actix_tutorials | [thecloudmaker/actix_tutorials](https://github.com/thecloudmaker/actix_tutorials) | 教程资源 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| ML001-Project-Sources-Code-and-Learning-Materials | [ayush714/ML001-Project-Sources-Code-and-Learning-Materials](https://github.com/ayush714/ML001-Project-Sources-Code-and-Learning-Materials) | 学习资源 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| ffmpeg-examples | [andy-zhangtao/ffmpeg-examples](https://github.com/andy-zhangtao/ffmpeg-examples) | 示例代码 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| rust-by-practice | [sunface/rust-by-practice](https://github.com/sunface/rust-by-practice) | 实践练习 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| scientific-visualization-book | [rougier/scientific-visualization-book](https://github.com/rougier/scientific-visualization-book) | 技术书籍 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| db-tutorial | [dunwu/db-tutorial](https://github.com/dunwu/db-tutorial) | 教程资源 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| tlpi-learn | [sunhuiquan/tlpi-learn](https://github.com/sunhuiquan/tlpi-learn) | 学习资源 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| Anime-Girls-Holding-Programming-Books | [cat-milk/Anime-Girls-Holding-Programming-Books](https://github.com/cat-milk/Anime-Girls-Holding-Programming-Books) | 技术书籍 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| RustBook | [QMHTMY/RustBook](https://github.com/QMHTMY/RustBook) | 技术书籍 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| makefiletutorial | [chaselambda/makefiletutorial](https://github.com/chaselambda/makefiletutorial) | 教程资源 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| ffmpeg-cheatsheet | [yuanqing/ffmpeg-cheatsheet](https://github.com/yuanqing/ffmpeg-cheatsheet) | 速查表 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| rust-course | [sunface/rust-course](https://github.com/sunface/rust-course) | 课程资源 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| cookbook.fish | [jorgebucaran/cookbook.fish](https://github.com/jorgebucaran/cookbook.fish) | 技术书籍 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| rust-algorithms | [EbTech/rust-algorithms](https://github.com/EbTech/rust-algorithms) | 算法学习资源 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| nvim-lua-guide | [nanotee/nvim-lua-guide](https://github.com/nanotee/nvim-lua-guide) | 指南文档 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| leetcode | [doocs/leetcode](https://github.com/doocs/leetcode) | LeetCode 题解 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| learn-neovim-lua | [nshen/learn-neovim-lua](https://github.com/nshen/learn-neovim-lua) | 学习资源 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| awesome-neovim | [rockerBOO/awesome-neovim](https://github.com/rockerBOO/awesome-neovim) | 精选资源列表 | - | X86/ARM | Linux/macOS/Windows | 资源 | 是 | 中 |
+| nvim-lua-guide-zh | [glepnir/nvim-lua-guide-zh](https://github.com/glepnir/nvim-lua-guide-zh) | 指南文档 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| awesome-lua | [forhappy/awesome-lua](https://github.com/forhappy/awesome-lua) | 精选资源列表 | - | X86/ARM | Linux/macOS/Windows | 资源 | 是 | 中 |
+| regexlearn.com | [aykutkardas/regexlearn.com](https://github.com/aykutkardas/regexlearn.com) | 学习资源 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| Awesome-CV | [posquit0/Awesome-CV](https://github.com/posquit0/Awesome-CV) | 精选资源列表 | - | X86/ARM | Linux/macOS/Windows | 资源 | 是 | 中 |
+| introduction-to-postman-course | [vdespa/introduction-to-postman-course](https://github.com/vdespa/introduction-to-postman-course) | 课程资源 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| c-unleashed-book-souce-code | [eliben/c-unleashed-book-souce-code](https://github.com/eliben/c-unleashed-book-souce-code) | 技术书籍 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| selenium-python-practice | [liweinan/selenium-python-practice](https://github.com/liweinan/selenium-python-practice) | 实践练习 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| raytracer-tutorial | [aik2mlj/raytracer-tutorial](https://github.com/aik2mlj/raytracer-tutorial) | 教程资源 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| awesome-resty | [bungle/awesome-resty](https://github.com/bungle/awesome-resty) | 精选资源列表 | - | X86/ARM | Linux/macOS/Windows | 资源 | 是 | 中 |
+| awesome-alternatives-in-rust | [TaKO8Ki/awesome-alternatives-in-rust](https://github.com/TaKO8Ki/awesome-alternatives-in-rust) | 精选资源列表 | - | X86/ARM | Linux/macOS/Windows | 资源 | 是 | 中 |
+| openresty-best-practices | [moonbingbing/openresty-best-practices](https://github.com/moonbingbing/openresty-best-practices) | 实践练习 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| nginx-tutorials | [openresty/nginx-tutorials](https://github.com/openresty/nginx-tutorials) | 教程资源 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| NGINX-Cookbook | [PacktPublishing/NGINX-Cookbook](https://github.com/PacktPublishing/NGINX-Cookbook) | 技术书籍 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| bitcoin-storage-guide | [rustyrussell/bitcoin-storage-guide](https://github.com/rustyrussell/bitcoin-storage-guide) | 指南文档 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| vim-indent-guides | [preservim/vim-indent-guides](https://github.com/preservim/vim-indent-guides) | 指南文档 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| awesome-cheatsheets | [LeCoupa/awesome-cheatsheets](https://github.com/LeCoupa/awesome-cheatsheets) | 速查表 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| developer-roadmap | [kamranahmedse/developer-roadmap](https://github.com/kamranahmedse/developer-roadmap) | 技术路线图 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| rust-learning | [ctjhoa/rust-learning](https://github.com/ctjhoa/rust-learning) | 学习资源 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| api-guidelines | [rust-lang/api-guidelines](https://github.com/rust-lang/api-guidelines) | 指南文档 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| javascript-algorithms | [trekhleb/javascript-algorithms](https://github.com/trekhleb/javascript-algorithms) | 算法学习资源 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| machine-learning-yearning-cn | [deeplearning-ai/machine-learning-yearning-cn](https://github.com/deeplearning-ai/machine-learning-yearning-cn) | 学习资源 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| perf-book | [nnethercote/perf-book](https://github.com/nnethercote/perf-book) | 技术书籍 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| LeetCodeAnimation | [MisterBooo/LeetCodeAnimation](https://github.com/MisterBooo/LeetCodeAnimation) | LeetCode 题解 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| awesome-modern-cpp | [rigtorp/awesome-modern-cpp](https://github.com/rigtorp/awesome-modern-cpp) | 精选资源列表 | - | X86/ARM | Linux/macOS/Windows | 资源 | 是 | 中 |
+| os-tutorial | [cfenollosa/os-tutorial](https://github.com/cfenollosa/os-tutorial) | 教程资源 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| db_tutorial | [cstack/db_tutorial](https://github.com/cstack/db_tutorial) | 教程资源 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| awesome-c-cn | [jobbole/awesome-c-cn](https://github.com/jobbole/awesome-c-cn) | 精选资源列表 | - | X86/ARM | Linux/macOS/Windows | 资源 | 是 | 中 |
+| rsa-guide | [DogtorDoggo/rsa-guide](https://github.com/DogtorDoggo/rsa-guide) | 指南文档 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| diesel-join-example | [trombonehero/diesel-join-example](https://github.com/trombonehero/diesel-join-example) | 示例代码 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| the-book-of-secret-knowledge | [trimstray/the-book-of-secret-knowledge](https://github.com/trimstray/the-book-of-secret-knowledge) | 技术书籍 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| coding-interview-university | [jwasham/coding-interview-university](https://github.com/jwasham/coding-interview-university) | 面试题解 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| rocket-diesel-rest-api-example | [liweinan/rocket-diesel-rest-api-example](https://github.com/liweinan/rocket-diesel-rest-api-example) | 示例代码 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| rocket-diesel-rest-api-example | [sean3z/rocket-diesel-rest-api-example](https://github.com/sean3z/rocket-diesel-rest-api-example) | 示例代码 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| Learn-Vim | [iggredible/Learn-Vim](https://github.com/iggredible/Learn-Vim) | 学习资源 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| mdBook | [rust-lang/mdBook](https://github.com/rust-lang/mdBook) | 技术书籍 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| awesome-database-learning | [pingcap/awesome-database-learning](https://github.com/pingcap/awesome-database-learning) | 学习资源 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| examples | [actix/examples](https://github.com/actix/examples) | 示例代码 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| awesome-IntelliJ-IDEA | [xiaoxiunique/awesome-IntelliJ-IDEA](https://github.com/xiaoxiunique/awesome-IntelliJ-IDEA) | 精选资源列表 | - | X86/ARM | Linux/macOS/Windows | 资源 | 是 | 中 |
+| fucking-algorithm | [labuladong/fucking-algorithm](https://github.com/labuladong/fucking-algorithm) | 算法学习资源 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| Front-end-Developer-Interview-Questions | [h5bp/Front-end-Developer-Interview-Questions](https://github.com/h5bp/Front-end-Developer-Interview-Questions) | 面试题解 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| LeetCode-Go | [halfrost/LeetCode-Go](https://github.com/halfrost/LeetCode-Go) | LeetCode 题解 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| xbook2 | [hzcx998/xbook2](https://github.com/hzcx998/xbook2) | 技术书籍 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| wireshark-cheatsheet | [security-cheatsheet/wireshark-cheatsheet](https://github.com/security-cheatsheet/wireshark-cheatsheet) | 速查表 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| hello-algorithm | [geekxh/hello-algorithm](https://github.com/geekxh/hello-algorithm) | 算法学习资源 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| awesome-embedded-rust | [rust-embedded/awesome-embedded-rust](https://github.com/rust-embedded/awesome-embedded-rust) | 精选资源列表 | - | X86/ARM | Linux/macOS/Windows | 资源 | 是 | 中 |
+| rust-book-chinese | [KaiserY/rust-book-chinese](https://github.com/KaiserY/rust-book-chinese) | 技术书籍 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| blockchain-tutorial | [liuchengxu/blockchain-tutorial](https://github.com/liuchengxu/blockchain-tutorial) | 教程资源 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| learnrust | [inancgumus/learnrust](https://github.com/inancgumus/learnrust) | 学习资源 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| rust-raspberrypi-OS-tutorials | [rust-embedded/rust-raspberrypi-OS-tutorials](https://github.com/rust-embedded/rust-raspberrypi-OS-tutorials) | 教程资源 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| awesome-rust | [rust-unofficial/awesome-rust](https://github.com/rust-unofficial/awesome-rust) | 精选资源列表 | - | X86/ARM | Linux/macOS/Windows | 资源 | 是 | 中 |
+| book | [rust-lang/book](https://github.com/rust-lang/book) | 技术书籍 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| learngo | [inancgumus/learngo](https://github.com/inancgumus/learngo) | 学习资源 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| Learn-CUDA-Programming | [PacktPublishing/Learn-CUDA-Programming](https://github.com/PacktPublishing/Learn-CUDA-Programming) | 学习资源 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| learnGitBranching | [pcottle/learnGitBranching](https://github.com/pcottle/learnGitBranching) | 学习资源 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| awesome-architecture | [toutiaoio/awesome-architecture](https://github.com/toutiaoio/awesome-architecture) | 精选资源列表 | - | X86/ARM | Linux/macOS/Windows | 资源 | 是 | 中 |
+| react-naive-book-examples | [huzidaha/react-naive-book-examples](https://github.com/huzidaha/react-naive-book-examples) | 技术书籍 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| awesome-mac | [jaywcjlove/awesome-mac](https://github.com/jaywcjlove/awesome-mac) | 精选资源列表 | - | X86/ARM | Linux/macOS/Windows | 资源 | 是 | 中 |
+| awesome-golang-algorithm | [6boris/awesome-golang-algorithm](https://github.com/6boris/awesome-golang-algorithm) | 算法学习资源 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| Leetcode | [luliyucoordinate/Leetcode](https://github.com/luliyucoordinate/Leetcode) | LeetCode 题解 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| free-programming-books-zh_CN | [Jessicahust/free-programming-books-zh_CN](https://github.com/Jessicahust/free-programming-books-zh_CN) | 技术书籍 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| books | [Jessicahust/books](https://github.com/Jessicahust/books) | 技术书籍 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| How-to-Write-a-Technical-Book | [BetterTuring/How-to-Write-a-Technical-Book](https://github.com/BetterTuring/How-to-Write-a-Technical-Book) | 技术书籍 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| CS-Books | [huihut/CS-Books](https://github.com/huihut/CS-Books) | 技术书籍 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| Embedded-Engineering-RoadMap-2018 | [vazeri/Embedded-Engineering-RoadMap-2018](https://github.com/vazeri/Embedded-Engineering-RoadMap-2018) | 技术路线图 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| cppbestpractices | [cpp-best-practices/cppbestpractices](https://github.com/cpp-best-practices/cppbestpractices) | 实践练习 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| interview | [huihut/interview](https://github.com/huihut/interview) | 面试题解 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| CppTemplateTutorial | [wuye9036/CppTemplateTutorial](https://github.com/wuye9036/CppTemplateTutorial) | 教程资源 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| algorithmic-library | [zimpha/algorithmic-library](https://github.com/zimpha/algorithmic-library) | 算法学习资源 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| cplusplus-_Implementation_Of_Introduction_to_Algorithms | [huaxz1986/cplusplus-_Implementation_Of_Introduction_to_Algorithms](https://github.com/huaxz1986/cplusplus-_Implementation_Of_Introduction_to_Algorithms) | 算法学习资源 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| Cplusplus-Concurrency-In-Practice | [forhappy/Cplusplus-Concurrency-In-Practice](https://github.com/forhappy/Cplusplus-Concurrency-In-Practice) | 实践练习 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| modern-cpp-tutorial | [changkun/modern-cpp-tutorial](https://github.com/changkun/modern-cpp-tutorial) | 教程资源 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| project-based-learning | [practical-tutorials/project-based-learning](https://github.com/practical-tutorials/project-based-learning) | 学习资源 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| awesome-resume | [resumejob/awesome-resume](https://github.com/resumejob/awesome-resume) | 精选资源列表 | - | X86/ARM | Linux/macOS/Windows | 资源 | 是 | 中 |
+| notebook | [jupyter/notebook](https://github.com/jupyter/notebook) | 技术书籍 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| ffmpeg-libav-tutorial | [leandromoreira/ffmpeg-libav-tutorial](https://github.com/leandromoreira/ffmpeg-libav-tutorial) | 教程资源 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| Deep-Learning-with-TensorFlow-book | [dragen1860/Deep-Learning-with-TensorFlow-book](https://github.com/dragen1860/Deep-Learning-with-TensorFlow-book) | 学习资源 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| cpp-cheatsheet | [mortennobel/cpp-cheatsheet](https://github.com/mortennobel/cpp-cheatsheet) | 速查表 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| spellbook-of-modern-webdev | [dexteryy/spellbook-of-modern-webdev](https://github.com/dexteryy/spellbook-of-modern-webdev) | 技术书籍 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| DeepLearningWithTF2.0 | [astrumai/DeepLearningWithTF2.0](https://github.com/astrumai/DeepLearningWithTF2.0) | 学习资源 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| awesome-python | [vinta/awesome-python](https://github.com/vinta/awesome-python) | 精选资源列表 | - | X86/ARM | Linux/macOS/Windows | 资源 | 是 | 中 |
+| reverse-interview-zh | [perkfly/reverse-interview-zh](https://github.com/perkfly/reverse-interview-zh) | 面试题解 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| json-tutorial | [miloyip/json-tutorial](https://github.com/miloyip/json-tutorial) | 教程资源 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| cheatsheet-kubernetes-A4 | [dennyzhang/cheatsheet-kubernetes-A4](https://github.com/dennyzhang/cheatsheet-kubernetes-A4) | 速查表 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
+| vim-practice | [oldratlee/vim-practice](https://github.com/oldratlee/vim-practice) | 实践练习 | - | X86/ARM | Linux/macOS/Windows | 文档 | 是 | 中 |
 | linux-insides | [0xAX/linux-insides](https://github.com/0xAX/linux-insides) | Linux 内核深度解析教程 | Markdown | - | - | 文档 | 否 | 高 |
 | Crash-Course-Computer-Science-Chinese | [1c7/Crash-Course-Computer-Science-Chinese](https://github.com/1c7/Crash-Course-Computer-Science-Chinese) | 计算机科学速成课中文翻译 | Markdown | - | - | 文档 | 否 | 高 |
 | interview_internal_reference | [0voice/interview_internal_reference](https://github.com/0voice/interview_internal_reference) | 阿里、腾讯等内部面试题 | Markdown | - | - | 文档 | 否 | 中 |
@@ -423,6 +688,15 @@
 
 | 仓库名称 | 链接 | 基本描述 | 编程语言 | 架构支持 | 系统支持 | 类型 | 可二次开发 | 推荐度 |
 |---------|------|---------|---------|---------|--------|------|-----------|--------|
+| claude-code-router | [musistudio/claude-code-router](https://github.com/musistudio/claude-code-router) | Claude Code 路由工具 | Python | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| llm-viz | [bbycroft/llm-viz](https://github.com/bbycroft/llm-viz) | LLM 可视化 | TypeScript | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| transformer-explainer | [poloclub/transformer-explainer](https://github.com/poloclub/transformer-explainer) | Transformer 解释器 | JavaScript | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| mlx | [ml-explore/mlx](https://github.com/ml-explore/mlx) | Apple 机器学习框架 | C++ | X86/ARM | Linux/macOS/Windows | 库 | 是 | 高 |
+| ChatTTS | [2noise/ChatTTS](https://github.com/2noise/ChatTTS) | 文本转语音模型 | Python | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 高 |
+| llm.c | [karpathy/llm.c](https://github.com/karpathy/llm.c) | 纯 C 语言 LLM 训练 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 高 |
+| gpt_academic | [binary-husky/gpt_academic](https://github.com/binary-husky/gpt_academic) | 学术 GPT 工具 | Python | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| lobe-chat | [lobehub/lobe-chat](https://github.com/lobehub/lobe-chat) | AI 聊天助手 | TypeScript | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| markmap | [markmap/markmap](https://github.com/markmap/markmap) | 思维导图工具 | TypeScript | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | claude-code-router | [musistudio/claude-code-router](https://github.com/musistudio/claude-code-router) | Claude Code 路由工具 | Python | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 
 ## 四十六、其他系统工具
@@ -635,6 +909,50 @@
 
 | 仓库名称 | 链接 | 基本描述 | 编程语言 | 架构支持 | 系统支持 | 类型 | 可二次开发 | 推荐度 |
 |---------|------|---------|---------|---------|--------|------|-----------|--------|
+| ffmpeg-apple-arm64-build | [Vargol/ffmpeg-apple-arm64-build](https://github.com/Vargol/ffmpeg-apple-arm64-build) | FFmpeg 相关工具 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| mp4-inspector | [alfg/mp4-inspector](https://github.com/alfg/mp4-inspector) | MP4 工具 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| ffmpeg-android-maker | [Javernaut/ffmpeg-android-maker](https://github.com/Javernaut/ffmpeg-android-maker) | FFmpeg 相关工具 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| h265player | [goldvideo/h265player](https://github.com/goldvideo/h265player) | 媒体播放器 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| jellyfin-ffmpeg | [jellyfin/jellyfin-ffmpeg](https://github.com/jellyfin/jellyfin-ffmpeg) | FFmpeg 相关工具 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| pyvideotrans | [jianchang512/pyvideotrans](https://github.com/jianchang512/pyvideotrans) | 视频处理工具 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| ffmpeg-autobuild | [AnimMouse/ffmpeg-autobuild](https://github.com/AnimMouse/ffmpeg-autobuild) | FFmpeg 相关工具 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| VideoProcessing | [YiiGaa/VideoProcessing](https://github.com/YiiGaa/VideoProcessing) | 视频处理工具 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| audiocraft | [facebookresearch/audiocraft](https://github.com/facebookresearch/audiocraft) | 音频处理工具 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| ffmpeg-static | [eugeneware/ffmpeg-static](https://github.com/eugeneware/ffmpeg-static) | FFmpeg 相关工具 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| ffmpeg-build-script | [markus-perl/ffmpeg-build-script](https://github.com/markus-perl/ffmpeg-build-script) | FFmpeg 相关工具 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| ffmpeg-static | [zimbatm/ffmpeg-static](https://github.com/zimbatm/ffmpeg-static) | FFmpeg 相关工具 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| mobile-ffmpeg | [tanersener/mobile-ffmpeg](https://github.com/tanersener/mobile-ffmpeg) | FFmpeg 相关工具 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| direct-to-video | [ange-yaghi/direct-to-video](https://github.com/ange-yaghi/direct-to-video) | 视频处理工具 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| playerdemo | [itisyang/playerdemo](https://github.com/itisyang/playerdemo) | 媒体播放器 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| ffmpeg-windows-build-helpers | [rdp/ffmpeg-windows-build-helpers](https://github.com/rdp/ffmpeg-windows-build-helpers) | FFmpeg 相关工具 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| ffmpeg-ffnvcodec-explanation | [omen23/ffmpeg-ffnvcodec-explanation](https://github.com/omen23/ffmpeg-ffnvcodec-explanation) | FFmpeg 相关工具 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| ffmpeg-quality-metrics | [slhck/ffmpeg-quality-metrics](https://github.com/slhck/ffmpeg-quality-metrics) | FFmpeg 相关工具 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| KeyDecoder | [MaximeBeasse/KeyDecoder](https://github.com/MaximeBeasse/KeyDecoder) | 解码器 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| video.js | [videojs/video.js](https://github.com/videojs/video.js) | 视频处理工具 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| video-quality | [aizvorski/video-quality](https://github.com/aizvorski/video-quality) | 视频处理工具 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| setup-ffmpeg | [federicocarboni/setup-ffmpeg](https://github.com/federicocarboni/setup-ffmpeg) | FFmpeg 相关工具 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| ffmpeg_develop_doc | [lokenetwork/ffmpeg_develop_doc](https://github.com/lokenetwork/ffmpeg_develop_doc) | FFmpeg 相关工具 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| BilibiliVideoDownload | [BilibiliVideoDownload/BilibiliVideoDownload](https://github.com/BilibiliVideoDownload/BilibiliVideoDownload) | 视频处理工具 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| FSplayer | [brookicv/FSplayer](https://github.com/brookicv/FSplayer) | 媒体播放器 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| pyaudio | [jleb/pyaudio](https://github.com/jleb/pyaudio) | 音频处理工具 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| ffmpeg-cmd-viewer | [YoungSx/ffmpeg-cmd-viewer](https://github.com/YoungSx/ffmpeg-cmd-viewer) | FFmpeg 相关工具 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| ffmpeg-cli-flags | [transitive-bullshit/ffmpeg-cli-flags](https://github.com/transitive-bullshit/ffmpeg-cli-flags) | FFmpeg 相关工具 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| ffmpeg | [jrottenberg/ffmpeg](https://github.com/jrottenberg/ffmpeg) | FFmpeg 相关工具 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| ffmpeg-python | [kkroening/ffmpeg-python](https://github.com/kkroening/ffmpeg-python) | FFmpeg 相关工具 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| ffmpeg-video-player | [rambod-rahmani/ffmpeg-video-player](https://github.com/rambod-rahmani/ffmpeg-video-player) | FFmpeg 相关工具 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| ffmpeg.wasm | [ffmpegwasm/ffmpeg.wasm](https://github.com/ffmpegwasm/ffmpeg.wasm) | FFmpeg 相关工具 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| RobustVideoMatting | [PeterL1n/RobustVideoMatting](https://github.com/PeterL1n/RobustVideoMatting) | 视频处理工具 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| pianoplayer | [marcomusy/pianoplayer](https://github.com/marcomusy/pianoplayer) | 媒体播放器 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| JiaoZiVideoPlayer | [lipangit/JiaoZiVideoPlayer](https://github.com/lipangit/JiaoZiVideoPlayer) | 视频处理工具 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| rust-ac-ffmpeg | [angelcam/rust-ac-ffmpeg](https://github.com/angelcam/rust-ac-ffmpeg) | FFmpeg 相关工具 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| pyAudioAnalysis | [tyiannak/pyAudioAnalysis](https://github.com/tyiannak/pyAudioAnalysis) | 音频处理工具 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| h-player-v2 | [ZyqGitHub1/h-player-v2](https://github.com/ZyqGitHub1/h-player-v2) | 媒体播放器 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| kbd-audio | [ggerganov/kbd-audio](https://github.com/ggerganov/kbd-audio) | 音频处理工具 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| rust-ffmpeg | [zmwangx/rust-ffmpeg](https://github.com/zmwangx/rust-ffmpeg) | FFmpeg 相关工具 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| AudioMass | [pkalogiros/AudioMass](https://github.com/pkalogiros/AudioMass) | 音频处理工具 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| Realtime_PyAudio_FFT | [aiXander/Realtime_PyAudio_FFT](https://github.com/aiXander/Realtime_PyAudio_FFT) | 音频处理工具 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| digital_video_introduction | [leandromoreira/digital_video_introduction](https://github.com/leandromoreira/digital_video_introduction) | 视频处理工具 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
+| audiowaveform | [bbc/audiowaveform](https://github.com/bbc/audiowaveform) | 音频处理工具 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | audio_video_streaming | [0voice/audio_video_streaming](https://github.com/0voice/audio_video_streaming) | 音视频流媒体开发 | Markdown | - | - | 文档 | 否 | 中 || C-from-Scratch | [theokwebb/C-from-Scratch](https://github.com/theokwebb/C-from-Scratch) | C 语言实现教程 | C | X86/ARM | Linux/macOS/Windows | 文档 | 否 | 中 |
 | OmniParser | [microsoft/OmniParser](https://github.com/microsoft/OmniParser) | UI 屏幕解析工具 | Python | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | deepface | [serengil/deepface](https://github.com/serengil/deepface) | 人脸识别和分析 | Python | X86/ARM | Linux/macOS/Windows | 库 | 是 | 中 |
@@ -833,7 +1151,6 @@
 |---------|------|---------|---------|---------|--------|------|-----------|--------|
 | css-modules | [css-modules/css-modules](https://github.com/css-modules/css-modules) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | public-image-mirror | [DaoCloud/public-image-mirror](https://github.com/DaoCloud/public-image-mirror) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| regexp-example | [jaywcjlove/regexp-example](https://github.com/jaywcjlove/regexp-example) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | moly-ai | [moly-ai/moly-ai](https://github.com/moly-ai/moly-ai) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | cobra | [spf13/cobra](https://github.com/spf13/cobra) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | viper | [spf13/viper](https://github.com/spf13/viper) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
@@ -844,38 +1161,26 @@
 | webrtc-streamer | [mpromonet/webrtc-streamer](https://github.com/mpromonet/webrtc-streamer) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | gear-lib | [gozfree/gear-lib](https://github.com/gozfree/gear-lib) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | VexiiRiscv | [SpinalHDL/VexiiRiscv](https://github.com/SpinalHDL/VexiiRiscv) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| awesome-iptv | [DangJin/awesome-iptv](https://github.com/DangJin/awesome-iptv) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 资源 | 否 | 中 |
 | NETworkManager | [BornToBeRoot/NETworkManager](https://github.com/BornToBeRoot/NETworkManager) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | Windrecorder | [yuka-friends/Windrecorder](https://github.com/yuka-friends/Windrecorder) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | ShellCrash | [juewuy/ShellCrash](https://github.com/juewuy/ShellCrash) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | Proxmox | [tteck/Proxmox](https://github.com/tteck/Proxmox) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| gpt_academic | [binary-husky/gpt_academic](https://github.com/binary-husky/gpt_academic) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | aspoem | [meetqy/aspoem](https://github.com/meetqy/aspoem) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | OFGB | [xM4ddy/OFGB](https://github.com/xM4ddy/OFGB) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | llama3-from-scratch | [naklecha/llama3-from-scratch](https://github.com/naklecha/llama3-from-scratch) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | cobalt | [imputnet/cobalt](https://github.com/imputnet/cobalt) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | omakub | [basecamp/omakub](https://github.com/basecamp/omakub) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| cargo-binstall | [cargo-bins/cargo-binstall](https://github.com/cargo-bins/cargo-binstall) | 查看详情 | Go | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | gost | [ginuerzh/gost](https://github.com/ginuerzh/gost) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| ChatTTS | [2noise/ChatTTS](https://github.com/2noise/ChatTTS) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | pokegb | [binji/pokegb](https://github.com/binji/pokegb) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | ngrrram | [wintermute-cell/ngrrram](https://github.com/wintermute-cell/ngrrram) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | planka | [plankanban/planka](https://github.com/plankanban/planka) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | pg | [datawan-labs/pg](https://github.com/datawan-labs/pg) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| mlx | [ml-explore/mlx](https://github.com/ml-explore/mlx) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| ffmpeg-apple-arm64-build | [Vargol/ffmpeg-apple-arm64-build](https://github.com/Vargol/ffmpeg-apple-arm64-build) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | it-tools | [CorentinTh/it-tools](https://github.com/CorentinTh/it-tools) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | type-challenges | [type-challenges/type-challenges](https://github.com/type-challenges/type-challenges) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | datatype99 | [hirrolot/datatype99](https://github.com/hirrolot/datatype99) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| react-complete-guide-course-resources | [academind/react-complete-guide-course-resources](https://github.com/academind/react-complete-guide-course-resources) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 文档 | 否 | 中 |
-| React---The-Complete-Guide-includes-Hooks-React-Router-and-Redux-Second-Edition | [PacktPublishing/React---The-Complete-Guide-includes-Hooks-React-Router-and-Redux-Second-Edition](https://github.com/PacktPublishing/React---The-Complete-Guide-includes-Hooks-React-Router-and-Redux-Second-Edition) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | bash_tls | [gh2o/bash_tls](https://github.com/gh2o/bash_tls) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| termux-packages | [termux/termux-packages](https://github.com/termux/termux-packages) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | homeshick | [andsens/homeshick](https://github.com/andsens/homeshick) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| mp4-inspector | [alfg/mp4-inspector](https://github.com/alfg/mp4-inspector) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| fastfetch | [fastfetch-cli/fastfetch](https://github.com/fastfetch-cli/fastfetch) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | audacity | [audacity/audacity](https://github.com/audacity/audacity) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| prompt-tutorial | [PandaBearLab/prompt-tutorial](https://github.com/PandaBearLab/prompt-tutorial) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 文档 | 否 | 中 |
 | ProgrammingVTuberLogos | [Aikoyori/ProgrammingVTuberLogos](https://github.com/Aikoyori/ProgrammingVTuberLogos) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | XRobot | [xrobot-org/XRobot](https://github.com/xrobot-org/XRobot) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | hanzi-writer | [chanind/hanzi-writer](https://github.com/chanind/hanzi-writer) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
@@ -885,22 +1190,16 @@
 | zvbi | [zapping-vbi/zvbi](https://github.com/zapping-vbi/zvbi) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | jessibuca | [langhuihui/jessibuca](https://github.com/langhuihui/jessibuca) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | KiteSQL | [KipData/KiteSQL](https://github.com/KipData/KiteSQL) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| cloc | [AlDanial/cloc](https://github.com/AlDanial/cloc) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | oh-my-git | [git-learning-game/oh-my-git](https://github.com/git-learning-game/oh-my-git) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 文档 | 否 | 中 |
 | DevHub | [jaywcjlove/DevHub](https://github.com/jaywcjlove/DevHub) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| llm.c | [karpathy/llm.c](https://github.com/karpathy/llm.c) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | neco | [tidwall/neco](https://github.com/tidwall/neco) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | manim | [ManimCommunity/manim](https://github.com/ManimCommunity/manim) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | typical | [camwiegert/typical](https://github.com/camwiegert/typical) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | wrecc | [PhilippRados/wrecc](https://github.com/PhilippRados/wrecc) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| pgmock | [stack-auth/pgmock](https://github.com/stack-auth/pgmock) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| drawdb | [drawdb-io/drawdb](https://github.com/drawdb-io/drawdb) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | sigma-file-manager | [aleksey-hoffman/sigma-file-manager](https://github.com/aleksey-hoffman/sigma-file-manager) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| markmap | [markmap/markmap](https://github.com/markmap/markmap) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | devtools-v6 | [vuejs/devtools-v6](https://github.com/vuejs/devtools-v6) | 查看详情 | JavaScript | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | clmystery | [veltman/clmystery](https://github.com/veltman/clmystery) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | lux | [iawia002/lux](https://github.com/iawia002/lux) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| lobe-chat | [lobehub/lobe-chat](https://github.com/lobehub/lobe-chat) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | NVEnc | [rigaya/NVEnc](https://github.com/rigaya/NVEnc) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | MaterialDesign | [Templarian/MaterialDesign](https://github.com/Templarian/MaterialDesign) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | garnet | [microsoft/garnet](https://github.com/microsoft/garnet) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
@@ -911,10 +1210,7 @@
 | MediaCrawler | [NanmiCoder/MediaCrawler](https://github.com/NanmiCoder/MediaCrawler) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | pglite | [electric-sql/pglite](https://github.com/electric-sql/pglite) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | yoursql | [yywe/yoursql](https://github.com/yywe/yoursql) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| ffmpeg-android-maker | [Javernaut/ffmpeg-android-maker](https://github.com/Javernaut/ffmpeg-android-maker) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | planify | [alainm23/planify](https://github.com/alainm23/planify) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| vue-router | [vuejs/vue-router](https://github.com/vuejs/vue-router) | 查看详情 | JavaScript | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| quick-SQL-cheatsheet | [enochtangg/quick-SQL-cheatsheet](https://github.com/enochtangg/quick-SQL-cheatsheet) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | rectg | [jackvale/rectg](https://github.com/jackvale/rectg) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | mande | [posva/mande](https://github.com/posva/mande) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | nvtop | [Syllo/nvtop](https://github.com/Syllo/nvtop) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
@@ -925,17 +1221,10 @@
 | ratatui | [ratatui/ratatui](https://github.com/ratatui/ratatui) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | FFMetrics | [fifonik/FFMetrics](https://github.com/fifonik/FFMetrics) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | cr_task.h | [rkaehn/cr_task.h](https://github.com/rkaehn/cr_task.h) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| learnVue | [answershuto/learnVue](https://github.com/answershuto/learnVue) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 文档 | 否 | 中 |
-| create-vue | [vuejs/create-vue](https://github.com/vuejs/create-vue) | 查看详情 | JavaScript | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | vue-grid-layout | [jbaysolutions/vue-grid-layout](https://github.com/jbaysolutions/vue-grid-layout) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| lodash | [lodash/lodash](https://github.com/lodash/lodash) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| marked | [markedjs/marked](https://github.com/markedjs/marked) | 查看详情 | JavaScript | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | earthworm | [cuixueshe/earthworm](https://github.com/cuixueshe/earthworm) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | toggleterm.nvim | [akinsho/toggleterm.nvim](https://github.com/akinsho/toggleterm.nvim) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| dockerc | [NilsIrl/dockerc](https://github.com/NilsIrl/dockerc) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | PortTunnel | [VbScrub/PortTunnel](https://github.com/VbScrub/PortTunnel) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| mathematics-roadmap | [TalalAlrawajfeh/mathematics-roadmap](https://github.com/TalalAlrawajfeh/mathematics-roadmap) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| typescript-book | [gibbok/typescript-book](https://github.com/gibbok/typescript-book) | 查看详情 | TypeScript | X86/ARM | Linux/macOS/Windows | 文档 | 否 | 中 |
 | reference | [jaywcjlove/reference](https://github.com/jaywcjlove/reference) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | WhiteSur-gtk-theme | [vinceliuice/WhiteSur-gtk-theme](https://github.com/vinceliuice/WhiteSur-gtk-theme) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | h265web.js | [numberwolf/h265web.js](https://github.com/numberwolf/h265web.js) | 查看详情 | JavaScript | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
@@ -946,67 +1235,45 @@
 | indie-hacker-tools | [weijunext/indie-hacker-tools](https://github.com/weijunext/indie-hacker-tools) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | dailycheckin | [Sitoi/dailycheckin](https://github.com/Sitoi/dailycheckin) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | ctypes.sh | [taviso/ctypes.sh](https://github.com/taviso/ctypes.sh) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| mkcert | [FiloSottile/mkcert](https://github.com/FiloSottile/mkcert) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | carbon | [carbon-app/carbon](https://github.com/carbon-app/carbon) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | toolong | [Textualize/toolong](https://github.com/Textualize/toolong) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| linux-tutorial | [dunwu/linux-tutorial](https://github.com/dunwu/linux-tutorial) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 文档 | 否 | 中 |
 | tfjs-models | [tensorflow/tfjs-models](https://github.com/tensorflow/tfjs-models) | 查看详情 | JavaScript | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | vue-composable | [pikax/vue-composable](https://github.com/pikax/vue-composable) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| vueuse | [antfu/vueuse](https://github.com/antfu/vueuse) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | obsidian-border | [Akifyss/obsidian-border](https://github.com/Akifyss/obsidian-border) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| nginx-tutorial | [dunwu/nginx-tutorial](https://github.com/dunwu/nginx-tutorial) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 文档 | 否 | 中 |
 | gitbutler | [gitbutlerapp/gitbutler](https://github.com/gitbutlerapp/gitbutler) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | huntly | [lcomplete/huntly](https://github.com/lcomplete/huntly) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | balancing-cube | [willem-pennings/balancing-cube](https://github.com/willem-pennings/balancing-cube) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | chalk | [chalk/chalk](https://github.com/chalk/chalk) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| jj | [jj-vcs/jj](https://github.com/jj-vcs/jj) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| socket.io | [socketio/socket.io](https://github.com/socketio/socket.io) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| sass | [sass/sass](https://github.com/sass/sass) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| quasar | [quasarframework/quasar](https://github.com/quasarframework/quasar) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| free-programming-books | [EbookFoundation/free-programming-books](https://github.com/EbookFoundation/free-programming-books) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 文档 | 否 | 中 |
-| Installer | [Rectify11/Installer](https://github.com/Rectify11/Installer) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | FlyingCarpet | [spieglt/FlyingCarpet](https://github.com/spieglt/FlyingCarpet) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| sqlglot | [tobymao/sqlglot](https://github.com/tobymao/sqlglot) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | my-tv | [lizongying/my-tv](https://github.com/lizongying/my-tv) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | genann | [codeplea/genann](https://github.com/codeplea/genann) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| Chart.js | [chartjs/Chart.js](https://github.com/chartjs/Chart.js) | 查看详情 | JavaScript | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | vue-chartjs | [apertureless/vue-chartjs](https://github.com/apertureless/vue-chartjs) | 查看详情 | JavaScript | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | ltp | [linux-test-project/ltp](https://github.com/linux-test-project/ltp) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | Loop | [MrKai77/Loop](https://github.com/MrKai77/Loop) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | vizia | [vizia/vizia](https://github.com/vizia/vizia) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | tinylog | [pymumu/tinylog](https://github.com/pymumu/tinylog) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | nginx-proxy-manager | [NginxProxyManager/nginx-proxy-manager](https://github.com/NginxProxyManager/nginx-proxy-manager) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| redis-mindmap | [huangzworks/redis-mindmap](https://github.com/huangzworks/redis-mindmap) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | vuetify | [vuetifyjs/vuetify](https://github.com/vuetifyjs/vuetify) | 查看详情 | JavaScript | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | KeyCastOW | [brookhong/KeyCastOW](https://github.com/brookhong/KeyCastOW) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | keycastr | [keycastr/keycastr](https://github.com/keycastr/keycastr) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| zed | [zed-industries/zed](https://github.com/zed-industries/zed) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | ImgUltraCompress | [youshandefeiyang/ImgUltraCompress](https://github.com/youshandefeiyang/ImgUltraCompress) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | IPTV | [joevess/IPTV](https://github.com/joevess/IPTV) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | marker | [datalab-to/marker](https://github.com/datalab-to/marker) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| github-cheat-sheet | [tiimgreen/github-cheat-sheet](https://github.com/tiimgreen/github-cheat-sheet) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| buildroot | [buildroot/buildroot](https://github.com/buildroot/buildroot) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | lossless-cut | [mifi/lossless-cut](https://github.com/mifi/lossless-cut) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | dashboard-icons | [homarr-labs/dashboard-icons](https://github.com/homarr-labs/dashboard-icons) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | mini-lsm | [skyzh/mini-lsm](https://github.com/skyzh/mini-lsm) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | stm32l0xx-hal | [stm32-rs/stm32l0xx-hal](https://github.com/stm32-rs/stm32l0xx-hal) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| Awesome-LLM | [Hannibal046/Awesome-LLM](https://github.com/Hannibal046/Awesome-LLM) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | tiny-rdm | [tiny-craft/tiny-rdm](https://github.com/tiny-craft/tiny-rdm) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | kener | [rajnandan1/kener](https://github.com/rajnandan1/kener) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | music-tag-web | [xhongc/music-tag-web](https://github.com/xhongc/music-tag-web) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| tailwindcss | [tailwindlabs/tailwindcss](https://github.com/tailwindlabs/tailwindcss) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | yolov5 | [ultralytics/yolov5](https://github.com/ultralytics/yolov5) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | byte-unixbench | [kdlucas/byte-unixbench](https://github.com/kdlucas/byte-unixbench) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | spotube | [KRTirtho/spotube](https://github.com/KRTirtho/spotube) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | Building-Real-world-Web-Applications-with-Vue.js-3 | [PacktPublishing/Building-Real-world-Web-Applications-with-Vue.js-3](https://github.com/PacktPublishing/Building-Real-world-Web-Applications-with-Vue.js-3) | 查看详情 | JavaScript | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| h265player | [goldvideo/h265player](https://github.com/goldvideo/h265player) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| learn-kvm | [yifengyou/learn-kvm](https://github.com/yifengyou/learn-kvm) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 文档 | 否 | 中 |
 | weapp-tailwindcss | [sonofmagic/weapp-tailwindcss](https://github.com/sonofmagic/weapp-tailwindcss) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | naev | [naev/naev](https://github.com/naev/naev) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | s2n-tls | [aws/s2n-tls](https://github.com/aws/s2n-tls) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | devtools | [vuejs/devtools](https://github.com/vuejs/devtools) | 查看详情 | JavaScript | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| prisma | [prisma/prisma](https://github.com/prisma/prisma) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| drizzle-orm | [drizzle-team/drizzle-orm](https://github.com/drizzle-team/drizzle-orm) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | surya | [datalab-to/surya](https://github.com/datalab-to/surya) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | raddebugger | [EpicGamesExt/raddebugger](https://github.com/EpicGamesExt/raddebugger) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | voice-assistant | [linyiLYi/voice-assistant](https://github.com/linyiLYi/voice-assistant) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
@@ -1023,28 +1290,21 @@
 | ArchTitus | [ChrisTitusTech/ArchTitus](https://github.com/ChrisTitusTech/ArchTitus) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | allure2 | [allure-framework/allure2](https://github.com/allure-framework/allure2) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | pinia | [vuejs/pinia](https://github.com/vuejs/pinia) | 查看详情 | JavaScript | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| books | [chapin666/books](https://github.com/chapin666/books) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 文档 | 否 | 中 |
-| vitest | [vitest-dev/vitest](https://github.com/vitest-dev/vitest) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | supabase | [supabase/supabase](https://github.com/supabase/supabase) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | system-design-primer | [donnemartin/system-design-primer](https://github.com/donnemartin/system-design-primer) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| learning-vue-app | [mayashavin/learning-vue-app](https://github.com/mayashavin/learning-vue-app) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 文档 | 否 | 中 |
 | tailspin | [bensadeh/tailspin](https://github.com/bensadeh/tailspin) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | rust-incubator | [instrumentisto/rust-incubator](https://github.com/instrumentisto/rust-incubator) | 查看详情 | Rust | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | vocal-separate | [jianchang512/vocal-separate](https://github.com/jianchang512/vocal-separate) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | deskhop | [hrvach/deskhop](https://github.com/hrvach/deskhop) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | rustcamp | [rust-lang-ua/rustcamp](https://github.com/rust-lang-ua/rustcamp) | 查看详情 | Rust | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | FPGADesignElements | [laforest/FPGADesignElements](https://github.com/laforest/FPGADesignElements) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| css_course | [gitdagray/css_course](https://github.com/gitdagray/css_course) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 文档 | 否 | 中 |
 | iCSS | [chokcoco/iCSS](https://github.com/chokcoco/iCSS) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | hustzc | [ManiaciaChao/hustzc](https://github.com/ManiaciaChao/hustzc) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | blind_watermark | [guofei9987/blind_watermark](https://github.com/guofei9987/blind_watermark) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| interactive-tutorials | [ronreiter/interactive-tutorials](https://github.com/ronreiter/interactive-tutorials) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 文档 | 否 | 中 |
 | Leaflet | [Leaflet/Leaflet](https://github.com/Leaflet/Leaflet) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | vuejs-challenges | [webfansplz/vuejs-challenges](https://github.com/webfansplz/vuejs-challenges) | 查看详情 | JavaScript | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| vueuse | [vueuse/vueuse](https://github.com/vueuse/vueuse) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | FireDBG.for.Rust | [SeaQL/FireDBG.for.Rust](https://github.com/SeaQL/FireDBG.for.Rust) | 查看详情 | Rust | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | vant | [youzan/vant](https://github.com/youzan/vant) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| awesome-for-beginners | [MunGell/awesome-for-beginners](https://github.com/MunGell/awesome-for-beginners) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 资源 | 否 | 中 |
 | DevToysMac | [DevToys-app/DevToysMac](https://github.com/DevToys-app/DevToysMac) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | DevToys | [DevToys-app/DevToys](https://github.com/DevToys-app/DevToys) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | SFUD | [armink/SFUD](https://github.com/armink/SFUD) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
@@ -1072,7 +1332,6 @@
 | WeChatPlugin-MacOS | [TKkk-iOSer/WeChatPlugin-MacOS](https://github.com/TKkk-iOSer/WeChatPlugin-MacOS) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | llamafile | [mozilla-ai/llamafile](https://github.com/mozilla-ai/llamafile) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | upptime | [upptime/upptime](https://github.com/upptime/upptime) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| jellyfin-ffmpeg | [jellyfin/jellyfin-ffmpeg](https://github.com/jellyfin/jellyfin-ffmpeg) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | crawlee | [apify/crawlee](https://github.com/apify/crawlee) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | Tdarr | [HaveAGitGat/Tdarr](https://github.com/HaveAGitGat/Tdarr) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | display-interface | [therealprof/display-interface](https://github.com/therealprof/display-interface) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
@@ -1087,9 +1346,7 @@
 | libuv | [libuv/libuv](https://github.com/libuv/libuv) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | inshellisense | [microsoft/inshellisense](https://github.com/microsoft/inshellisense) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | Tasmota | [arendst/Tasmota](https://github.com/arendst/Tasmota) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| pyvideotrans | [jianchang512/pyvideotrans](https://github.com/jianchang512/pyvideotrans) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | v2rayN | [2dust/v2rayN](https://github.com/2dust/v2rayN) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| awesome-actions | [sdras/awesome-actions](https://github.com/sdras/awesome-actions) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 资源 | 否 | 中 |
 | clash-verge | [zzzgydi/clash-verge](https://github.com/zzzgydi/clash-verge) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | vue-flow | [bcakmakoglu/vue-flow](https://github.com/bcakmakoglu/vue-flow) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | Umi-OCR | [hiroi-sora/Umi-OCR](https://github.com/hiroi-sora/Umi-OCR) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
@@ -1122,9 +1379,7 @@
 | bison | [akimd/bison](https://github.com/akimd/bison) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | embedded-hal | [rust-embedded/embedded-hal](https://github.com/rust-embedded/embedded-hal) | 查看详情 | Rust | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | esp-idf | [espressif/esp-idf](https://github.com/espressif/esp-idf) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| ffmpeg-autobuild | [AnimMouse/ffmpeg-autobuild](https://github.com/AnimMouse/ffmpeg-autobuild) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | pgserials | [ipconfiger/pgserials](https://github.com/ipconfiger/pgserials) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| modern-embedded-programming-course | [QuantumLeaps/modern-embedded-programming-course](https://github.com/QuantumLeaps/modern-embedded-programming-course) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 文档 | 否 | 中 |
 | flutter_server_box | [lollipopkit/flutter_server_box](https://github.com/lollipopkit/flutter_server_box) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | pg_badapple | [higuoxing/pg_badapple](https://github.com/higuoxing/pg_badapple) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | LiTiaotiao-Custom-Rules | [Snoopy1866/LiTiaotiao-Custom-Rules](https://github.com/Snoopy1866/LiTiaotiao-Custom-Rules) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
@@ -1147,7 +1402,6 @@
 | marksman | [artempyanykh/marksman](https://github.com/artempyanykh/marksman) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | thefuck | [nvbn/thefuck](https://github.com/nvbn/thefuck) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | WavJourney | [Audio-AGI/WavJourney](https://github.com/Audio-AGI/WavJourney) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| awesome-lua | [LewisJEllis/awesome-lua](https://github.com/LewisJEllis/awesome-lua) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 资源 | 否 | 中 |
 | luaposix | [luaposix/luaposix](https://github.com/luaposix/luaposix) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | luafilesystem | [lunarmodules/luafilesystem](https://github.com/lunarmodules/luafilesystem) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | Bochs | [bochs-emu/Bochs](https://github.com/bochs-emu/Bochs) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
@@ -1155,17 +1409,13 @@
 | auto-animate | [formkit/auto-animate](https://github.com/formkit/auto-animate) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | computer-science | [ossu/computer-science](https://github.com/ossu/computer-science) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | Digital-IDE | [Digital-EDA/Digital-IDE](https://github.com/Digital-EDA/Digital-IDE) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| VideoProcessing | [YiiGaa/VideoProcessing](https://github.com/YiiGaa/VideoProcessing) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | sharedrop | [ShareDropio/sharedrop](https://github.com/ShareDropio/sharedrop) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | fake-sms | [Narasimha1997/fake-sms](https://github.com/Narasimha1997/fake-sms) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | Hackintosh | [daliansky/Hackintosh](https://github.com/daliansky/Hackintosh) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | locust | [locustio/locust](https://github.com/locustio/locust) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | How-To-Ask-Questions-The-Smart-Way | [ryanhanwu/How-To-Ask-Questions-The-Smart-Way](https://github.com/ryanhanwu/How-To-Ask-Questions-The-Smart-Way) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | awsm.fish | [jorgebucaran/awsm.fish](https://github.com/jorgebucaran/awsm.fish) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| awesome-zsh-plugins | [unixorn/awesome-zsh-plugins](https://github.com/unixorn/awesome-zsh-plugins) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 资源 | 否 | 中 |
-| cs-self-learning | [PKUFlyingPig/cs-self-learning](https://github.com/PKUFlyingPig/cs-self-learning) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 文档 | 否 | 中 |
 | 6.S081-All-in-one | [duguosheng/6.S081-All-in-one](https://github.com/duguosheng/6.S081-All-in-one) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| Roadmap-to-Embedded-Engineering | [mateustoin/Roadmap-to-Embedded-Engineering](https://github.com/mateustoin/Roadmap-to-Embedded-Engineering) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | pil4 | [0kk470/pil4](https://github.com/0kk470/pil4) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | SymCrypt | [microsoft/SymCrypt](https://github.com/microsoft/SymCrypt) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | GFPGAN | [TencentARC/GFPGAN](https://github.com/TencentARC/GFPGAN) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
@@ -1177,7 +1427,6 @@
 | openseadragon | [openseadragon/openseadragon](https://github.com/openseadragon/openseadragon) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | Obsidian_to_Anki | [ObsidianToAnki/Obsidian_to_Anki](https://github.com/ObsidianToAnki/Obsidian_to_Anki) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | MitsubishiPlcProtocol | [blueskit/MitsubishiPlcProtocol](https://github.com/blueskit/MitsubishiPlcProtocol) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| awesome-macos-screensavers | [agarrharr/awesome-macos-screensavers](https://github.com/agarrharr/awesome-macos-screensavers) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 资源 | 否 | 中 |
 | youre-the-os | [plbrault/youre-the-os](https://github.com/plbrault/youre-the-os) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | riscv-fs | [mrLSD/riscv-fs](https://github.com/mrLSD/riscv-fs) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | invoke | [pyinvoke/invoke](https://github.com/pyinvoke/invoke) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
@@ -1187,15 +1436,11 @@
 | waka-readme | [athul/waka-readme](https://github.com/athul/waka-readme) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | p0f | [p0f/p0f](https://github.com/p0f/p0f) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | pprintpp | [wolever/pprintpp](https://github.com/wolever/pprintpp) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| git-trim | [foriequal0/git-trim](https://github.com/foriequal0/git-trim) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | BLEUnlock | [ts1/BLEUnlock](https://github.com/ts1/BLEUnlock) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | reference | [redhat-gpte-devopsautomation/reference](https://github.com/redhat-gpte-devopsautomation/reference) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | FreeCAD | [FreeCAD/FreeCAD](https://github.com/FreeCAD/FreeCAD) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| audiocraft | [facebookresearch/audiocraft](https://github.com/facebookresearch/audiocraft) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 文档 | 否 | 中 |
 | gorm | [go-gorm/gorm](https://github.com/go-gorm/gorm) | 查看详情 | Go | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| python-mastery | [dabeaz-course/python-mastery](https://github.com/dabeaz-course/python-mastery) | 查看详情 | Python | X86/ARM | Linux/macOS/Windows | 文档 | 否 | 中 |
 | TypeChat | [microsoft/TypeChat](https://github.com/microsoft/TypeChat) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| nixos-and-flakes-book | [ryan4yin/nixos-and-flakes-book](https://github.com/ryan4yin/nixos-and-flakes-book) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 文档 | 否 | 中 |
 | single_file_libs | [r-lyeh/single_file_libs](https://github.com/r-lyeh/single_file_libs) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | srs | [ossrs/srs](https://github.com/ossrs/srs) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | xiu | [harlanc/xiu](https://github.com/harlanc/xiu) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
@@ -1218,15 +1463,11 @@
 | llama2.c | [karpathy/llama2.c](https://github.com/karpathy/llama2.c) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | gitstars | [cfour-hi/gitstars](https://github.com/cfour-hi/gitstars) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | rocket-chip | [chipsalliance/rocket-chip](https://github.com/chipsalliance/rocket-chip) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| cpp-tbox | [cpp-main/cpp-tbox](https://github.com/cpp-main/cpp-tbox) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| ffmpeg-static | [eugeneware/ffmpeg-static](https://github.com/eugeneware/ffmpeg-static) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | kamacoder-solutions | [youngyangyang04/kamacoder-solutions](https://github.com/youngyangyang04/kamacoder-solutions) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | matter-js | [liabru/matter-js](https://github.com/liabru/matter-js) | 查看详情 | JavaScript | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| missing-semester-cn.github.io | [missing-semester-cn/missing-semester-cn.github.io](https://github.com/missing-semester-cn/missing-semester-cn.github.io) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | tinypilot | [tiny-pilot/tinypilot](https://github.com/tiny-pilot/tinypilot) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | faster-whisper-youtube | [lewangdev/faster-whisper-youtube](https://github.com/lewangdev/faster-whisper-youtube) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | english-note | [hzpt-inet-club/english-note](https://github.com/hzpt-inet-club/english-note) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| git-filter-repo | [newren/git-filter-repo](https://github.com/newren/git-filter-repo) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | anki | [ankitects/anki](https://github.com/ankitects/anki) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | ppsspp | [hrydgard/ppsspp](https://github.com/hrydgard/ppsspp) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | obs-do | [jonhoo/obs-do](https://github.com/jonhoo/obs-do) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
@@ -1237,31 +1478,26 @@
 | FanControl.Releases | [Rem0o/FanControl.Releases](https://github.com/Rem0o/FanControl.Releases) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | trippy | [fujiapple852/trippy](https://github.com/fujiapple852/trippy) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | Microsoft-Activation-Scripts | [massgravel/Microsoft-Activation-Scripts](https://github.com/massgravel/Microsoft-Activation-Scripts) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| docker-monitoring-stack-gpnc | [ruanbekker/docker-monitoring-stack-gpnc](https://github.com/ruanbekker/docker-monitoring-stack-gpnc) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | Pake | [tw93/Pake](https://github.com/tw93/Pake) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | obsidian-livesync | [vrtmrz/obsidian-livesync](https://github.com/vrtmrz/obsidian-livesync) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | keysound | [fgheng/keysound](https://github.com/fgheng/keysound) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | isolate | [iffyio/isolate](https://github.com/iffyio/isolate) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | copilot.lua | [zbirenbaum/copilot.lua](https://github.com/zbirenbaum/copilot.lua) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | WechatMomentScreenshot | [TransparentLC/WechatMomentScreenshot](https://github.com/TransparentLC/WechatMomentScreenshot) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| Nmap-Cheatsheet | [jasonniebauer/Nmap-Cheatsheet](https://github.com/jasonniebauer/Nmap-Cheatsheet) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | entt | [skypjack/entt](https://github.com/skypjack/entt) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | Files | [files-community/Files](https://github.com/files-community/Files) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | evernote-backup | [vzhd1701/evernote-backup](https://github.com/vzhd1701/evernote-backup) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | evernote2md | [wormi4ok/evernote2md](https://github.com/wormi4ok/evernote2md) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | tinyvector | [m1guelpf/tinyvector](https://github.com/m1guelpf/tinyvector) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | typst | [typst/typst](https://github.com/typst/typst) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| ffmpeg-build-script | [markus-perl/ffmpeg-build-script](https://github.com/markus-perl/ffmpeg-build-script) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | vitesse | [antfu-collective/vitesse](https://github.com/antfu-collective/vitesse) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | react | [typescript-cheatsheets/react](https://github.com/typescript-cheatsheets/react) | 查看详情 | TypeScript | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | Chinese-LLaMA-Alpaca | [ymcui/Chinese-LLaMA-Alpaca](https://github.com/ymcui/Chinese-LLaMA-Alpaca) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | watchmate | [azymohliad/watchmate](https://github.com/azymohliad/watchmate) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | VeraCrypt | [veracrypt/VeraCrypt](https://github.com/veracrypt/VeraCrypt) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| archinstall | [archlinux/archinstall](https://github.com/archlinux/archinstall) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | auto-launch | [zzzgydi/auto-launch](https://github.com/zzzgydi/auto-launch) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | xad | [auto-differentiation/xad](https://github.com/auto-differentiation/xad) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | polyrhythmix | [dredozubov/polyrhythmix](https://github.com/dredozubov/polyrhythmix) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| ffmpeg-static | [zimbatm/ffmpeg-static](https://github.com/zimbatm/ffmpeg-static) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | pi-hole | [pi-hole/pi-hole](https://github.com/pi-hole/pi-hole) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | core | [home-assistant/core](https://github.com/home-assistant/core) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | IOPaint | [Sanster/IOPaint](https://github.com/Sanster/IOPaint) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
@@ -1282,7 +1518,6 @@
 | feeds | [feeddd/feeds](https://github.com/feeddd/feeds) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | core_analyzer | [yanqi27/core_analyzer](https://github.com/yanqi27/core_analyzer) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | ghh_json | [garrisonhh/ghh_json](https://github.com/garrisonhh/ghh_json) | 查看详情 | JavaScript | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| neotest | [nvim-neotest/neotest](https://github.com/nvim-neotest/neotest) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | tree-sitter-matlab | [acristoffers/tree-sitter-matlab](https://github.com/acristoffers/tree-sitter-matlab) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | axum-template | [Altair-Bueno/axum-template](https://github.com/Altair-Bueno/axum-template) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | chatgpt | [j178/chatgpt](https://github.com/j178/chatgpt) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
@@ -1345,16 +1580,12 @@
 | HumanSystemOptimization | [zijie0/HumanSystemOptimization](https://github.com/zijie0/HumanSystemOptimization) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | forever-coolshell | [soulteary/forever-coolshell](https://github.com/soulteary/forever-coolshell) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | clippy | [EsotericSoftware/clippy](https://github.com/EsotericSoftware/clippy) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| mobile-ffmpeg | [tanersener/mobile-ffmpeg](https://github.com/tanersener/mobile-ffmpeg) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | libm | [rust-lang/libm](https://github.com/rust-lang/libm) | 查看详情 | Rust | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| direct-to-video | [ange-yaghi/direct-to-video](https://github.com/ange-yaghi/direct-to-video) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | engine-sim | [ange-yaghi/engine-sim](https://github.com/ange-yaghi/engine-sim) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | simple-2d-constraint-solver | [ange-yaghi/simple-2d-constraint-solver](https://github.com/ange-yaghi/simple-2d-constraint-solver) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | pgrx | [pgcentralfoundation/pgrx](https://github.com/pgcentralfoundation/pgrx) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| learning-ebpf | [lizrice/learning-ebpf](https://github.com/lizrice/learning-ebpf) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 文档 | 否 | 中 |
 | FPGA | [LeiWang1999/FPGA](https://github.com/LeiWang1999/FPGA) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | semantic-kernel | [microsoft/semantic-kernel](https://github.com/microsoft/semantic-kernel) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| playerdemo | [itisyang/playerdemo](https://github.com/itisyang/playerdemo) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 文档 | 否 | 中 |
 | bumpalo | [fitzgen/bumpalo](https://github.com/fitzgen/bumpalo) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | pipx | [pypa/pipx](https://github.com/pypa/pipx) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | hls.js | [video-dev/hls.js](https://github.com/video-dev/hls.js) | 查看详情 | JavaScript | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
@@ -1369,13 +1600,11 @@
 | hello-algo | [krahets/hello-algo](https://github.com/krahets/hello-algo) | 查看详情 | Go | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | rust-crypto | [DaGenix/rust-crypto](https://github.com/DaGenix/rust-crypto) | 查看详情 | Rust | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | chatbox | [chatboxai/chatbox](https://github.com/chatboxai/chatbox) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| ffmpeg-windows-build-helpers | [rdp/ffmpeg-windows-build-helpers](https://github.com/rdp/ffmpeg-windows-build-helpers) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | LinuxTracepoints | [microsoft/LinuxTracepoints](https://github.com/microsoft/LinuxTracepoints) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | erdtree | [solidiquis/erdtree](https://github.com/solidiquis/erdtree) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | BBLL | [xiaye13579/BBLL](https://github.com/xiaye13579/BBLL) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | sudo-rs | [trifectatechfoundation/sudo-rs](https://github.com/trifectatechfoundation/sudo-rs) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | lkmpg | [sysprog21/lkmpg](https://github.com/sysprog21/lkmpg) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| py-spy | [benfred/py-spy](https://github.com/benfred/py-spy) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | og-aws | [open-guides/og-aws](https://github.com/open-guides/og-aws) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | cirCeTZ | [fenjalien/cirCeTZ](https://github.com/fenjalien/cirCeTZ) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | LKY_OfficeTools | [OdysseusYuan/LKY_OfficeTools](https://github.com/OdysseusYuan/LKY_OfficeTools) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
@@ -1390,7 +1619,6 @@
 | MiniXML | [chuckatkins/MiniXML](https://github.com/chuckatkins/MiniXML) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | toolkit | [cproape/toolkit](https://github.com/cproape/toolkit) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | sql-translator | [whoiskatrin/sql-translator](https://github.com/whoiskatrin/sql-translator) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| learn-tfjs | [GantMan/learn-tfjs](https://github.com/GantMan/learn-tfjs) | 查看详情 | JavaScript | X86/ARM | Linux/macOS/Windows | 文档 | 否 | 中 |
 | reabble-android | [zmk-ink/reabble-android](https://github.com/zmk-ink/reabble-android) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | sailboatui | [sailboatui/sailboatui](https://github.com/sailboatui/sailboatui) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | PAmix | [patroclos/PAmix](https://github.com/patroclos/PAmix) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
@@ -1411,21 +1639,16 @@
 | PianoFingering.jl | [JuliaMusic/PianoFingering.jl](https://github.com/JuliaMusic/PianoFingering.jl) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | bark | [suno-ai/bark](https://github.com/suno-ai/bark) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | vmaf | [Netflix/vmaf](https://github.com/Netflix/vmaf) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| ffmpeg-ffnvcodec-explanation | [omen23/ffmpeg-ffnvcodec-explanation](https://github.com/omen23/ffmpeg-ffnvcodec-explanation) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | nvme-cli | [linux-nvme/nvme-cli](https://github.com/linux-nvme/nvme-cli) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | mongoose | [cesanta/mongoose](https://github.com/cesanta/mongoose) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| haoel.github.io | [haoel/haoel.github.io](https://github.com/haoel/haoel.github.io) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| awesome-bilibili | [SyMind/awesome-bilibili](https://github.com/SyMind/awesome-bilibili) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 资源 | 否 | 中 |
 | mediapipe | [google-ai-edge/mediapipe](https://github.com/google-ai-edge/mediapipe) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | joplin | [laurent22/joplin](https://github.com/laurent22/joplin) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | basic | [fantastic-admin/basic](https://github.com/fantastic-admin/basic) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | srt | [Haivision/srt](https://github.com/Haivision/srt) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| Pentest-Windows | [arch3rPro/Pentest-Windows](https://github.com/arch3rPro/Pentest-Windows) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | cmake-init | [friendlyanon/cmake-init](https://github.com/friendlyanon/cmake-init) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | EdgeGPT | [acheong08/EdgeGPT](https://github.com/acheong08/EdgeGPT) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | umi | [js2xxx/umi](https://github.com/js2xxx/umi) | 查看详情 | JavaScript | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | gpt4all | [nomic-ai/gpt4all](https://github.com/nomic-ai/gpt4all) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| practical-programming-books | [EZLippi/practical-programming-books](https://github.com/EZLippi/practical-programming-books) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 文档 | 否 | 中 |
 | fft-image-experiments | [dmishin/fft-image-experiments](https://github.com/dmishin/fft-image-experiments) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | SCSnapshotManager | [ShannonChenCHN/SCSnapshotManager](https://github.com/ShannonChenCHN/SCSnapshotManager) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | ChatGPT | [acheong08/ChatGPT](https://github.com/acheong08/ChatGPT) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
@@ -1436,31 +1659,25 @@
 | CS-Base | [xiaolincoder/CS-Base](https://github.com/xiaolincoder/CS-Base) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | picohttpparser | [h2o/picohttpparser](https://github.com/h2o/picohttpparser) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | webamp-desktop | [durasj/webamp-desktop](https://github.com/durasj/webamp-desktop) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| practice-qemu-riscv64-buildroot | [hemashushu/practice-qemu-riscv64-buildroot](https://github.com/hemashushu/practice-qemu-riscv64-buildroot) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | AutoGPT | [Significant-Gravitas/AutoGPT](https://github.com/Significant-Gravitas/AutoGPT) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | arrow-rs | [apache/arrow-rs](https://github.com/apache/arrow-rs) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | streamlit | [streamlit/streamlit](https://github.com/streamlit/streamlit) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | asdf | [asdf-vm/asdf](https://github.com/asdf-vm/asdf) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | uPlot | [leeoniya/uPlot](https://github.com/leeoniya/uPlot) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | tabby | [TabbyML/tabby](https://github.com/TabbyML/tabby) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| CppCoreGuidelines | [isocpp/CppCoreGuidelines](https://github.com/isocpp/CppCoreGuidelines) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | oemer | [meteo-team/oemer](https://github.com/meteo-team/oemer) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | electron | [electron/electron](https://github.com/electron/electron) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | robopianist | [google-research/robopianist](https://github.com/google-research/robopianist) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | trurl | [curl/trurl](https://github.com/curl/trurl) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | kramdown-asciidoc | [asciidoctor/kramdown-asciidoc](https://github.com/asciidoctor/kramdown-asciidoc) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | rustsec | [rustsec/rustsec](https://github.com/rustsec/rustsec) | 查看详情 | Rust | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| awesome-code-review | [joho/awesome-code-review](https://github.com/joho/awesome-code-review) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 资源 | 否 | 中 |
 | JARVIS | [microsoft/JARVIS](https://github.com/microsoft/JARVIS) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| speedtest-cli | [sivel/speedtest-cli](https://github.com/sivel/speedtest-cli) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| bpf-developer-tutorial | [eunomia-bpf/bpf-developer-tutorial](https://github.com/eunomia-bpf/bpf-developer-tutorial) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 文档 | 否 | 中 |
 | jellyfin | [jellyfin/jellyfin](https://github.com/jellyfin/jellyfin) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | pgbackrest | [pgbackrest/pgbackrest](https://github.com/pgbackrest/pgbackrest) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | build-lua-in-rust | [WuBingzheng/build-lua-in-rust](https://github.com/WuBingzheng/build-lua-in-rust) | 查看详情 | Rust | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | docusaurus | [facebook/docusaurus](https://github.com/facebook/docusaurus) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 文档 | 否 | 中 |
 | Overload | [Overload-Technologies/Overload](https://github.com/Overload-Technologies/Overload) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | cheerp-meta | [leaningtech/cheerp-meta](https://github.com/leaningtech/cheerp-meta) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| kubernetes-in-action-2nd-edition | [luksa/kubernetes-in-action-2nd-edition](https://github.com/luksa/kubernetes-in-action-2nd-edition) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | DragonOS | [DragonOS-Community/DragonOS](https://github.com/DragonOS-Community/DragonOS) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | TensorFlowTTS | [TensorSpeech/TensorFlowTTS](https://github.com/TensorSpeech/TensorFlowTTS) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | 100-Days-Of-ML-Code | [MLEveryday/100-Days-Of-ML-Code](https://github.com/MLEveryday/100-Days-Of-ML-Code) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
@@ -1513,10 +1730,8 @@
 | bubbletea | [charmbracelet/bubbletea](https://github.com/charmbracelet/bubbletea) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | toolbox | [docker-archive/toolbox](https://github.com/docker-archive/toolbox) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | comprehensive-rust | [google/comprehensive-rust](https://github.com/google/comprehensive-rust) | 查看详情 | Rust | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| asm_book | [pkivolowitz/asm_book](https://github.com/pkivolowitz/asm_book) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 文档 | 否 | 中 |
 | cypress | [cypress-io/cypress](https://github.com/cypress-io/cypress) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | xplr | [sayanarijit/xplr](https://github.com/sayanarijit/xplr) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| ffmpeg-quality-metrics | [slhck/ffmpeg-quality-metrics](https://github.com/slhck/ffmpeg-quality-metrics) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | localsend | [localsend/localsend](https://github.com/localsend/localsend) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | tqdm | [tqdm/tqdm](https://github.com/tqdm/tqdm) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | wee_alloc | [rustwasm/wee_alloc](https://github.com/rustwasm/wee_alloc) | 查看详情 | Rust | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
@@ -1530,7 +1745,6 @@
 | cargo-generate | [cargo-generate/cargo-generate](https://github.com/cargo-generate/cargo-generate) | 查看详情 | Go | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | DeepSpeech | [mozilla/DeepSpeech](https://github.com/mozilla/DeepSpeech) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | nextai-translator | [nextai-translator/nextai-translator](https://github.com/nextai-translator/nextai-translator) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| book | [rustwasm/book](https://github.com/rustwasm/book) | 查看详情 | Rust | X86/ARM | Linux/macOS/Windows | 文档 | 否 | 中 |
 | sops | [getsops/sops](https://github.com/getsops/sops) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | potatis | [henrikpersson/potatis](https://github.com/henrikpersson/potatis) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | so-vits-svc | [svc-develop-team/so-vits-svc](https://github.com/svc-develop-team/so-vits-svc) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
@@ -1548,7 +1762,6 @@
 | musicaiz | [carlosholivan/musicaiz](https://github.com/carlosholivan/musicaiz) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | rspack | [web-infra-dev/rspack](https://github.com/web-infra-dev/rspack) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | nvim-dap-ui | [rcarriga/nvim-dap-ui](https://github.com/rcarriga/nvim-dap-ui) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| devops-directive-docker-course | [sidpalas/devops-directive-docker-course](https://github.com/sidpalas/devops-directive-docker-course) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 文档 | 否 | 中 |
 | sonic | [bytedance/sonic](https://github.com/bytedance/sonic) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | bspwm | [baskerville/bspwm](https://github.com/baskerville/bspwm) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | komorebi | [LGUG2Z/komorebi](https://github.com/LGUG2Z/komorebi) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
@@ -1576,36 +1789,23 @@
 | Chinese-Word-Vectors | [Embedding/Chinese-Word-Vectors](https://github.com/Embedding/Chinese-Word-Vectors) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | pbc | [cloudwu/pbc](https://github.com/cloudwu/pbc) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | shell_gpt | [TheR1D/shell_gpt](https://github.com/TheR1D/shell_gpt) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| git-tips | [521xueweihan/git-tips](https://github.com/521xueweihan/git-tips) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | aball | [brickbots/aball](https://github.com/brickbots/aball) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | cpp11-on-multicore | [preshing/cpp11-on-multicore](https://github.com/preshing/cpp11-on-multicore) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | linuxupskillchallenge | [snori74/linuxupskillchallenge](https://github.com/snori74/linuxupskillchallenge) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | pt | [gburd/pt](https://github.com/gburd/pt) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | CC | [JacksonAllan/CC](https://github.com/JacksonAllan/CC) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | kernel-wasm | [wasmerio/kernel-wasm](https://github.com/wasmerio/kernel-wasm) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| book-cpp-algorithms | [HappyCerberus/book-cpp-algorithms](https://github.com/HappyCerberus/book-cpp-algorithms) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 文档 | 否 | 中 |
 | libmatoya | [snowcone-ltd/libmatoya](https://github.com/snowcone-ltd/libmatoya) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| Programmers-Overseas-Job-Interview-Handbook | [eliaszon/Programmers-Overseas-Job-Interview-Handbook](https://github.com/eliaszon/Programmers-Overseas-Job-Interview-Handbook) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 文档 | 否 | 中 |
 | blocks | [githubnext/blocks](https://github.com/githubnext/blocks) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| abookmark | [pfcao/abookmark](https://github.com/pfcao/abookmark) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 文档 | 否 | 中 |
-| gptcommit | [zurawiki/gptcommit](https://github.com/zurawiki/gptcommit) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| grokking_algorithms | [egonSchiele/grokking_algorithms](https://github.com/egonSchiele/grokking_algorithms) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| C-CppLearning | [tangtangcoding/C-CppLearning](https://github.com/tangtangcoding/C-CppLearning) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| LearningNote | [szza/LearningNote](https://github.com/szza/LearningNote) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| DeepLearning | [yusugomori/DeepLearning](https://github.com/yusugomori/DeepLearning) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| learnopencv | [spmallick/learnopencv](https://github.com/spmallick/learnopencv) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 文档 | 否 | 中 |
 | notepad-- | [cxasm/notepad--](https://github.com/cxasm/notepad--) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | whisper.cpp | [ggml-org/whisper.cpp](https://github.com/ggml-org/whisper.cpp) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| learn_unsafe_rust | [google/learn_unsafe_rust](https://github.com/google/learn_unsafe_rust) | 查看详情 | Rust | X86/ARM | Linux/macOS/Windows | 文档 | 否 | 中 |
 | clash-rules | [Loyalsoldier/clash-rules](https://github.com/Loyalsoldier/clash-rules) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | Gogh | [Gogh-Co/Gogh](https://github.com/Gogh-Co/Gogh) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | leetgo | [j178/leetgo](https://github.com/j178/leetgo) | 查看详情 | Go | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | rbpf | [solana-labs/rbpf](https://github.com/solana-labs/rbpf) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | FreshRSS | [FreshRSS/FreshRSS](https://github.com/FreshRSS/FreshRSS) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| boutique-books | [linghuam/boutique-books](https://github.com/linghuam/boutique-books) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 文档 | 否 | 中 |
 | Auto_Bangumi | [EstrellaXD/Auto_Bangumi](https://github.com/EstrellaXD/Auto_Bangumi) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | Skiplist-CPP | [youngyangyang04/Skiplist-CPP](https://github.com/youngyangyang04/Skiplist-CPP) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| git-sim | [initialcommit-com/git-sim](https://github.com/initialcommit-com/git-sim) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | LazyVim | [LazyVim/LazyVim](https://github.com/LazyVim/LazyVim) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | asap | [abdes/asap](https://github.com/abdes/asap) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | Robyn | [sparckles/Robyn](https://github.com/sparckles/Robyn) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
@@ -1619,20 +1819,13 @@
 | tinyusb | [hathach/tinyusb](https://github.com/hathach/tinyusb) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | nginx-studies | [lucasrodcosta/nginx-studies](https://github.com/lucasrodcosta/nginx-studies) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | PainterEngine | [matrixcascade/PainterEngine](https://github.com/matrixcascade/PainterEngine) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| awesome-ebpf | [zoidyzoidzoid/awesome-ebpf](https://github.com/zoidyzoidzoid/awesome-ebpf) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 资源 | 否 | 中 |
-| KeyDecoder | [MaximeBeasse/KeyDecoder](https://github.com/MaximeBeasse/KeyDecoder) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| leetcode-master | [youngyangyang04/leetcode-master](https://github.com/youngyangyang04/leetcode-master) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | NTSC-CRT | [LMP88959/NTSC-CRT](https://github.com/LMP88959/NTSC-CRT) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | heartrate | [alexmojaki/heartrate](https://github.com/alexmojaki/heartrate) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | media-framework | [kaltura/media-framework](https://github.com/kaltura/media-framework) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| devguide | [python/devguide](https://github.com/python/devguide) | 查看详情 | Python | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | glances | [nicolargo/glances](https://github.com/nicolargo/glances) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | gradio | [gradio-app/gradio](https://github.com/gradio-app/gradio) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | MathAnimation | [ambrosiogabe/MathAnimation](https://github.com/ambrosiogabe/MathAnimation) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| video.js | [videojs/video.js](https://github.com/videojs/video.js) | 查看详情 | JavaScript | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| git-extras | [tj/git-extras](https://github.com/tj/git-extras) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | QGIS | [qgis/QGIS](https://github.com/qgis/QGIS) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| video-quality | [aizvorski/video-quality](https://github.com/aizvorski/video-quality) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | lnav | [tstack/lnav](https://github.com/tstack/lnav) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | 30-Days-Of-React | [Asabeneh/30-Days-Of-React](https://github.com/Asabeneh/30-Days-Of-React) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | libc | [peterzuger/libc](https://github.com/peterzuger/libc) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
@@ -1652,7 +1845,6 @@
 | Ciphey | [bee-san/Ciphey](https://github.com/bee-san/Ciphey) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | ToastFish | [Uahh/ToastFish](https://github.com/Uahh/ToastFish) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | rust-cross | [japaric/rust-cross](https://github.com/japaric/rust-cross) | 查看详情 | Rust | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| setup-ffmpeg | [federicocarboni/setup-ffmpeg](https://github.com/federicocarboni/setup-ffmpeg) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | MiaoYan | [tw93/MiaoYan](https://github.com/tw93/MiaoYan) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | pics | [corkami/pics](https://github.com/corkami/pics) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | bilix | [HFrost0/bilix](https://github.com/HFrost0/bilix) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
@@ -1661,15 +1853,11 @@
 | duckstation | [stenzek/duckstation](https://github.com/stenzek/duckstation) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | wolfssl | [wolfSSL/wolfssl](https://github.com/wolfSSL/wolfssl) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | CleanMyWechat | [blackboxo/CleanMyWechat](https://github.com/blackboxo/CleanMyWechat) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| ffmpeg_develop_doc | [lokenetwork/ffmpeg_develop_doc](https://github.com/lokenetwork/ffmpeg_develop_doc) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| pico-examples | [raspberrypi/pico-examples](https://github.com/raspberrypi/pico-examples) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | playwright | [microsoft/playwright](https://github.com/microsoft/playwright) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | FFCreator | [tnfe/FFCreator](https://github.com/tnfe/FFCreator) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | xq | [sibprogrammer/xq](https://github.com/sibprogrammer/xq) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | podman-desktop | [podman-desktop/podman-desktop](https://github.com/podman-desktop/podman-desktop) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| awesome-programming-books | [jobbole/awesome-programming-books](https://github.com/jobbole/awesome-programming-books) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 资源 | 否 | 中 |
 | hanzi_lookup | [gugray/hanzi_lookup](https://github.com/gugray/hanzi_lookup) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| qwerty-learner | [RealKai42/qwerty-learner](https://github.com/RealKai42/qwerty-learner) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 文档 | 否 | 中 |
 | zstd | [facebook/zstd](https://github.com/facebook/zstd) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 文档 | 否 | 中 |
 | pyradio | [coderholic/pyradio](https://github.com/coderholic/pyradio) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | pwru | [cilium/pwru](https://github.com/cilium/pwru) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
@@ -1691,7 +1879,6 @@
 | cc-rs | [rust-lang/cc-rs](https://github.com/rust-lang/cc-rs) | 查看详情 | Rust | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | sea-orm | [SeaQL/sea-orm](https://github.com/SeaQL/sea-orm) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | turborepo | [vercel/turborepo](https://github.com/vercel/turborepo) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| BilibiliVideoDownload | [BilibiliVideoDownload/BilibiliVideoDownload](https://github.com/BilibiliVideoDownload/BilibiliVideoDownload) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | openh264 | [cisco/openh264](https://github.com/cisco/openh264) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | FastFlix | [cdgriffith/FastFlix](https://github.com/cdgriffith/FastFlix) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | Terathon-Math-Library | [EricLengyel/Terathon-Math-Library](https://github.com/EricLengyel/Terathon-Math-Library) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
@@ -1712,13 +1899,10 @@
 | react-hook-form | [react-hook-form/react-hook-form](https://github.com/react-hook-form/react-hook-form) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | markwhen | [mark-when/markwhen](https://github.com/mark-when/markwhen) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | Dashboard | [leon-kfd/Dashboard](https://github.com/leon-kfd/Dashboard) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| course22 | [fastai/course22](https://github.com/fastai/course22) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 文档 | 否 | 中 |
 | rust-url | [servo/rust-url](https://github.com/servo/rust-url) | 查看详情 | Rust | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | wasm3 | [wasm3/wasm3](https://github.com/wasm3/wasm3) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | ComWeChatRobot | [ljc545w/ComWeChatRobot](https://github.com/ljc545w/ComWeChatRobot) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| python-scripts | [metafy-social/python-scripts](https://github.com/metafy-social/python-scripts) | 查看详情 | Python | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | Lightly | [Luwx/Lightly](https://github.com/Luwx/Lightly) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| es6tutorial | [ruanyf/es6tutorial](https://github.com/ruanyf/es6tutorial) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 文档 | 否 | 中 |
 | budibase | [Budibase/budibase](https://github.com/Budibase/budibase) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | react.dev | [reactjs/react.dev](https://github.com/reactjs/react.dev) | 查看详情 | JavaScript | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | .tmux | [gpakosz/.tmux](https://github.com/gpakosz/.tmux) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
@@ -1732,15 +1916,12 @@
 | postgresml | [postgresml/postgresml](https://github.com/postgresml/postgresml) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | pyan | [davidfraser/pyan](https://github.com/davidfraser/pyan) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | code2flow | [scottrogowski/code2flow](https://github.com/scottrogowski/code2flow) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| docker-compose-viz | [pmsipilot/docker-compose-viz](https://github.com/pmsipilot/docker-compose-viz) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | repo-visualizer | [githubocto/repo-visualizer](https://github.com/githubocto/repo-visualizer) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | pylustrator | [rgerum/pylustrator](https://github.com/rgerum/pylustrator) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | surrealdb | [surrealdb/surrealdb](https://github.com/surrealdb/surrealdb) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | jsonrpsee | [paritytech/jsonrpsee](https://github.com/paritytech/jsonrpsee) | 查看详情 | JavaScript | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | mermaid | [mermaid-js/mermaid](https://github.com/mermaid-js/mermaid) | 查看详情 | JavaScript | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| awesome-c | [oz123/awesome-c](https://github.com/oz123/awesome-c) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 资源 | 否 | 中 |
 | httpbin | [postmanlabs/httpbin](https://github.com/postmanlabs/httpbin) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| python-sdk | [upyun/python-sdk](https://github.com/upyun/python-sdk) | 查看详情 | Python | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | nix | [NixOS/nix](https://github.com/NixOS/nix) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | nixpkgs | [NixOS/nixpkgs](https://github.com/NixOS/nixpkgs) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | Flask-Filter | [exleym/Flask-Filter](https://github.com/exleym/Flask-Filter) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
@@ -1762,13 +1943,11 @@
 | redis-py | [redis/redis-py](https://github.com/redis/redis-py) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | as-deprecated | [autoas/as-deprecated](https://github.com/autoas/as-deprecated) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | lotion | [Dashibase/lotion](https://github.com/Dashibase/lotion) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| FSplayer | [brookicv/FSplayer](https://github.com/brookicv/FSplayer) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | actions-stats | [n0vad3v/actions-stats](https://github.com/n0vad3v/actions-stats) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | ostep-translations | [remzi-arpacidusseau/ostep-translations](https://github.com/remzi-arpacidusseau/ostep-translations) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | avbuild | [wang-bin/avbuild](https://github.com/wang-bin/avbuild) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | QtAV | [wang-bin/QtAV](https://github.com/wang-bin/QtAV) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | imgui-rs | [imgui-rs/imgui-rs](https://github.com/imgui-rs/imgui-rs) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| git-absorb | [tummychow/git-absorb](https://github.com/tummychow/git-absorb) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | topgrade | [r-darwish/topgrade](https://github.com/r-darwish/topgrade) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | 100-Days-Of-ML-Code | [Avik-Jain/100-Days-Of-ML-Code](https://github.com/Avik-Jain/100-Days-Of-ML-Code) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | math3d | [cloudwu/math3d](https://github.com/cloudwu/math3d) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
@@ -1786,20 +1965,16 @@
 | doctree | [sourcegraph/doctree](https://github.com/sourcegraph/doctree) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | bertin | [riatelab/bertin](https://github.com/riatelab/bertin) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | rust-demangle.c | [LykenSol/rust-demangle.c](https://github.com/LykenSol/rust-demangle.c) | 查看详情 | Rust | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| pytorch-handbook | [zergtant/pytorch-handbook](https://github.com/zergtant/pytorch-handbook) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 文档 | 否 | 中 |
 | gyroflow | [gyroflow/gyroflow](https://github.com/gyroflow/gyroflow) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | libmfcc | [jsawruk/libmfcc](https://github.com/jsawruk/libmfcc) | 查看详情 | JavaScript | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| pyaudio | [jleb/pyaudio](https://github.com/jleb/pyaudio) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | wslg | [microsoft/wslg](https://github.com/microsoft/wslg) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | WSL2-Linux-Kernel | [microsoft/WSL2-Linux-Kernel](https://github.com/microsoft/WSL2-Linux-Kernel) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | WSL | [MicrosoftDocs/WSL](https://github.com/MicrosoftDocs/WSL) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | toydb | [erikgrinaker/toydb](https://github.com/erikgrinaker/toydb) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| ffmpeg-cmd-viewer | [YoungSx/ffmpeg-cmd-viewer](https://github.com/YoungSx/ffmpeg-cmd-viewer) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | prql | [PRQL/prql](https://github.com/PRQL/prql) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | min-dalle | [kuprel/min-dalle](https://github.com/kuprel/min-dalle) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | linux | [Rust-for-Linux/linux](https://github.com/Rust-for-Linux/linux) | 查看详情 | Rust | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | Software-Engineering-at-Google | [qiangmzsx/Software-Engineering-at-Google](https://github.com/qiangmzsx/Software-Engineering-at-Google) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| python-patterns | [faif/python-patterns](https://github.com/faif/python-patterns) | 查看详情 | Python | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | oh-my-posh | [JanDeDobbeleer/oh-my-posh](https://github.com/JanDeDobbeleer/oh-my-posh) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | live555 | [rgaufman/live555](https://github.com/rgaufman/live555) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | bashsimplecurses | [metal3d/bashsimplecurses](https://github.com/metal3d/bashsimplecurses) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
@@ -1812,7 +1987,6 @@
 | halo | [halo-dev/halo](https://github.com/halo-dev/halo) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | leanote | [leanote/leanote](https://github.com/leanote/leanote) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | calibre-web | [janeczku/calibre-web](https://github.com/janeczku/calibre-web) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| ffmpeg-cli-flags | [transitive-bullshit/ffmpeg-cli-flags](https://github.com/transitive-bullshit/ffmpeg-cli-flags) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | xterm.js | [xtermjs/xterm.js](https://github.com/xtermjs/xterm.js) | 查看详情 | JavaScript | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | log4c | [bmanojlovic/log4c](https://github.com/bmanojlovic/log4c) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | WLED | [wled/WLED](https://github.com/wled/WLED) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
@@ -1834,15 +2008,12 @@
 | bootstrap | [twbs/bootstrap](https://github.com/twbs/bootstrap) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | notifiers | [liiight/notifiers](https://github.com/liiight/notifiers) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | rust-subprocess | [hniksic/rust-subprocess](https://github.com/hniksic/rust-subprocess) | 查看详情 | Rust | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| python-logging-loki | [GreyZmeem/python-logging-loki](https://github.com/GreyZmeem/python-logging-loki) | 查看详情 | Python | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | plog | [SergiusTheBest/plog](https://github.com/SergiusTheBest/plog) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| nginxconfig.io | [digitalocean/nginxconfig.io](https://github.com/digitalocean/nginxconfig.io) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | ThinkDSP | [AllenDowney/ThinkDSP](https://github.com/AllenDowney/ThinkDSP) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | aya-log | [aya-rs/aya-log](https://github.com/aya-rs/aya-log) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | abseil-py | [abseil/abseil-py](https://github.com/abseil/abseil-py) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | abseil-cpp | [abseil/abseil-cpp](https://github.com/abseil/abseil-cpp) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | Weylus | [H-M-H/Weylus](https://github.com/H-M-H/Weylus) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| git-internals-pdf | [pluralsight/git-internals-pdf](https://github.com/pluralsight/git-internals-pdf) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | teloxide | [teloxide/teloxide](https://github.com/teloxide/teloxide) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | airflow | [apache/airflow](https://github.com/apache/airflow) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | LCD-show | [goodtft/LCD-show](https://github.com/goodtft/LCD-show) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
@@ -1863,14 +2034,11 @@
 | memray | [bloomberg/memray](https://github.com/bloomberg/memray) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | pnpm | [pnpm/pnpm](https://github.com/pnpm/pnpm) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | zenith | [bvaisvil/zenith](https://github.com/bvaisvil/zenith) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| go-stress-testing | [link1st/go-stress-testing](https://github.com/link1st/go-stress-testing) | 查看详情 | Go | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | robotics-toolbox-python | [petercorke/robotics-toolbox-python](https://github.com/petercorke/robotics-toolbox-python) | 查看详情 | Python | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | PaddleSpeech | [PaddlePaddle/PaddleSpeech](https://github.com/PaddlePaddle/PaddleSpeech) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | cutter | [rizinorg/cutter](https://github.com/rizinorg/cutter) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | multipass | [canonical/multipass](https://github.com/canonical/multipass) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| Inside-Deep-Learning | [EdwardRaff/Inside-Deep-Learning](https://github.com/EdwardRaff/Inside-Deep-Learning) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | scapy | [secdev/scapy](https://github.com/secdev/scapy) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| ffmpeg | [jrottenberg/ffmpeg](https://github.com/jrottenberg/ffmpeg) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | sql-generator | [liyupi/sql-generator](https://github.com/liyupi/sql-generator) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | jupyter-themes | [dunovank/jupyter-themes](https://github.com/dunovank/jupyter-themes) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | Google-Chinese-Results-Blocklist | [cobaltdisco/Google-Chinese-Results-Blocklist](https://github.com/cobaltdisco/Google-Chinese-Results-Blocklist) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
@@ -1878,16 +2046,13 @@
 | city-roads | [anvaka/city-roads](https://github.com/anvaka/city-roads) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | handson-ml2 | [ageron/handson-ml2](https://github.com/ageron/handson-ml2) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | open-gpu-kernel-modules | [NVIDIA/open-gpu-kernel-modules](https://github.com/NVIDIA/open-gpu-kernel-modules) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| container-desktop | [iongion/container-desktop](https://github.com/iongion/container-desktop) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | MIT6.S081 | [huihongxiao/MIT6.S081](https://github.com/huihongxiao/MIT6.S081) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | taichi | [taichi-dev/taichi](https://github.com/taichi-dev/taichi) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | tracy | [wolfpld/tracy](https://github.com/wolfpld/tracy) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| interviews.ai | [BoltzmannEntropy/interviews.ai](https://github.com/BoltzmannEntropy/interviews.ai) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | bling | [BlingCorp/bling](https://github.com/BlingCorp/bling) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | klib | [attractivechaos/klib](https://github.com/attractivechaos/klib) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | natpass | [lwch/natpass](https://github.com/lwch/natpass) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | osm2pgsql | [osm2pgsql-dev/osm2pgsql](https://github.com/osm2pgsql-dev/osm2pgsql) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| actix_tutorials | [thecloudmaker/actix_tutorials](https://github.com/thecloudmaker/actix_tutorials) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 文档 | 否 | 中 |
 | redox | [redox-os/redox](https://github.com/redox-os/redox) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | cling | [root-project/cling](https://github.com/root-project/cling) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | cert-manager | [cert-manager/cert-manager](https://github.com/cert-manager/cert-manager) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
@@ -1909,25 +2074,21 @@
 | scipy | [scipy/scipy](https://github.com/scipy/scipy) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | numpy | [numpy/numpy](https://github.com/numpy/numpy) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | MIT6.828_OS | [SmallPond/MIT6.828_OS](https://github.com/SmallPond/MIT6.828_OS) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| ffmpeg-python | [kkroening/ffmpeg-python](https://github.com/kkroening/ffmpeg-python) | 查看详情 | Python | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | chineseocr_lite | [DayBreak-u/chineseocr_lite](https://github.com/DayBreak-u/chineseocr_lite) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | pimox7 | [pimox/pimox7](https://github.com/pimox/pimox7) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | ipython | [ipython/ipython](https://github.com/ipython/ipython) | 查看详情 | Python | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | rule | [Infatuation-Fei/rule](https://github.com/Infatuation-Fei/rule) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | toga | [beeware/toga](https://github.com/beeware/toga) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| ML001-Project-Sources-Code-and-Learning-Materials | [ayush714/ML001-Project-Sources-Code-and-Learning-Materials](https://github.com/ayush714/ML001-Project-Sources-Code-and-Learning-Materials) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | jsoncrack.com | [AykutSarac/jsoncrack.com](https://github.com/AykutSarac/jsoncrack.com) | 查看详情 | JavaScript | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | psycopg2 | [psycopg/psycopg2](https://github.com/psycopg/psycopg2) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | cockpit-podman | [cockpit-project/cockpit-podman](https://github.com/cockpit-project/cockpit-podman) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | toipe | [Samyak2/toipe](https://github.com/Samyak2/toipe) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | fvwm3 | [fvwmorg/fvwm3](https://github.com/fvwmorg/fvwm3) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| pyenv-installer | [pyenv/pyenv-installer](https://github.com/pyenv/pyenv-installer) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | ML-For-Beginners | [microsoft/ML-For-Beginners](https://github.com/microsoft/ML-For-Beginners) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | one-python-craftsman | [piglei/one-python-craftsman](https://github.com/piglei/one-python-craftsman) | 查看详情 | Python | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | wachy | [rubrikinc/wachy](https://github.com/rubrikinc/wachy) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | AI-For-Beginners | [microsoft/AI-For-Beginners](https://github.com/microsoft/AI-For-Beginners) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | typeorm | [typeorm/typeorm](https://github.com/typeorm/typeorm) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| ffmpeg-examples | [andy-zhangtao/ffmpeg-examples](https://github.com/andy-zhangtao/ffmpeg-examples) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | invisible-watermark | [ShieldMnt/invisible-watermark](https://github.com/ShieldMnt/invisible-watermark) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | exercises | [leichn/exercises](https://github.com/leichn/exercises) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | Tkinter-Designer | [ParthJadhav/Tkinter-Designer](https://github.com/ParthJadhav/Tkinter-Designer) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
@@ -1939,11 +2100,9 @@
 | zhvoice | [fighting41love/zhvoice](https://github.com/fighting41love/zhvoice) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | grist-core | [gristlabs/grist-core](https://github.com/gristlabs/grist-core) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | code_snippets | [CoreyMSchafer/code_snippets](https://github.com/CoreyMSchafer/code_snippets) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| rust-by-practice | [sunface/rust-by-practice](https://github.com/sunface/rust-by-practice) | 查看详情 | Rust | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | orbit | [google/orbit](https://github.com/google/orbit) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | skimpy | [aeturrell/skimpy](https://github.com/aeturrell/skimpy) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | matplotlib | [matplotlib/matplotlib](https://github.com/matplotlib/matplotlib) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| scientific-visualization-book | [rougier/scientific-visualization-book](https://github.com/rougier/scientific-visualization-book) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 文档 | 否 | 中 |
 | zoxide | [ajeetdsouza/zoxide](https://github.com/ajeetdsouza/zoxide) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | ly | [fairyglade/ly](https://github.com/fairyglade/ly) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | nvitop | [XuehaiPan/nvitop](https://github.com/XuehaiPan/nvitop) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
@@ -1956,17 +2115,13 @@
 | buffet | [alcover/buffet](https://github.com/alcover/buffet) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | qoi | [phoboslab/qoi](https://github.com/phoboslab/qoi) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | LANDrop | [LANDrop/LANDrop](https://github.com/LANDrop/LANDrop) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| db-tutorial | [dunwu/db-tutorial](https://github.com/dunwu/db-tutorial) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 文档 | 否 | 中 |
-| tlpi-learn | [sunhuiquan/tlpi-learn](https://github.com/sunhuiquan/tlpi-learn) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 文档 | 否 | 中 |
 | rust-sdl2 | [Rust-SDL2/rust-sdl2](https://github.com/Rust-SDL2/rust-sdl2) | 查看详情 | Rust | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | SDL | [libsdl-org/SDL](https://github.com/libsdl-org/SDL) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| ffmpeg-video-player | [rambod-rahmani/ffmpeg-video-player](https://github.com/rambod-rahmani/ffmpeg-video-player) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | libpg_query | [pganalyze/libpg_query](https://github.com/pganalyze/libpg_query) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | music21 | [cuthbertLab/music21](https://github.com/cuthbertLab/music21) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | cargo-script | [DanielKeep/cargo-script](https://github.com/DanielKeep/cargo-script) | 查看详情 | Go | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | kitty | [kovidgoyal/kitty](https://github.com/kovidgoyal/kitty) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | geany | [geany/geany](https://github.com/geany/geany) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| Anime-Girls-Holding-Programming-Books | [cat-milk/Anime-Girls-Holding-Programming-Books](https://github.com/cat-milk/Anime-Girls-Holding-Programming-Books) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | bt.sh | [simonsj/bt.sh](https://github.com/simonsj/bt.sh) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | Apollo-11 | [chrislgarry/Apollo-11](https://github.com/chrislgarry/Apollo-11) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | log.c | [rxi/log.c](https://github.com/rxi/log.c) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
@@ -1978,22 +2133,18 @@
 | loc | [cgag/loc](https://github.com/cgag/loc) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | vertical-tabs-chrome-extension | [lxieyang/vertical-tabs-chrome-extension](https://github.com/lxieyang/vertical-tabs-chrome-extension) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | tbox | [tboox/tbox](https://github.com/tboox/tbox) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| pytest | [pytest-dev/pytest](https://github.com/pytest-dev/pytest) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | spaCy | [explosion/spaCy](https://github.com/explosion/spaCy) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | c2rust | [immunant/c2rust](https://github.com/immunant/c2rust) | 查看详情 | Rust | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | UDPspeeder | [wangyu-/UDPspeeder](https://github.com/wangyu-/UDPspeeder) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | dandere2x | [akai-katto/dandere2x](https://github.com/akai-katto/dandere2x) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | nginx-lua-redis-rate-measuring | [leandromoreira/nginx-lua-redis-rate-measuring](https://github.com/leandromoreira/nginx-lua-redis-rate-measuring) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | Data-Pixels | [gmattie/Data-Pixels](https://github.com/gmattie/Data-Pixels) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| RustBook | [QMHTMY/RustBook](https://github.com/QMHTMY/RustBook) | 查看详情 | Rust | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | makefile2graph | [lindenb/makefile2graph](https://github.com/lindenb/makefile2graph) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | openx86 | [openx86/openx86](https://github.com/openx86/openx86) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | kmon | [orhun/kmon](https://github.com/orhun/kmon) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | copilot-docs | [github/copilot-docs](https://github.com/github/copilot-docs) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| makefiletutorial | [chaselambda/makefiletutorial](https://github.com/chaselambda/makefiletutorial) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 文档 | 否 | 中 |
 | ntfstool | [ntfstool/ntfstool](https://github.com/ntfstool/ntfstool) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | Criterion | [Snaipe/Criterion](https://github.com/Snaipe/Criterion) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| ffmpeg-cheatsheet | [yuanqing/ffmpeg-cheatsheet](https://github.com/yuanqing/ffmpeg-cheatsheet) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | cs431 | [kaist-cp/cs431](https://github.com/kaist-cp/cs431) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | maven | [apache/maven](https://github.com/apache/maven) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | picom | [yshui/picom](https://github.com/yshui/picom) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
@@ -2001,7 +2152,6 @@
 | dwm-scripts | [killabytenow/dwm-scripts](https://github.com/killabytenow/dwm-scripts) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | zh.javascript.info | [javascript-tutorial/zh.javascript.info](https://github.com/javascript-tutorial/zh.javascript.info) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 文档 | 否 | 中 |
 | flask | [pallets/flask](https://github.com/pallets/flask) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| rust-course | [sunface/rust-course](https://github.com/sunface/rust-course) | 查看详情 | Rust | X86/ARM | Linux/macOS/Windows | 文档 | 否 | 中 |
 | lua-resty-exec | [jprjr/lua-resty-exec](https://github.com/jprjr/lua-resty-exec) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | lunatic-python | [bastibe/lunatic-python](https://github.com/bastibe/lunatic-python) | 查看详情 | Python | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | logrotate | [logrotate/logrotate](https://github.com/logrotate/logrotate) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
@@ -2009,10 +2159,7 @@
 | pipenv | [pypa/pipenv](https://github.com/pypa/pipenv) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | hwatch | [blacknon/hwatch](https://github.com/blacknon/hwatch) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | celery | [celery/celery](https://github.com/celery/celery) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| cookbook.fish | [jorgebucaran/cookbook.fish](https://github.com/jorgebucaran/cookbook.fish) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 文档 | 否 | 中 |
-| rust-algorithms | [EbTech/rust-algorithms](https://github.com/EbTech/rust-algorithms) | 查看详情 | Rust | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | rbatis | [rbatis/rbatis](https://github.com/rbatis/rbatis) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| nextest | [nextest-rs/nextest](https://github.com/nextest-rs/nextest) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | WiFiManager | [tzapu/WiFiManager](https://github.com/tzapu/WiFiManager) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | rsm | [rsms/rsm](https://github.com/rsms/rsm) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | jless | [PaulJuliusMartinez/jless](https://github.com/PaulJuliusMartinez/jless) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
@@ -2037,14 +2184,10 @@
 | nvim-web-devicons | [nvim-tree/nvim-web-devicons](https://github.com/nvim-tree/nvim-web-devicons) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | vim-devicons | [ryanoasis/vim-devicons](https://github.com/ryanoasis/vim-devicons) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | nvim-cmp | [hrsh7th/nvim-cmp](https://github.com/hrsh7th/nvim-cmp) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| nvim-lsp-installer | [williamboman/nvim-lsp-installer](https://github.com/williamboman/nvim-lsp-installer) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| nvim-lua-guide | [nanotee/nvim-lua-guide](https://github.com/nanotee/nvim-lua-guide) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | macports-ports | [macports/macports-ports](https://github.com/macports/macports-ports) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| tmux-config | [samoshkin/tmux-config](https://github.com/samoshkin/tmux-config) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | fidget.nvim | [j-hui/fidget.nvim](https://github.com/j-hui/fidget.nvim) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | lua-resty-redis-util | [anjia0532/lua-resty-redis-util](https://github.com/anjia0532/lua-resty-redis-util) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | vagrant-libvirt | [vagrant-libvirt/vagrant-libvirt](https://github.com/vagrant-libvirt/vagrant-libvirt) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| leetcode | [doocs/leetcode](https://github.com/doocs/leetcode) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | axum | [tokio-rs/axum](https://github.com/tokio-rs/axum) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | lua-resty-healthcheck | [Kong/lua-resty-healthcheck](https://github.com/Kong/lua-resty-healthcheck) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | radare2 | [radareorg/radare2](https://github.com/radareorg/radare2) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
@@ -2056,18 +2199,14 @@
 | enum-iterator | [stephaneyfx/enum-iterator](https://github.com/stephaneyfx/enum-iterator) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | leftwm | [leftwm/leftwm](https://github.com/leftwm/leftwm) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | easyssh | [muriloventuroso/easyssh](https://github.com/muriloventuroso/easyssh) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| learn-neovim-lua | [nshen/learn-neovim-lua](https://github.com/nshen/learn-neovim-lua) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 文档 | 否 | 中 |
 | screenFetch | [KittyKatt/screenFetch](https://github.com/KittyKatt/screenFetch) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | Neovim-from-scratch | [LunarVim/Neovim-from-scratch](https://github.com/LunarVim/Neovim-from-scratch) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | opentelemetry-lua | [yangxikun/opentelemetry-lua](https://github.com/yangxikun/opentelemetry-lua) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | yt-dlp | [yt-dlp/yt-dlp](https://github.com/yt-dlp/yt-dlp) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | Comment.nvim | [numToStr/Comment.nvim](https://github.com/numToStr/Comment.nvim) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| nvim-lspconfig | [neovim/nvim-lspconfig](https://github.com/neovim/nvim-lspconfig) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | vim | [dracula/vim](https://github.com/dracula/vim) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| awesome-neovim | [rockerBOO/awesome-neovim](https://github.com/rockerBOO/awesome-neovim) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 资源 | 否 | 中 |
 | packer.nvim | [wbthomason/packer.nvim](https://github.com/wbthomason/packer.nvim) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | screencasts | [curran/screencasts](https://github.com/curran/screencasts) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| nvim-lua-guide-zh | [glepnir/nvim-lua-guide-zh](https://github.com/glepnir/nvim-lua-guide-zh) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | which-key.nvim | [folke/which-key.nvim](https://github.com/folke/which-key.nvim) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | arrow | [apache/arrow](https://github.com/apache/arrow) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | lightningcss | [parcel-bundler/lightningcss](https://github.com/parcel-bundler/lightningcss) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
@@ -2097,7 +2236,6 @@
 | curl | [curl/curl](https://github.com/curl/curl) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | rusqlite | [rusqlite/rusqlite](https://github.com/rusqlite/rusqlite) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | eww | [elkowar/eww](https://github.com/elkowar/eww) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| awesome-lua | [forhappy/awesome-lua](https://github.com/forhappy/awesome-lua) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 资源 | 否 | 中 |
 | julia | [JuliaLang/julia](https://github.com/JuliaLang/julia) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | mcfly | [cantino/mcfly](https://github.com/cantino/mcfly) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | bmon | [tgraf/bmon](https://github.com/tgraf/bmon) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
@@ -2107,9 +2245,7 @@
 | Silice | [sylefeb/Silice](https://github.com/sylefeb/Silice) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | mock | [golang/mock](https://github.com/golang/mock) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | Mock | [nuysoft/Mock](https://github.com/nuysoft/Mock) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| googletest | [google/googletest](https://github.com/google/googletest) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | ninja | [ninja-build/ninja](https://github.com/ninja-build/ninja) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| jq | [jqlang/jq](https://github.com/jqlang/jq) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | IntelliJDashPlugin | [gdelmas/IntelliJDashPlugin](https://github.com/gdelmas/IntelliJDashPlugin) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | misbrands | [mkrl/misbrands](https://github.com/mkrl/misbrands) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | targets.vim | [wellle/targets.vim](https://github.com/wellle/targets.vim) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
@@ -2140,7 +2276,6 @@
 | Game-Programmer-Study-Notes | [QianMo/Game-Programmer-Study-Notes](https://github.com/QianMo/Game-Programmer-Study-Notes) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | jumpy | [fishfolk/jumpy](https://github.com/fishfolk/jumpy) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | react-wasm-gif-maker | [fireship-io/react-wasm-gif-maker](https://github.com/fireship-io/react-wasm-gif-maker) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| ffmpeg.wasm | [ffmpegwasm/ffmpeg.wasm](https://github.com/ffmpegwasm/ffmpeg.wasm) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | excalidraw | [excalidraw/excalidraw](https://github.com/excalidraw/excalidraw) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | databend | [databendlabs/databend](https://github.com/databendlabs/databend) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | graph-note-of-greek-myth | [Lihaogx/graph-note-of-greek-myth](https://github.com/Lihaogx/graph-note-of-greek-myth) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
@@ -2157,7 +2292,6 @@
 | jynew | [jynew/jynew](https://github.com/jynew/jynew) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | pywonderland | [neozhaoliang/pywonderland](https://github.com/neozhaoliang/pywonderland) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | backward-cpp | [bombela/backward-cpp](https://github.com/bombela/backward-cpp) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| regexlearn.com | [aykutkardas/regexlearn.com](https://github.com/aykutkardas/regexlearn.com) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 文档 | 否 | 中 |
 | AppFlowy | [AppFlowy-IO/AppFlowy](https://github.com/AppFlowy-IO/AppFlowy) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | libtree | [haampie/libtree](https://github.com/haampie/libtree) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | typora-theme-essay_cn | [du33169/typora-theme-essay_cn](https://github.com/du33169/typora-theme-essay_cn) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
@@ -2165,17 +2299,14 @@
 | trois | [troisjs/trois](https://github.com/troisjs/trois) | 查看详情 | JavaScript | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | 3d-force-graph | [vasturiano/3d-force-graph](https://github.com/vasturiano/3d-force-graph) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | tower | [tower-rs/tower](https://github.com/tower-rs/tower) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| github-readme-stats | [anuraghazra/github-readme-stats](https://github.com/anuraghazra/github-readme-stats) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | kuchiki | [kuchiki-rs/kuchiki](https://github.com/kuchiki-rs/kuchiki) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | minijinja | [mitsuhiko/minijinja](https://github.com/mitsuhiko/minijinja) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | insta | [mitsuhiko/insta](https://github.com/mitsuhiko/insta) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| test-nginx | [openresty/test-nginx](https://github.com/openresty/test-nginx) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | hubris | [oxidecomputer/hubris](https://github.com/oxidecomputer/hubris) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | cross | [cross-rs/cross](https://github.com/cross-rs/cross) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | awesome | [sindresorhus/awesome](https://github.com/sindresorhus/awesome) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 资源 | 否 | 中 |
 | marktext | [marktext/marktext](https://github.com/marktext/marktext) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | nvim-treesitter | [nvim-treesitter/nvim-treesitter](https://github.com/nvim-treesitter/nvim-treesitter) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| testify | [stretchr/testify](https://github.com/stretchr/testify) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | chinese-independent-blogs | [timqian/chinese-independent-blogs](https://github.com/timqian/chinese-independent-blogs) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | unix-ipc | [mitsuhiko/unix-ipc](https://github.com/mitsuhiko/unix-ipc) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | druid | [linebender/druid](https://github.com/linebender/druid) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
@@ -2190,8 +2321,6 @@
 | shellcheck | [koalaman/shellcheck](https://github.com/koalaman/shellcheck) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | lua-resty-http | [ledgetech/lua-resty-http](https://github.com/ledgetech/lua-resty-http) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | shunit2 | [kward/shunit2](https://github.com/kward/shunit2) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| RobustVideoMatting | [PeterL1n/RobustVideoMatting](https://github.com/PeterL1n/RobustVideoMatting) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| pianoplayer | [marcomusy/pianoplayer](https://github.com/marcomusy/pianoplayer) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | lua-resty-openidc | [zmartzone/lua-resty-openidc](https://github.com/zmartzone/lua-resty-openidc) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | vite-plugin-wasm-pack | [nshen/vite-plugin-wasm-pack](https://github.com/nshen/vite-plugin-wasm-pack) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | watchman | [facebook/watchman](https://github.com/facebook/watchman) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 文档 | 否 | 中 |
@@ -2205,14 +2334,11 @@
 | zaobao | [wubaiqing/zaobao](https://github.com/wubaiqing/zaobao) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | remote-jobs-in-china | [LinuxSuRen/remote-jobs-in-china](https://github.com/LinuxSuRen/remote-jobs-in-china) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | elfshaker | [elfshaker/elfshaker](https://github.com/elfshaker/elfshaker) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| Awesome-CV | [posquit0/Awesome-CV](https://github.com/posquit0/Awesome-CV) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | czkawka | [qarmin/czkawka](https://github.com/qarmin/czkawka) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | newman | [postmanlabs/newman](https://github.com/postmanlabs/newman) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | PowerUp | [badamczewski/PowerUp](https://github.com/badamczewski/PowerUp) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| introduction-to-postman-course | [vdespa/introduction-to-postman-course](https://github.com/vdespa/introduction-to-postman-course) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 文档 | 否 | 中 |
 | yabai | [koekeishiya/yabai](https://github.com/koekeishiya/yabai) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | StarsAndClown | [zhaoolee/StarsAndClown](https://github.com/zhaoolee/StarsAndClown) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| git-branchless | [arxanas/git-branchless](https://github.com/arxanas/git-branchless) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | vim-galore | [mhinz/vim-galore](https://github.com/mhinz/vim-galore) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | flash-linux0.11-talk | [dibingfa/flash-linux0.11-talk](https://github.com/dibingfa/flash-linux0.11-talk) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | ProxyMan | [himanshub16/ProxyMan](https://github.com/himanshub16/ProxyMan) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
@@ -2221,25 +2347,20 @@
 | browserslist | [browserslist/browserslist](https://github.com/browserslist/browserslist) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | automa | [AutomaApp/automa](https://github.com/AutomaApp/automa) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | Detox | [wix/Detox](https://github.com/wix/Detox) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| JiaoZiVideoPlayer | [lipangit/JiaoZiVideoPlayer](https://github.com/lipangit/JiaoZiVideoPlayer) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | rls | [rust-lang/rls](https://github.com/rust-lang/rls) | 查看详情 | Rust | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | cargo-outdated | [kbknapp/cargo-outdated](https://github.com/kbknapp/cargo-outdated) | 查看详情 | Go | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | addr2line | [gimli-rs/addr2line](https://github.com/gimli-rs/addr2line) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | cargo-tree | [sfackler/cargo-tree](https://github.com/sfackler/cargo-tree) | 查看详情 | Go | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | cargo-readme | [webern/cargo-readme](https://github.com/webern/cargo-readme) | 查看详情 | Go | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| configs | [jonhoo/configs](https://github.com/jonhoo/configs) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| rust-ac-ffmpeg | [angelcam/rust-ac-ffmpeg](https://github.com/angelcam/rust-ac-ffmpeg) | 查看详情 | Rust | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | zellij | [zellij-org/zellij](https://github.com/zellij-org/zellij) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | anyhow | [dtolnay/anyhow](https://github.com/dtolnay/anyhow) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | perspective | [perspective-dev/perspective](https://github.com/perspective-dev/perspective) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| git-cliff | [orhun/git-cliff](https://github.com/orhun/git-cliff) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | resea | [nuta/resea](https://github.com/nuta/resea) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | simdjson | [simdjson/simdjson](https://github.com/simdjson/simdjson) | 查看详情 | JavaScript | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | cargo-add | [withoutboats/cargo-add](https://github.com/withoutboats/cargo-add) | 查看详情 | Go | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | pianotrans | [azuwis/pianotrans](https://github.com/azuwis/pianotrans) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | undermoon | [doyoubi/undermoon](https://github.com/doyoubi/undermoon) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | LAVFilters | [Nevcairiel/LAVFilters](https://github.com/Nevcairiel/LAVFilters) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| refined-github | [refined-github/refined-github](https://github.com/refined-github/refined-github) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | MOTHBALLED-graphviz | [ellson/MOTHBALLED-graphviz](https://github.com/ellson/MOTHBALLED-graphviz) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | AlgoXY | [liuxinyu95/AlgoXY](https://github.com/liuxinyu95/AlgoXY) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | LCUI | [lc-soft/LCUI](https://github.com/lc-soft/LCUI) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
@@ -2249,7 +2370,6 @@
 | lsh | [brenns10/lsh](https://github.com/brenns10/lsh) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | Dummy-Robot | [peng-zhihui/Dummy-Robot](https://github.com/peng-zhihui/Dummy-Robot) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | tools | [rome/tools](https://github.com/rome/tools) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| c-unleashed-book-souce-code | [eliben/c-unleashed-book-souce-code](https://github.com/eliben/c-unleashed-book-souce-code) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 文档 | 否 | 中 |
 | native-windows-gui | [gabdube/native-windows-gui](https://github.com/gabdube/native-windows-gui) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | rust-lang-interop | [crackcomm/rust-lang-interop](https://github.com/crackcomm/rust-lang-interop) | 查看详情 | Rust | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | warriorjs | [olistic/warriorjs](https://github.com/olistic/warriorjs) | 查看详情 | JavaScript | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
@@ -2276,11 +2396,7 @@
 | winget-cli | [microsoft/winget-cli](https://github.com/microsoft/winget-cli) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | Diagon | [ArthurSonzogni/Diagon](https://github.com/ArthurSonzogni/Diagon) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | echo-nginx-module | [openresty/echo-nginx-module](https://github.com/openresty/echo-nginx-module) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| selenium-python-practice | [liweinan/selenium-python-practice](https://github.com/liweinan/selenium-python-practice) | 查看详情 | Python | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| raytracer-tutorial | [aik2mlj/raytracer-tutorial](https://github.com/aik2mlj/raytracer-tutorial) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 文档 | 否 | 中 |
 | fabric | [fabric/fabric](https://github.com/fabric/fabric) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| lua-resty-test | [iresty/lua-resty-test](https://github.com/iresty/lua-resty-test) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| awesome-resty | [bungle/awesome-resty](https://github.com/bungle/awesome-resty) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 资源 | 否 | 中 |
 | image-builder-rpi | [hypriot/image-builder-rpi](https://github.com/hypriot/image-builder-rpi) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | BaiduPanDownloadWinform | [Accelerider/BaiduPanDownloadWinform](https://github.com/Accelerider/BaiduPanDownloadWinform) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | mini-redis | [tokio-rs/mini-redis](https://github.com/tokio-rs/mini-redis) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
@@ -2295,7 +2411,6 @@
 | palanteer | [dfeneyrou/palanteer](https://github.com/dfeneyrou/palanteer) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | rustviz | [rustviz/rustviz](https://github.com/rustviz/rustviz) | 查看详情 | Rust | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | supervisor | [Supervisor/supervisor](https://github.com/Supervisor/supervisor) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| hty-docker-postgres | [liweinan/hty-docker-postgres](https://github.com/liweinan/hty-docker-postgres) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | libffi | [libffi/libffi](https://github.com/libffi/libffi) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | apisix | [apache/apisix](https://github.com/apache/apisix) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | lua-resty-core | [openresty/lua-resty-core](https://github.com/openresty/lua-resty-core) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
@@ -2308,7 +2423,6 @@
 | notify | [notify-rs/notify](https://github.com/notify-rs/notify) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | plow | [six-ddc/plow](https://github.com/six-ddc/plow) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | ImageMagick | [ImageMagick/ImageMagick](https://github.com/ImageMagick/ImageMagick) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| docker-node | [nodejs/docker-node](https://github.com/nodejs/docker-node) | 查看详情 | JavaScript | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | javascript-questions | [lydiahallie/javascript-questions](https://github.com/lydiahallie/javascript-questions) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | rich | [Textualize/rich](https://github.com/Textualize/rich) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | NvChad | [NvChad/NvChad](https://github.com/NvChad/NvChad) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
@@ -2328,28 +2442,21 @@
 | systemd | [systemd/systemd](https://github.com/systemd/systemd) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | grex | [pemistahl/grex](https://github.com/pemistahl/grex) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | downsampling | [haoel/downsampling](https://github.com/haoel/downsampling) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| awesome-alternatives-in-rust | [TaKO8Ki/awesome-alternatives-in-rust](https://github.com/TaKO8Ki/awesome-alternatives-in-rust) | 查看详情 | Rust | X86/ARM | Linux/macOS/Windows | 资源 | 否 | 中 |
 | STM32CommandLine | [ShareCat/STM32CommandLine](https://github.com/ShareCat/STM32CommandLine) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | resty | [go-resty/resty](https://github.com/go-resty/resty) | 查看详情 | Go | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| openresty-best-practices | [moonbingbing/openresty-best-practices](https://github.com/moonbingbing/openresty-best-practices) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | tensorflow_macos | [apple/tensorflow_macos](https://github.com/apple/tensorflow_macos) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| container-diff | [GoogleContainerTools/container-diff](https://github.com/GoogleContainerTools/container-diff) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | snek | [keith-packard/snek](https://github.com/keith-packard/snek) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| nginx-tutorials | [openresty/nginx-tutorials](https://github.com/openresty/nginx-tutorials) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 文档 | 否 | 中 |
-| docker-openresty | [openresty/docker-openresty](https://github.com/openresty/docker-openresty) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | miri | [rust-lang/miri](https://github.com/rust-lang/miri) | 查看详情 | Rust | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | syncthing | [syncthing/syncthing](https://github.com/syncthing/syncthing) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | streisand | [StreisandEffect/streisand](https://github.com/StreisandEffect/streisand) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | assh | [moul/assh](https://github.com/moul/assh) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | ffi | [ffi/ffi](https://github.com/ffi/ffi) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| pyAudioAnalysis | [tyiannak/pyAudioAnalysis](https://github.com/tyiannak/pyAudioAnalysis) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | openresty | [openresty/openresty](https://github.com/openresty/openresty) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | luarocks | [luarocks/luarocks](https://github.com/luarocks/luarocks) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | lua-rest | [alchemy-studio/lua-rest](https://github.com/alchemy-studio/lua-rest) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | lua-resty-upload | [openresty/lua-resty-upload](https://github.com/openresty/lua-resty-upload) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | jsbin | [jsbin/jsbin](https://github.com/jsbin/jsbin) | 查看详情 | JavaScript | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | vant-demo | [vant-ui/vant-demo](https://github.com/vant-ui/vant-demo) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 文档 | 否 | 中 |
-| h-player-v2 | [ZyqGitHub1/h-player-v2](https://github.com/ZyqGitHub1/h-player-v2) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | pytorch-CycleGAN-and-pix2pix | [junyanz/pytorch-CycleGAN-and-pix2pix](https://github.com/junyanz/pytorch-CycleGAN-and-pix2pix) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | dadda-translate-crx | [waynecz/dadda-translate-crx](https://github.com/waynecz/dadda-translate-crx) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | RadioLib | [jgromes/RadioLib](https://github.com/jgromes/RadioLib) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
@@ -2384,7 +2491,6 @@
 | LuaJIT | [LuaJIT/LuaJIT](https://github.com/LuaJIT/LuaJIT) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | spring | [spring/spring](https://github.com/spring/spring) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | lua-resty-limit-traffic | [openresty/lua-resty-limit-traffic](https://github.com/openresty/lua-resty-limit-traffic) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| NGINX-Cookbook | [PacktPublishing/NGINX-Cookbook](https://github.com/PacktPublishing/NGINX-Cookbook) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 文档 | 否 | 中 |
 | rust | [exercism/rust](https://github.com/exercism/rust) | 查看详情 | Rust | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | flutter-tools.nvim | [nvim-flutter/flutter-tools.nvim](https://github.com/nvim-flutter/flutter-tools.nvim) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | youki | [youki-dev/youki](https://github.com/youki-dev/youki) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
@@ -2393,14 +2499,10 @@
 | lxc | [lxc/lxc](https://github.com/lxc/lxc) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | cinf | [mhausenblas/cinf](https://github.com/mhausenblas/cinf) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | perf-tools | [brendangregg/perf-tools](https://github.com/brendangregg/perf-tools) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| docker-registry-web | [mkuchin/docker-registry-web](https://github.com/mkuchin/docker-registry-web) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| docker-registry | [wshihadeh/docker-registry](https://github.com/wshihadeh/docker-registry) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | ustreamer | [pikvm/ustreamer](https://github.com/pikvm/ustreamer) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | dt | [42wim/dt](https://github.com/42wim/dt) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| rust-memory-container-cs | [usagi/rust-memory-container-cs](https://github.com/usagi/rust-memory-container-cs) | 查看详情 | Rust | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | dkron | [distribworks/dkron](https://github.com/distribworks/dkron) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | ccan | [rustyrussell/ccan](https://github.com/rustyrussell/ccan) | 查看详情 | Rust | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| bitcoin-storage-guide | [rustyrussell/bitcoin-storage-guide](https://github.com/rustyrussell/bitcoin-storage-guide) | 查看详情 | Rust | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | lartc | [andelf/lartc](https://github.com/andelf/lartc) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | ez-risc-v-cpu | [risc-v-cpu/ez-risc-v-cpu](https://github.com/risc-v-cpu/ez-risc-v-cpu) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | volta | [volta-cli/volta](https://github.com/volta-cli/volta) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
@@ -2415,14 +2517,12 @@
 | auto-pairs | [jiangmiao/auto-pairs](https://github.com/jiangmiao/auto-pairs) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | vim-json | [elzr/vim-json](https://github.com/elzr/vim-json) | 查看详情 | JavaScript | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | indentLine | [Yggdroot/indentLine](https://github.com/Yggdroot/indentLine) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| vim-indent-guides | [preservim/vim-indent-guides](https://github.com/preservim/vim-indent-guides) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | ctrlp.vim | [kien/ctrlp.vim](https://github.com/kien/ctrlp.vim) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | cni | [containernetworking/cni](https://github.com/containernetworking/cni) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | vimwiki | [vimwiki/vimwiki](https://github.com/vimwiki/vimwiki) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | powerline | [powerline/powerline](https://github.com/powerline/powerline) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | vim-go | [fatih/vim-go](https://github.com/fatih/vim-go) | 查看详情 | Go | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | dracula-theme | [dracula/dracula-theme](https://github.com/dracula/dracula-theme) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| awesome-cheatsheets | [LeCoupa/awesome-cheatsheets](https://github.com/LeCoupa/awesome-cheatsheets) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 资源 | 否 | 中 |
 | eInkCalendarOfToxicSoul | [breakstring/eInkCalendarOfToxicSoul](https://github.com/breakstring/eInkCalendarOfToxicSoul) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | vim-vinegar | [tpope/vim-vinegar](https://github.com/tpope/vim-vinegar) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | bottom | [ClementTsang/bottom](https://github.com/ClementTsang/bottom) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
@@ -2437,12 +2537,9 @@
 | dactyl-keyboard | [adereth/dactyl-keyboard](https://github.com/adereth/dactyl-keyboard) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | legacy-python-cli | [wakatime/legacy-python-cli](https://github.com/wakatime/legacy-python-cli) | 查看详情 | Python | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | rbpf | [qmonnet/rbpf](https://github.com/qmonnet/rbpf) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| Docker-OSX | [sickcodes/Docker-OSX](https://github.com/sickcodes/Docker-OSX) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | cargo-mirror | [tennix/cargo-mirror](https://github.com/tennix/cargo-mirror) | 查看详情 | Go | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| github-tag-action | [anothrNick/github-tag-action](https://github.com/anothrNick/github-tag-action) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | PostgresApp | [PostgresApp/PostgresApp](https://github.com/PostgresApp/PostgresApp) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | cri | [containerd/cri](https://github.com/containerd/cri) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| containerd | [containerd/containerd](https://github.com/containerd/containerd) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | lua | [lua/lua](https://github.com/lua/lua) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | chinese-dos-games | [rwv/chinese-dos-games](https://github.com/rwv/chinese-dos-games) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | redis-rs | [redis-rs/redis-rs](https://github.com/redis-rs/redis-rs) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
@@ -2466,7 +2563,6 @@
 | async-graphql | [async-graphql/async-graphql](https://github.com/async-graphql/async-graphql) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | mame | [mamedev/mame](https://github.com/mamedev/mame) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | vftool | [evansm7/vftool](https://github.com/evansm7/vftool) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| developer-roadmap | [kamranahmedse/developer-roadmap](https://github.com/kamranahmedse/developer-roadmap) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | YYeTsBot | [tgbot-collection/YYeTsBot](https://github.com/tgbot-collection/YYeTsBot) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | Theseus | [theseus-os/Theseus](https://github.com/theseus-os/Theseus) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | gatsby | [gatsbyjs/gatsby](https://github.com/gatsbyjs/gatsby) | 查看详情 | JavaScript | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
@@ -2483,19 +2579,15 @@
 | cli | [cli/cli](https://github.com/cli/cli) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | shadowsocks-rust | [shadowsocks/shadowsocks-rust](https://github.com/shadowsocks/shadowsocks-rust) | 查看详情 | Rust | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | exercism | [exercism/exercism](https://github.com/exercism/exercism) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| rust-learning | [ctjhoa/rust-learning](https://github.com/ctjhoa/rust-learning) | 查看详情 | Rust | X86/ARM | Linux/macOS/Windows | 文档 | 否 | 中 |
 | rust-postgres | [rust-postgres/rust-postgres](https://github.com/rust-postgres/rust-postgres) | 查看详情 | Rust | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | BBDown | [nilaoda/BBDown](https://github.com/nilaoda/BBDown) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| api-guidelines | [rust-lang/api-guidelines](https://github.com/rust-lang/api-guidelines) | 查看详情 | Rust | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | cargo-edit | [killercup/cargo-edit](https://github.com/killercup/cargo-edit) | 查看详情 | Go | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | router | [vuejs/router](https://github.com/vuejs/router) | 查看详情 | JavaScript | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| javascript-algorithms | [trekhleb/javascript-algorithms](https://github.com/trekhleb/javascript-algorithms) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | pwndbg | [pwndbg/pwndbg](https://github.com/pwndbg/pwndbg) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | pgdoc-cn | [postgres-cn/pgdoc-cn](https://github.com/postgres-cn/pgdoc-cn) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | rust-ffi-omnibus | [shepmaster/rust-ffi-omnibus](https://github.com/shepmaster/rust-ffi-omnibus) | 查看详情 | Rust | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | rust-lang-cheat-sheet | [donbright/rust-lang-cheat-sheet](https://github.com/donbright/rust-lang-cheat-sheet) | 查看详情 | Rust | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | json-to-plantuml | [meteorbites/json-to-plantuml](https://github.com/meteorbites/json-to-plantuml) | 查看详情 | JavaScript | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| kbd-audio | [ggerganov/kbd-audio](https://github.com/ggerganov/kbd-audio) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | element-plus | [element-plus/element-plus](https://github.com/element-plus/element-plus) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | rust-bindgen | [rust-lang/rust-bindgen](https://github.com/rust-lang/rust-bindgen) | 查看详情 | Rust | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | cbindgen | [mozilla/cbindgen](https://github.com/mozilla/cbindgen) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
@@ -2505,8 +2597,6 @@
 | Vim | [VSCodeVim/Vim](https://github.com/VSCodeVim/Vim) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | tock | [tock/tock](https://github.com/tock/tock) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | cargo-watch | [watchexec/cargo-watch](https://github.com/watchexec/cargo-watch) | 查看详情 | Go | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| machine-learning-yearning-cn | [deeplearning-ai/machine-learning-yearning-cn](https://github.com/deeplearning-ai/machine-learning-yearning-cn) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 文档 | 否 | 中 |
-| rust-ffmpeg | [zmwangx/rust-ffmpeg](https://github.com/zmwangx/rust-ffmpeg) | 查看详情 | Rust | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | timely-dataflow | [TimelyDataflow/timely-dataflow](https://github.com/TimelyDataflow/timely-dataflow) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | DSView | [DreamSourceLab/DSView](https://github.com/DreamSourceLab/DSView) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | rust-blog | [pretzelhammer/rust-blog](https://github.com/pretzelhammer/rust-blog) | 查看详情 | Rust | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
@@ -2530,7 +2620,6 @@
 | pastel | [sharkdp/pastel](https://github.com/sharkdp/pastel) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | introduction-to-bash-scripting | [bobbyiliev/introduction-to-bash-scripting](https://github.com/bobbyiliev/introduction-to-bash-scripting) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | darkreader | [darkreader/darkreader](https://github.com/darkreader/darkreader) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| perf-book | [nnethercote/perf-book](https://github.com/nnethercote/perf-book) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 文档 | 否 | 中 |
 | vue-sfc | [liweinan/vue-sfc](https://github.com/liweinan/vue-sfc) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | simple_excel_writer | [outersky/simple_excel_writer](https://github.com/outersky/simple_excel_writer) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | foundation-sites | [foundation/foundation-sites](https://github.com/foundation/foundation-sites) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
@@ -2554,10 +2643,8 @@
 | beginners-intro-javascript-node | [microsoft/beginners-intro-javascript-node](https://github.com/microsoft/beginners-intro-javascript-node) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | GuiLite | [idea4good/GuiLite](https://github.com/idea4good/GuiLite) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | calculator | [microsoft/calculator](https://github.com/microsoft/calculator) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| LeetCodeAnimation | [MisterBooo/LeetCodeAnimation](https://github.com/MisterBooo/LeetCodeAnimation) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | FLIF | [FLIF-hub/FLIF](https://github.com/FLIF-hub/FLIF) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | 2048.cpp | [plibither8/2048.cpp](https://github.com/plibither8/2048.cpp) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| cpp-cheat-sheet | [gibsjose/cpp-cheat-sheet](https://github.com/gibsjose/cpp-cheat-sheet) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | TrafficMonitor | [zhongyang219/TrafficMonitor](https://github.com/zhongyang219/TrafficMonitor) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | albert | [albertlauncher/albert](https://github.com/albertlauncher/albert) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | tinytetris | [taylorconor/tinytetris](https://github.com/taylorconor/tinytetris) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
@@ -2570,7 +2657,6 @@
 | dbg-macro | [sharkdp/dbg-macro](https://github.com/sharkdp/dbg-macro) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | netdata | [netdata/netdata](https://github.com/netdata/netdata) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | nebula | [vesoft-inc/nebula](https://github.com/vesoft-inc/nebula) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| awesome-modern-cpp | [rigtorp/awesome-modern-cpp](https://github.com/rigtorp/awesome-modern-cpp) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 资源 | 否 | 中 |
 | fmt | [fmtlib/fmt](https://github.com/fmtlib/fmt) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | muduo | [chenshuo/muduo](https://github.com/chenshuo/muduo) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | libevent | [libevent/libevent](https://github.com/libevent/libevent) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
@@ -2578,23 +2664,16 @@
 | SimpleKernel | [Simple-XX/SimpleKernel](https://github.com/Simple-XX/SimpleKernel) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | goaccess | [allinurl/goaccess](https://github.com/allinurl/goaccess) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | scrcpy | [Genymobile/scrcpy](https://github.com/Genymobile/scrcpy) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| os-tutorial | [cfenollosa/os-tutorial](https://github.com/cfenollosa/os-tutorial) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 文档 | 否 | 中 |
 | C | [TheAlgorithms/C](https://github.com/TheAlgorithms/C) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | ttygif | [icholy/ttygif](https://github.com/icholy/ttygif) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| db_tutorial | [cstack/db_tutorial](https://github.com/cstack/db_tutorial) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 文档 | 否 | 中 |
-| awesome-c-cn | [jobbole/awesome-c-cn](https://github.com/jobbole/awesome-c-cn) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 资源 | 否 | 中 |
 | easy_rust | [Dhghomon/easy_rust](https://github.com/Dhghomon/easy_rust) | 查看详情 | Rust | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | globe | [adamsky/globe](https://github.com/adamsky/globe) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| rsa-guide | [DogtorDoggo/rsa-guide](https://github.com/DogtorDoggo/rsa-guide) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | vue-idle-game | [Couy69/vue-idle-game](https://github.com/Couy69/vue-idle-game) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | bit | [chriswalz/bit](https://github.com/chriswalz/bit) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | vim-mario | [rbtnn/vim-mario](https://github.com/rbtnn/vim-mario) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| diesel-join-example | [trombonehero/diesel-join-example](https://github.com/trombonehero/diesel-join-example) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| the-book-of-secret-knowledge | [trimstray/the-book-of-secret-knowledge](https://github.com/trimstray/the-book-of-secret-knowledge) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 文档 | 否 | 中 |
 | full-stack-fastapi-template | [fastapi/full-stack-fastapi-template](https://github.com/fastapi/full-stack-fastapi-template) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | kiss-raspi | [xuxiaodong/kiss-raspi](https://github.com/xuxiaodong/kiss-raspi) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | Leo-JavaScript | [pingan8787/Leo-JavaScript](https://github.com/pingan8787/Leo-JavaScript) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| dockerfile-hisilicon | [kelvinlawson/dockerfile-hisilicon](https://github.com/kelvinlawson/dockerfile-hisilicon) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | log | [rust-lang/log](https://github.com/rust-lang/log) | 查看详情 | Rust | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | log4rs | [estk/log4rs](https://github.com/estk/log4rs) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | calamine | [tafia/calamine](https://github.com/tafia/calamine) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
@@ -2604,7 +2683,6 @@
 | mpeg2ts | [sile/mpeg2ts](https://github.com/sile/mpeg2ts) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | gots | [Comcast/gots](https://github.com/Comcast/gots) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | go-astits | [asticode/go-astits](https://github.com/asticode/go-astits) | 查看详情 | Go | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| coding-interview-university | [jwasham/coding-interview-university](https://github.com/jwasham/coding-interview-university) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | yara | [VirusTotal/yara](https://github.com/VirusTotal/yara) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | reqwest | [seanmonstar/reqwest](https://github.com/seanmonstar/reqwest) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | cheats.rs | [ralfbiedert/cheats.rs](https://github.com/ralfbiedert/cheats.rs) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
@@ -2623,8 +2701,6 @@
 | wg | [rust-embedded/wg](https://github.com/rust-embedded/wg) | 查看详情 | Rust | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | monotron | [thejpster/monotron](https://github.com/thejpster/monotron) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | linux-conf-au-2019-epaper-badge | [wezm/linux-conf-au-2019-epaper-badge](https://github.com/wezm/linux-conf-au-2019-epaper-badge) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| github-breakout | [SIY1121/github-breakout](https://github.com/SIY1121/github-breakout) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| rocket-diesel-rest-api-example | [liweinan/rocket-diesel-rest-api-example](https://github.com/liweinan/rocket-diesel-rest-api-example) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | Motrix | [agalwood/Motrix](https://github.com/agalwood/Motrix) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | r2d2-diesel | [diesel-rs/r2d2-diesel](https://github.com/diesel-rs/r2d2-diesel) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | FrameworkBenchmarks | [TechEmpower/FrameworkBenchmarks](https://github.com/TechEmpower/FrameworkBenchmarks) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
@@ -2633,7 +2709,6 @@
 | LuLu | [objective-see/LuLu](https://github.com/objective-see/LuLu) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | xsv | [BurntSushi/xsv](https://github.com/BurntSushi/xsv) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | rust-web-diesel-rocket | [nlsnmr/rust-web-diesel-rocket](https://github.com/nlsnmr/rust-web-diesel-rocket) | 查看详情 | Rust | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| kata-containers | [kata-containers/kata-containers](https://github.com/kata-containers/kata-containers) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | postgres | [postgres/postgres](https://github.com/postgres/postgres) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | postgrest | [PostgREST/postgrest](https://github.com/PostgREST/postgrest) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | sysdig | [draios/sysdig](https://github.com/draios/sysdig) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
@@ -2642,13 +2717,11 @@
 | git | [git-for-windows/git](https://github.com/git-for-windows/git) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | rfcs | [rust-lang/rfcs](https://github.com/rust-lang/rfcs) | 查看详情 | Rust | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | Rust-Full-Stack | [steadylearner/Rust-Full-Stack](https://github.com/steadylearner/Rust-Full-Stack) | 查看详情 | Rust | X86/ARM | Linux/macOS/Windows | 文档 | 否 | 中 |
-| rocket-diesel-rest-api-example | [sean3z/rocket-diesel-rest-api-example](https://github.com/sean3z/rocket-diesel-rest-api-example) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | websocat | [vi/websocat](https://github.com/vi/websocat) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | musl | [bminor/musl](https://github.com/bminor/musl) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | rust-musl-builder | [emk/rust-musl-builder](https://github.com/emk/rust-musl-builder) | 查看详情 | Rust | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | GenericMakefile | [mbcrawfo/GenericMakefile](https://github.com/mbcrawfo/GenericMakefile) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | how-to-write-makefile | [seisman/how-to-write-makefile](https://github.com/seisman/how-to-write-makefile) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| Learn-Vim | [iggredible/Learn-Vim](https://github.com/iggredible/Learn-Vim) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | teamocil | [remi/teamocil](https://github.com/remi/teamocil) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | source-code-pro | [adobe-fonts/source-code-pro](https://github.com/adobe-fonts/source-code-pro) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | lemonade-stand | [nayafia/lemonade-stand](https://github.com/nayafia/lemonade-stand) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
@@ -2659,9 +2732,7 @@
 | dmenu | [LukeSmithxyz/dmenu](https://github.com/LukeSmithxyz/dmenu) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | dwm | [LukeSmithxyz/dwm](https://github.com/LukeSmithxyz/dwm) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | LunarVim | [LunarVim/LunarVim](https://github.com/LunarVim/LunarVim) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| mdBook | [rust-lang/mdBook](https://github.com/rust-lang/mdBook) | 查看详情 | Rust | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | too-many-lists | [rust-unofficial/too-many-lists](https://github.com/rust-unofficial/too-many-lists) | 查看详情 | Rust | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| awesome-database-learning | [pingcap/awesome-database-learning](https://github.com/pingcap/awesome-database-learning) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 资源 | 否 | 中 |
 | shadowsocks-qt5 | [shadowsocks/shadowsocks-qt5](https://github.com/shadowsocks/shadowsocks-qt5) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | bottlerocket | [bottlerocket-os/bottlerocket](https://github.com/bottlerocket-os/bottlerocket) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | clojure | [clojure/clojure](https://github.com/clojure/clojure) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
@@ -2672,7 +2743,6 @@
 | ccls | [MaskRay/ccls](https://github.com/MaskRay/ccls) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | vim-fugitive | [tpope/vim-fugitive](https://github.com/tpope/vim-fugitive) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | tools.analyzer | [clojure/tools.analyzer](https://github.com/clojure/tools.analyzer) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| examples | [actix/examples](https://github.com/actix/examples) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | rabbit-escape | [andybalaam/rabbit-escape](https://github.com/andybalaam/rabbit-escape) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | hibernate-orm | [hibernate/hibernate-orm](https://github.com/hibernate/hibernate-orm) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | pdf | [pdf-rs/pdf](https://github.com/pdf-rs/pdf) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
@@ -2683,7 +2753,6 @@
 | promise | [then/promise](https://github.com/then/promise) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | bevy | [bevyengine/bevy](https://github.com/bevyengine/bevy) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | vimspector | [puremourning/vimspector](https://github.com/puremourning/vimspector) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| js-framework-benchmark | [krausest/js-framework-benchmark](https://github.com/krausest/js-framework-benchmark) | 查看详情 | JavaScript | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | lemmy | [LemmyNet/lemmy](https://github.com/LemmyNet/lemmy) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | coc-extensions | [voldikss/coc-extensions](https://github.com/voldikss/coc-extensions) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | vista.vim | [liuchengxu/vista.vim](https://github.com/liuchengxu/vista.vim) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
@@ -2692,7 +2761,6 @@
 | amber | [google/amber](https://github.com/google/amber) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | valhalla | [valhalla/valhalla](https://github.com/valhalla/valhalla) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | taglist.vim | [vim-scripts/taglist.vim](https://github.com/vim-scripts/taglist.vim) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| js-lru | [rsms/js-lru](https://github.com/rsms/js-lru) | 查看详情 | JavaScript | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | Linux-0.11 | [yuan-xy/Linux-0.11](https://github.com/yuan-xy/Linux-0.11) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | ytop | [cjbassi/ytop](https://github.com/cjbassi/ytop) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | fzf.vim | [junegunn/fzf.vim](https://github.com/junegunn/fzf.vim) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
@@ -2713,7 +2781,6 @@
 | ring | [briansmith/ring](https://github.com/briansmith/ring) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | rust-wasm-loader | [ianjsikes/rust-wasm-loader](https://github.com/ianjsikes/rust-wasm-loader) | 查看详情 | Rust | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | coc-rls | [neoclide/coc-rls](https://github.com/neoclide/coc-rls) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| awesome-IntelliJ-IDEA | [xiaoxiunique/awesome-IntelliJ-IDEA](https://github.com/xiaoxiunique/awesome-IntelliJ-IDEA) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 资源 | 否 | 中 |
 | command-t | [wincent/command-t](https://github.com/wincent/command-t) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | OSX-KVM | [kholia/OSX-KVM](https://github.com/kholia/OSX-KVM) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | qemu | [qemu/qemu](https://github.com/qemu/qemu) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
@@ -2735,16 +2802,13 @@
 | vue-cli | [vuejs/vue-cli](https://github.com/vuejs/vue-cli) | 查看详情 | JavaScript | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | nom | [rust-bakery/nom](https://github.com/rust-bakery/nom) | 查看详情 | Rust | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | ncspot | [hrkfdn/ncspot](https://github.com/hrkfdn/ncspot) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| fucking-algorithm | [labuladong/fucking-algorithm](https://github.com/labuladong/fucking-algorithm) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | json | [serde-rs/json](https://github.com/serde-rs/json) | 查看详情 | JavaScript | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| Front-end-Developer-Interview-Questions | [h5bp/Front-end-Developer-Interview-Questions](https://github.com/h5bp/Front-end-Developer-Interview-Questions) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | r2d2 | [sfackler/r2d2](https://github.com/sfackler/r2d2) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | cs140e-20win | [dddrrreee/cs140e-20win](https://github.com/dddrrreee/cs140e-20win) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | diesel_demo | [liweinan/diesel_demo](https://github.com/liweinan/diesel_demo) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 文档 | 否 | 中 |
 | archive-program | [github/archive-program](https://github.com/github/archive-program) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | Kingfisher | [onevcat/Kingfisher](https://github.com/onevcat/Kingfisher) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | vue-objccn | [halfrost/vue-objccn](https://github.com/halfrost/vue-objccn) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| LeetCode-Go | [halfrost/LeetCode-Go](https://github.com/halfrost/LeetCode-Go) | 查看详情 | Go | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | nphysics | [dimforge/nphysics](https://github.com/dimforge/nphysics) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | vocalremover | [sharki13/vocalremover](https://github.com/sharki13/vocalremover) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | RustFFT | [awelkie/RustFFT](https://github.com/awelkie/RustFFT) | 查看详情 | Rust | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
@@ -2768,9 +2832,7 @@
 | scummvm | [scummvm/scummvm](https://github.com/scummvm/scummvm) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | rust_and_cmake | [liweinan/rust_and_cmake](https://github.com/liweinan/rust_and_cmake) | 查看详情 | Rust | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | rust-playground | [rust-lang/rust-playground](https://github.com/rust-lang/rust-playground) | 查看详情 | Rust | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| xbook2 | [hzcx998/xbook2](https://github.com/hzcx998/xbook2) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 文档 | 否 | 中 |
 | circe | [circe/circe](https://github.com/circe/circe) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| wireshark-cheatsheet | [security-cheatsheet/wireshark-cheatsheet](https://github.com/security-cheatsheet/wireshark-cheatsheet) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | vite | [vitejs/vite](https://github.com/vitejs/vite) | 查看详情 | JavaScript | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | ozzo-validation | [go-ozzo/ozzo-validation](https://github.com/go-ozzo/ozzo-validation) | 查看详情 | Go | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | tiper-js | [carlelieser/tiper-js](https://github.com/carlelieser/tiper-js) | 查看详情 | JavaScript | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
@@ -2787,7 +2849,6 @@
 | vue-loader | [vuejs/vue-loader](https://github.com/vuejs/vue-loader) | 查看详情 | JavaScript | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | wasm-bindgen | [wasm-bindgen/wasm-bindgen](https://github.com/wasm-bindgen/wasm-bindgen) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | llvm-project | [llvm/llvm-project](https://github.com/llvm/llvm-project) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| hello-algorithm | [geekxh/hello-algorithm](https://github.com/geekxh/hello-algorithm) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | riscv-edk2 | [riscvarchive/riscv-edk2](https://github.com/riscvarchive/riscv-edk2) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | webpack | [webpack/webpack](https://github.com/webpack/webpack) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | deno | [denoland/deno](https://github.com/denoland/deno) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
@@ -2799,10 +2860,8 @@
 | tui-rs | [fdehau/tui-rs](https://github.com/fdehau/tui-rs) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | podman | [containers/podman](https://github.com/containers/podman) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | packer | [hashicorp/packer](https://github.com/hashicorp/packer) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| awesome-embedded-rust | [rust-embedded/awesome-embedded-rust](https://github.com/rust-embedded/awesome-embedded-rust) | 查看详情 | Rust | X86/ARM | Linux/macOS/Windows | 资源 | 否 | 中 |
 | awesomefluttertips | [erluxman/awesomefluttertips](https://github.com/erluxman/awesomefluttertips) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 资源 | 否 | 中 |
 | gulp | [gulpjs/gulp](https://github.com/gulpjs/gulp) | 查看详情 | JavaScript | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| rust-book-chinese | [KaiserY/rust-book-chinese](https://github.com/KaiserY/rust-book-chinese) | 查看详情 | Rust | X86/ARM | Linux/macOS/Windows | 文档 | 否 | 中 |
 | trpl-zh-cn | [KaiserY/trpl-zh-cn](https://github.com/KaiserY/trpl-zh-cn) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | octant | [vmware-archive/octant](https://github.com/vmware-archive/octant) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | shoelace | [shoelace-style/shoelace](https://github.com/shoelace-style/shoelace) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
@@ -2813,13 +2872,11 @@
 | easy-mock | [easy-mock/easy-mock](https://github.com/easy-mock/easy-mock) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | websocketpp | [zaphoyd/websocketpp](https://github.com/zaphoyd/websocketpp) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | websocket | [gorilla/websocket](https://github.com/gorilla/websocket) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| blockchain-tutorial | [liuchengxu/blockchain-tutorial](https://github.com/liuchengxu/blockchain-tutorial) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 文档 | 否 | 中 |
 | space-vim | [liuchengxu/space-vim](https://github.com/liuchengxu/space-vim) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | hyper | [hyperium/hyper](https://github.com/hyperium/hyper) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | lucet | [bytecodealliance/lucet](https://github.com/bytecodealliance/lucet) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | linux-kernel-module-rust | [fishinabarrel/linux-kernel-module-rust](https://github.com/fishinabarrel/linux-kernel-module-rust) | 查看详情 | Rust | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | wechaty | [wechaty/wechaty](https://github.com/wechaty/wechaty) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| docker-maven-plugin | [fabric8io/docker-maven-plugin](https://github.com/fabric8io/docker-maven-plugin) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | dqlite | [canonical/dqlite](https://github.com/canonical/dqlite) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | EasyOCR | [JaidedAI/EasyOCR](https://github.com/JaidedAI/EasyOCR) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | zsh-autosuggestions | [zsh-users/zsh-autosuggestions](https://github.com/zsh-users/zsh-autosuggestions) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
@@ -2857,7 +2914,6 @@
 | keras-io | [keras-team/keras-io](https://github.com/keras-team/keras-io) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | i-hate-regex | [geongeorge/i-hate-regex](https://github.com/geongeorge/i-hate-regex) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | juniper | [graphql-rust/juniper](https://github.com/graphql-rust/juniper) | 查看详情 | Rust | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| ripgrep | [BurntSushi/ripgrep](https://github.com/BurntSushi/ripgrep) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | ripgrep-all | [phiresky/ripgrep-all](https://github.com/phiresky/ripgrep-all) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | tunnelto | [agrinman/tunnelto](https://github.com/agrinman/tunnelto) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | tree-sitter | [tree-sitter/tree-sitter](https://github.com/tree-sitter/tree-sitter) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
@@ -2893,14 +2949,12 @@
 | quiche | [cloudflare/quiche](https://github.com/cloudflare/quiche) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | vue-admin-better | [zxwk1998/vue-admin-better](https://github.com/zxwk1998/vue-admin-better) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | starship | [starship/starship](https://github.com/starship/starship) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| learnrust | [inancgumus/learnrust](https://github.com/inancgumus/learnrust) | 查看详情 | Rust | X86/ARM | Linux/macOS/Windows | 文档 | 否 | 中 |
 | lsd | [lsd-rs/lsd](https://github.com/lsd-rs/lsd) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | you-get | [soimort/you-get](https://github.com/soimort/you-get) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | puppeteer | [puppeteer/puppeteer](https://github.com/puppeteer/puppeteer) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | opentracing-go | [opentracing/opentracing-go](https://github.com/opentracing/opentracing-go) | 查看详情 | Go | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | vscode-solidity-auditor | [ConsenSysDiligence/vscode-solidity-auditor](https://github.com/ConsenSysDiligence/vscode-solidity-auditor) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | wasm-pack | [drager/wasm-pack](https://github.com/drager/wasm-pack) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| rust-raspberrypi-OS-tutorials | [rust-embedded/rust-raspberrypi-OS-tutorials](https://github.com/rust-embedded/rust-raspberrypi-OS-tutorials) | 查看详情 | Rust | X86/ARM | Linux/macOS/Windows | 文档 | 否 | 中 |
 | kubesphere | [kubesphere/kubesphere](https://github.com/kubesphere/kubesphere) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | fiber | [gofiber/fiber](https://github.com/gofiber/fiber) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | hey | [rakyll/hey](https://github.com/rakyll/hey) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
@@ -2909,14 +2963,12 @@
 | casbin | [casbin/casbin](https://github.com/casbin/casbin) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | deskflow | [deskflow/deskflow](https://github.com/deskflow/deskflow) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | rustfmt | [rust-lang/rustfmt](https://github.com/rust-lang/rustfmt) | 查看详情 | Rust | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| awesome-rust | [rust-unofficial/awesome-rust](https://github.com/rust-unofficial/awesome-rust) | 查看详情 | Rust | X86/ARM | Linux/macOS/Windows | 资源 | 否 | 中 |
 | Rust | [TheAlgorithms/Rust](https://github.com/TheAlgorithms/Rust) | 查看详情 | Rust | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | rust | [tensorflow/rust](https://github.com/tensorflow/rust) | 查看详情 | Rust | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | seafile | [haiwen/seafile](https://github.com/haiwen/seafile) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | terminal | [microsoft/terminal](https://github.com/microsoft/terminal) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | ggez | [ggez/ggez](https://github.com/ggez/ggez) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | faas | [openfaas/faas](https://github.com/openfaas/faas) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| AudioMass | [pkalogiros/AudioMass](https://github.com/pkalogiros/AudioMass) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | b8 | [paladin-t/b8](https://github.com/paladin-t/b8) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | REKCARC-TSC-UHT | [PKUanonym/REKCARC-TSC-UHT](https://github.com/PKUanonym/REKCARC-TSC-UHT) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | solarized | [altercation/solarized](https://github.com/altercation/solarized) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
@@ -2925,12 +2977,8 @@
 | brew | [Homebrew/brew](https://github.com/Homebrew/brew) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | yapi | [YMFE/yapi](https://github.com/YMFE/yapi) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | rustup | [rust-lang/rustup](https://github.com/rust-lang/rustup) | 查看详情 | Rust | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| book | [rust-lang/book](https://github.com/rust-lang/book) | 查看详情 | Rust | X86/ARM | Linux/macOS/Windows | 文档 | 否 | 中 |
-| learngo | [inancgumus/learngo](https://github.com/inancgumus/learngo) | 查看详情 | Go | X86/ARM | Linux/macOS/Windows | 文档 | 否 | 中 |
 | mini-status | [axipo/mini-status](https://github.com/axipo/mini-status) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| Learn-CUDA-Programming | [PacktPublishing/Learn-CUDA-Programming](https://github.com/PacktPublishing/Learn-CUDA-Programming) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | rpcs3 | [RPCS3/rpcs3](https://github.com/RPCS3/rpcs3) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| Realtime_PyAudio_FFT | [aiXander/Realtime_PyAudio_FFT](https://github.com/aiXander/Realtime_PyAudio_FFT) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | manim | [3b1b/manim](https://github.com/3b1b/manim) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | homebrew-core | [Homebrew/homebrew-core](https://github.com/Homebrew/homebrew-core) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | Interactive_Tools | [Machine-Learning-Tokyo/Interactive_Tools](https://github.com/Machine-Learning-Tokyo/Interactive_Tools) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
@@ -2941,13 +2989,10 @@
 | olcPixelGameEngine | [OneLoneCoder/olcPixelGameEngine](https://github.com/OneLoneCoder/olcPixelGameEngine) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | hono | [eclipse-hono/hono](https://github.com/eclipse-hono/hono) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | leptonica | [DanBloomberg/leptonica](https://github.com/DanBloomberg/leptonica) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| learnGitBranching | [pcottle/learnGitBranching](https://github.com/pcottle/learnGitBranching) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 文档 | 否 | 中 |
-| awesome-architecture | [toutiaoio/awesome-architecture](https://github.com/toutiaoio/awesome-architecture) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 资源 | 否 | 中 |
 | bashtop | [aristocratos/bashtop](https://github.com/aristocratos/bashtop) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | little-kid-going-down | [davidyu37/little-kid-going-down](https://github.com/davidyu37/little-kid-going-down) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | fftw3 | [FFTW/fftw3](https://github.com/FFTW/fftw3) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | jc | [kellyjonbrazil/jc](https://github.com/kellyjonbrazil/jc) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| react-naive-book-examples | [huzidaha/react-naive-book-examples](https://github.com/huzidaha/react-naive-book-examples) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 文档 | 否 | 中 |
 | nomino | [yaa110/nomino](https://github.com/yaa110/nomino) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | react-slick | [akiran/react-slick](https://github.com/akiran/react-slick) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | libpnet | [libpnet/libpnet](https://github.com/libpnet/libpnet) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
@@ -2980,7 +3025,6 @@
 | Get-my-Arch-Linux | [NiiiKlaus/Get-my-Arch-Linux](https://github.com/NiiiKlaus/Get-my-Arch-Linux) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | react | [duxianwei520/react](https://github.com/duxianwei520/react) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | react | [facebook/react](https://github.com/facebook/react) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 文档 | 否 | 中 |
-| xiaolai.github.io | [xiaolai/xiaolai.github.io](https://github.com/xiaolai/xiaolai.github.io) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | babel | [babel/babel](https://github.com/babel/babel) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | vim-snippets | [honza/vim-snippets](https://github.com/honza/vim-snippets) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | gh-ost | [github/gh-ost](https://github.com/github/gh-ost) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
@@ -3006,10 +3050,7 @@
 | poi | [apache/poi](https://github.com/apache/poi) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | tmux | [tmux/tmux](https://github.com/tmux/tmux) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | spaceship-prompt | [spaceship-prompt/spaceship-prompt](https://github.com/spaceship-prompt/spaceship-prompt) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| chrome-headless-browser-docker | [yukinying/chrome-headless-browser-docker](https://github.com/yukinying/chrome-headless-browser-docker) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | debug | [debug-js/debug](https://github.com/debug-js/debug) | 查看详情 | JavaScript | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| awesome-mac | [jaywcjlove/awesome-mac](https://github.com/jaywcjlove/awesome-mac) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 资源 | 否 | 中 |
-| awesome-golang-algorithm | [6boris/awesome-golang-algorithm](https://github.com/6boris/awesome-golang-algorithm) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 资源 | 否 | 中 |
 | glitch-this | [TotallyNotChase/glitch-this](https://github.com/TotallyNotChase/glitch-this) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | gogs | [gogs/gogs](https://github.com/gogs/gogs) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | gdb-frontend | [rohanrhu/gdb-frontend](https://github.com/rohanrhu/gdb-frontend) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
@@ -3024,7 +3065,6 @@
 | model_server | [openvinotoolkit/model_server](https://github.com/openvinotoolkit/model_server) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | generators-with-stylegan2 | [a312863063/generators-with-stylegan2](https://github.com/a312863063/generators-with-stylegan2) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | any-rule | [any86/any-rule](https://github.com/any86/any-rule) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| Leetcode | [luliyucoordinate/Leetcode](https://github.com/luliyucoordinate/Leetcode) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | poetry | [python-poetry/poetry](https://github.com/python-poetry/poetry) | 查看详情 | Python | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | RSSHub | [DIYgod/RSSHub](https://github.com/DIYgod/RSSHub) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | tabulate | [p-ranav/tabulate](https://github.com/p-ranav/tabulate) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
@@ -3038,13 +3078,8 @@
 | unicorn | [unicorn-engine/unicorn](https://github.com/unicorn-engine/unicorn) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | source-code-hunter | [doocs/source-code-hunter](https://github.com/doocs/source-code-hunter) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | hana | [boostorg/hana](https://github.com/boostorg/hana) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| free-programming-books-zh_CN | [Jessicahust/free-programming-books-zh_CN](https://github.com/Jessicahust/free-programming-books-zh_CN) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 文档 | 否 | 中 |
-| books | [Jessicahust/books](https://github.com/Jessicahust/books) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 文档 | 否 | 中 |
 | Wudao-dict | [ChestnutHeng/Wudao-dict](https://github.com/ChestnutHeng/Wudao-dict) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| How-to-Write-a-Technical-Book | [BetterTuring/How-to-Write-a-Technical-Book](https://github.com/BetterTuring/How-to-Write-a-Technical-Book) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | pk_do_not_be_afraid | [CCCSBuffet/pk_do_not_be_afraid](https://github.com/CCCSBuffet/pk_do_not_be_afraid) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| docker-headless-vnc-container | [ConSol/docker-headless-vnc-container](https://github.com/ConSol/docker-headless-vnc-container) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| dockerlabs | [collabnix/dockerlabs](https://github.com/collabnix/dockerlabs) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | v2ray | [233boy/v2ray](https://github.com/233boy/v2ray) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | opencv_contrib | [opencv/opencv_contrib](https://github.com/opencv/opencv_contrib) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | gfw-pac | [zhiyi7/gfw-pac](https://github.com/zhiyi7/gfw-pac) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
@@ -3055,8 +3090,6 @@
 | nps | [ehang-io/nps](https://github.com/ehang-io/nps) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | frp | [fatedier/frp](https://github.com/fatedier/frp) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | OpenUSD | [PixarAnimationStudios/OpenUSD](https://github.com/PixarAnimationStudios/OpenUSD) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| dockerpi | [lukechilds/dockerpi](https://github.com/lukechilds/dockerpi) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| CS-Books | [huihut/CS-Books](https://github.com/huihut/CS-Books) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | Catch2 | [catchorg/Catch2](https://github.com/catchorg/Catch2) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | linux | [raspberrypi/linux](https://github.com/raspberrypi/linux) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | vim-leader-mapper | [dpretet/vim-leader-mapper](https://github.com/dpretet/vim-leader-mapper) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
@@ -3066,31 +3099,18 @@
 | kratos | [go-kratos/kratos](https://github.com/go-kratos/kratos) | 查看详情 | Go | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | linux | [torvalds/linux](https://github.com/torvalds/linux) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | strace | [strace/strace](https://github.com/strace/strace) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| Embedded-Engineering-RoadMap-2018 | [vazeri/Embedded-Engineering-RoadMap-2018](https://github.com/vazeri/Embedded-Engineering-RoadMap-2018) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | libdvbpsi | [mkrufky/libdvbpsi](https://github.com/mkrufky/libdvbpsi) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | PowerShell | [PowerShell/PowerShell](https://github.com/PowerShell/PowerShell) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | powerlevel9k | [Powerlevel9k/powerlevel9k](https://github.com/Powerlevel9k/powerlevel9k) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| cppbestpractices | [cpp-best-practices/cppbestpractices](https://github.com/cpp-best-practices/cppbestpractices) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| interview | [huihut/interview](https://github.com/huihut/interview) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| CppTemplateTutorial | [wuye9036/CppTemplateTutorial](https://github.com/wuye9036/CppTemplateTutorial) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | pistache | [pistacheio/pistache](https://github.com/pistacheio/pistache) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| algorithmic-library | [zimpha/algorithmic-library](https://github.com/zimpha/algorithmic-library) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| cplusplus-_Implementation_Of_Introduction_to_Algorithms | [huaxz1986/cplusplus-_Implementation_Of_Introduction_to_Algorithms](https://github.com/huaxz1986/cplusplus-_Implementation_Of_Introduction_to_Algorithms) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | SFML | [SFML/SFML](https://github.com/SFML/SFML) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| Cplusplus-Concurrency-In-Practice | [forhappy/Cplusplus-Concurrency-In-Practice](https://github.com/forhappy/Cplusplus-Concurrency-In-Practice) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| modern-cpp-tutorial | [changkun/modern-cpp-tutorial](https://github.com/changkun/modern-cpp-tutorial) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 文档 | 否 | 中 |
 | spdlog | [gabime/spdlog](https://github.com/gabime/spdlog) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | json | [nlohmann/json](https://github.com/nlohmann/json) | 查看详情 | JavaScript | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| project-based-learning | [practical-tutorials/project-based-learning](https://github.com/practical-tutorials/project-based-learning) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 文档 | 否 | 中 |
 | indicators | [p-ranav/indicators](https://github.com/p-ranav/indicators) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| paint-github | [muan/paint-github](https://github.com/muan/paint-github) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | PowerToys | [microsoft/PowerToys](https://github.com/microsoft/PowerToys) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | vim-mundo | [simnalamburt/vim-mundo](https://github.com/simnalamburt/vim-mundo) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| awesome-resume | [resumejob/awesome-resume](https://github.com/resumejob/awesome-resume) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 资源 | 否 | 中 |
-| Cpp-Primer | [Mooophy/Cpp-Primer](https://github.com/Mooophy/Cpp-Primer) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | habitica | [HabitRPG/habitica](https://github.com/HabitRPG/habitica) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | lighthouse | [GoogleChrome/lighthouse](https://github.com/GoogleChrome/lighthouse) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| docker.app | [docker-archive-public/docker.app](https://github.com/docker-archive-public/docker.app) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | Viry3D | [stackos/Viry3D](https://github.com/stackos/Viry3D) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | IOTstack | [gcgarner/IOTstack](https://github.com/gcgarner/IOTstack) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | coc-snippets | [neoclide/coc-snippets](https://github.com/neoclide/coc-snippets) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
@@ -3098,15 +3118,10 @@
 | GitGutter | [jisaacks/GitGutter](https://github.com/jisaacks/GitGutter) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | jupyterlab | [jupyterlab/jupyterlab](https://github.com/jupyterlab/jupyterlab) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | jupyterhub | [jupyterhub/jupyterhub](https://github.com/jupyterhub/jupyterhub) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| notebook | [jupyter/notebook](https://github.com/jupyter/notebook) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 文档 | 否 | 中 |
 | jupyter | [jupyter/jupyter](https://github.com/jupyter/jupyter) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| ffmpeg-libav-tutorial | [leandromoreira/ffmpeg-libav-tutorial](https://github.com/leandromoreira/ffmpeg-libav-tutorial) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 文档 | 否 | 中 |
-| digital_video_introduction | [leandromoreira/digital_video_introduction](https://github.com/leandromoreira/digital_video_introduction) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | idea-sourcetrail | [CoatiSoftware/idea-sourcetrail](https://github.com/CoatiSoftware/idea-sourcetrail) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | Sourcetrail | [CoatiSoftware/Sourcetrail](https://github.com/CoatiSoftware/Sourcetrail) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| kubernetes | [kubernetes/kubernetes](https://github.com/kubernetes/kubernetes) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | OpenDiablo2 | [OpenDiablo2/OpenDiablo2](https://github.com/OpenDiablo2/OpenDiablo2) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| Deep-Learning-with-TensorFlow-book | [dragen1860/Deep-Learning-with-TensorFlow-book](https://github.com/dragen1860/Deep-Learning-with-TensorFlow-book) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 文档 | 否 | 中 |
 | stack-inspector | [sharkdp/stack-inspector](https://github.com/sharkdp/stack-inspector) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | bandwhich | [imsnif/bandwhich](https://github.com/imsnif/bandwhich) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | the-way-to-go_ZH_CN | [unknwon/the-way-to-go_ZH_CN](https://github.com/unknwon/the-way-to-go_ZH_CN) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
@@ -3118,33 +3133,23 @@
 | antispy | [mohuihui/antispy](https://github.com/mohuihui/antispy) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | opencv | [opencv/opencv](https://github.com/opencv/opencv) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | CLRS | [CyberZHG/CLRS](https://github.com/CyberZHG/CLRS) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| cpp-cheatsheet | [mortennobel/cpp-cheatsheet](https://github.com/mortennobel/cpp-cheatsheet) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| audiowaveform | [bbc/audiowaveform](https://github.com/bbc/audiowaveform) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | xmake | [xmake-io/xmake](https://github.com/xmake-io/xmake) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | pexpect | [pexpect/pexpect](https://github.com/pexpect/pexpect) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | ultisnips | [SirVer/ultisnips](https://github.com/SirVer/ultisnips) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | shadowsocksr-libev | [shadowsocksr-backup/shadowsocksr-libev](https://github.com/shadowsocksr-backup/shadowsocksr-libev) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | shadowsocks-libev | [shadowsocks/shadowsocks-libev](https://github.com/shadowsocks/shadowsocks-libev) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| spellbook-of-modern-webdev | [dexteryy/spellbook-of-modern-webdev](https://github.com/dexteryy/spellbook-of-modern-webdev) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 文档 | 否 | 中 |
 | trackerslist | [ngosang/trackerslist](https://github.com/ngosang/trackerslist) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | fonts | [powerline/fonts](https://github.com/powerline/fonts) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | ClickHouse | [ClickHouse/ClickHouse](https://github.com/ClickHouse/ClickHouse) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | tcprest | [liweinan/tcprest](https://github.com/liweinan/tcprest) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| DeepLearningWithTF2.0 | [astrumai/DeepLearningWithTF2.0](https://github.com/astrumai/DeepLearningWithTF2.0) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | cinolib | [mlivesu/cinolib](https://github.com/mlivesu/cinolib) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | GitDataV | [HongqingCao/GitDataV](https://github.com/HongqingCao/GitDataV) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| awesome-python | [vinta/awesome-python](https://github.com/vinta/awesome-python) | 查看详情 | Python | X86/ARM | Linux/macOS/Windows | 资源 | 否 | 中 |
-| python-is-cool | [chiphuyen/python-is-cool](https://github.com/chiphuyen/python-is-cool) | 查看详情 | Python | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | hyper | [vercel/hyper](https://github.com/vercel/hyper) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| core-js | [zloirock/core-js](https://github.com/zloirock/core-js) | 查看详情 | JavaScript | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| reverse-interview-zh | [perkfly/reverse-interview-zh](https://github.com/perkfly/reverse-interview-zh) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | friture | [tlecomte/friture](https://github.com/tlecomte/friture) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | chai | [chaisql/chai](https://github.com/chaisql/chai) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | linux-aio | [littledan/linux-aio](https://github.com/littledan/linux-aio) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | json-c | [json-c/json-c](https://github.com/json-c/json-c) | 查看详情 | JavaScript | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | struct2json | [armink/struct2json](https://github.com/armink/struct2json) | 查看详情 | JavaScript | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| json-tutorial | [miloyip/json-tutorial](https://github.com/miloyip/json-tutorial) | 查看详情 | JavaScript | X86/ARM | Linux/macOS/Windows | 文档 | 否 | 中 |
-| cheatsheet-kubernetes-A4 | [dennyzhang/cheatsheet-kubernetes-A4](https://github.com/dennyzhang/cheatsheet-kubernetes-A4) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | conky | [brndnmtthws/conky](https://github.com/brndnmtthws/conky) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | vimium | [philc/vimium](https://github.com/philc/vimium) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | gitpod | [gitpod-io/gitpod](https://github.com/gitpod-io/gitpod) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
@@ -3156,7 +3161,6 @@
 | vim-airline | [vim-airline/vim-airline](https://github.com/vim-airline/vim-airline) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | ncm2 | [ncm2/ncm2](https://github.com/ncm2/ncm2) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | audfprint | [dpwe/audfprint](https://github.com/dpwe/audfprint) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| .config | [theniceboy/.config](https://github.com/theniceboy/.config) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | HarmonyOS | [Awesome-HarmonyOS/HarmonyOS](https://github.com/Awesome-HarmonyOS/HarmonyOS) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | nvim | [theniceboy/nvim](https://github.com/theniceboy/nvim) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | oh-my-fish | [oh-my-fish/oh-my-fish](https://github.com/oh-my-fish/oh-my-fish) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
@@ -3164,5 +3168,4 @@
 | neovim | [neovim/neovim](https://github.com/neovim/neovim) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | vim-galore-zh_cn | [wsdjeg/vim-galore-zh_cn](https://github.com/wsdjeg/vim-galore-zh_cn) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 | spf13-vim | [spf13/spf13-vim](https://github.com/spf13/spf13-vim) | 查看详情 | - | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
-| vim-practice | [oldratlee/vim-practice](https://github.com/oldratlee/vim-practice) | 查看详情 | C | X86/ARM | Linux/macOS/Windows | 工具 | 是 | 中 |
 
