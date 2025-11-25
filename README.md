@@ -190,7 +190,7 @@ script_tool_and_config/
 
 - **IdeaVim** (`nvim/ideavimrc/`): IntelliJ IDEA 系列 IDE 的 Vim 模拟插件配置
   - **配置方式**: 位于 nvim submodule 中
-  - `.ideavimrc`: IdeaVim 配置文件
+  - `.ideavimrc`: IdeaVim 配置文件（已与 basic.lua 同步配置）
   - `install.sh`: 自动安装脚本（支持多平台，包含配置同步和备份）
   - 支持 macOS、Linux、Windows 平台
   - **主要特性**:
@@ -198,6 +198,10 @@ script_tool_and_config/
     - IDEA 动作集成（调试、重构、跳转等）
     - 自定义 Leader 键和快捷键
     - 窗口管理和代码导航
+    - 配置与 Neovim basic.lua 保持一致
+  - **Submodule 使用**:
+    - 首次克隆后需要初始化: `git submodule update --init dotfiles/nvim`
+    - 更新配置: `git submodule update --remote dotfiles/nvim`
   - **注意**: 配置位于 `dotfiles/nvim/ideavimrc/`，通过 nvim submodule 管理
 
 - **SecureCRT** (`secure_crt/`): SSH 客户端配置和自动化脚本
@@ -371,6 +375,29 @@ chmod +x install.sh
 # 3. 更新配置（当 submodule 更新后）
 git submodule update --remote dotfiles/nvim
 cd dotfiles/nvim
+./install.sh
+```
+
+**IdeaVim（位于 nvim submodule 中）**
+```bash
+# 1. 确保 nvim submodule 已初始化
+cd script_tool_and_config
+git submodule update --init dotfiles/nvim
+
+# 2. 安装 IdeaVim 配置
+cd dotfiles/nvim/ideavimrc
+chmod +x install.sh
+./install.sh
+
+# 3. 在 IDE 中安装 IdeaVim 插件
+#    - 打开 Settings / Preferences (Windows/Linux: Ctrl+Alt+S, macOS: Cmd+,)
+#    - 进入 Plugins
+#    - 搜索 "IdeaVim" 并安装
+#    - 重启 IDE
+
+# 4. 更新配置（当 submodule 更新后）
+git submodule update --remote dotfiles/nvim
+cd dotfiles/nvim/ideavimrc
 ./install.sh
 ```
 
