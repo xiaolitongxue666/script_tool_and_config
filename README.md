@@ -188,7 +188,8 @@ script_tool_and_config/
     - 更新配置: `git submodule update --remote dotfiles/nvim`
   - **原始仓库**: https://github.com/xiaolitongxue666/nvim
 
-- **IdeaVim** (`ideavim/`): IntelliJ IDEA 系列 IDE 的 Vim 模拟插件配置
+- **IdeaVim** (`nvim/ideavimrc/`): IntelliJ IDEA 系列 IDE 的 Vim 模拟插件配置
+  - **配置方式**: 位于 nvim submodule 中
   - `.ideavimrc`: IdeaVim 配置文件
   - `install.sh`: 自动安装脚本（支持多平台，包含配置同步和备份）
   - 支持 macOS、Linux、Windows 平台
@@ -197,6 +198,7 @@ script_tool_and_config/
     - IDEA 动作集成（调试、重构、跳转等）
     - 自定义 Leader 键和快捷键
     - 窗口管理和代码导航
+  - **注意**: 配置位于 `dotfiles/nvim/ideavimrc/`，通过 nvim submodule 管理
 
 - **SecureCRT** (`secure_crt/`): SSH 客户端配置和自动化脚本
   - `SecureCRTV8_VM_Login_TOP.vbs`: VBScript 自动化脚本
