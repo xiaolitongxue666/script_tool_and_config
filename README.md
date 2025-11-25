@@ -103,6 +103,8 @@ script_tool_and_config/
 - **编辑器配置**
   - `auto_install_neovim_for_archlinux.sh`: ArchLinux 上自动安装 Neovim
   - `auto_install_fish_and_omf.sh`: 安装 Fish Shell 和 Oh My Fish
+  - `install_neovim.sh`: 安装 Neovim（包含 Windows 配置说明）
+    - **Windows 配置**: 需要设置 `XDG_CONFIG_HOME` 环境变量，详见脚本注释
 
 #### Windows
 - `keyboard_exchange_esc_and_tab/`: 键盘 ESC 和 TAB 键交换配置
@@ -171,6 +173,31 @@ script_tool_and_config/
   - `install.sh`: 自动安装脚本（仅 macOS）
 
 #### 其他工具配置
+- **Neovim** (`nvim/`): 现代化 Neovim 配置（使用 Git Submodule 管理）
+  - **配置方式**: Git Submodule（独立仓库）
+  - `install.sh`: 自动安装脚本（支持多平台，包含配置同步和备份）
+  - 支持 macOS、Linux、Windows 平台
+  - **主要特性**:
+    - 基于 Lua 的现代化配置
+    - lazy.nvim 插件管理器
+    - 代码补全、LSP 支持、语法高亮
+    - 文件浏览、模糊查找、Git 集成
+    - 丰富的 UI 组件和主题
+  - **Submodule 使用**:
+    - 首次克隆后需要初始化: `git submodule update --init dotfiles/nvim`
+    - 更新配置: `git submodule update --remote dotfiles/nvim`
+  - **原始仓库**: https://github.com/xiaolitongxue666/nvim
+
+- **IdeaVim** (`ideavim/`): IntelliJ IDEA 系列 IDE 的 Vim 模拟插件配置
+  - `.ideavimrc`: IdeaVim 配置文件
+  - `install.sh`: 自动安装脚本（支持多平台，包含配置同步和备份）
+  - 支持 macOS、Linux、Windows 平台
+  - **主要特性**:
+    - Vim 键位映射和编辑体验
+    - IDEA 动作集成（调试、重构、跳转等）
+    - 自定义 Leader 键和快捷键
+    - 窗口管理和代码导航
+
 - **SecureCRT** (`secure_crt/`): SSH 客户端配置和自动化脚本
   - `SecureCRTV8_VM_Login_TOP.vbs`: VBScript 自动化脚本
   - `install.sh`: 自动安装脚本（Windows）
@@ -262,12 +289,38 @@ script_tool_and_config/
 
 ## 使用说明
 
+### Git Submodule 说明
+
+本项目使用 Git Submodule 管理部分配置（如 Neovim 配置）。首次克隆项目后需要初始化 submodule：
+
+```bash
+# 初始化所有 submodule
+git submodule update --init --recursive
+
+# 或只初始化特定 submodule
+git submodule update --init dotfiles/nvim
+```
+
+克隆项目时同时克隆 submodule：
+
+```bash
+git clone --recursive git@github.com:your-username/script_tool_and_config.git
+```
+
+更新 submodule：
+
+```bash
+# 更新到远程仓库的最新提交
+git submodule update --remote dotfiles/nvim
+```
+
 ### 基本使用
 
 大多数脚本都可以直接运行，但某些脚本可能需要：
 1. 执行权限：`chmod +x script_name.sh`
 2. 特定环境：某些脚本针对特定操作系统（如 ArchLinux）
 3. 依赖工具：确保已安装所需工具（如 ffmpeg、cmake 等）
+4. Git Submodule：某些配置需要先初始化 submodule（见上方说明）
 
 ### 示例
 
@@ -299,6 +352,23 @@ chmod +x install.sh
 ```bash
 cd dotfiles/bash
 chmod +x install.sh
+./install.sh
+```
+
+**Neovim（使用 Git Submodule）**
+```bash
+# 1. 首次克隆项目后，初始化 submodule
+cd script_tool_and_config
+git submodule update --init --recursive
+
+# 2. 安装 Neovim 配置
+cd dotfiles/nvim
+chmod +x install.sh
+./install.sh
+
+# 3. 更新配置（当 submodule 更新后）
+git submodule update --remote dotfiles/nvim
+cd dotfiles/nvim
 ./install.sh
 ```
 
