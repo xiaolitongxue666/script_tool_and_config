@@ -48,6 +48,8 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
     OS="macos"
 elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
     OS="linux"
+elif [[ "$OSTYPE" =~ ^(msys|mingw|cygwin) ]]; then
+    OS="windows"
 else
     OS="unknown"
 fi
@@ -183,6 +185,36 @@ elif [[ "$OS" == "linux" ]]; then
     # 对应 Fish: alias h_proxy='set -gx http_proxy http://127.0.0.1:1087 ...'
     alias h_proxy='export http_proxy=http://127.0.0.1:1087; export https_proxy=http://127.0.0.1:1087; export all_proxy=socks5://127.0.0.1:1087'
     alias unset_h='unset http_proxy; unset https_proxy; unset all_proxy'
+
+# Windows Git Bash 特定配置
+# 对应 Fish: else if test "$OS" = "Windows" ... end
+elif [[ "$OS" == "windows" ]]; then
+    # 字符编码设置
+    export LANG=zh_CN.UTF-8
+    export LC_ALL=zh_CN.UTF-8
+    export LC_CTYPE=zh_CN.UTF-8
+
+    # 代理配置（Windows 默认使用 7890）
+    # 对应 Fish: alias h_proxy='set -gx http_proxy http://127.0.0.1:7890 ...'
+    alias h_proxy='export http_proxy=http://127.0.0.1:7890; export https_proxy=http://127.0.0.1:7890; export all_proxy=socks5://127.0.0.1:7890'
+    alias unset_h='unset http_proxy; unset https_proxy; unset all_proxy'
+
+    # Windows 路径处理
+    # Git Bash 中的路径转换
+    export MSYS_NO_PATHCONV=1
+
+    # 工具别名（Windows 特定）
+    if command -v explorer.exe &> /dev/null; then
+        alias open='explorer.exe'
+    fi
+
+    # Python 环境（如果使用 uv）
+    if [ -d "/c/Users/$USER/.local/bin" ]; then
+        export PATH="/c/Users/$USER/.local/bin:$PATH"
+    fi
+    if [ -d "/c/Users/$USER/AppData/Roaming/uv/python" ]; then
+        export PATH="/c/Users/$USER/AppData/Roaming/uv/python/cpython-3.10.16-windows-x86_64-none:$PATH"
+    fi
 fi
 
 # ============================================

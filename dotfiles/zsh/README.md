@@ -52,6 +52,20 @@ sudo apt-get install zsh
 sudo yum install zsh
 ```
 
+#### Windows (Git Bash)
+```bash
+# 方法 1: 使用 winget（推荐）
+# 需要 Windows 10 1809+ 和 winget
+winget install --id=MSYS2.MSYS2 -e
+
+# 方法 2: 使用安装脚本（自动使用 winget）
+cd dotfiles/zsh
+chmod +x install.sh
+./install.sh
+```
+
+**注意**: Windows 上需要先安装 [winget](https://aka.ms/getwinget)（Windows Package Manager）。如果未安装，可以从 Microsoft Store 安装 "App Installer"。
+
 ## 安装 Oh My Zsh
 
 Oh My Zsh 是 Zsh 的配置框架，提供了丰富的主题和插件：
@@ -115,6 +129,7 @@ source ~/.zshrc
 配置文件使用条件判断自动检测操作系统并加载对应配置：
 - **macOS**: 自动加载 macOS 特定配置（Homebrew、Autojump、Starship 等）
 - **Linux**: 自动加载 Linux 特定配置（Pyenv 额外配置、代理端口等）
+- **Windows Git Bash**: 自动加载 Windows 特定配置（字符编码、代理端口 7890、路径处理等）
 - **通用配置**: 所有平台共享的别名和设置
 
 ### 功能对齐
@@ -143,7 +158,11 @@ source ~/.zshrc
 #### 代理配置
 - **完整代理支持**: 包括 `http_proxy`、`https_proxy` 和 `all_proxy`（socks5）
 - **快速切换**: 使用 `h_proxy` 启用代理，`unset_h` 禁用代理
-- **平台特定端口**: macOS 默认使用 7890，Linux 默认使用 1087
+- **平台特定端口**: 
+  - macOS: 默认使用 7890
+  - Linux: 默认使用 1087
+  - Windows: 默认使用 7890
+- **安装脚本代理**: 安装脚本自动检测环境变量中的代理设置（`http_proxy` 或 `https_proxy`），默认使用 `localhost:7890`
 
 #### 工具集成
 - **fnm**: 自动检测并加载 fnm (Fast Node Manager)
@@ -315,6 +334,130 @@ omz update
 uninstall_oh_my_zsh
 ```
 
+## Windows Git Bash + Zsh 使用说明
+
+### 前置要求
+
+1. **Git Bash**: 已安装 Git for Windows（包含 Git Bash）
+2. **winget**: Windows 10 1809+ 需要安装 [winget](https://aka.ms/getwinget)（Windows Package Manager）
+   - 从 Microsoft Store 安装 "App Installer" 即可获得 winget
+
+### 安装步骤
+
+1. **使用安装脚本安装**（推荐）:
+```bash
+cd dotfiles/zsh
+chmod +x install.sh
+./install.sh
+```
+
+安装脚本会自动：
+- 检测 Windows Git Bash 环境
+- 使用 winget 安装 zsh（通过 MSYS2）
+- 安装 Oh My Zsh（支持代理）
+- 检测并安装 Nerd Fonts（可选）
+- 同步配置文件
+
+2. **手动安装 zsh**:
+```bash
+# 使用 winget 安装 MSYS2（包含 zsh）
+winget install --id=MSYS2.MSYS2 -e --accept-source-agreements --accept-package-agreements
+
+# 或通过 MSYS2 的 pacman 安装 zsh
+pacman -S --noconfirm zsh
+```
+
+3. **配置 Git Bash 自动启动 zsh**:
+
+在 `~/.bash_profile` 或 `~/.bashrc` 中添加：
+```bash
+# 自动启动 zsh（如果可用）
+[ -t 1 ] && exec zsh
+```
+
+### 字体配置
+
+agnoster 主题需要 Nerd Fonts 才能正确显示图标。安装方法：
+
+#### 方法 1: 使用 winget（推荐）
+```bash
+# 安装 Cascadia Code Nerd Font
+winget install --id=CascadiaCode.NerdFont -e
+
+# 或其他 Nerd Fonts
+winget install --id=NerdFonts.FiraCode
+winget install --id=NerdFonts.Meslo
+```
+
+#### 方法 2: 手动安装
+1. 访问 [Nerd Fonts 官网](https://www.nerdfonts.com/font-downloads)
+2. 下载字体（推荐: Cascadia Code, Fira Code, Meslo）
+3. 安装字体（双击 .ttf 文件，点击"安装"）
+4. 在终端设置中选择安装的字体
+
+#### 配置终端字体
+
+**Windows Terminal**:
+1. 打开设置（Ctrl + ,）
+2. 选择 Git Bash 配置文件
+3. 在"外观"中设置字体为安装的 Nerd Font
+
+**Alacritty**:
+在 `alacritty.toml` 中配置：
+```toml
+[font]
+normal = { family = "Cascadia Code", style = "Regular" }
+```
+
+### 代理配置
+
+安装脚本支持代理设置，默认使用 `localhost:7890`：
+
+#### 方法 1: 环境变量（推荐）
+```bash
+# 在 Git Bash 中设置代理
+export http_proxy=http://127.0.0.1:7890
+export https_proxy=http://127.0.0.1:7890
+
+# 运行安装脚本
+./install.sh
+```
+
+#### 方法 2: 在安装脚本中自动检测
+安装脚本会自动检测环境变量中的 `http_proxy` 或 `https_proxy`，如果未设置则使用默认值 `localhost:7890`。
+
+### 常见问题
+
+#### zsh 未自动启动
+如果 Git Bash 打开后仍然是 bash，检查：
+1. zsh 是否已安装：`which zsh`
+2. `~/.bash_profile` 或 `~/.bashrc` 中是否添加了自动启动配置
+3. 重新打开 Git Bash
+
+#### 字体图标显示异常
+1. 确认已安装 Nerd Fonts
+2. 确认终端字体设置为 Nerd Font
+3. 重启终端
+
+#### winget 命令未找到
+1. 确认 Windows 版本为 10 1809+
+2. 从 Microsoft Store 安装 "App Installer"
+3. 或手动下载安装 [winget](https://aka.ms/getwinget)
+
+#### 代理问题
+如果安装 Oh My Zsh 时网络连接失败：
+1. 检查代理服务是否运行（默认 `localhost:7890`）
+2. 设置环境变量：`export http_proxy=http://127.0.0.1:7890`
+3. 重新运行安装脚本
+
+### Windows 特定配置
+
+配置文件会自动检测 Windows Git Bash 环境并加载以下配置：
+- 字符编码：UTF-8 中文环境
+- 代理端口：7890（与 Git Bash 配置一致）
+- 路径处理：自动处理 Windows 路径转换
+- 工具别名：`open` → `explorer.exe`
+
 ## 参考链接
 
 - [Zsh 官网](https://www.zsh.org/)
@@ -323,3 +466,6 @@ uninstall_oh_my_zsh
 - [Oh My Zsh 主题列表](https://github.com/ohmyzsh/ohmyzsh/wiki/Themes)
 - [Oh My Zsh 插件列表](https://github.com/ohmyzsh/ohmyzsh/wiki/Plugins)
 - [Powerlevel10k](https://github.com/romkatv/powerlevel10k)
+- [Nerd Fonts](https://www.nerdfonts.com/)
+- [winget 文档](https://learn.microsoft.com/en-us/windows/package-manager/winget/)
+- [MSYS2](https://www.msys2.org/)

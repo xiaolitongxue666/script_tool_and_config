@@ -315,19 +315,31 @@
   # from `0.0` to `1.0`.
   # thickness = 0.15
 
-# Shell configuration # Shell 设置
+# Terminal shell configuration # 终端 Shell 设置
 #
-# You can set `shell.program` to the path of your favorite shell, e.g.
-# `/bin/fish`. Entries in `shell.args` are passed unmodified as arguments to the
+# You can set `terminal.shell.program` to the path of your favorite shell, e.g.
+# `/bin/fish`. Entries in `terminal.shell.args` are passed unmodified as arguments to the
 # shell.
 #
 # Default:
 #   - (macOS) /bin/bash --login
 #   - (Linux/BSD) user login shell
 #   - (Windows) powershell
-# [shell]
-#   program = "/bin/bash"
-#   args = ["--login"]
+#
+# Windows: 配置为使用 Git Bash，并自动启动 zsh（如果已安装）
+# 安装脚本会自动检测 Git Bash 路径并配置
+# macOS/Linux: 保持注释状态，使用系统默认配置
+#
+# 注意：安装脚本会根据平台自动配置，无需手动修改
+# 注意：从新版本开始，使用 [terminal.shell] 替代已废弃的 [shell]
+# [terminal.shell]
+#   # macOS/Linux 配置（取消注释以使用）
+#   # program = "/bin/bash"
+#   # args = ["--login"]
+#   
+#   # Windows 配置（安装脚本会自动配置）
+#   # program = "C:\\Program Files\\Git\\usr\\bin\\bash.exe"
+#   # args = ["--login"]
 
 # Startup directory # 启动目录
 #
