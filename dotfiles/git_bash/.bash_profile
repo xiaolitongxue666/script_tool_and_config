@@ -155,40 +155,40 @@ fi
 # 这允许在 Alacritty 中启动 Git Bash 后自动切换到 zsh
 # 注意：exec zsh 会替换当前 shell 进程，所以必须放在所有配置的最后
 # 这样可以确保所有 Git Bash 配置都已加载，然后切换到 zsh
-if command -v zsh &> /dev/null && [ -t 1 ]; then
-    # 检查是否已经在 zsh 中（避免循环）
-    if [ -z "$ZSH_VERSION" ]; then
-        # 确定正确的 HOME 路径
-        CORRECT_HOME=""
-        if [ -n "$USERPROFILE" ]; then
-            # 转换 Windows 路径格式（C:\Users\Administrator -> /c/Users/Administrator）
-            CORRECT_HOME=$(echo "$USERPROFILE" | sed 's|\\|/|g' | sed 's|^\([A-Za-z]\):|/\1|' | tr '[:upper:]' '[:lower:]' | sed 's|^/\([a-z]\)|/\1|')
-            # 确保首字母大写（Users 而不是 users）
-            CORRECT_HOME=$(echo "$CORRECT_HOME" | sed 's|^/\([a-z]\)/\([a-z]*\)|/\1/\u\2|')
-            if [ ! -d "$CORRECT_HOME" ]; then
-                CORRECT_HOME=""
-            fi
-        fi
-        # 如果还是不确定，尝试常见路径
-        if [ -z "$CORRECT_HOME" ] || [ ! -f "$CORRECT_HOME/.zshrc" ]; then
-            for test_home in "/c/Users/Administrator" "/d/Users/Administrator" "/e/Users/Administrator"; do
-                if [ -d "$test_home" ] && [ -f "$test_home/.zshrc" ]; then
-                    CORRECT_HOME="$test_home"
-                    break
-                fi
-            done
-        fi
-        # 如果找到了正确的 HOME，使用它启动 zsh
-        # 关键：在 exec 命令中直接设置 HOME 环境变量
-        if [ -n "$CORRECT_HOME" ] && [ -f "$CORRECT_HOME/.zshrc" ]; then
-            # 使用 env 命令确保 HOME 被正确传递
-            exec env HOME="$CORRECT_HOME" zsh
-        else
-            # 如果找不到正确的 HOME，仍然尝试启动 zsh（可能会失败）
-            exec zsh
-        fi
-    fi
-fi
+# if command -v zsh &> /dev/null && [ -t 1 ]; then
+#     # 检查是否已经在 zsh 中（避免循环）
+#     if [ -z "$ZSH_VERSION" ]; then
+#         # 确定正确的 HOME 路径
+#         CORRECT_HOME=""
+#         if [ -n "$USERPROFILE" ]; then
+#             # 转换 Windows 路径格式（C:\Users\Administrator -> /c/Users/Administrator）
+#             CORRECT_HOME=$(echo "$USERPROFILE" | sed 's|\\|/|g' | sed 's|^\([A-Za-z]\):|/\1|' | tr '[:upper:]' '[:lower:]' | sed 's|^/\([a-z]\)|/\1|')
+#             # 确保首字母大写（Users 而不是 users）
+#             CORRECT_HOME=$(echo "$CORRECT_HOME" | sed 's|^/\([a-z]\)/\([a-z]*\)|/\1/\u\2|')
+#             if [ ! -d "$CORRECT_HOME" ]; then
+#                 CORRECT_HOME=""
+#             fi
+#         fi
+#         # 如果还是不确定，尝试常见路径
+#         if [ -z "$CORRECT_HOME" ] || [ ! -f "$CORRECT_HOME/.zshrc" ]; then
+#             for test_home in "/c/Users/Administrator" "/d/Users/Administrator" "/e/Users/Administrator"; do
+#                 if [ -d "$test_home" ] && [ -f "$test_home/.zshrc" ]; then
+#                     CORRECT_HOME="$test_home"
+#                     break
+#                 fi
+#             done
+#         fi
+#         # 如果找到了正确的 HOME，使用它启动 zsh
+#         # 关键：在 exec 命令中直接设置 HOME 环境变量
+#         if [ -n "$CORRECT_HOME" ] && [ -f "$CORRECT_HOME/.zshrc" ]; then
+#             # 使用 env 命令确保 HOME 被正确传递
+#             exec env HOME="$CORRECT_HOME" zsh
+#         else
+#             # 如果找不到正确的 HOME，仍然尝试启动 zsh（可能会失败）
+#             exec zsh
+#         fi
+#     fi
+# fi
 
 # ============================================
 # 启动配置（可选）
