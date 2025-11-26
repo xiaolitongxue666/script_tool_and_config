@@ -142,6 +142,81 @@ else
 fi
 
 # ============================================
+# 检查并安装 Zsh 和 Oh My Zsh
+# ============================================
+echo ""
+log_info "检查 Zsh 和 Oh My Zsh 安装状态..."
+
+check_zsh_tools() {
+    local zsh_installed=false
+    local ohmyzsh_installed=false
+    
+    # 检查 zsh 是否已安装
+    if command -v zsh &> /dev/null; then
+        ZSH_PATH=$(command -v zsh)
+        log_success "检测到 Zsh: $ZSH_PATH"
+        zsh_installed=true
+    else
+        log_warning "未检测到 Zsh"
+    fi
+    
+    # 检查 oh-my-zsh 是否已安装
+    if [ -d "$HOME/.oh-my-zsh" ]; then
+        log_success "检测到 Oh My Zsh: $HOME/.oh-my-zsh"
+        ohmyzsh_installed=true
+    else
+        log_warning "未检测到 Oh My Zsh"
+    fi
+    
+    # 如果都安装了，直接返回
+    if [ "$zsh_installed" == "true" ] && [ "$ohmyzsh_installed" == "true" ]; then
+        log_success "Zsh 和 Oh My Zsh 已安装，无需额外操作"
+        return 0
+    fi
+    
+    # 如果未安装，自动调用 zsh 安装脚本
+    echo ""
+    log_info "开始自动安装 Zsh 和 Oh My Zsh..."
+    
+    ZSH_INSTALL_SCRIPT="$SCRIPT_DIR/../zsh/install.sh"
+    if [ ! -f "$ZSH_INSTALL_SCRIPT" ]; then
+        log_error "未找到 Zsh 安装脚本: $ZSH_INSTALL_SCRIPT"
+        log_info "请手动运行: cd dotfiles/zsh && ./install.sh"
+        return 1
+    fi
+    
+    # 调用 zsh 安装脚本，设置自动安装标志
+    log_info "运行 Zsh 安装脚本（自动安装 Oh My Zsh）..."
+    export AUTO_INSTALL_OMZ=true
+    export GIT_BASH_INSTALL_CALL=true
+    if bash "$ZSH_INSTALL_SCRIPT"; then
+        log_success "Zsh 安装脚本执行完成"
+        
+        # 再次检查安装状态
+        if command -v zsh &> /dev/null && [ -d "$HOME/.oh-my-zsh" ]; then
+            log_success "Zsh 和 Oh My Zsh 安装成功！"
+            return 0
+        else
+            log_warning "安装可能未完全成功，请手动检查"
+            if ! command -v zsh &> /dev/null; then
+                log_warning "Zsh 未安装或不在 PATH 中"
+            fi
+            if [ ! -d "$HOME/.oh-my-zsh" ]; then
+                log_warning "Oh My Zsh 未安装"
+            fi
+            return 1
+        fi
+    else
+        log_error "Zsh 安装脚本执行失败"
+        log_info "请手动运行: cd dotfiles/zsh && ./install.sh"
+        return 1
+    fi
+}
+
+# 执行工具检查
+check_zsh_tools
+
+# ============================================
 # 安装完成
 # ============================================
 end_script
@@ -152,7 +227,19 @@ echo "配置文件位置:"
 echo "  - .bash_profile: $BASH_PROFILE"
 echo "  - .bashrc: $BASHRC"
 echo ""
-echo "请运行以下命令重新加载配置:"
-echo "  source $BASH_PROFILE"
-echo "或重新打开 Git Bash"
+if command -v zsh &> /dev/null && [ -d "$HOME/.oh-my-zsh" ]; then
+    echo "Zsh 和 Oh My Zsh 已配置完成"
+    echo ""
+    echo "启动流程:"
+    echo "  1. 打开 Alacritty"
+    echo "  2. Alacritty 自动启动 Git Bash"
+    echo "  3. Git Bash 自动切换到 Zsh"
+    echo "  4. Zsh 加载 Oh My Zsh 配置"
+    echo ""
+    echo "请重启 Alacritty 以体验完整流程"
+else
+    echo "请运行以下命令重新加载配置:"
+    echo "  source $BASH_PROFILE"
+    echo "或重新打开 Git Bash"
+fi
 

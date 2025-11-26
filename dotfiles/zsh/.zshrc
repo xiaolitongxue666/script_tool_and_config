@@ -4,6 +4,97 @@
 # 功能对齐: 参考 dotfiles/fish/config.fish，确保功能一致
 
 # ============================================
+# HOME 变量修复（必须在最前面，Git Bash 启动的 zsh 中 HOME 可能不正确）
+# ============================================
+# 检测操作系统
+if [[ "$OSTYPE" =~ ^(msys|mingw|cygwin) ]]; then
+    # Windows Git Bash 环境
+    # 修复 HOME 变量：Git Bash 启动的 zsh 中 HOME 可能被设置为 /home/Administrator
+    # 或者可能是 Windows 路径格式 c:/users/administrator，需要转换为 /c/Users/Administrator
+    # 注意：此修复必须在任何其他配置之前执行，因为 Oh My Zsh 和其他工具依赖正确的 HOME
+    
+    # 首先，如果 HOME 是 Windows 路径格式（c:/users/administrator），转换为 Unix 格式
+    if [[ "$HOME" =~ ^[a-zA-Z]: ]]; then
+        # Windows 路径格式，转换为 Unix 格式
+        # c:/users/administrator -> /c/Users/Administrator
+        # 步骤1: 提取盘符
+        DRIVE_LETTER=$(echo "$HOME" | cut -c1 | tr '[:upper:]' '[:lower:]')
+        # 步骤2: 提取路径部分并转换为小写
+        PATH_AFTER_DRIVE=$(echo "$HOME" | cut -d':' -f2 | sed 's|^/||' | tr '[:upper:]' '[:lower:]')
+        # 步骤3: 将路径的每个目录首字母大写
+        if [ -n "$PATH_AFTER_DRIVE" ]; then
+            # 分割路径为目录数组（使用 zsh 兼容的方法）
+            # 使用 zsh 的数组语法
+            CONVERTED_PATH=""
+            # 使用 zsh 的 (s:/:) 分割语法
+            dirs=(${(s:/:)PATH_AFTER_DRIVE})
+            for dir in "${dirs[@]}"; do
+                if [ -n "$dir" ]; then
+                    # 首字母大写
+                    FIRST_CHAR=$(echo "$dir" | cut -c1 | tr '[:lower:]' '[:upper:]')
+                    REST_CHARS=$(echo "$dir" | cut -c2-)
+                    UPPER_DIR="${FIRST_CHAR}${REST_CHARS}"
+                    if [ -z "$CONVERTED_PATH" ]; then
+                        CONVERTED_PATH="$UPPER_DIR"
+                    else
+                        CONVERTED_PATH="$CONVERTED_PATH/$UPPER_DIR"
+                    fi
+                fi
+            done
+            HOME="/${DRIVE_LETTER}/${CONVERTED_PATH}"
+        else
+            HOME="/${DRIVE_LETTER}"
+        fi
+        export HOME
+    fi
+    
+    # 如果 HOME 不正确，立即修复它
+    if [ "$HOME" = "/home/Administrator" ] || [ ! -d "$HOME" ] || [ ! -f "$HOME/.zshrc" ]; then
+        # 方法1: 从 USERPROFILE 环境变量获取（最可靠）
+        if [ -n "$USERPROFILE" ]; then
+            # 转换 Windows 路径格式（C:\Users\Administrator -> /c/Users/Administrator）
+            WIN_HOME=$(echo "$USERPROFILE" | sed 's|\\|/|g' | sed 's|^\([A-Za-z]\):|/\1|' | tr '[:upper:]' '[:lower:]' | sed 's|^/\([a-z]\)|/\1|')
+            # 确保首字母大写
+            WIN_HOME=$(echo "$WIN_HOME" | sed 's|^/\([a-z]\)/\([a-z]*\)|/\1/\u\2|')
+            if [ -d "$WIN_HOME" ] && [ -f "$WIN_HOME/.zshrc" ]; then
+                export HOME="$WIN_HOME"
+            fi
+        fi
+        # 方法2: 如果还是不对，尝试常见路径
+        if [ "$HOME" = "/home/Administrator" ] || [ ! -f "$HOME/.zshrc" ]; then
+            for test_home in "/c/Users/Administrator" "/d/Users/Administrator" "/e/Users/Administrator"; do
+                if [ -d "$test_home" ] && [ -f "$test_home/.zshrc" ]; then
+                    export HOME="$test_home"
+                    break
+                fi
+            done
+        fi
+        # 方法3: 如果以上方法都失败，尝试从当前脚本位置推断
+        # 注意：这应该在最后尝试，因为可能不准确
+        if [ "$HOME" = "/home/Administrator" ] || [ ! -f "$HOME/.zshrc" ]; then
+            # 尝试从当前工作目录推断
+            if [ -f "/c/Users/Administrator/.zshrc" ]; then
+                export HOME="/c/Users/Administrator"
+            fi
+        fi
+    fi
+fi
+
+# ============================================
+# 字符编码设置（确保中文正确显示）
+# ============================================
+# 检测操作系统
+if [[ "$OSTYPE" =~ ^(msys|mingw|cygwin) ]]; then
+    # Windows Git Bash 环境
+    # 字符编码设置
+    export LANG=zh_CN.UTF-8
+    export LC_ALL=zh_CN.UTF-8
+    export LC_CTYPE=zh_CN.UTF-8
+    # 设置终端编码
+    export TERM=xterm-256color
+fi
+
+# ============================================
 # Oh My Zsh 配置
 # ============================================
 # Oh My Zsh 安装路径
@@ -22,20 +113,35 @@ zstyle ':omz:update' mode disabled
 # ============================================
 # 插件配置
 # ============================================
+# 注意：zsh-autosuggestions 和 zsh-syntax-highlighting 需要单独安装
+# 如果未安装，这些插件会被忽略，不会影响其他功能
 plugins=(
   git
   docker
   kubectl
   z
-  zsh-autosuggestions
-  zsh-syntax-highlighting
+  # zsh-autosuggestions  # 需要安装: git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
+  # zsh-syntax-highlighting  # 需要安装: git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting
 )
 
 # ============================================
 # 加载 Oh My Zsh
 # ============================================
 if [ -d "$ZSH" ]; then
+    # 加载 Oh My Zsh 核心
     source $ZSH/oh-my-zsh.sh
+    
+    # 确保 cli.zsh 被加载（提供 omz 命令）
+    # 显式加载 cli.zsh 以确保 omz 命令可用
+    # 注意：必须在 oh-my-zsh.sh 加载后立即加载
+    if [ -f "$ZSH/lib/cli.zsh" ]; then
+        source "$ZSH/lib/cli.zsh"
+    fi
+    
+    # 验证 Oh My Zsh 是否正确加载
+    if [ -z "$ZSH_VERSION" ]; then
+        echo "警告: Oh My Zsh 可能未正确加载"
+    fi
 else
     echo "警告: Oh My Zsh 未安装，请运行: sh -c \"\$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)\""
 fi
@@ -189,7 +295,7 @@ elif [[ "$OS" == "linux" ]]; then
 # Windows Git Bash 特定配置
 # 对应 Fish: else if test "$OS" = "Windows" ... end
 elif [[ "$OS" == "windows" ]]; then
-    # 字符编码设置
+    # 字符编码设置（已在文件开头设置，这里确保覆盖）
     export LANG=zh_CN.UTF-8
     export LC_ALL=zh_CN.UTF-8
     export LC_CTYPE=zh_CN.UTF-8

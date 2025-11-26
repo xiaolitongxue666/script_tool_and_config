@@ -11,6 +11,25 @@ if [[ ! "$OSTYPE" =~ ^(msys|mingw|cygwin) ]]; then
 fi
 
 # ============================================
+# PATH 配置（MSYS2 zsh 支持）
+# ============================================
+# 如果 MSYS2 已安装，添加其 bin 目录到 PATH
+# 这样可以使用 MSYS2 中的 zsh 和其他工具
+# 此配置由 zsh 安装脚本自动管理
+for msys2_bin in \
+    "/c/msys64/usr/bin" \
+    "/d/msys64/usr/bin" \
+    "/c/Program Files/msys64/usr/bin" \
+    "/d/Program Files/msys64/usr/bin" \
+    "/c/Program Files (x86)/msys64/usr/bin" \
+    "/d/Program Files (x86)/msys64/usr/bin"; do
+    if [ -d "$msys2_bin" ] && [ -f "$msys2_bin/zsh.exe" ]; then
+        export PATH="$msys2_bin:$PATH"
+        break
+    fi
+done
+
+# ============================================
 # 历史记录配置
 # ============================================
 # 自动追加历史记录到文件
@@ -41,6 +60,26 @@ alias unset_h='unset http_proxy; unset https_proxy'
 # ============================================
 # 环境变量配置
 # ============================================
+
+# 确保 HOME 变量正确设置（Windows Git Bash 环境）
+# 在 Git Bash 中，HOME 应该指向 Windows 用户目录
+if [[ "$OSTYPE" =~ ^(msys|mingw|cygwin) ]]; then
+    # 如果 HOME 指向 /home/Administrator，修正为 Windows 实际路径
+    if [ "$HOME" == "/home/Administrator" ] || [ -z "$HOME" ]; then
+        export HOME="/c/Users/Administrator"
+    fi
+    # 确保 HOME 指向正确的 Windows 用户目录
+    if [ ! -d "$HOME" ]; then
+        # 尝试从环境变量获取
+        if [ -n "$USERPROFILE" ]; then
+            # 转换 Windows 路径格式（C:\Users\Administrator -> /c/Users/Administrator）
+            WIN_HOME=$(echo "$USERPROFILE" | sed 's|\\|/|g' | sed 's|^\([A-Za-z]\):|/\1|' | tr '[:upper:]' '[:lower:]' | sed 's|^/\([a-z]\)|/\1|')
+            if [ -d "$WIN_HOME" ]; then
+                export HOME="$WIN_HOME"
+            fi
+        fi
+    fi
+fi
 
 # Google Cloud 项目配置
 export GOOGLE_CLOUD_PROJECT="gen-lang-client-0128654003"
@@ -98,7 +137,9 @@ alias python='python3.10'
 # 这样可以确保在非登录 shell 中也能使用
 
 # Oh My Posh 主题配置
-# 注意：必须放在最后，因为它会初始化提示符
+# 注意：必须在 exec zsh 之前执行，因为它会初始化提示符
+# 但由于我们会切换到 zsh，这个配置实际上不会在 zsh 中生效
+# 如果需要在 zsh 中使用主题，请在 .zshrc 中配置
 if command -v oh-my-posh &> /dev/null; then
     eval "$(oh-my-posh --init --shell bash --config ~/AppData/Local/Programs/oh-my-posh/themes/montys.omp.json)"
 fi
@@ -112,10 +153,40 @@ fi
 # ============================================
 # 如果 zsh 已安装且可用，自动启动 zsh
 # 这允许在 Alacritty 中启动 Git Bash 后自动切换到 zsh
+# 注意：exec zsh 会替换当前 shell 进程，所以必须放在所有配置的最后
+# 这样可以确保所有 Git Bash 配置都已加载，然后切换到 zsh
 if command -v zsh &> /dev/null && [ -t 1 ]; then
     # 检查是否已经在 zsh 中（避免循环）
     if [ -z "$ZSH_VERSION" ]; then
-        exec zsh
+        # 确定正确的 HOME 路径
+        CORRECT_HOME=""
+        if [ -n "$USERPROFILE" ]; then
+            # 转换 Windows 路径格式（C:\Users\Administrator -> /c/Users/Administrator）
+            CORRECT_HOME=$(echo "$USERPROFILE" | sed 's|\\|/|g' | sed 's|^\([A-Za-z]\):|/\1|' | tr '[:upper:]' '[:lower:]' | sed 's|^/\([a-z]\)|/\1|')
+            # 确保首字母大写（Users 而不是 users）
+            CORRECT_HOME=$(echo "$CORRECT_HOME" | sed 's|^/\([a-z]\)/\([a-z]*\)|/\1/\u\2|')
+            if [ ! -d "$CORRECT_HOME" ]; then
+                CORRECT_HOME=""
+            fi
+        fi
+        # 如果还是不确定，尝试常见路径
+        if [ -z "$CORRECT_HOME" ] || [ ! -f "$CORRECT_HOME/.zshrc" ]; then
+            for test_home in "/c/Users/Administrator" "/d/Users/Administrator" "/e/Users/Administrator"; do
+                if [ -d "$test_home" ] && [ -f "$test_home/.zshrc" ]; then
+                    CORRECT_HOME="$test_home"
+                    break
+                fi
+            done
+        fi
+        # 如果找到了正确的 HOME，使用它启动 zsh
+        # 关键：在 exec 命令中直接设置 HOME 环境变量
+        if [ -n "$CORRECT_HOME" ] && [ -f "$CORRECT_HOME/.zshrc" ]; then
+            # 使用 env 命令确保 HOME 被正确传递
+            exec env HOME="$CORRECT_HOME" zsh
+        else
+            # 如果找不到正确的 HOME，仍然尝试启动 zsh（可能会失败）
+            exec zsh
+        fi
     fi
 fi
 

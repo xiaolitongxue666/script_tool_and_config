@@ -87,26 +87,58 @@ fi
 winget_install_zsh() {
     log_info "使用 winget 安装 zsh..."
     
-    # 方法1: 尝试安装 MSYS2（包含 zsh）
+    # 方法1: 检查 MSYS2 是否已安装并包含 zsh
+    log_info "检查 MSYS2 是否已安装..."
+    MSYS2_DIR=""
+    for drive in /c /d /e; do
+        for path in "$drive/msys64" "$drive/Program Files/msys64" "$drive/Program Files (x86)/msys64"; do
+            if [ -d "$path" ] && [ -f "$path/usr/bin/pacman.exe" ]; then
+                MSYS2_DIR="$path"
+                log_success "找到 MSYS2: $MSYS2_DIR"
+                break 2
+            fi
+        done
+    done
+    
+    if [ -n "$MSYS2_DIR" ]; then
+        # 检查 zsh 是否已安装在 MSYS2 中
+        if [ -f "$MSYS2_DIR/usr/bin/zsh.exe" ]; then
+            log_info "MSYS2 中已包含 zsh，配置 zsh 以在 Git Bash 中使用..."
+            
+            # 配置 zsh 以在 Git Bash 中使用
+            configure_zsh_for_gitbash "$MSYS2_DIR"
+            return $?
+        else
+            # 尝试通过 MSYS2 的 pacman 安装 zsh
+            log_info "通过 MSYS2 pacman 安装 zsh..."
+            if "$MSYS2_DIR/usr/bin/pacman.exe" -S --noconfirm zsh 2>&1; then
+                log_success "zsh 安装成功"
+                # 配置 zsh 以在 Git Bash 中使用
+                configure_zsh_for_gitbash "$MSYS2_DIR"
+                return $?
+            else
+                log_warning "通过 pacman 安装 zsh 失败"
+            fi
+        fi
+    fi
+    
+    # 方法2: 尝试安装 MSYS2（如果未安装）
     log_info "尝试安装 MSYS2（包含 zsh）..."
     if winget install --id=MSYS2.MSYS2 -e --accept-source-agreements --accept-package-agreements 2>&1; then
         log_success "MSYS2 安装成功"
         # 等待 MSYS2 安装完成
-        sleep 2
-        # 检查 zsh 是否可用
-        if command -v zsh &> /dev/null; then
-            log_success "zsh 已可用"
-            return 0
-        fi
-    fi
-    
-    # 方法2: 如果 MSYS2 已安装，尝试通过 pacman 安装 zsh
-    if [ -f "/usr/bin/pacman" ]; then
-        log_info "检测到 MSYS2，尝试通过 pacman 安装 zsh..."
-        if pacman -S --noconfirm zsh 2>&1; then
-            log_success "zsh 安装成功"
-            return 0
-        fi
+        sleep 3
+        # 重新查找 MSYS2 目录
+        for drive in /c /d /e; do
+            for path in "$drive/msys64" "$drive/Program Files/msys64" "$drive/Program Files (x86)/msys64"; do
+                if [ -d "$path" ] && [ -f "$path/usr/bin/zsh.exe" ]; then
+                    MSYS2_DIR="$path"
+                    log_success "找到新安装的 MSYS2: $MSYS2_DIR"
+                    configure_zsh_for_gitbash "$MSYS2_DIR"
+                    return $?
+                fi
+            done
+        done
     fi
     
     # 方法3: 手动下载 zsh（如果上述方法失败）
@@ -114,6 +146,95 @@ winget_install_zsh() {
     log_info "方法1: 从 MSYS2 仓库下载 zsh 包"
     log_info "方法2: 使用 Git Bash 自带的包管理器"
     return 1
+}
+
+# ============================================
+# 配置 zsh 以在 Git Bash 中使用（Windows）
+# ============================================
+configure_zsh_for_gitbash() {
+    local msys2_dir="$1"
+    local msys2_bin="$msys2_dir/usr/bin"
+    local git_bin="/usr/bin"
+    
+    if [ ! -d "$msys2_bin" ] || [ ! -f "$msys2_bin/zsh.exe" ]; then
+        log_error "MSYS2 zsh 不存在: $msys2_bin/zsh.exe"
+        return 1
+    fi
+    
+    log_info "配置 zsh 以在 Git Bash 中使用..."
+    
+    # 1. 创建符号链接或复制 zsh
+    if [ ! -f "$git_bin/zsh" ] && [ ! -L "$git_bin/zsh" ]; then
+        log_info "创建 zsh 符号链接..."
+        if ln -s "$msys2_bin/zsh.exe" "$git_bin/zsh" 2>/dev/null; then
+            log_success "zsh 符号链接创建成功"
+        else
+            log_info "符号链接失败，尝试复制..."
+            if cp "$msys2_bin/zsh.exe" "$git_bin/zsh" 2>/dev/null; then
+                log_success "zsh 复制成功"
+            else
+                log_error "无法创建 zsh 链接或复制"
+                return 1
+            fi
+        fi
+    else
+        log_info "zsh 已存在于 $git_bin"
+    fi
+    
+    # 2. 复制依赖的 DLL 文件
+    log_info "复制 zsh 依赖文件..."
+    local deps=("msys-zsh-5.9.dll" "msys-ncursesw6.dll" "msys-readline8.dll")
+    local deps_found=0
+    for dep in "${deps[@]}"; do
+        if [ -f "$msys2_bin/$dep" ]; then
+            if [ ! -f "$git_bin/$dep" ]; then
+                cp "$msys2_bin/$dep" "$git_bin/" 2>/dev/null && \
+                    log_success "已复制: $dep" || \
+                    log_warning "复制失败: $dep"
+            fi
+            deps_found=$((deps_found + 1))
+        else
+            # 尝试查找其他版本的 DLL
+            local dep_pattern=$(echo "$dep" | sed 's/[0-9]/[0-9]/g')
+            local found_dep=$(find "$msys2_bin" -name "$dep_pattern" 2>/dev/null | head -1)
+            if [ -n "$found_dep" ]; then
+                local dep_name=$(basename "$found_dep")
+                if [ ! -f "$git_bin/$dep_name" ]; then
+                    cp "$found_dep" "$git_bin/" 2>/dev/null && \
+                        log_success "已复制: $dep_name" || \
+                        log_warning "复制失败: $dep_name"
+                fi
+                deps_found=$((deps_found + 1))
+            fi
+        fi
+    done
+    
+    if [ $deps_found -eq 0 ]; then
+        log_warning "未找到 zsh 依赖文件，可能需要手动处理"
+    fi
+    
+    # 3. 添加 MSYS2 到 PATH（在 Git Bash 配置中）
+    log_info "配置 PATH 以包含 MSYS2..."
+    local bash_profile="$HOME/.bash_profile"
+    if [ -f "$bash_profile" ] && ! grep -q "$msys2_bin" "$bash_profile" 2>/dev/null; then
+        echo "" >> "$bash_profile"
+        echo "# 添加 MSYS2 zsh 到 PATH（由 zsh 安装脚本自动添加）" >> "$bash_profile"
+        echo "export PATH=\"$msys2_bin:\$PATH\"" >> "$bash_profile"
+        log_success "已添加 MSYS2 到 PATH"
+    elif [ -f "$bash_profile" ]; then
+        log_info "MSYS2 已在 PATH 中"
+    fi
+    
+    # 4. 验证 zsh 是否可用
+    export PATH="$msys2_bin:$PATH"
+    if command -v zsh &> /dev/null; then
+        local zsh_version=$(zsh --version 2>&1 | head -1)
+        log_success "zsh 配置完成: $zsh_version"
+        return 0
+    else
+        log_warning "zsh 配置完成，但当前会话中不可用，请重新打开终端"
+        return 0
+    fi
 }
 
 # ============================================
@@ -141,10 +262,23 @@ fi
 # ============================================
 # 安装 Oh My Zsh
 # ============================================
-echo ""
-read -p "是否安装 Oh My Zsh (OMZ)？(y/n) " -n 1 -r
-echo
-if [[ $REPLY =~ ^[Yy]$ ]]; then
+# 检测是否从 Git Bash 安装脚本调用（自动安装模式）
+AUTO_INSTALL_OMZ="${AUTO_INSTALL_OMZ:-false}"
+if [ "$AUTO_INSTALL_OMZ" == "true" ] || [ -n "$GIT_BASH_INSTALL_CALL" ]; then
+    INSTALL_OMZ=true
+    log_info "检测到自动安装模式，将自动安装 Oh My Zsh"
+else
+    echo ""
+    read -p "是否安装 Oh My Zsh (OMZ)？(y/n) " -n 1 -r
+    echo
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        INSTALL_OMZ=true
+    else
+        INSTALL_OMZ=false
+    fi
+fi
+
+if [ "$INSTALL_OMZ" == "true" ]; then
     log_info "正在安装 Oh My Zsh..."
     if [ -d "$HOME/.oh-my-zsh" ]; then
         log_info "Oh My Zsh 已存在，跳过安装"
@@ -157,10 +291,25 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
             curl_proxy=""
         fi
         
-        if sh -c "$(curl $curl_proxy -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended; then
+        log_info "正在从 GitHub 下载 Oh My Zsh 安装脚本..."
+        if sh -c "$(curl $curl_proxy -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended --keep-zshrc 2>&1; then
             log_success "Oh My Zsh 安装成功"
         else
-            log_warning "Oh My Zsh 安装失败，请检查网络连接或代理设置"
+            log_error "Oh My Zsh 安装失败"
+            log_info "可能的原因："
+            log_info "  1. 网络连接问题"
+            log_info "  2. 代理设置不正确（当前代理: ${PROXY:-未设置}）"
+            log_info "  3. GitHub 访问受限"
+            log_info ""
+            log_info "手动安装方法："
+            log_info "  sh -c \"\$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)\""
+            if [ "$PLATFORM" == "windows" ]; then
+                log_info ""
+                log_info "Windows 用户提示："
+                log_info "  如果网络不通，请确保代理设置正确："
+                log_info "    export http_proxy=http://127.0.0.1:7890"
+                log_info "    export https_proxy=http://127.0.0.1:7890"
+            fi
         fi
     fi
 fi
@@ -264,11 +413,51 @@ if [ "$PLATFORM" == "windows" ]; then
 fi
 
 # ============================================
+# 安装后验证
+# ============================================
+echo ""
+log_info "验证安装结果..."
+
+VERIFICATION_PASSED=true
+
+# 验证 zsh 是否可执行
+if command -v zsh &> /dev/null; then
+    ZSH_VERSION_OUTPUT=$(zsh --version 2>/dev/null || echo "未知版本")
+    log_success "Zsh 已安装: $ZSH_VERSION_OUTPUT"
+else
+    log_error "Zsh 未安装或不在 PATH 中"
+    VERIFICATION_PASSED=false
+fi
+
+# 验证 oh-my-zsh（如果已安装）
+if [ "$INSTALL_OMZ" == "true" ] || [ -d "$HOME/.oh-my-zsh" ]; then
+    if [ -d "$HOME/.oh-my-zsh" ]; then
+        log_success "Oh My Zsh 已安装: $HOME/.oh-my-zsh"
+    else
+        log_warning "Oh My Zsh 未安装（可能安装失败）"
+        VERIFICATION_PASSED=false
+    fi
+fi
+
+# 验证配置文件
+if [ -f "$ZSH_CONFIG_FILE" ]; then
+    log_success "Zsh 配置文件已存在: $ZSH_CONFIG_FILE"
+else
+    log_warning "Zsh 配置文件不存在: $ZSH_CONFIG_FILE"
+    VERIFICATION_PASSED=false
+fi
+
+# ============================================
 # 安装完成
 # ============================================
 end_script
 
-log_success "Zsh 安装和配置完成！"
+if [ "$VERIFICATION_PASSED" == "true" ]; then
+    log_success "Zsh 安装和配置完成！"
+else
+    log_warning "安装完成，但部分验证未通过，请检查上述信息"
+fi
+
 echo ""
 echo "配置文件位置: $ZSH_CONFIG_FILE"
 echo "重新加载配置: source $ZSH_CONFIG_FILE"
@@ -278,5 +467,13 @@ if [ "$PLATFORM" == "windows" ]; then
     echo "Windows Git Bash 使用提示："
     echo "  如果 zsh 未自动启动，请在 ~/.bash_profile 或 ~/.bashrc 中添加："
     echo "    [ -t 1 ] && exec zsh"
+    echo ""
+    if [ "$VERIFICATION_PASSED" == "true" ]; then
+        echo "启动流程："
+        echo "  1. 打开 Alacritty"
+        echo "  2. Alacritty 自动启动 Git Bash"
+        echo "  3. Git Bash 自动切换到 Zsh"
+        echo "  4. Zsh 加载 Oh My Zsh 配置"
+    fi
 fi
 
