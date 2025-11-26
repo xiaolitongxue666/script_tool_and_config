@@ -41,7 +41,8 @@
   # available, otherwise `xterm-256color` is used.
   # 该值用于设置 `$TERM` 环境变量 Alacritty 的每个实例。如果它不存在，alacritty 将
   # 检查本地 terminfo 数据库，如果可用则使用 `alacritty`，否则使用 `xterm-256color`。
-  TERM = "alacritty"
+  # Windows 上通常没有 alacritty terminfo，使用 xterm-256color 作为后备以确保兼容性
+  TERM = "xterm-256color"
 
 # Window configuration
 # 窗口配置
@@ -273,7 +274,8 @@
 
   # When set to `true`, selected text will be copied to the primary clipboard.
   # 当设置为 `true` 时，选中的文本将被复制到主剪贴板。
-  # save_to_clipboard = false
+  # 启用后，鼠标选中文本会自动复制到剪贴板
+  save_to_clipboard = true
 
 # Cursor configuration # 光标配置
 # [cursor]
