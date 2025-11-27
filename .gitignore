@@ -179,6 +179,7 @@ scripts/linux/auto_edit_redis_config/redis.conf.bak
 # Windows 基础工具安装脚本生成的文件
 scripts/windows/system_basic_env/log
 scripts/windows/system_basic_env/path.bak
+scripts/windows/system_basic_env/InstallationLog.txt
 scripts/windows/system_basic_env/*.backup
 
 # ============================================

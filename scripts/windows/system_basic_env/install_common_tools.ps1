@@ -658,15 +658,54 @@ function Get-ProgramVersion {
     # 首先尝试从 winget list 获取版本（最可靠）
     if ($PackageId) {
         try {
-            $wingetList = winget list --id $PackageId --exact 2>&1
-            if ($LASTEXITCODE -eq 0 -and $wingetList) {
-                $versionMatch = $wingetList | Select-String -Pattern "(\d+\.\d+\.\d+[^\s]*)" | Select-Object -First 1
-                if ($versionMatch) {
-                    return $versionMatch.Matches[0].Groups[1].Value
+            $guid = [System.Guid]::NewGuid().ToString('N').Substring(0,8)
+            $stdoutFile = Join-Path $env:TEMP "winget_version_$guid.json"
+            $stderrFile = Join-Path $env:TEMP "winget_version_$guid.err"
+            $arguments = @(
+                "list",
+                "--id", $PackageId,
+                "--exact",
+                "--accept-source-agreements",
+                "--disable-interactivity",
+                "--output", "json"
+            )
+            $process = Start-Process -FilePath "winget" -ArgumentList $arguments -Wait -NoNewWindow -PassThru -RedirectStandardOutput $stdoutFile -RedirectStandardError $stderrFile
+            $jsonText = ""
+            if (Test-Path $stdoutFile) {
+                $jsonText = Get-Content -Path $stdoutFile -Raw -Encoding UTF8 -ErrorAction SilentlyContinue
+                Remove-Item -Path $stdoutFile -Force -ErrorAction SilentlyContinue
+            }
+            if (Test-Path $stderrFile) {
+                $stderrContent = Get-Content -Path $stderrFile -Raw -Encoding UTF8 -ErrorAction SilentlyContinue
+                Remove-Item -Path $stderrFile -Force -ErrorAction SilentlyContinue
+                if ($stderrContent) {
+                    Write-Log "winget list stderr (version): $stderrContent"
+                }
+            }
+            if ($jsonText) {
+                $parsed = $jsonText | ConvertFrom-Json
+                $packages = @()
+                if ($parsed -is [System.Collections.IEnumerable]) {
+                    $packages = $parsed
+                } elseif ($parsed.Packages) {
+                    $packages = $parsed.Packages
+                } elseif ($parsed.Sources) {
+                    foreach ($source in $parsed.Sources) {
+                        if ($source.Packages) {
+                            $packages += $source.Packages
+                        }
+                    }
+                }
+                foreach ($pkg in $packages) {
+                    if ($pkg.PackageIdentifier -eq $PackageId -or $pkg.Name -eq $PackageName) {
+                        if ($pkg.InstalledVersion) {
+                            return $pkg.InstalledVersion
+                        }
+                    }
                 }
             }
         } catch {
-            # 忽略错误，继续尝试其他方法
+            # 忽略错误，回退其他方式
         }
     }
     
@@ -2245,31 +2284,32 @@ function Test-NerdFontsInstalled {
         检查更具体的字体文件名模式
     #>
     $fontsDir = "$env:WINDIR\Fonts"
+    $patterns = @("FiraMono Nerd", "Fira Mono Nerd", "FiraMono NF", "FiraMono-Regular")
     
-    # 检查更具体的字体文件名（Nerd Fonts 的命名模式）
-    $fontPatterns = @(
-        "*FiraMono*Nerd*",
-        "*Fira*Mono*Nerd*",
-        "FiraMono*.ttf",
-        "Fira Mono*.ttf"
-    )
-    
-    foreach ($pattern in $fontPatterns) {
-        $fonts = Get-ChildItem -Path $fontsDir -Filter $pattern -ErrorAction SilentlyContinue
-        if ($fonts -and $fonts.Count -gt 0) {
-            return $true
-        }
-    }
-    
-    # 额外检查：通过字体名称查找（更可靠）
     try {
-        $installedFonts = Get-ChildItem -Path $fontsDir -Filter "*.ttf" -ErrorAction SilentlyContinue | 
-            Where-Object { $_.Name -like "*FiraMono*" -or $_.Name -like "*Fira*Mono*" }
-        if ($installedFonts -and $installedFonts.Count -gt 0) {
-            return $true
+        $fontFiles = Get-ChildItem -Path $fontsDir -Filter "*.ttf" -Force -ErrorAction SilentlyContinue
+        if ($fontFiles) {
+            foreach ($pattern in $patterns) {
+                if ($fontFiles.Name | Where-Object { $_ -like "*$pattern*" }) {
+                    return $true
+                }
+            }
         }
     } catch {
-        # 忽略错误，继续使用文件名检查
+        # 忽略，继续检查注册表
+    }
+    
+    try {
+        $fontReg = Get-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Fonts" -ErrorAction Stop
+        foreach ($property in $fontReg.PSObject.Properties) {
+            foreach ($pattern in $patterns) {
+                if ($property.Name -like "*$pattern*" -or $property.Value -like "*$pattern*") {
+                    return $true
+                }
+            }
+        }
+    } catch {
+        # 忽略
     }
     
     return $false
