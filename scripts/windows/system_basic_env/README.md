@@ -181,6 +181,8 @@ powershell -ExecutionPolicy Bypass -File .\install_common_tools.ps1
 | `-SkipFonts` | 跳过字体安装 | 开关 | False |
 | `-Action` | 操作类型 | `Install`, `Update`, `Uninstall` | `Install` |
 | `-ToolName` | 指定要单独操作的工具名称 | 工具名称（如 `fnm`, `alacritty`） | 空 |
+| `-Msys2Mirror` | 指定 MSYS2 pacman 镜像源（pacman 在代理失败时会自动切换） | 例如 `https://mirrors.tuna.tsinghua.edu.cn/msys2` | 空 |
+| `-GccPreset` | GCC 安装方案：`minimal` 仅安装 gcc/g++/gdb/make 等核心组件，`toolchain` 为完整套件 | `toolchain`, `minimal` | `minimal` |
 
 ### 使用示例
 
@@ -208,6 +210,9 @@ powershell -ExecutionPolicy Bypass -File .\install_common_tools.ps1
 
 # 示例 8: 安装所有工具但跳过字体
 .\install_common_tools.ps1 -SkipFonts
+
+# 示例 9: 使用清华镜像并安装完整 GCC toolchain
+.\install_common_tools.ps1 -Msys2Mirror "https://mirrors.tuna.tsinghua.edu.cn/msys2" -GccPreset toolchain
 ```
 
 ### 运行要求

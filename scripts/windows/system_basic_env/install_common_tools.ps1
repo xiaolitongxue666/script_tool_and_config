@@ -49,7 +49,9 @@ param(
     [ValidateSet("Install", "Update", "Uninstall")]
     [string]$Action = "Install",
     [string]$ToolName = "",
-    [string]$Msys2Mirror = ""
+    [string]$Msys2Mirror = "",
+    [ValidateSet("toolchain", "minimal")]
+    [string]$GccPreset = "minimal"
 )
 
 # 设置编码（在 param 块之后）
@@ -71,6 +73,7 @@ $Script:InstallationReport = @()  # 安装报告：@{Name, Version, Status, Inst
 $Script:CurrentAction = "Install"  # 当前操作类型
 $Script:PathBackedUp = $false  # PATH 是否已备份
 $Script:Msys2MirrorApplied = $false  # 自定义 MSYS2 镜像是否已经生效
+$Script:GccPreset = $GccPreset
 $Script:Msys2Mirror = $Msys2Mirror
 
 # 日志文件路径（与脚本同目录）
@@ -1622,8 +1625,7 @@ function Invoke-Msys2Pacman {
         [string]$Command
     )
     
-    $process = Start-Process -FilePath $BashPath -ArgumentList "-lc", $Command -Wait -NoNewWindow -PassThru
-    return $process.ExitCode
+    return Invoke-Msys2CommandStreaming -BashPath $BashPath -Command $Command -DisplayName "pacman command" -DisableProxy
 }
 
 function Set-MSYS2MirrorConfiguration {
@@ -1711,12 +1713,20 @@ function Invoke-Msys2CommandStreaming {
         [Parameter(Mandatory)]
         [string]$Command,
 
-        [string]$DisplayName = "MSYS2 command"
+        [string]$DisplayName = "MSYS2 command",
+
+        [switch]$DisableProxy
     )
 
     Write-Log "Executing ($DisplayName): $Command"
 
-    $escapedCommand = $Command.Replace('"', '\"')
+    $finalCommand = $Command
+    if ($DisableProxy) {
+        $proxyUnset = @("env", "-u", "http_proxy", "-u", "https_proxy", "-u", "HTTP_PROXY", "-u", "HTTPS_PROXY")
+        $finalCommand = ($proxyUnset + $Command) -join " "
+    }
+
+    $escapedCommand = $finalCommand.Replace('"', '\"')
     $psi = New-Object System.Diagnostics.ProcessStartInfo
     $psi.FileName = $BashPath
     $psi.Arguments = "-lc ""$escapedCommand"""
@@ -1802,10 +1812,10 @@ function Invoke-Msys2FirstTimeSetup {
     
     # Step 1: pacman -Syuu --noconfirm
     $step1Cmd = "yes | pacman -Syuu"
-    $step1Exit = Invoke-Msys2CommandStreaming -BashPath $bash -Command $step1Cmd -DisplayName "pacman -Syuu"
+    $step1Exit = Invoke-Msys2CommandStreaming -BashPath $bash -Command $step1Cmd -DisplayName "pacman -Syuu" -DisableProxy
     if ($step1Exit -ne 0 -and (Apply-MSYS2Mirror -Msys2Root $Msys2Root)) {
         Write-Warning "Step 1 failed with proxy, retrying using custom mirror..."
-        $step1Exit = Invoke-Msys2CommandStreaming -BashPath $bash -Command $step1Cmd -DisplayName "pacman -Syuu (mirror)"
+        $step1Exit = Invoke-Msys2CommandStreaming -BashPath $bash -Command $step1Cmd -DisplayName "pacman -Syuu (mirror)" -DisableProxy
     }
     if ($step1Exit -ne 0) {
         Write-Warning "Step 1 still failed (pacman -Syuu). Continuing, but MSYS2 may already be up to date."
@@ -1816,10 +1826,10 @@ function Invoke-Msys2FirstTimeSetup {
     Start-Sleep -Seconds 5
     
     $step2Cmd = "yes | pacman -Su"
-    $step2Exit = Invoke-Msys2CommandStreaming -BashPath $bash -Command $step2Cmd -DisplayName "pacman -Su"
+    $step2Exit = Invoke-Msys2CommandStreaming -BashPath $bash -Command $step2Cmd -DisplayName "pacman -Su" -DisableProxy
     if ($step2Exit -ne 0 -and (Apply-MSYS2Mirror -Msys2Root $Msys2Root)) {
         Write-Warning "Step 2 failed with proxy, retrying using custom mirror..."
-        $step2Exit = Invoke-Msys2CommandStreaming -BashPath $bash -Command $step2Cmd -DisplayName "pacman -Su (mirror)"
+        $step2Exit = Invoke-Msys2CommandStreaming -BashPath $bash -Command $step2Cmd -DisplayName "pacman -Su (mirror)" -DisableProxy
     }
     if ($step2Exit -ne 0) {
         Write-Warning "Step 2 still failed (pacman -Su). Continuing, but packages may already be up to date."
@@ -1985,12 +1995,25 @@ function Install-MSYS2AndGCC {
     }
     
     # 第3步：安装 GCC 工具链（现在 pacman 应该正常工作了）
-    Write-Info "Step 3/3: Installing GCC toolchain..."
-    $gccCommand = "pacman -S --needed --noconfirm mingw-w64-x86_64-toolchain"
-    $gccExit = Invoke-Msys2CommandStreaming -BashPath $bashPath -Command $gccCommand -DisplayName "pacman -S (gcc)"
+    if ($Script:GccPreset -eq "minimal") {
+        $minimalPackages = @(
+            "mingw-w64-x86_64-gcc",
+            "mingw-w64-x86_64-gcc-libs",
+            "mingw-w64-x86_64-binutils",
+            "mingw-w64-x86_64-make",
+            "mingw-w64-x86_64-gdb"
+        )
+        Write-Info "Step 3/3: Installing GCC toolchain (preset: minimal)..."
+        Write-Info "  Packages: $($minimalPackages -join ', ')"
+        $gccCommand = "pacman -S --needed --noconfirm " + ($minimalPackages -join " ")
+    } else {
+        Write-Info "Step 3/3: Installing GCC toolchain (preset: toolchain)..."
+        $gccCommand = "pacman -S --needed --noconfirm mingw-w64-x86_64-toolchain"
+    }
+    $gccExit = Invoke-Msys2CommandStreaming -BashPath $bashPath -Command $gccCommand -DisplayName "pacman -S (gcc)" -DisableProxy
     if ($gccExit -ne 0 -and (Apply-MSYS2Mirror -Msys2Root $msys2Root)) {
         Write-Warning "GCC installation failed with proxy, retrying using custom mirror..."
-        $gccExit = Invoke-Msys2CommandStreaming -BashPath $bashPath -Command $gccCommand -DisplayName "pacman -S (gcc mirror)"
+        $gccExit = Invoke-Msys2CommandStreaming -BashPath $bashPath -Command $gccCommand -DisplayName "pacman -S (gcc mirror)" -DisableProxy
     }
     if ($gccExit -ne 0) {
         Write-Error "GCC toolchain installation failed (exit code: $gccExit)"
