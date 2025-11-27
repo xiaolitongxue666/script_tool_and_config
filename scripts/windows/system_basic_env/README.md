@@ -45,6 +45,9 @@
   - **注意**：Windows 下使用 alacritty + git bash + oh-my-posh，不使用 starship
 
 ### 开发工具
+- **gcc** - MinGW-w64 GCC 编译器（C/C++ 开发，与 Linux GCC 行为一致）
+- **make** - GNU Make for Windows（构建自动化工具，与 Linux Makefile 兼容）
+- **cmake** - CMake 跨平台构建系统（支持 CMakeLists.txt，与 Linux 无缝共享）
 - **git-delta** - Git diff 增强工具
 - **lazygit** - Git TUI 工具
 - **direnv** - 环境变量管理工具
@@ -532,6 +535,98 @@ notepad .\log
 ```
 
 **注意**：日志文件包含完整的执行记录，包括 winget 的中文输出、返回值等信息，便于问题排查。日志文件已添加到 `.gitignore`，不会被提交到版本控制。
+
+### Q: GCC 安装后如何使用？
+
+GCC（MinGW-w64）安装后会自动添加到 PATH 环境变量中。
+
+**验证安装**：
+```powershell
+# 在 PowerShell 中验证
+gcc --version
+
+# 在 Git Bash 中验证
+gcc --version
+```
+
+**使用示例**：
+```bash
+# 在 Git Bash 中编译 C 程序
+echo -e '#include <stdio.h>\nint main(){puts("Hello, World!");}' > hello.c
+gcc hello.c -o hello
+./hello
+```
+
+**VS Code 配置**：
+如果使用 VS Code 进行 C/C++ 开发，需要配置编译器路径：
+- 设置 `C_Cpp › Default: Compiler Path` 为 `C:\Program Files\mingw64\bin\gcc.exe`
+- 或者使用 `C:\Program Files (x86)\mingw64\bin\gcc.exe`（如果安装在 x86 目录）
+
+**升级 GCC**：
+```powershell
+winget upgrade --id mingw-w64.mingw-w64
+```
+
+**卸载 GCC**：
+```powershell
+winget uninstall --id mingw-w64.mingw-w64
+```
+
+**注意**：
+- GCC 默认安装到 `C:\Program Files\mingw64\bin` 或 `C:\Program Files (x86)\mingw64\bin`
+- 脚本会自动检测并添加到 PATH 环境变量
+- MinGW-w64 的 GCC 与 Linux GCC 行为一致，生成零依赖的 exe 文件
+- 支持 C/C++ 开发，跨平台源码零改动
+
+### Q: Make 和 CMake 安装后如何使用？
+
+Make 和 CMake 安装后会自动添加到 PATH 环境变量中。
+
+**验证安装**：
+```powershell
+# 在 PowerShell 中验证
+make --version
+cmake --version
+
+# 在 Git Bash 中验证
+make --version
+cmake --version
+```
+
+**使用示例**：
+```bash
+# 在 Git Bash 中使用 Make
+make
+make clean
+make install
+
+# 使用 CMake
+cmake -B build
+cmake --build build
+cmake --install build
+```
+
+**路径信息**：
+- **Make**: 默认安装到 `C:\Program Files (x86)\GnuWin32\bin`
+- **CMake**: 默认安装到 `C:\Program Files\CMake\bin`
+- 脚本会自动检测并添加到 PATH 环境变量
+
+**升级**：
+```powershell
+winget upgrade --id GnuWin32.Make
+winget upgrade --id Kitware.CMake
+```
+
+**卸载**：
+```powershell
+winget uninstall --id GnuWin32.Make
+winget uninstall --id Kitware.CMake
+```
+
+**注意**：
+- GNU Make for Windows 与 Linux Makefile 兼容，可直接使用 Linux 项目的 Makefile
+- CMake 支持跨平台构建，CMakeLists.txt 可在 Windows 和 Linux 之间无缝共享
+- 配合 GCC，可实现完整的 C/C++ 开发环境，与 Linux 端命令 100% 对齐
 
 ## 参考
 

@@ -48,7 +48,8 @@ param(
     [switch]$SkipFonts,
     [ValidateSet("Install", "Update", "Uninstall")]
     [string]$Action = "Install",
-    [string]$ToolName = ""
+    [string]$ToolName = "",
+    [string]$Msys2Mirror = ""
 )
 
 # 设置编码（在 param 块之后）
@@ -69,9 +70,12 @@ $Script:SelectedPackages = @()
 $Script:InstallationReport = @()  # 安装报告：@{Name, Version, Status, InstallMethod}
 $Script:CurrentAction = "Install"  # 当前操作类型
 $Script:PathBackedUp = $false  # PATH 是否已备份
+$Script:Msys2MirrorApplied = $false  # 自定义 MSYS2 镜像是否已经生效
+$Script:Msys2Mirror = $Msys2Mirror
 
 # 日志文件路径（与脚本同目录）
 $Script:LogFile = Join-Path $PSScriptRoot "log"
+$Script:LogSyncRoot = New-Object System.Object
 
 # ============================================
 # 日志记录函数（类似 tee，同时输出到控制台和文件）
@@ -145,11 +149,18 @@ function Write-Host-Log {
         [string]$ForegroundColor
     )
     
+    # 构建 Write-Host 的参数（排除 NoNewline，因为要单独处理）
+    $hostParams = @{}
+    if ($ForegroundColor) {
+        $hostParams['ForegroundColor'] = $ForegroundColor
+    }
+    
+    # 输出到控制台
     if ($NoNewline) {
-        Write-Host $Message -NoNewline @PSBoundParameters
+        Write-Host $Message -NoNewline @hostParams
         Write-Log $Message -NoNewline
     } else {
-        Write-Host $Message @PSBoundParameters
+        Write-Host $Message @hostParams
         Write-Log $Message
     }
 }
@@ -232,6 +243,141 @@ function Get-WebRequestParams {
     }
     
     return $params
+}
+
+function Invoke-WebRequestWithProgress {
+    <#
+    .SYNOPSIS
+        带进度条和下载速度显示的下载函数
+    #>
+    param(
+        [Parameter(Mandatory)]
+        [string]$Uri,
+        
+        [Parameter(Mandatory)]
+        [string]$OutFile,
+        
+        [string]$ProxyUrl = ""
+    )
+    
+    try {
+        # 创建 WebClient 对象
+        $webClient = New-Object System.Net.WebClient
+        
+        # 设置代理
+        if ($env:http_proxy) {
+            try {
+                $proxyUri = [System.Uri]$env:http_proxy
+                $webClient.Proxy = [System.Net.WebProxy]::new($proxyUri)
+            } catch {
+                # 代理设置失败，继续
+            }
+        }
+        
+        # 获取文件大小（使用 script 作用域变量，以便在事件处理程序中访问）
+        $webClient.Headers.Add("User-Agent", "Mozilla/5.0")
+        $script:totalBytes = 0
+        try {
+            $response = $webClient.OpenRead($Uri)
+            $script:totalBytes = [System.Convert]::ToInt64($webClient.ResponseHeaders["Content-Length"])
+            $response.Close()
+        } catch {
+            # 无法获取文件大小，继续下载
+        }
+        
+        # 下载进度跟踪（使用 script 作用域变量，以便在事件处理程序中访问）
+        $script:downloadedBytes = 0
+        $script:lastUpdateTime = Get-Date
+        $script:lastDownloadedBytes = 0
+        $script:speed = 0
+        
+        # 注册进度事件
+        $webClient.add_DownloadProgressChanged({
+            param($sender, $e)
+            
+            $script:downloadedBytes = $e.BytesReceived
+            $currentTime = Get-Date
+            $timeElapsed = ($currentTime - $script:lastUpdateTime).TotalSeconds
+            
+            # 计算下载速度（每秒更新一次）
+            if ($timeElapsed -ge 1.0) {
+                $bytesDownloaded = $script:downloadedBytes - $script:lastDownloadedBytes
+                $script:speed = $bytesDownloaded / $timeElapsed
+                $script:lastUpdateTime = $currentTime
+                $script:lastDownloadedBytes = $script:downloadedBytes
+            }
+            
+            # 格式化速度
+            $speedFormatted = if ($script:speed -gt 1MB) {
+                "{0:N2} MB/s" -f ($script:speed / 1MB)
+            } elseif ($script:speed -gt 1KB) {
+                "{0:N2} KB/s" -f ($script:speed / 1KB)
+            } else {
+                "{0:N0} B/s" -f $script:speed
+            }
+            
+            # 格式化已下载大小
+            $downloadedFormatted = if ($script:downloadedBytes -gt 1MB) {
+                "{0:N2} MB" -f ($script:downloadedBytes / 1MB)
+            } elseif ($script:downloadedBytes -gt 1KB) {
+                "{0:N2} KB" -f ($script:downloadedBytes / 1KB)
+            } else {
+                "{0:N0} B" -f $script:downloadedBytes
+            }
+            
+            # 格式化总大小
+            $totalFormatted = if ($script:totalBytes -gt 1MB) {
+                "{0:N2} MB" -f ($script:totalBytes / 1MB)
+            } elseif ($script:totalBytes -gt 1KB) {
+                "{0:N2} KB" -f ($script:totalBytes / 1KB)
+            } else {
+                "{0:N0} B" -f $script:totalBytes
+            }
+            
+            # 计算百分比
+            $percent = if ($script:totalBytes -gt 0) {
+                [Math]::Min(100, [int](($script:downloadedBytes / $script:totalBytes) * 100))
+            } else {
+                0
+            }
+            
+            # 显示进度条
+            $progressBarLength = 50
+            $filledLength = [Math]::Floor($percent / 100 * $progressBarLength)
+            $bar = "█" * $filledLength + "▒" * ($progressBarLength - $filledLength)
+            
+            # 更新进度显示（在同一行）
+            $progressText = "`r  [$bar] $percent% - $downloadedFormatted / $totalFormatted - $speedFormatted"
+            Write-Host -NoNewline $progressText
+            # 注意：日志中不记录每行的进度更新，只记录最终完成状态
+        })
+        
+        # 开始下载
+        Write-Info "Downloading from: $Uri"
+        if ($script:totalBytes -gt 0) {
+            Write-Info "File size: $([Math]::Round($script:totalBytes / 1MB, 2)) MB"
+        }
+        
+        $webClient.DownloadFile($Uri, $OutFile)
+        
+        # 下载完成，换行
+        Write-Host ""
+        Write-Log ""
+        
+        Write-Success "Download completed: $OutFile"
+        return $true
+        
+    } catch {
+        Write-Host ""
+        Write-Log ""
+        Write-Error "Download failed: $_"
+        Write-Log "Download failed: $_"
+        return $false
+    } finally {
+        if ($webClient) {
+            $webClient.Dispose()
+        }
+    }
 }
 
 # ============================================
@@ -393,14 +539,82 @@ function Test-ProgramInstalled {
         [string]$Manager
     )
     
+    # 特殊处理：gcc 使用 MSYS2 检测方式
+    if ($PackageName -eq "gcc") {
+        $msys2Check = Test-MSYS2Installed
+        if ($msys2Check.Installed) {
+            try {
+                $gccVersion = & $msys2Check.GccPath --version 2>&1 | Select-Object -First 1
+                $versionMatch = $gccVersion | Select-String -Pattern "(\d+\.\d+\.\d+[^\s]*)"
+                $version = if ($versionMatch) { $versionMatch.Matches[0].Groups[1].Value } else { "Unknown" }
+                return @{ Installed = $true; Version = $version }
+            } catch {
+                return @{ Installed = $true; Version = "Unknown" }
+            }
+        }
+        return @{ Installed = $false; Version = $null }
+    }
+    
     try {
         if ($Manager -eq "winget") {
-            # 使用 winget list 检测
-            $result = winget list --id $PackageId --exact 2>&1
-            if ($LASTEXITCODE -eq 0 -and $result -match $PackageName) {
-                # 尝试获取版本号
-                $versionMatch = $result | Select-String -Pattern "(\d+\.\d+\.\d+[^\s]*)"
-                $version = if ($versionMatch) { $versionMatch.Matches[0].Groups[1].Value } else { "Unknown" }
+            $guid = [System.Guid]::NewGuid().ToString('N').Substring(0,8)
+            $stdoutFile = Join-Path $env:TEMP "winget_list_$guid.json"
+            $stderrFile = Join-Path $env:TEMP "winget_list_$guid.err"
+            $arguments = @(
+                "list",
+                "--id", $PackageId,
+                "--exact",
+                "--accept-source-agreements",
+                "--disable-interactivity",
+                "--output", "json"
+            )
+            try {
+                $process = Start-Process -FilePath "winget" -ArgumentList $arguments -Wait -NoNewWindow -PassThru -RedirectStandardOutput $stdoutFile -RedirectStandardError $stderrFile
+            } catch {
+                $process = $null
+            }
+            $jsonText = ""
+            if (Test-Path $stdoutFile) {
+                $jsonText = Get-Content -Path $stdoutFile -Raw -Encoding UTF8 -ErrorAction SilentlyContinue
+                Remove-Item -Path $stdoutFile -Force -ErrorAction SilentlyContinue
+            }
+            if (Test-Path $stderrFile) {
+                # 记录但不影响逻辑
+                $stderrContent = Get-Content -Path $stderrFile -Raw -Encoding UTF8 -ErrorAction SilentlyContinue
+                Remove-Item -Path $stderrFile -Force -ErrorAction SilentlyContinue
+                if ($stderrContent) {
+                    Write-Log "winget list stderr: $stderrContent"
+                }
+            }
+            if ($jsonText) {
+                try {
+                    $parsed = $jsonText | ConvertFrom-Json
+                    $packages = @()
+                    if ($parsed -is [System.Collections.IEnumerable]) {
+                        $packages = $parsed
+                    } elseif ($parsed.Packages) {
+                        $packages = $parsed.Packages
+                    } elseif ($parsed.Sources) {
+                        foreach ($source in $parsed.Sources) {
+                            if ($source.Packages) {
+                                $packages += $source.Packages
+                            }
+                        }
+                    }
+                    foreach ($pkg in $packages) {
+                        if ($pkg.PackageIdentifier -eq $PackageId -or $pkg.Name -eq $PackageName) {
+                            $version = if ($pkg.InstalledVersion) { $pkg.InstalledVersion } else { "Unknown" }
+                            return @{ Installed = $true; Version = $version }
+                        }
+                    }
+                } catch {
+                    # JSON 解析失败时回退到文本方式
+                }
+            }
+            # 回退：使用 where 检测可执行文件位置，避免语言差异
+            $pathCheck = Test-ProgramInPath -ProgramName $PackageName
+            if ($pathCheck.Available) {
+                $version = Get-ProgramVersion -PackageName $PackageName -PackageId $PackageId
                 return @{ Installed = $true; Version = $version }
             }
         } elseif ($Manager -eq "chocolatey") {
@@ -527,23 +741,54 @@ function Install-ProgramWinget {
         $arguments = "install --id $PackageId --source winget --silent --accept-source-agreements --accept-package-agreements"
         
         # 捕获 winget 的输出（包括中文输出）
-        $outputFile = Join-Path $env:TEMP "winget_output_$([System.Guid]::NewGuid().ToString('N').Substring(0,8)).txt"
-        $process = Start-Process -FilePath "winget" -ArgumentList $arguments -Wait -NoNewWindow -PassThru -RedirectStandardOutput $outputFile -RedirectStandardError $outputFile
+        # 注意：RedirectStandardOutput 和 RedirectStandardError 不能指向同一个文件
+        $guid = [System.Guid]::NewGuid().ToString('N').Substring(0,8)
+        $stdoutFile = Join-Path $env:TEMP "winget_stdout_$guid.txt"
+        $stderrFile = Join-Path $env:TEMP "winget_stderr_$guid.txt"
         
-        # 读取并记录 winget 的输出
-        if (Test-Path $outputFile) {
-            $wingetOutput = Get-Content -Path $outputFile -Encoding UTF8 -ErrorAction SilentlyContinue
-            if ($wingetOutput) {
-                foreach ($line in $wingetOutput) {
-                    if ($line.Trim()) {
-                        Write-Log $line
-                    }
-                }
-            }
-            Remove-Item -Path $outputFile -Force -ErrorAction SilentlyContinue
+        try {
+            $process = Start-Process -FilePath "winget" -ArgumentList $arguments -Wait -NoNewWindow -PassThru -RedirectStandardOutput $stdoutFile -RedirectStandardError $stderrFile
+        } catch {
+            # 如果重定向失败，回退到不使用重定向的方式
+            Write-Warning "Failed to redirect output, using direct execution: $_"
+            $process = Start-Process -FilePath "winget" -ArgumentList $arguments -Wait -NoNewWindow -PassThru
+            $process = @{ ExitCode = $process.ExitCode }
         }
         
-        if ($process.ExitCode -eq 0 -or $process.ExitCode -eq -1978335189) {
+        # 读取并记录 winget 的输出（合并 stdout 和 stderr）
+        $allOutput = @()
+        if (Test-Path $stdoutFile) {
+            $stdoutContent = Get-Content -Path $stdoutFile -Encoding UTF8 -ErrorAction SilentlyContinue
+            if ($stdoutContent) {
+                $allOutput += $stdoutContent
+            }
+            Remove-Item -Path $stdoutFile -Force -ErrorAction SilentlyContinue
+        }
+        if (Test-Path $stderrFile) {
+            $stderrContent = Get-Content -Path $stderrFile -Encoding UTF8 -ErrorAction SilentlyContinue
+            if ($stderrContent) {
+                $allOutput += $stderrContent
+            }
+            Remove-Item -Path $stderrFile -Force -ErrorAction SilentlyContinue
+        }
+        
+        # 记录所有输出到日志
+        foreach ($line in $allOutput) {
+            if ($line -and $line.Trim()) {
+                Write-Log $line
+            }
+        }
+        
+        # 获取退出代码（处理不同的返回类型）
+        $exitCode = if ($process -is [System.Diagnostics.Process]) {
+            $process.ExitCode
+        } elseif ($null -ne $process.ExitCode) {
+            $process.ExitCode
+        } else {
+            $LASTEXITCODE
+        }
+        
+        if ($exitCode -eq 0 -or $exitCode -eq -1978335189) {
             # 0 = 成功, -1978335189 = 已安装或无需更新
             Write-Success "$PackageName installed successfully"
             Write-Log "True"  # 记录返回值
@@ -592,7 +837,9 @@ function Install-ProgramWinget {
             Write-Log "True"  # 记录返回值
             return $true
         } else {
-            Write-Error "$PackageName installation failed (exit code: $($process.ExitCode))"
+            $errorMsg = "$PackageName installation failed (exit code: $exitCode)"
+            Write-Error $errorMsg
+            Write-Log $errorMsg  # 记录错误信息到日志
             $Script:FailedCount++
             $Script:FailedPackages += $PackageName
             $Script:InstallationReport += @{
@@ -605,7 +852,9 @@ function Install-ProgramWinget {
             return $false
         }
     } catch {
-        Write-Error "$PackageName installation failed: $_"
+        $errorMsg = "$PackageName installation failed: $_"
+        Write-Error $errorMsg
+        Write-Log $errorMsg  # 记录错误信息到日志
         $Script:FailedCount++
         $Script:FailedPackages += $PackageName
         $Script:InstallationReport += @{
@@ -949,6 +1198,11 @@ function Install-Program {
     $wingetId = $Package.WingetId
     $chocoId = $Package.ChocoId
     
+    # 特殊处理：gcc 使用 MSYS2 安装方式
+    if ($packageName -eq "gcc") {
+        return Install-MSYS2AndGCC -PackageName $packageName
+    }
+    
     # 确定使用的包管理器
     $useWinget = $false
     $useChoco = $false
@@ -994,6 +1248,11 @@ function Update-Program {
     $wingetId = $Package.WingetId
     $chocoId = $Package.ChocoId
     
+    # 特殊处理：gcc 使用 MSYS2 更新方式
+    if ($packageName -eq "gcc") {
+        return Update-MSYS2AndGCC -PackageName $packageName
+    }
+    
     # 确定使用的包管理器
     $useWinget = $false
     $useChoco = $false
@@ -1038,6 +1297,11 @@ function Uninstall-Program {
     $packageName = $Package.Name
     $wingetId = $Package.WingetId
     $chocoId = $Package.ChocoId
+    
+    # 特殊处理：gcc 使用 MSYS2 卸载方式
+    if ($packageName -eq "gcc") {
+        return Uninstall-MSYS2AndGCC -PackageName $packageName
+    }
     
     # 确定使用的包管理器
     $useWinget = $false
@@ -1343,6 +1607,612 @@ function Test-ProgramInPath {
 }
 
 # ============================================
+# MSYS2 和 GCC 安装函数
+# ============================================
+function Invoke-Msys2Pacman {
+    <#
+    .SYNOPSIS
+        执行 MSYS2 pacman 命令的辅助函数
+    #>
+    param(
+        [Parameter(Mandatory)]
+        [string]$BashPath,
+        
+        [Parameter(Mandatory)]
+        [string]$Command
+    )
+    
+    $process = Start-Process -FilePath $BashPath -ArgumentList "-lc", $Command -Wait -NoNewWindow -PassThru
+    return $process.ExitCode
+}
+
+function Set-MSYS2MirrorConfiguration {
+    <#
+    .SYNOPSIS
+        配置 MSYS2 使用自定义镜像源
+    #>
+    param(
+        [Parameter(Mandatory)]
+        [string]$Msys2Root,
+        [Parameter(Mandatory)]
+        [string]$MirrorUrl
+    )
+
+    if (-not (Test-Path $Msys2Root)) {
+        Write-Warning "MSYS2 root path not found when configuring mirror: $Msys2Root"
+        return
+    }
+
+    $cleanMirror = if ($MirrorUrl.EndsWith("/")) { $MirrorUrl.TrimEnd("/") } else { $MirrorUrl }
+    $mirrorFiles = @(
+        @{ Path = "etc\pacman.d\mirrorlist.mingw64"; Suffix = "/mingw/x86_64" },
+        @{ Path = "etc\pacman.d\mirrorlist.mingw32"; Suffix = "/mingw/i686" },
+        @{ Path = "etc\pacman.d\mirrorlist.msys";     Suffix = "/msys/$arch" }
+    )
+
+    foreach ($entry in $mirrorFiles) {
+        $target = Join-Path $Msys2Root $entry.Path
+        if (-not (Test-Path $target)) {
+            continue
+        }
+
+        try {
+            $backupPath = "$target.backup"
+            if (-not (Test-Path $backupPath)) {
+                Copy-Item -Path $target -Destination $backupPath -Force -ErrorAction SilentlyContinue
+            }
+
+            $suffix = $entry.Suffix.Replace("$arch", "x86_64")
+            $content = @()
+            $content += "## Generated by install_common_tools.ps1"
+            $content += "## Original file backed up to $backupPath"
+            $content += "Server = $cleanMirror$suffix"
+            Set-Content -Path $target -Value $content -Encoding UTF8
+            Write-Info "Configured MSYS2 mirror for $($entry.Path) -> $cleanMirror$suffix"
+        } catch {
+            Write-Warning "Failed to configure MSYS2 mirror for $($entry.Path): $_"
+        }
+    }
+}
+
+function Apply-MSYS2Mirror {
+    <#
+    .SYNOPSIS
+        在需要时应用自定义 MSYS2 镜像（只执行一次）
+    #>
+    param(
+        [Parameter(Mandatory)]
+        [string]$Msys2Root
+    )
+
+    if (-not $Script:Msys2Mirror) {
+        return $false
+    }
+
+    if ($Script:Msys2MirrorApplied) {
+        return $false
+    }
+
+    Write-Info "Applying MSYS2 mirror: $Script:Msys2Mirror"
+    Set-MSYS2MirrorConfiguration -Msys2Root $Msys2Root -MirrorUrl $Script:Msys2Mirror
+    $Script:Msys2MirrorApplied = $true
+    return $true
+}
+
+function Invoke-Msys2CommandStreaming {
+    <#
+    .SYNOPSIS
+        执行 MSYS2 命令并实时输出到控制台与日志
+    #>
+    param(
+        [Parameter(Mandatory)]
+        [string]$BashPath,
+
+        [Parameter(Mandatory)]
+        [string]$Command,
+
+        [string]$DisplayName = "MSYS2 command"
+    )
+
+    Write-Log "Executing ($DisplayName): $Command"
+
+    $escapedCommand = $Command.Replace('"', '\"')
+    $psi = New-Object System.Diagnostics.ProcessStartInfo
+    $psi.FileName = $BashPath
+    $psi.Arguments = "-lc ""$escapedCommand"""
+    $psi.RedirectStandardOutput = $true
+    $psi.RedirectStandardError = $true
+    $psi.UseShellExecute = $false
+    $psi.CreateNoWindow = $true
+    $psi.StandardOutputEncoding = [System.Text.Encoding]::UTF8
+    $psi.StandardErrorEncoding = [System.Text.Encoding]::UTF8
+
+    $process = New-Object System.Diagnostics.Process
+    $process.StartInfo = $psi
+
+    $logPath = $Script:LogFile
+    $syncRoot = $Script:LogSyncRoot
+
+    try {
+        $null = $process.Start()
+        $stdout = $process.StandardOutput
+        $stderr = $process.StandardError
+
+        while (-not $process.HasExited -or -not $stdout.EndOfStream -or -not $stderr.EndOfStream) {
+            while (-not $stdout.EndOfStream) {
+                $line = $stdout.ReadLine()
+                if ($null -ne $line) {
+                    [Console]::WriteLine($line)
+                    [System.Threading.Monitor]::Enter($syncRoot)
+                    try {
+                        [System.IO.File]::AppendAllText($logPath, $line + [Environment]::NewLine, [System.Text.Encoding]::UTF8)
+                    } finally {
+                        [System.Threading.Monitor]::Exit($syncRoot)
+                    }
+                }
+            }
+            while (-not $stderr.EndOfStream) {
+                $line = $stderr.ReadLine()
+                if ($null -ne $line) {
+                    [Console]::WriteLine($line)
+                    [System.Threading.Monitor]::Enter($syncRoot)
+                    try {
+                        [System.IO.File]::AppendAllText($logPath, $line + [Environment]::NewLine, [System.Text.Encoding]::UTF8)
+                    } finally {
+                        [System.Threading.Monitor]::Exit($syncRoot)
+                    }
+                }
+            }
+            Start-Sleep -Milliseconds 50
+        }
+
+        $process.WaitForExit()
+        Write-Log "($DisplayName) exited with code: $($process.ExitCode)"
+        return $process.ExitCode
+    } catch {
+        Write-Error ("Failed to execute {0}: {1}" -f $DisplayName, $_)
+        Write-Log ("Failed to execute {0}: {1}" -f $DisplayName, $_)
+        return 1
+    } finally {
+        if ($process) {
+            $process.Dispose()
+        }
+    }
+}
+
+function Invoke-Msys2FirstTimeSetup {
+    <#
+    .SYNOPSIS
+        MSYS2 首次初始化（解决残缺 pacman 问题）
+        这是 MSYS2 安装后必须执行的一次性初始化流程
+    #>
+    param(
+        [string]$Msys2Root = "C:\msys64"
+    )
+    
+    $bash = Join-Path $Msys2Root "usr\bin\bash.exe"
+    if (-not (Test-Path $bash)) {
+        Write-Error "MSYS2 bash not found at $bash"
+        Write-Log "MSYS2 bash not found at $bash"
+        return $false
+    }
+    
+    Write-Info "Running official MSYS2 first-time initialization (this may take 3-8 minutes)..."
+    Write-Log "Running official MSYS2 first-time initialization (this may take 3-8 minutes)..."
+    
+    # Step 1: pacman -Syuu --noconfirm
+    $step1Cmd = "yes | pacman -Syuu"
+    $step1Exit = Invoke-Msys2CommandStreaming -BashPath $bash -Command $step1Cmd -DisplayName "pacman -Syuu"
+    if ($step1Exit -ne 0 -and (Apply-MSYS2Mirror -Msys2Root $Msys2Root)) {
+        Write-Warning "Step 1 failed with proxy, retrying using custom mirror..."
+        $step1Exit = Invoke-Msys2CommandStreaming -BashPath $bash -Command $step1Cmd -DisplayName "pacman -Syuu (mirror)"
+    }
+    if ($step1Exit -ne 0) {
+        Write-Warning "Step 1 still failed (pacman -Syuu). Continuing, but MSYS2 may already be up to date."
+    }
+    
+    # Step 2: pacman -Su --noconfirm
+    Write-Info "Waiting for pacman update to take effect (restarting bash process)..."
+    Start-Sleep -Seconds 5
+    
+    $step2Cmd = "yes | pacman -Su"
+    $step2Exit = Invoke-Msys2CommandStreaming -BashPath $bash -Command $step2Cmd -DisplayName "pacman -Su"
+    if ($step2Exit -ne 0 -and (Apply-MSYS2Mirror -Msys2Root $Msys2Root)) {
+        Write-Warning "Step 2 failed with proxy, retrying using custom mirror..."
+        $step2Exit = Invoke-Msys2CommandStreaming -BashPath $bash -Command $step2Cmd -DisplayName "pacman -Su (mirror)"
+    }
+    if ($step2Exit -ne 0) {
+        Write-Warning "Step 2 still failed (pacman -Su). Continuing, but packages may already be up to date."
+    }
+    
+    Write-Success "MSYS2 first-time setup completed (proxy first, mirror fallback if needed)"
+    Write-Log "MSYS2 first-time setup completed (proxy first, mirror fallback if needed)"
+    return $true
+}
+
+function Test-MSYS2Installed {
+    <#
+    .SYNOPSIS
+        检查 MSYS2 是否已安装
+        返回：@{ Installed = bool; Path = string; GccInstalled = bool; GccPath = string }
+    #>
+    $msys2Paths = @(
+        "C:\msys64",
+        "C:\msys32",
+        "${env:ProgramFiles}\msys64",
+        "${env:ProgramFiles(x86)}\msys64"
+    )
+    
+    foreach ($path in $msys2Paths) {
+        if (Test-Path $path) {
+            # 检查 MSYS2 目录是否存在关键文件（确认是有效的 MSYS2 安装）
+            $msys2Bash = Join-Path $path "usr\bin\bash.exe"
+            if (Test-Path $msys2Bash) {
+                # MSYS2 已安装，检查 GCC 是否已安装
+                $gccPath = Join-Path $path "mingw64\bin\gcc.exe"
+                $gccInstalled = Test-Path $gccPath
+                
+                return @{ 
+                    Installed = $true
+                    Path = $path
+                    GccInstalled = $gccInstalled
+                    GccPath = if ($gccInstalled) { $gccPath } else { $null }
+                }
+            }
+        }
+    }
+    
+    return @{ Installed = $false; Path = $null; GccInstalled = $false; GccPath = $null }
+}
+
+function Install-MSYS2AndGCC {
+    <#
+    .SYNOPSIS
+        安装 MSYS2 和 GCC（使用 MSYS2 方式）
+        参考：https://www.msys2.org/
+    #>
+    param(
+        [Parameter(Mandatory)]
+        [string]$PackageName
+    )
+    
+    # 检查是否已安装
+    $msys2Check = Test-MSYS2Installed
+    
+    # 如果 MSYS2 已安装且 GCC 已安装，直接返回
+    if ($msys2Check.Installed -and $msys2Check.GccInstalled) {
+        Write-Info "$PackageName (MSYS2 GCC) is already installed"
+        Write-Info "  MSYS2 Path: $($msys2Check.Path)"
+        Write-Info "  GCC Path: $($msys2Check.GccPath)"
+        
+        # 检查 GCC 版本
+        try {
+            $gccVersion = & $msys2Check.GccPath --version 2>&1 | Select-Object -First 1
+            if ($gccVersion) {
+                Write-Info "  GCC Version: $gccVersion"
+            }
+        } catch {
+            # 忽略错误
+        }
+        
+        # 确保 PATH 中包含 MSYS2 的 mingw64\bin
+        $mingw64Bin = Join-Path $msys2Check.Path "mingw64\bin"
+        $userPath = [System.Environment]::GetEnvironmentVariable("Path", "User")
+        if ($userPath -notlike "*$mingw64Bin*") {
+            Write-Info "Adding MSYS2 GCC to PATH..."
+            [System.Environment]::SetEnvironmentVariable("Path", "$userPath;$mingw64Bin", "User")
+            $env:Path += ";$mingw64Bin"
+            Write-Success "MSYS2 GCC added to PATH"
+        }
+        
+        $version = Get-ProgramVersion -PackageName "gcc"
+        $Script:InstallationReport += @{
+            Name = $PackageName
+            Version = $version
+            Status = "AlreadyExists"
+            InstallMethod = "MSYS2"
+        }
+        Write-Log "True"
+        return $true
+    }
+    
+    # 确定 MSYS2 根目录
+    $msys2Root = if ($msys2Check.Installed) { $msys2Check.Path } else { "C:\msys64" }
+    $bashPath = Join-Path $msys2Root "usr\bin\bash.exe"
+    
+    # 如果 MSYS2 未安装，需要完整安装
+    if (-not $msys2Check.Installed) {
+        Write-Info "Installing MSYS2 and GCC..."
+        Write-Info "This will install MSYS2 (a software distribution and building platform for Windows) and GCC compiler."
+        
+        $msys2InstallerUrl = "https://github.com/msys2/msys2-installer/releases/latest/download/msys2-x86_64-latest.exe"
+        $installerPath = "$env:TEMP\msys2-installer.exe"
+        
+        try {
+            # 下载 MSYS2 安装程序（带进度条）
+            if (-not (Invoke-WebRequestWithProgress -Uri $msys2InstallerUrl -OutFile $installerPath)) {
+                Write-Error "Failed to download MSYS2 installer"
+                Write-Log "Failed to download MSYS2 installer"
+                return $false
+            }
+            
+            # 安装 MSYS2（静默安装）
+            Write-Info "Installing MSYS2 (this may take a few minutes)..."
+            $installArgs = "install --root `"$msys2Root`" --confirm-command"
+            $installProcess = Start-Process -FilePath $installerPath -ArgumentList $installArgs -Wait -NoNewWindow -PassThru
+            
+            if ($installProcess.ExitCode -ne 0 -and $installProcess.ExitCode -ne 3010) {
+                Write-Error "MSYS2 installation failed (exit code: $($installProcess.ExitCode))"
+                Write-Log "MSYS2 installation failed (exit code: $($installProcess.ExitCode))"
+                Remove-Item -Path $installerPath -Force -ErrorAction SilentlyContinue
+                return $false
+            }
+            
+            # 等待 MSYS2 安装完成
+            Start-Sleep -Seconds 5
+            
+            # 检查 MSYS2 是否安装成功
+            if (-not (Test-Path $msys2Root)) {
+                Write-Error "MSYS2 installation directory not found: $msys2Root"
+                Write-Log "MSYS2 installation directory not found: $msys2Root"
+                Remove-Item -Path $installerPath -Force -ErrorAction SilentlyContinue
+                return $false
+            }
+            
+            # 清理安装程序
+            Remove-Item -Path $installerPath -Force -ErrorAction SilentlyContinue
+        } catch {
+            $errorMsg = "MSYS2 installation failed: $_"
+            Write-Error $errorMsg
+            Write-Log $errorMsg
+            Remove-Item -Path $installerPath -Force -ErrorAction SilentlyContinue
+            return $false
+        }
+    }
+    
+    # 检查 bash 是否存在
+    if (-not (Test-Path $bashPath)) {
+        Write-Error "MSYS2 bash not found: $bashPath"
+        Write-Log "MSYS2 bash not found: $bashPath"
+        return $false
+    }
+    
+    # 关键修复：无论是否已安装 GCC，都先强制执行一次「首次初始化流程」
+    if (-not (Invoke-Msys2FirstTimeSetup -Msys2Root $msys2Root)) {
+        Write-Error "MSYS2 initialization failed"
+        Write-Log "MSYS2 initialization failed"
+        return $false
+    }
+    
+    # 第3步：安装 GCC 工具链（现在 pacman 应该正常工作了）
+    Write-Info "Step 3/3: Installing GCC toolchain..."
+    $gccCommand = "pacman -S --needed --noconfirm mingw-w64-x86_64-toolchain"
+    $gccExit = Invoke-Msys2CommandStreaming -BashPath $bashPath -Command $gccCommand -DisplayName "pacman -S (gcc)"
+    if ($gccExit -ne 0 -and (Apply-MSYS2Mirror -Msys2Root $msys2Root)) {
+        Write-Warning "GCC installation failed with proxy, retrying using custom mirror..."
+        $gccExit = Invoke-Msys2CommandStreaming -BashPath $bashPath -Command $gccCommand -DisplayName "pacman -S (gcc mirror)"
+    }
+    if ($gccExit -ne 0) {
+        Write-Error "GCC toolchain installation failed (exit code: $gccExit)"
+        Write-Log "GCC toolchain installation failed (exit code: $gccExit)"
+        return $false
+    }
+    
+    # 验证 GCC 是否真的装好了
+    $gccPath = Join-Path $msys2Root "mingw64\bin\gcc.exe"
+    if (-not (Test-Path $gccPath)) {
+        Write-Error "GCC installation completed but gcc.exe not found at $gccPath"
+        Write-Log "GCC installation completed but gcc.exe not found at $gccPath"
+        return $false
+    }
+    
+    # 添加到 PATH（保持你原来的逻辑）
+    $mingwBin = Join-Path $msys2Root "mingw64\bin"
+    $userPath = [System.Environment]::GetEnvironmentVariable("Path", "User")
+    if ($userPath -notlike "*$mingwBin*") {
+        Write-Info "Adding MSYS2 GCC to PATH..."
+        [System.Environment]::SetEnvironmentVariable("Path", "$userPath;$mingwBin", "User")
+        $env:Path += ";$mingwBin"
+        Write-Success "MSYS2 GCC added to PATH"
+    }
+    
+    Write-Success "$PackageName (MSYS2 GCC) installed successfully"
+    Write-Info "  MSYS2 Path: $msys2Root"
+    Write-Info "  GCC Path: $mingwBin"
+    Write-Log "True"
+    
+    $Script:InstalledCount++
+    
+    # 备份 PATH（首次安装时，如果尚未备份）
+    if (-not $Script:PathBackedUp) {
+        Write-Info "Backing up current PATH to path.bak..."
+        if (Backup-EnvironmentPath) {
+            $Script:PathBackedUp = $true
+        }
+    }
+    
+    # 刷新 PATH 环境变量
+    Write-Info "Refreshing PATH environment variable..."
+    $refreshResult = Refresh-EnvironmentPath -SkipBackup
+    if ($refreshResult) {
+        Write-Info "PATH refreshed successfully"
+    } else {
+        Write-Warning "PATH refresh had issues, but continuing..."
+    }
+    
+    # 等待系统更新 PATH
+    Start-Sleep -Milliseconds 1000
+    
+    # 验证工具是否在 PATH 中
+    $pathCheck = Test-ProgramInPath -ProgramName "gcc"
+    if ($pathCheck.Available) {
+        Write-Success "$PackageName is available in PATH (found via $($pathCheck.Method))"
+        if ($pathCheck.Path) {
+            Write-Info "  Location: $($pathCheck.Path)"
+        }
+    } else {
+        Write-Warning "$PackageName may not be in PATH yet. You may need to restart your terminal (PowerShell/Git Bash)."
+        Write-Info "  Note: Some tools may require a system restart or new terminal session to be available."
+    }
+    
+    # 获取版本号
+    $version = Get-ProgramVersion -PackageName "gcc"
+    $Script:InstallationReport += @{
+        Name = $PackageName
+        Version = $version
+        Status = "NewInstalled"
+        InstallMethod = "MSYS2"
+    }
+    Write-Log "True"
+    return $true
+}
+
+function Update-MSYS2AndGCC {
+    <#
+    .SYNOPSIS
+        更新 MSYS2 和 GCC（使用 MSYS2 方式）
+    #>
+    param(
+        [Parameter(Mandatory)]
+        [string]$PackageName
+    )
+    
+    # 检查是否已安装
+    $msys2Check = Test-MSYS2Installed
+    if (-not $msys2Check.Installed) {
+        Write-Warning "$PackageName (MSYS2 GCC) is not installed, cannot update"
+        return $false
+    }
+    
+    Write-Info "Updating MSYS2 and GCC..."
+    Write-Info "This will update MSYS2 system and GCC toolchain."
+    
+    $msys2Root = $msys2Check.Path
+    $bashPath = Join-Path $msys2Root "usr\bin\bash.exe"
+    
+    if (-not (Test-Path $bashPath)) {
+        Write-Error "MSYS2 bash not found: $bashPath"
+        return $false
+    }
+
+    try {
+        # 先初始化 MSYS2（确保 pacman 支持 --noconfirm）
+        Initialize-MSYS2 -BashPath $bashPath
+        
+        # 更新 MSYS2 系统和 GCC 工具链（使用 --noconfirm 参数实现非交互式更新）
+        Write-Info "Updating MSYS2 system and GCC toolchain (this may take several minutes)..."
+        $exitCode = Invoke-Msys2Pacman -BashPath $bashPath -Command "pacman --noconfirm -S --needed base-devel mingw-w64-x86_64-toolchain"
+        Write-Log "MSYS2 & GCC update process exited with code: $exitCode"
+        
+        if ($exitCode -eq 0) {
+            Write-Success "$PackageName (MSYS2 GCC) updated successfully"
+            
+            # 刷新 PATH 环境变量
+            Write-Info "Refreshing PATH environment variable..."
+            $refreshResult = Refresh-EnvironmentPath -SkipBackup
+            if ($refreshResult) {
+                Write-Info "PATH refreshed successfully"
+            }
+            
+            Start-Sleep -Milliseconds 500
+            $version = Get-ProgramVersion -PackageName "gcc"
+            $Script:InstallationReport += @{
+                Name = $PackageName
+                Version = $version
+                Status = "Updated"
+                InstallMethod = "MSYS2"
+            }
+            Write-Log "True"
+            return $true
+        } else {
+            $errMsg = "$PackageName update failed (pacman exit code: $exitCode)"
+            Write-Error $errMsg
+            Write-Log $errMsg
+            $Script:FailedCount++
+            $Script:FailedPackages += $PackageName
+            Write-Log "False"
+            return $false
+        }
+    } catch {
+        Write-Error "Unexpected error during MSYS2/GCC update: $_"
+        Write-Log "Exception: $_"
+        $Script:FailedCount++
+        $Script:FailedPackages += $PackageName
+        return $false
+    }
+}
+
+function Uninstall-MSYS2AndGCC {
+    <#
+    .SYNOPSIS
+        卸载 MSYS2 和 GCC（使用 MSYS2 方式）
+        注意：这会卸载整个 MSYS2 系统
+    #>
+    param(
+        [Parameter(Mandatory)]
+        [string]$PackageName
+    )
+    
+    # 检查是否已安装
+    $msys2Check = Test-MSYS2Installed
+    if (-not $msys2Check.Installed) {
+        Write-Warning "$PackageName (MSYS2 GCC) is not installed, cannot uninstall"
+        return $false
+    }
+    
+    Write-Warning "Uninstalling MSYS2 will remove the entire MSYS2 installation, including GCC and all other MSYS2 packages."
+    $confirm = Read-Host "Are you sure you want to uninstall MSYS2? (Y/N)"
+    
+    if ($confirm -ne "Y" -and $confirm -ne "y") {
+        Write-Info "Uninstallation cancelled"
+        return $false
+    }
+    
+    $msys2Root = $msys2Check.Path
+    
+    try {
+        # 从 PATH 中移除 MSYS2 GCC
+        $mingw64Bin = Join-Path $msys2Root "mingw64\bin"
+        $userPath = [System.Environment]::GetEnvironmentVariable("Path", "User")
+        if ($userPath -like "*$mingw64Bin*") {
+            Write-Info "Removing MSYS2 GCC from PATH..."
+            $newPath = ($userPath -split ';' | Where-Object { $_ -ne $mingw64Bin }) -join ';'
+            [System.Environment]::SetEnvironmentVariable("Path", $newPath, "User")
+            $env:Path = ($env:Path -split ';' | Where-Object { $_ -ne $mingw64Bin }) -join ';'
+            Write-Success "MSYS2 GCC removed from PATH"
+        }
+        
+        # 删除 MSYS2 目录
+        Write-Info "Removing MSYS2 installation directory..."
+        Remove-Item -Path $msys2Root -Recurse -Force -ErrorAction SilentlyContinue
+        
+        if (-not (Test-Path $msys2Root)) {
+            Write-Success "$PackageName (MSYS2 GCC) uninstalled successfully"
+            $Script:InstallationReport += @{
+                Name = $PackageName
+                Version = "Uninstalled"
+                Status = "Uninstalled"
+                InstallMethod = "MSYS2"
+            }
+            Write-Log "True"
+            return $true
+        } else {
+            Write-Warning "MSYS2 directory still exists. You may need to manually remove: $msys2Root"
+            Write-Log "MSYS2 directory still exists: $msys2Root"
+            return $false
+        }
+    } catch {
+        $errorMsg = "$PackageName (MSYS2 GCC) uninstall failed: $_"
+        Write-Error $errorMsg
+        Write-Log $errorMsg
+        $Script:FailedCount++
+        $Script:FailedPackages += $PackageName
+        Write-Log "False"
+        return $false
+    }
+}
+
+# ============================================
 # 字体安装函数
 # ============================================
 function Test-NerdFontsInstalled {
@@ -1408,10 +2278,12 @@ function Install-NerdFonts {
             New-Item -ItemType Directory -Path $tempDir -Force | Out-Null
         }
         
-        # 下载字体文件
-        Write-Info "Downloading font files..."
-        $webParams = Get-WebRequestParams
-        Invoke-WebRequest -Uri $fontUrl -OutFile $zipFile @webParams
+        # 下载字体文件（带进度条）
+        if (-not (Invoke-WebRequestWithProgress -Uri $fontUrl -OutFile $zipFile)) {
+            Write-Error "Failed to download font files"
+            Write-Log "Failed to download font files"
+            return $false
+        }
         
         # 解压字体文件
         Write-Info "Extracting font files..."
@@ -1485,6 +2357,9 @@ $Script:Tools = @{
         @{ Name = "oh-my-posh"; WingetId = "JanDeDobbeleer.OhMyPosh"; ChocoId = "oh-my-posh"; Description = "PowerShell prompt tool" }
     )
     "Development Tools" = @(
+        @{ Name = "gcc"; WingetId = ""; ChocoId = ""; Description = "MinGW-w64 GCC compiler (C/C++ development, installed via MSYS2)" }
+        @{ Name = "make"; WingetId = "GnuWin32.Make"; ChocoId = "make"; Description = "GNU Make for Windows (build automation)" }
+        @{ Name = "cmake"; WingetId = "Kitware.CMake"; ChocoId = "cmake"; Description = "CMake cross-platform build system" }
         @{ Name = "git-delta"; WingetId = "dandavison.delta"; ChocoId = "git-delta"; Description = "Git diff enhancer" }
         @{ Name = "lazygit"; WingetId = "jesseduffield.lazygit"; ChocoId = "lazygit"; Description = "Git TUI tool" }
         @{ Name = "direnv"; WingetId = "direnv.direnv"; ChocoId = "direnv"; Description = "Environment variable manager" }
@@ -1535,7 +2410,22 @@ function Show-InteractiveMenu {
                 $chocoId = $tool.ChocoId
                 $checkResult = $null
                 
-                if ($wingetId -and (Test-PackageManager -Manager "winget") -eq "installed") {
+                # 特殊处理：gcc 使用 MSYS2 检测方式
+                if ($tool.Name -eq "gcc") {
+                    $msys2Check = Test-MSYS2Installed
+                    if ($msys2Check.Installed) {
+                        try {
+                            $gccVersion = & $msys2Check.GccPath --version 2>&1 | Select-Object -First 1
+                            $versionMatch = $gccVersion | Select-String -Pattern "(\d+\.\d+\.\d+[^\s]*)"
+                            $version = if ($versionMatch) { $versionMatch.Matches[0].Groups[1].Value } else { "Unknown" }
+                            $checkResult = @{ Installed = $true; Version = $version }
+                        } catch {
+                            $checkResult = @{ Installed = $true; Version = "Unknown" }
+                        }
+                    } else {
+                        $checkResult = @{ Installed = $false; Version = $null }
+                    }
+                } elseif ($wingetId -and (Test-PackageManager -Manager "winget") -eq "installed") {
                     $checkResult = Test-ProgramInstalled -PackageId $wingetId -PackageName $tool.Name -Manager "winget"
                 } elseif ($chocoId -and (Test-PackageManager -Manager "chocolatey") -eq "installed") {
                     $checkResult = Test-ProgramInstalled -PackageId $chocoId -PackageName $tool.Name -Manager "chocolatey"
@@ -1615,7 +2505,20 @@ function Show-SingleToolMenu {
     $installed = $false
     $version = "Unknown"
     
-    if ($wingetId -and (Test-PackageManager -Manager "winget") -eq "installed") {
+    # 特殊处理：gcc 使用 MSYS2 检测方式
+    if ($foundTool.Name -eq "gcc") {
+        $msys2Check = Test-MSYS2Installed
+        if ($msys2Check.Installed) {
+            $installed = $true
+            try {
+                $gccVersion = & $msys2Check.GccPath --version 2>&1 | Select-Object -First 1
+                $versionMatch = $gccVersion | Select-String -Pattern "(\d+\.\d+\.\d+[^\s]*)"
+                $version = if ($versionMatch) { $versionMatch.Matches[0].Groups[1].Value } else { "Unknown" }
+            } catch {
+                $version = "Unknown"
+            }
+        }
+    } elseif ($wingetId -and (Test-PackageManager -Manager "winget") -eq "installed") {
         $checkResult = Test-ProgramInstalled -PackageId $wingetId -PackageName $foundTool.Name -Manager "winget"
         if ($checkResult.Installed) {
             $installed = $true
@@ -1666,8 +2569,8 @@ function Start-Installation {
     
     # 初始化日志文件（清空旧日志，开始新会话）
     try {
-        # 清空日志文件，准备记录新会话
-        "" | Out-File -FilePath $Script:LogFile -Encoding UTF8 -Force
+        # 清空日志文件，准备记录新会话（不写入空行）
+        $null = New-Item -Path $Script:LogFile -ItemType File -Force -ErrorAction SilentlyContinue
     } catch {
         # 如果无法创建日志文件，继续执行（不影响主流程）
     }
@@ -1679,14 +2582,18 @@ function Start-Installation {
         default { "Management" }
     }
     
-    Write-Host "`n===========================================" -ForegroundColor Cyan
-    Write-Host "    Windows Common Tools $actionText Script" -ForegroundColor Cyan
-    Write-Host "===========================================" -ForegroundColor Cyan
-    Write-Host ""
-    Write-Log "==========================================="
-    Write-Log "Windows Common Tools $actionText Script"
-    Write-Log "==========================================="
-    Write-Log ""
+    Write-Host-Log "`n===========================================" -ForegroundColor Cyan
+    Write-Host-Log "    Windows Common Tools $actionText Script" -ForegroundColor Cyan
+    Write-Host-Log "===========================================" -ForegroundColor Cyan
+    Write-Host-Log ""
+    
+    # 默认代理：优先尝试本地 127.0.0.1:7890
+    if (-not $env:http_proxy -and -not $env:https_proxy) {
+        Write-Info "Applying default proxy http://127.0.0.1:7890"
+        Set-ProxySettings -ProxyUrl "http://127.0.0.1:7890"
+    } else {
+        Write-Info "Using existing proxy configuration"
+    }
     
     # 备份 PATH（在开始操作前，参考 winutil 的实现）
     if ($Action -eq "Install" -and -not $Script:PathBackedUp) {
@@ -1778,7 +2685,11 @@ function Start-Installation {
                     $chocoId = $tool.ChocoId
                     $installed = $false
                     
-                    if ($wingetId -and (Test-PackageManager -Manager "winget") -eq "installed") {
+                    # 特殊处理：gcc 使用 MSYS2 检测方式
+                    if ($tool.Name -eq "gcc") {
+                        $msys2Check = Test-MSYS2Installed
+                        $installed = $msys2Check.Installed
+                    } elseif ($wingetId -and (Test-PackageManager -Manager "winget") -eq "installed") {
                         $checkResult = Test-ProgramInstalled -PackageId $wingetId -PackageName $tool.Name -Manager "winget"
                         $installed = $checkResult.Installed
                     } elseif ($chocoId -and (Test-PackageManager -Manager "chocolatey") -eq "installed") {
@@ -1800,7 +2711,11 @@ function Start-Installation {
                     $chocoId = $tool.ChocoId
                     $installed = $false
                     
-                    if ($wingetId -and (Test-PackageManager -Manager "winget") -eq "installed") {
+                    # 特殊处理：gcc 使用 MSYS2 检测方式
+                    if ($tool.Name -eq "gcc") {
+                        $msys2Check = Test-MSYS2Installed
+                        $installed = $msys2Check.Installed
+                    } elseif ($wingetId -and (Test-PackageManager -Manager "winget") -eq "installed") {
                         $checkResult = Test-ProgramInstalled -PackageId $wingetId -PackageName $tool.Name -Manager "winget"
                         $installed = $checkResult.Installed
                     } elseif ($chocoId -and (Test-PackageManager -Manager "chocolatey") -eq "installed") {
