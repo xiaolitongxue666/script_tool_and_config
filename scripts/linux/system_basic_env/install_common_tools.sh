@@ -35,7 +35,7 @@ readonly PACMAN_CONF="/etc/pacman.conf"
 # 镜像列表文件路径
 readonly MIRRORLIST="/etc/pacman.d/mirrorlist"
 # 默认代理 URL
-readonly DEFAULT_PROXY_URL="${DEFAULT_PROXY_URL:-http://127.0.0.1:7890}"
+readonly DEFAULT_PROXY_URL="${DEFAULT_PROXY_URL:-http://192.168.1.76:7890}"
 # 字体版本
 readonly FONT_VERSION="${FONT_VERSION:-3.2.1}"
 # 字体名称
@@ -129,140 +129,181 @@ detect_install_user() {
     log_info "Non-privileged user: ${INSTALL_USER}"
 }
 
-# 设置代理（优先使用代理）
-setup_proxy() {
+# 启用代理（用于非 pacman 操作）
+enable_proxy() {
     # 从环境变量或默认值获取代理 URL
     PROXY_URL="${HTTP_PROXY:-${HTTPS_PROXY:-${PROXY_URL:-${DEFAULT_PROXY_URL}}}}"
 
-    # 优先使用代理，即使测试失败也尝试使用
     if [[ -n "${PROXY_URL:-}" ]]; then
-        # 设置代理环境变量（优先使用代理）
+        # 设置代理环境变量
         export http_proxy="${PROXY_URL}"
         export https_proxy="${PROXY_URL}"
         export HTTP_PROXY="${PROXY_URL}"
         export HTTPS_PROXY="${PROXY_URL}"
-        log_info "Proxy set: ${PROXY_URL}"
+        log_info "Proxy enabled: ${PROXY_URL}"
 
-        # 测试代理是否可用（仅用于信息提示，不影响代理使用）
+        # 测试代理是否可用
         if curl -s --connect-timeout 3 --max-time 5 --proxy "${PROXY_URL}" "https://www.google.com" >/dev/null 2>&1; then
             log_info "Proxy connection test: OK"
         else
             log_warning "Proxy connection test failed, but will still use proxy"
-            log_warning "If proxy is not available, you can disable it by: unset HTTP_PROXY HTTPS_PROXY http_proxy https_proxy"
-            log_warning "Or set NO_PROXY=1 to skip proxy configuration"
         fi
     else
-        log_info "No proxy configured, using direct connection"
+        log_info "No proxy URL configured, using direct connection"
+        PROXY_URL=""
     fi
 }
 
-# 带进度显示的下载函数
+# 禁用代理（用于 pacman 操作，使用国内源）
+disable_proxy() {
+    unset http_proxy https_proxy HTTP_PROXY HTTPS_PROXY
+    log_info "Proxy disabled for pacman operations (using Chinese mirrors)"
+}
+
+# 初始化代理配置（在脚本开始时调用）
+setup_proxy() {
+    # 默认启用代理（除了 pacman 操作）
+    # 可以通过 NO_PROXY=1 完全禁用代理
+    if [[ "${NO_PROXY:-0}" == "1" ]]; then
+        log_info "Proxy disabled by NO_PROXY=1, using direct connection for all operations"
+        PROXY_URL=""
+        return 0
+    fi
+
+    # 默认启用代理
+    enable_proxy
+}
+
+# 带进度显示的下载函数（带超时和重试，简洁进度显示）
 download_with_progress() {
     local url="$1"
     local dest="$2"
+    local timeout="${3:-60}"  # 默认超时60秒
+    local max_retries="${4:-3}"  # 默认重试3次
+
     log_info "Starting download: ${url}"
     # 确保目标目录存在
     ensure_directory "$(dirname "${dest}")"
-    # 优先使用 aria2c，其次 wget，最后使用 curl
-    if command -v aria2c >/dev/null 2>&1; then
-        aria2c --check-certificate=false --max-connection-per-server=8 \
-            --split=8 --dir="$(dirname "${dest}")" --out="$(basename "${dest}")" \
-            --summary-interval=1 "${url}"
-    elif command -v wget >/dev/null 2>&1; then
-        wget --show-progress --progress=bar:force:noscroll -O "${dest}" "${url}"
-    else
-        curl -fL --progress-bar -o "${dest}" "${url}"
-    fi
-    log_success "Download completed: ${dest}"
+
+    local retry_count=0
+    while [[ "${retry_count}" -lt "${max_retries}" ]]; do
+        # 优先使用 curl（进度条更简洁），其次 wget，最后使用 aria2c
+        if command -v curl >/dev/null 2>&1; then
+            # curl 使用简洁的单行进度条
+            if timeout "${timeout}" curl -fL --progress-bar --max-time "${timeout}" \
+                -o "${dest}" "${url}" 2>&1; then
+                echo ""  # 换行，避免进度条和成功消息在同一行
+                log_success "Download completed: ${dest}"
+                return 0
+            fi
+        elif command -v wget >/dev/null 2>&1; then
+            # wget 使用简洁的进度条
+            if timeout "${timeout}" wget --show-progress --progress=bar:force:noscroll \
+                --timeout="${timeout}" -O "${dest}" "${url}" 2>&1; then
+                log_success "Download completed: ${dest}"
+                return 0
+            fi
+        elif command -v aria2c >/dev/null 2>&1; then
+            # aria2c 使用适中的更新间隔（5秒），过滤重复信息，只显示进度条
+            local aria2_output
+            aria2_output=$(aria2c --check-certificate=false \
+                --max-connection-per-server=8 \
+                --split=8 \
+                --dir="$(dirname "${dest}")" \
+                --out="$(basename "${dest}")" \
+                --summary-interval=5 \
+                --console-log-level=warn \
+                --timeout="${timeout}" \
+                --max-tries="${max_retries}" \
+                --quiet=false \
+                "${url}" 2>&1)
+
+            local aria2_exit=$?
+
+            # 过滤并显示进度信息
+            echo "${aria2_output}" | grep -E "^\[#.*\]" | tail -n 1 | sed 's/^/\r/' >&2 || true
+
+            if [[ ${aria2_exit} -eq 0 ]]; then
+                echo "" >&2  # 换行
+                # 检查文件是否成功下载
+                if [[ -f "${dest}" ]]; then
+                    log_success "Download completed: ${dest}"
+                    return 0
+                fi
+            fi
+        else
+            log_error "No download tool available (curl, wget, or aria2c)"
+            return 1
+        fi
+
+        retry_count=$((retry_count + 1))
+        if [[ "${retry_count}" -lt "${max_retries}" ]]; then
+            log_warning "Download failed, retrying (${retry_count}/${max_retries})..."
+            sleep 2
+            rm -f "${dest}" 2>/dev/null || true
+        fi
+    done
+
+    log_error "Download failed after ${max_retries} attempts: ${url}"
+    return 1
 }
 
-# 配置 pacman 代理（优先使用代理）
+# 配置 pacman 代理（始终移除代理配置，pacman 使用国内源直连）
 configure_pacman_proxy() {
-    # 检查是否禁用代理
-    if [[ "${NO_PROXY:-0}" == "1" ]]; then
-        log_info "Proxy disabled by NO_PROXY=1, skipping XferCommand configuration"
-        return 0
-    fi
-
-    # 优先使用代理配置
-    if [[ -z "${PROXY_URL:-}" ]]; then
-        # 没有代理配置，不设置 XferCommand
-        return 0
-    fi
-
-    log_info "Configuring pacman to use proxy: ${PROXY_URL}"
-
     # 使用临时文件来安全地修改配置
     local tmp_file
     tmp_file="$(mktemp)"
-    local in_options_section=0
-    local xfer_added=0
-    local xfer_in_options=0
+    local has_xfercommand=0
 
-    # 首先检查 XferCommand 是否已经在 [options] 部分
-    local current_section=""
+    # 检查是否存在 XferCommand
     while IFS= read -r line; do
-        if [[ "${line}" =~ ^\[([^\]]+)\] ]]; then
-            current_section="${BASH_REMATCH[1]}"
-        elif [[ "${line}" =~ ^XferCommand ]]; then
-            if [[ "${current_section}" == "options" ]]; then
-                xfer_in_options=1
+        if [[ "${line}" =~ ^XferCommand ]]; then
+            has_xfercommand=1
+            break
+        fi
+    done < "${PACMAN_CONF}"
+
+    # 始终移除 XferCommand 配置，pacman 使用国内源直连
+    if [[ "${has_xfercommand}" -eq 1 ]]; then
+        log_info "Removing XferCommand configuration, pacman will use direct connection (Chinese mirrors)"
+        while IFS= read -r line; do
+            # 跳过所有 XferCommand 行
+            if [[ "${line}" =~ ^XferCommand ]]; then
+                continue
             fi
-        fi
-    done < "${PACMAN_CONF}"
-
-    # 重新读取文件，移除所有 XferCommand，然后在 [options] 部分添加
-    current_section=""
-    while IFS= read -r line; do
-        # 检测是否进入 [options] 部分
-        if [[ "${line}" =~ ^\[options\] ]]; then
-            in_options_section=1
-            current_section="options"
             echo "${line}" >> "${tmp_file}"
-            # 在 [options] 部分后立即添加 XferCommand（使用代理）
-            echo "XferCommand = /usr/bin/curl -L -C - -f --retry 3 --progress-bar --proxy ${PROXY_URL} -o %o %u" >> "${tmp_file}"
-            xfer_added=1
-        # 检测是否进入其他部分（遇到下一个 [ 开头的行）
-        elif [[ "${line}" =~ ^\[([^\]]+)\] ]]; then
-            in_options_section=0
-            current_section="${BASH_REMATCH[1]}"
-            echo "${line}" >> "${tmp_file}"
-        # 跳过所有现有的 XferCommand 行（无论在哪里）
-        elif [[ "${line}" =~ ^XferCommand ]]; then
-            # 忽略这一行，我们会在 [options] 部分添加新的
-            continue
-        else
-            echo "${line}" >> "${tmp_file}"
-        fi
-    done < "${PACMAN_CONF}"
-
-    # 如果没有 [options] 部分，在文件开头添加
-    if [[ "${xfer_added}" -eq 0 ]]; then
-        {
-            echo "[options]"
-            echo "XferCommand = /usr/bin/curl -L -C - -f --retry 3 --progress-bar --proxy ${PROXY_URL} -o %o %u"
-            echo ""
-            cat "${tmp_file}"
-        } > "${tmp_file}.new"
-        mv "${tmp_file}.new" "${tmp_file}"
+        done < "${PACMAN_CONF}"
+        mv "${tmp_file}" "${PACMAN_CONF}"
+        log_info "XferCommand removed, pacman will use direct connection"
+    else
+        log_info "Pacman configured to use direct connection (Chinese mirrors)"
     fi
-
-    mv "${tmp_file}" "${PACMAN_CONF}"
-    log_info "XferCommand configured in [options] section with proxy: ${PROXY_URL}"
 }
 
-# 配置中国镜像源
+# 配置中国镜像源（基于可用性测试结果，2025年11月更新）
 configure_mirrors() {
     backup_file "${MIRRORLIST}"
     cat > "${MIRRORLIST}" <<'EOF'
-## Tsinghua University
-Server = https://mirrors.tuna.tsinghua.edu.cn/archlinux/$repo/os/$arch
-## 163
-Server = http://mirrors.163.com/archlinux/$repo/os/$arch
-## Aliyun
-Server = http://mirrors.aliyun.com/archlinux/$repo/os/$arch
+## Aliyun (HTTPS, primary)
+Server = https://mirrors.aliyun.com/archlinux/$repo/os/$arch
+## USTC (HTTPS, secondary)
+Server = https://mirrors.ustc.edu.cn/archlinux/$repo/os/$arch
+## Tencent Cloud (HTTPS, tertiary)
+Server = https://mirrors.cloud.tencent.com/archlinux/$repo/os/$arch
+## Huawei Cloud (HTTPS)
+Server = https://mirrors.huaweicloud.com/repository/archlinux/$repo/os/$arch
+## Nanjing University (HTTPS)
+Server = https://mirrors.nju.edu.cn/archlinux/$repo/os/$arch
+## Chongqing University (HTTPS)
+Server = https://mirrors.cqu.edu.cn/archlinux/$repo/os/$arch
+## Neusoft (HTTPS)
+Server = https://mirrors.neusoft.edu.cn/archlinux/$repo/os/$arch
+## Lanzhou University (HTTPS)
+Server = https://mirror.lzu.edu.cn/archlinux/$repo/os/$arch
+## Southern University of Science and Technology (HTTPS)
+Server = https://mirrors.sustech.edu.cn/archlinux/$repo/os/$arch
 EOF
-    log_info "Chinese mirror sources applied"
+    log_info "Chinese mirror sources applied (9 available mirrors, tested 2025-11)"
 }
 
 # 优化 pacman 配置
@@ -281,10 +322,20 @@ SigLevel    = Required DatabaseOptional\
 LocalFileSigLevel = Optional' "${PACMAN_CONF}"
     fi
 
-    # 确保 ParallelDownloads 已启用
-    sed -i 's/^#ParallelDownloads/ParallelDownloads/' "${PACMAN_CONF}"
+    # 确保 ParallelDownloads 已启用并设置合理值
+    if ! grep -q "^ParallelDownloads" "${PACMAN_CONF}"; then
+        # 如果 ParallelDownloads 被注释，取消注释并设置值
+        sed -i 's/^#ParallelDownloads/ParallelDownloads/' "${PACMAN_CONF}"
+        # 如果还是没有，在 [options] 部分添加
+        if ! grep -q "^ParallelDownloads" "${PACMAN_CONF}"; then
+            sed -i '/^\[options\]/a\
+ParallelDownloads = 5' "${PACMAN_CONF}"
+        fi
+    fi
+    # 确保 ParallelDownloads 有合理的值（至少为 3）
+    sed -i 's/^ParallelDownloads[[:space:]]*=[[:space:]]*[0-9]*/ParallelDownloads = 5/' "${PACMAN_CONF}"
 
-    # 确保 core, extra, community 仓库使用镜像列表
+    # 确保 core, extra 仓库使用镜像列表（community 已合并到 extra，不再需要单独配置）
     if ! grep -q "^Include = /etc/pacman.d/mirrorlist" "${PACMAN_CONF}"; then
         sed -i '/^\[core\]/,/^\[/ { /^\[core\]/a\
 Include = /etc/pacman.d/mirrorlist
@@ -292,39 +343,168 @@ Include = /etc/pacman.d/mirrorlist
         sed -i '/^\[extra\]/,/^\[/ { /^\[extra\]/a\
 Include = /etc/pacman.d/mirrorlist
 }' "${PACMAN_CONF}"
-        sed -i '/^\[community\]/,/^\[/ { /^\[community\]/a\
-Include = /etc/pacman.d/mirrorlist
-}' "${PACMAN_CONF}"
     fi
 
-    # 添加 archlinuxcn 源
+    # 移除已废弃的 [community] 配置（如果存在）
+    if grep -q "^\[community\]" "${PACMAN_CONF}"; then
+        sed -i '/^\[community\]/,/^\[/ { /^\[community\]/d; /^SigLevel/d; /^Include/d; }' "${PACMAN_CONF}"
+        log_info "Removed deprecated [community] section (merged into [extra])"
+    fi
+
+    # 添加 archlinuxcn 源（基于可用性测试结果，2025年11月更新，8个可用镜像）
+    # 注意：archlinuxcn-keyring 要求不使用 SigLevel，使用默认设置
     if ! grep -q "archlinuxcn" "${PACMAN_CONF}"; then
         cat <<'EOF' >> "${PACMAN_CONF}"
 [archlinuxcn]
-SigLevel = Optional TrustAll
-Server = https://mirrors.tuna.tsinghua.edu.cn/archlinuxcn/$arch
+Server = https://mirrors.ustc.edu.cn/archlinuxcn/$arch
+Server = https://mirrors.aliyun.com/archlinuxcn/$arch
+Server = https://mirrors.cloud.tencent.com/archlinuxcn/$arch
+Server = https://mirrors.huaweicloud.com/repository/archlinuxcn/$arch
+Server = https://mirrors.nju.edu.cn/archlinuxcn/$arch
+Server = https://mirrors.cqu.edu.cn/archlinuxcn/$arch
+Server = https://mirror.lzu.edu.cn/archlinuxcn/$arch
+Server = https://mirrors.sustech.edu.cn/archlinuxcn/$arch
 EOF
+    else
+        # 如果已存在 archlinuxcn 配置，移除 SigLevel 行（如果存在）
+        if grep -q "^\[archlinuxcn\]" "${PACMAN_CONF}"; then
+            sed -i '/^\[archlinuxcn\]/,/^\[/ { /^SigLevel/d; }' "${PACMAN_CONF}"
+            log_info "Removed SigLevel from [archlinuxcn] section (required by archlinuxcn-keyring)"
+        fi
     fi
 
     configure_pacman_proxy
     log_info "Pacman configuration optimized"
 }
 
+# 安装 archlinuxcn-keyring（如果配置了 archlinuxcn 源）
+install_archlinuxcn_keyring() {
+    # 检查是否配置了 archlinuxcn 源
+    if ! grep -q "^\[archlinuxcn\]" "${PACMAN_CONF}"; then
+        log_info "archlinuxcn repository not configured, skipping keyring installation"
+        return 0
+    fi
+
+    # 检查是否已安装
+    if pacman -Qi archlinuxcn-keyring >/dev/null 2>&1; then
+        log_info "archlinuxcn-keyring already installed"
+        return 0
+    fi
+
+    log_info "Installing archlinuxcn-keyring to configure GPG keys for archlinuxcn repository"
+
+    # 先同步数据库（只同步，不更新系统）
+    log_info "Synchronizing package databases (including archlinuxcn)"
+    local retry_count=0
+    local max_retries=3
+    local sync_success=0
+
+    while [[ "${retry_count}" -lt "${max_retries}" ]]; do
+        if pacman -Sy --noconfirm 2>&1; then
+            sync_success=1
+            break
+        fi
+        retry_count=$((retry_count + 1))
+        if [[ "${retry_count}" -lt "${max_retries}" ]]; then
+            log_warning "Database sync failed, retrying (${retry_count}/${max_retries})..."
+            sleep 2
+        fi
+    done
+
+    if [[ "${sync_success}" -eq 0 ]]; then
+        log_warning "Failed to sync databases, archlinuxcn-keyring installation may fail"
+    fi
+
+    # 尝试安装 archlinuxcn-keyring
+    retry_count=0
+    while [[ "${retry_count}" -lt "${max_retries}" ]]; do
+        if pacman -S --noconfirm archlinuxcn-keyring 2>&1; then
+            log_success "archlinuxcn-keyring installed successfully"
+            return 0
+        fi
+        retry_count=$((retry_count + 1))
+        if [[ "${retry_count}" -lt "${max_retries}" ]]; then
+            log_warning "Failed to install archlinuxcn-keyring, retrying (${retry_count}/${max_retries})..."
+            sleep 2
+            # 重新同步数据库
+            pacman -Sy --noconfirm >/dev/null 2>&1 || true
+        fi
+    done
+
+    log_warning "Failed to install archlinuxcn-keyring after ${max_retries} attempts"
+    log_warning "archlinuxcn repository may not work properly until keyring is installed"
+    log_warning "You can install it manually later with: sudo pacman -Sy archlinuxcn-keyring"
+    log_warning "Or try switching to a different mirror if the current one is unavailable"
+}
+
 # 更新系统
 update_system() {
-    log_info "Synchronizing system and keyring"
-    pacman -Sy --noconfirm archlinux-keyring
-    pacman -Syu --noconfirm
+    # pacman 操作前禁用代理（使用国内源）
+    disable_proxy
+
+    log_info "Starting system update process"
+
+    # 步骤 1: 更新 archlinux-keyring（官方仓库的密钥环）
+    log_info "Updating archlinux-keyring"
+    local retry_count=0
+    local max_retries=3
+    while [[ "${retry_count}" -lt "${max_retries}" ]]; do
+        if pacman -Sy --noconfirm archlinux-keyring 2>&1; then
+            log_success "archlinux-keyring updated"
+            break
+        fi
+        retry_count=$((retry_count + 1))
+        if [[ "${retry_count}" -lt "${max_retries}" ]]; then
+            log_warning "Keyring sync failed, retrying (${retry_count}/${max_retries})..."
+            sleep 2
+        else
+            log_warning "Failed to update archlinux-keyring after ${max_retries} attempts, continuing..."
+        fi
+    done
+
+    # 步骤 2: 安装 archlinuxcn-keyring（如果配置了 archlinuxcn 源）
+    # 这必须在系统更新之前完成，以确保 archlinuxcn 源的 GPG 密钥正确配置
+    install_archlinuxcn_keyring
+
+    # 步骤 3: 更新系统（包括所有仓库）
+    log_info "Updating system packages"
+    retry_count=0
+    while [[ "${retry_count}" -lt "${max_retries}" ]]; do
+        if pacman -Syu --noconfirm 2>&1; then
+            log_success "System update completed"
+            break
+        fi
+        retry_count=$((retry_count + 1))
+        if [[ "${retry_count}" -lt "${max_retries}" ]]; then
+            log_warning "System update failed, retrying (${retry_count}/${max_retries})..."
+            sleep 3
+        else
+            log_warning "System update failed after ${max_retries} attempts, but continuing..."
+            log_warning "You may need to manually run: sudo pacman -Syu"
+        fi
+    done
+
+    # pacman 操作完成后启用代理（用于后续操作）
+    enable_proxy
 }
 
 # 安装软件包
 install_packages() {
+    # pacman 操作前禁用代理（使用国内源）
+    disable_proxy
+
     log_info "Installing core tools: ${PACMAN_PACKAGES[*]}"
     pacman -S --needed --noconfirm "${PACMAN_PACKAGES[@]}"
+
+    # pacman 操作完成后启用代理（用于后续操作）
+    enable_proxy
 }
 
 # 确保 AUR 助手已安装
 ensure_aur_helper() {
+    # pacman 操作前禁用代理（使用国内源）
+    disable_proxy
+
     if command -v yay >/dev/null 2>&1; then
         AUR_HELPER="yay"
     elif command -v paru >/dev/null 2>&1; then
@@ -352,6 +532,9 @@ EOF
         fi
     fi
     log_info "AUR helper: ${AUR_HELPER}"
+
+    # pacman 操作完成后启用代理（用于后续操作）
+    enable_proxy
 }
 
 # 安装字体
@@ -359,12 +542,22 @@ install_font() {
     ensure_directory "${FONT_DIR}"
     local tmp_zip
     tmp_zip="$(mktemp)"
-    download_with_progress "${FONT_URL}" "${tmp_zip}"
-    unzip -o "${tmp_zip}" -d "${FONT_DIR}"
-    rm -f "${tmp_zip}"
-    # 更新字体缓存
-    fc-cache -f
-    log_success "Installed ${FONT_NAME} Nerd Font"
+    # 字体文件可能较大，使用更长的超时时间（5分钟）和更多重试次数
+    log_info "Downloading ${FONT_NAME} Nerd Font (this may take a while for large files)..."
+    if download_with_progress "${FONT_URL}" "${tmp_zip}" 300 5; then
+        log_info "Extracting font files..."
+        unzip -o "${tmp_zip}" -d "${FONT_DIR}" >/dev/null 2>&1 || {
+            log_warning "Some font files may have extraction issues, but continuing..."
+        }
+        rm -f "${tmp_zip}"
+        # 更新字体缓存
+        fc-cache -f >/dev/null 2>&1 || true
+        log_success "Installed ${FONT_NAME} Nerd Font"
+    else
+        log_warning "Failed to download ${FONT_NAME} Nerd Font"
+        log_warning "You can manually download and install it later from: ${FONT_URL}"
+        rm -f "${tmp_zip}"
+    fi
 }
 
 # 安装 Oh My Zsh
@@ -385,7 +578,14 @@ install_oh_my_zsh() {
 
 # 安装 shell 工具
 install_shell_tools() {
+    # pacman 操作前禁用代理（使用国内源）
+    disable_proxy
+
     pacman -S --needed --noconfirm zsh
+
+    # pacman 操作完成后启用代理（用于后续操作）
+    enable_proxy
+
     install_oh_my_zsh
 }
 
@@ -401,10 +601,14 @@ install_uv() {
     # 尝试通过 AUR 安装
     if [[ -n "${AUR_HELPER:-}" ]]; then
         log_info "Using ${AUR_HELPER} to install uv"
-        sudo -u "${INSTALL_USER}" "${AUR_HELPER}" -S --noconfirm uv || {
+        # 临时给普通用户读取 pacman.conf 的权限（yay 需要读取配置）
+        chmod 644 "${PACMAN_CONF}" 2>/dev/null || true
+        sudo -u "${INSTALL_USER}" "${AUR_HELPER}" -S --noconfirm uv 2>&1 || {
             log_warning "AUR installation failed, trying official install script"
             install_uv_official
         }
+        # 恢复权限
+        chmod 644 "${PACMAN_CONF}" 2>/dev/null || true
     else
         install_uv_official
     fi
@@ -424,7 +628,7 @@ install_uv_official() {
     # 安全地获取用户主目录
     user_home="$(eval echo ~"${INSTALL_USER}")"
 
-    download_with_progress "https://astral.sh/uv/install.sh" "${install_script}"
+    download_with_progress "https://astral.sh/uv/install.sh" "${install_script}" 120 3
     chmod +x "${install_script}"
     # 使用普通用户安装，允许失败
     sudo -u "${INSTALL_USER}" env \
@@ -450,10 +654,14 @@ install_fnm() {
     # 尝试通过 AUR 安装
     if [[ -n "${AUR_HELPER:-}" ]]; then
         log_info "Using ${AUR_HELPER} to install fnm"
-        sudo -u "${INSTALL_USER}" "${AUR_HELPER}" -S --noconfirm fnm || {
+        # 临时给普通用户读取 pacman.conf 的权限（yay 需要读取配置）
+        chmod 644 "${PACMAN_CONF}" 2>/dev/null || true
+        sudo -u "${INSTALL_USER}" "${AUR_HELPER}" -S --noconfirm fnm 2>&1 || {
             log_warning "AUR installation failed, trying official install script"
             install_fnm_official
         }
+        # 恢复权限
+        chmod 644 "${PACMAN_CONF}" 2>/dev/null || true
     else
         install_fnm_official
     fi
@@ -474,7 +682,7 @@ install_fnm_official() {
     # 安全地获取用户主目录
     user_home="$(eval echo ~"${INSTALL_USER}")"
 
-    download_with_progress "https://fnm.vercel.app/install" "${install_script}"
+    download_with_progress "https://fnm.vercel.app/install" "${install_script}" 120 3
     chmod +x "${install_script}"
     # 使用普通用户安装，允许失败
     sudo -u "${INSTALL_USER}" env \
@@ -488,89 +696,6 @@ install_fnm_official() {
     fi
 }
 
-# 为 Neovim 安装 Python 工具
-install_python_tools_for_neovim() {
-    # 确保 uv 已安装
-    if ! command -v uv >/dev/null 2>&1; then
-        install_uv
-    fi
-
-    local user_home
-    # 安全地获取用户主目录
-    user_home="$(eval echo ~"${INSTALL_USER}")"
-    local venv_dir="${user_home}/.config/nvim/venv"
-    local venv_path="${venv_dir}/nvim-python"
-
-    log_info "Creating Python virtual environment for Neovim"
-    ensure_directory "${venv_dir}"
-
-    # 如果虚拟环境已存在，则更新包
-    if [[ -d "${venv_path}" ]]; then
-        log_warning "Virtual environment already exists: ${venv_path}"
-        log_info "Will update packages in existing environment"
-    else
-        log_info "Creating virtual environment: ${venv_path}"
-        sudo -u "${INSTALL_USER}" uv venv "${venv_path}" || error_exit "Failed to create virtual environment"
-    fi
-
-    # 安装 Python 包
-    log_info "Installing Neovim Python tools"
-    local python_packages=(
-        pynvim
-        pyright
-        ruff-lsp
-        debugpy
-        black
-        isort
-        flake8
-        mypy
-    )
-
-    # 使用 uv pip 安装包
-    # 注意：使用数组展开时需要用引号保护
-    sudo -u "${INSTALL_USER}" bash -c "
-        source '${venv_path}/bin/activate' && \
-        uv pip install -U ${python_packages[*]}
-    " || {
-        log_warning "Some packages failed to install, but continuing"
-    }
-
-    log_success "Neovim Python tools installation completed"
-
-    # 输出配置说明
-    cat <<EOF
-
-==========================================
-Neovim Python Environment Configuration
-==========================================
-
-Virtual environment location: ${venv_path}
-
-Add the following configuration to your Neovim config (init.lua):
-
--- Specify Python interpreter
-vim.g.python3_host_prog = "${venv_path}/bin/python"
-
--- Add virtual environment site-packages to pythonpath
-local venv_path = "${venv_path}"
-vim.opt.pp:prepend(venv_path .. "/lib/python*/site-packages")
-
-Daily maintenance commands:
-
-# Upgrade all packages
-source ${venv_path}/bin/activate
-uv pip upgrade -r <(uv pip freeze)
-
-# Add new package
-uv pip install <package_name>
-
-# Rebuild environment (if needed)
-rm -rf ${venv_path}
-cd ${venv_dir} && uv venv nvim-python && uv pip install -U pynvim pyright ruff-lsp debugpy black isort flake8 mypy
-
-==========================================
-EOF
-}
 
 # 安装 Neovim
 install_neovim() {
@@ -583,6 +708,11 @@ install_neovim() {
         log_info "Neovim already installed: $(nvim --version | head -n 1)"
     fi
 
+    # 确保 uv 已安装（Neovim Python 环境需要）
+    if ! command -v uv >/dev/null 2>&1; then
+        install_uv
+    fi
+
     # 获取项目根目录和 Neovim 安装脚本
     local nvim_install_script="${PROJECT_ROOT}/dotfiles/nvim/install.sh"
 
@@ -593,9 +723,15 @@ install_neovim() {
         cd "${PROJECT_ROOT}" || error_exit "Failed to change to project root directory"
         sudo -u "${INSTALL_USER}" git submodule update --init dotfiles/nvim 2>/dev/null || true
 
-        # 运行安装脚本
+        # 运行安装脚本，传递环境变量（代理和系统级 venv 配置）
         chmod +x "${nvim_install_script}"
-        sudo -u "${INSTALL_USER}" bash "${nvim_install_script}" || {
+        # 传递代理和系统级 venv 环境变量给 nvim 安装脚本
+        sudo -u "${INSTALL_USER}" env \
+            http_proxy="${PROXY_URL:-}" https_proxy="${PROXY_URL:-}" \
+            HTTP_PROXY="${PROXY_URL:-}" HTTPS_PROXY="${PROXY_URL:-}" \
+            USE_SYSTEM_NVIM_VENV="${USE_SYSTEM_NVIM_VENV:-0}" \
+            INSTALL_USER="${INSTALL_USER}" \
+            bash "${nvim_install_script}" || {
             log_warning "Neovim configuration installation failed, but continuing"
         }
     else
@@ -661,24 +797,61 @@ print_summary() {
 # 主函数
 main() {
     start_script "Arch Basic Tools Installation"
+
+    # 记录环境变量配置（用于调试）
+    if [[ "${USE_SYSTEM_NVIM_VENV:-0}" == "1" ]]; then
+        log_info "USE_SYSTEM_NVIM_VENV=1: Will use system-wide Neovim Python environment"
+    else
+        log_info "USE_SYSTEM_NVIM_VENV not set: Will use user-specific Neovim Python environment"
+    fi
+
     check_root
     check_arch_linux
     detect_install_user
     ensure_directories
     prepare_path_management
+
+    # ==========================================
+    # 第一部分：pacman 相关操作（使用国内源，不走代理）
+    # ==========================================
+    log_info "=========================================="
+    log_info "Phase 1: Pacman operations (using Chinese mirrors, no proxy)"
+    log_info "=========================================="
+
+    # 初始化代理配置（但 pacman 操作会禁用代理）
     setup_proxy
+
+    # 配置镜像源和 pacman（这些操作不使用代理）
     configure_mirrors
     tune_pacman
+
+    # pacman 相关操作（会自动禁用代理）
     update_system
     install_packages
     ensure_aur_helper
+
+    # ==========================================
+    # 第二部分：其他操作（使用代理）
+    # ==========================================
+    log_info "=========================================="
+    log_info "Phase 2: Other operations (using proxy)"
+    log_info "=========================================="
+
+    # 确保代理已启用（用于后续操作）
+    enable_proxy
+
+    # 安装工具（使用代理）
     install_uv
     install_fnm
-    install_python_tools_for_neovim
+
+    # Neovim 配置（包括 Python 环境，由 nvim/install.sh 处理）
     install_neovim
+
+    # 其他操作（使用代理）
     install_optional_tools
     install_font
     install_shell_tools
+
     print_summary
     end_script
 }

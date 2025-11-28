@@ -1,17 +1,29 @@
 #!/bin/bash
 
-set -x 
+set -x
 
 # 镜像列表
 cp /etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist.backup
 
 cat >/etc/pacman.d/mirrorlist <<EOL
-# 清华大学
-Server = https://mirrors.tuna.tsinghua.edu.cn/archlinux/\$repo/os/\$arch
-## 163
-Server = http://mirrors.163.com/archlinux/\$repo/os/\$arch
-## aliyun
-Server = http://mirrors.aliyun.com/archlinux/\$repo/os/\$arch
+## Aliyun (HTTPS, primary)
+Server = https://mirrors.aliyun.com/archlinux/\$repo/os/\$arch
+## USTC (HTTPS, secondary)
+Server = https://mirrors.ustc.edu.cn/archlinux/\$repo/os/\$arch
+## Tencent Cloud (HTTPS, tertiary)
+Server = https://mirrors.cloud.tencent.com/archlinux/\$repo/os/\$arch
+## Huawei Cloud (HTTPS)
+Server = https://mirrors.huaweicloud.com/repository/archlinux/\$repo/os/\$arch
+## Nanjing University (HTTPS)
+Server = https://mirrors.nju.edu.cn/archlinux/\$repo/os/\$arch
+## Chongqing University (HTTPS)
+Server = https://mirrors.cqu.edu.cn/archlinux/\$repo/os/\$arch
+## Neusoft (HTTPS)
+Server = https://mirrors.neusoft.edu.cn/archlinux/\$repo/os/\$arch
+## Lanzhou University (HTTPS)
+Server = https://mirror.lzu.edu.cn/archlinux/\$repo/os/\$arch
+## Southern University of Science and Technology (HTTPS)
+Server = https://mirrors.sustech.edu.cn/archlinux/\$repo/os/\$arch
 
 EOL
 
@@ -34,13 +46,15 @@ Include = /etc/pacman.d/mirrorlist
 SigLevel = PackageRequired
 Include = /etc/pacman.d/mirrorlist
 
-[community]
-SigLevel = PackageRequired
-Include = /etc/pacman.d/mirrorlist
-
 [archlinuxcn]
-SigLevel = Optional TrustAll
-Server = https://mirrors.tuna.tsinghua.edu.cn/archlinuxcn/\$arch
+Server = https://mirrors.ustc.edu.cn/archlinuxcn/\$arch
+Server = https://mirrors.aliyun.com/archlinuxcn/\$arch
+Server = https://mirrors.cloud.tencent.com/archlinuxcn/\$arch
+Server = https://mirrors.huaweicloud.com/repository/archlinuxcn/\$arch
+Server = https://mirrors.nju.edu.cn/archlinuxcn/\$arch
+Server = https://mirrors.cqu.edu.cn/archlinuxcn/\$arch
+Server = https://mirror.lzu.edu.cn/archlinuxcn/\$arch
+Server = https://mirrors.sustech.edu.cn/archlinuxcn/\$arch
 EOL
 
 # 显示配置
