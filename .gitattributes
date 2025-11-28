@@ -1,0 +1,78 @@
+# Git 属性配置文件
+# 用于控制 Git 如何处理文件（换行符、合并策略等）
+
+# ============================================
+# Windows 脚本文件（使用 CRLF）
+# ============================================
+scripts/windows/**/*.bat text eol=crlf
+scripts/windows/**/*.ps1 text eol=crlf
+scripts/windows/**/*.cmd text eol=crlf
+
+# ============================================
+# Linux/Unix 脚本文件（使用 LF）
+# ============================================
+scripts/linux/**/*.sh text eol=lf
+scripts/common.sh text eol=lf
+dotfiles/**/*.sh text eol=lf
+
+# ============================================
+# 所有 Shell 脚本（使用 LF）
+# ============================================
+*.sh text eol=lf
+
+# ============================================
+# 配置文件（使用 LF）
+# ============================================
+*.json text eol=lf
+*.toml text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
+*.conf text eol=lf
+*.config text eol=lf
+*.ini text eol=lf
+
+# ============================================
+# 代码文件（使用 LF）
+# ============================================
+*.c text eol=lf
+*.cpp text eol=lf
+*.h text eol=lf
+*.hpp text eol=lf
+*.py text eol=lf
+*.lua text eol=lf
+*.rs text eol=lf
+*.go text eol=lf
+*.java text eol=lf
+*.js text eol=lf
+*.ts text eol=lf
+*.tsx text eol=lf
+
+# ============================================
+# 文档文件（使用 LF）
+# ============================================
+*.md text eol=lf
+*.txt text eol=lf
+README* text eol=lf
+
+# ============================================
+# 二进制文件
+# ============================================
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.zip binary
+*.tar binary
+*.gz binary
+*.7z binary
+*.exe binary
+*.dll binary
+*.so binary
+*.dylib binary
+
+# ============================================
+# 默认：所有文本文件使用 LF
+# ============================================
+* text=auto eol=lf
+

@@ -459,7 +459,7 @@ chmod +x install.sh
 ./install.sh  # 安装脚本会自动同步配置
 ```
 
-**注意**: 
+**注意**:
 - Alacritty 从 0.13.0 版本开始使用 TOML 格式配置文件（`alacritty.toml`），旧版 YAML 格式（`alacritty.yml`）已不再支持
 - 所有安装脚本都会自动检测操作系统并安装对应配置
 
@@ -494,6 +494,48 @@ chmod +x install.sh
 - ✅ 减少配置重复和冗余
 - ✅ 结构更简洁清晰
 
+## 文件换行符配置
+
+本项目使用多种配置文件来确保不同操作系统的脚本文件使用正确的换行符：
+
+### 配置文件说明
+
+1. **`.editorconfig`** - 编辑器通用配置
+   - 按路径模式设置换行符
+   - Windows 脚本（`scripts/windows/**/*.bat`, `*.ps1`）使用 CRLF
+   - Linux 脚本（`scripts/linux/**/*.sh`, `scripts/common.sh`）使用 LF
+   - 所有 Shell 脚本（`*.sh`）使用 LF
+
+2. **`.gitattributes`** - Git 版本控制配置
+   - 确保 Git 仓库中文件使用正确的换行符
+   - Windows 脚本在仓库中保持 CRLF
+   - Linux 脚本在仓库中保持 LF
+   - 防止 Git 自动转换导致的问题
+
+3. **`.vscode/settings.json`** - VS Code/Cursor 编辑器配置
+   - 文件类型级别的换行符设置
+   - 启用 EditorConfig 支持
+   - 自动检测文件编码
+
+### 使用建议
+
+1. **安装 EditorConfig 扩展**（如果使用 VS Code）：
+   - 扩展 ID: `EditorConfig.EditorConfig`
+   - Cursor 内置支持 EditorConfig
+
+2. **验证配置**：
+   - 打开文件后，查看状态栏的换行符显示（LF/CRLF）
+   - 保存文件时，编辑器会自动应用配置
+
+3. **修复现有文件**：
+   ```bash
+   # 在 Linux 系统上修复所有 .sh 文件
+   find scripts -name "*.sh" -type f -exec sed -i 's/\r$//' {} \;
+
+   # 或使用 dos2unix（如果已安装）
+   find scripts -name "*.sh" -type f -exec dos2unix {} \;
+   ```
+
 ## 注意事项
 
 1. **统一结构**: 所有工具配置遵循统一的结构，便于管理和使用
@@ -501,6 +543,7 @@ chmod +x install.sh
 3. **权限要求**: 某些脚本需要 root 权限（使用 `sudo`）
 4. **平台特定**: 部分脚本仅适用于特定操作系统，请根据实际情况使用
 5. **备份**: 修改系统配置文件前，建议先备份原文件
+6. **换行符**: 确保使用正确的换行符格式（Windows 脚本用 CRLF，Linux 脚本用 LF）
 
 ## 许可证
 

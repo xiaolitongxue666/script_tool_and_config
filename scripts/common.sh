@@ -51,28 +51,28 @@ function echo_color_message() {
 
 # 信息日志（蓝色）
 function log_info() {
-    echo_color_message "${BLUE}" "[信息] $*"
+    echo_color_message "${BLUE}" "[INFO] $*"
 }
 
 # 成功日志（绿色）
 function log_success() {
-    echo_color_message "${GREEN}" "[成功] $*"
+    echo_color_message "${GREEN}" "[SUCCESS] $*"
 }
 
 # 警告日志（黄色）
 function log_warning() {
-    echo_color_message "${YELLOW}" "[警告] $*"
+    echo_color_message "${YELLOW}" "[WARNING] $*"
 }
 
 # 错误日志（红色）
 function log_error() {
-    echo_color_message "${RED}" "[错误] $*" >&2
+    echo_color_message "${RED}" "[ERROR] $*" >&2
 }
 
 # 调试日志（青色）
 function log_debug() {
     if [[ "${DEBUG:-0}" == "1" ]]; then
-        echo_color_message "${CYAN}" "[调试] $*"
+        echo_color_message "${CYAN}" "[DEBUG] $*"
     fi
 }
 
@@ -84,7 +84,7 @@ function log_debug() {
 function start_script() {
     echo ""
     echo_color_message "${CYAN}" "=========================================="
-    echo_color_message "${CYAN}" "开始执行: $1"
+    echo_color_message "${CYAN}" "Starting: $1"
     echo_color_message "${CYAN}" "=========================================="
     echo ""
 }
@@ -93,7 +93,7 @@ function start_script() {
 function end_script() {
     echo ""
     echo_color_message "${CYAN}" "=========================================="
-    echo_color_message "${CYAN}" "脚本执行完成"
+    echo_color_message "${CYAN}" "Script execution completed"
     echo_color_message "${CYAN}" "=========================================="
     echo ""
     trap - EXIT
@@ -102,7 +102,7 @@ function end_script() {
 
 # 脚本错误退出
 function error_exit() {
-    local error_msg="${1:-未知错误}"
+    local error_msg="${1:-Unknown error}"
     local exit_code="${2:-1}"
     log_error "$error_msg"
     exit "$exit_code"
@@ -115,28 +115,28 @@ function error_exit() {
 # 检查命令是否存在
 function check_command() {
     if ! command -v "$1" &> /dev/null; then
-        error_exit "命令 '$1' 未找到，请先安装"
+        error_exit "Command '$1' not found, please install it first"
     fi
 }
 
 # 检查文件是否存在
 function check_file() {
     if [[ ! -f "$1" ]]; then
-        error_exit "文件不存在: $1"
+        error_exit "File does not exist: $1"
     fi
 }
 
 # 检查目录是否存在
 function check_directory() {
     if [[ ! -d "$1" ]]; then
-        error_exit "目录不存在: $1"
+        error_exit "Directory does not exist: $1"
     fi
 }
 
 # 检查是否为 root 用户
 function check_root() {
     if [[ $EUID -ne 0 ]]; then
-        error_exit "此脚本需要 root 权限，请使用 sudo 运行"
+        error_exit "This script requires root privileges, please run with sudo"
     fi
 }
 
@@ -146,7 +146,7 @@ function check_root() {
 
 # 确认操作
 function confirm() {
-    local prompt="${1:-是否继续？}"
+    local prompt="${1:-Continue?}"
     read -p "$(echo_color_message "${YELLOW}" "$prompt (y/n): ")" -n 1 -r
     echo
     if [[ ! $REPLY =~ ^[Yy]$ ]]; then
@@ -159,7 +159,7 @@ function confirm() {
 function ensure_directory() {
     if [[ ! -d "$1" ]]; then
         mkdir -p "$1"
-        log_info "已创建目录: $1"
+        log_info "Directory created: $1"
     fi
 }
 
@@ -169,7 +169,7 @@ function backup_file() {
     if [[ -f "$file" ]]; then
         local backup="${file}.backup.$(date +%Y%m%d_%H%M%S)"
         cp "$file" "$backup"
-        log_info "已备份文件: $backup"
+        log_info "File backed up: $backup"
         echo "$backup"
     fi
 }

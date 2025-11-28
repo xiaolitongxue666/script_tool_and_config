@@ -1,0 +1,45 @@
+{
+  // ============================================
+  // 文件编码和换行符配置
+  // ============================================
+  // 注意：路径级别的换行符配置请使用 .editorconfig 文件
+  // VS Code 会自动读取 .editorconfig 配置
+
+  // 1. 默认 UTF-8 编码 + LF 换行符（全局兜底）
+  "files.encoding": "utf8",
+  "files.eol": "\n",
+
+  // 2. Windows 批处理文件使用 CRLF
+  "[bat]": {
+    "files.eol": "\r\n"
+  },
+
+  // 3. PowerShell 脚本使用 CRLF
+  "[powershell]": {
+    "files.eol": "\r\n"
+  },
+
+  // 4. Shell 脚本明确使用 LF（防止全局被改）
+  "[shellscript]": {
+    "files.eol": "\n"
+  },
+
+  // 5. 启用 EditorConfig 支持（需要安装 EditorConfig for VS Code 扩展）
+  "editorconfig.enable": true,
+
+  // 6. 自动检测文件编码
+  "files.autoGuessEncoding": true,
+
+  // 7. 保存时自动修复换行符
+  "files.insertFinalNewline": true,
+  "files.trimTrailingWhitespace": true,
+
+  // 8. 文件关联（确保文件类型识别正确）
+  "files.associations": {
+    "*.sh": "shellscript",
+    "*.bat": "bat",
+    "*.cmd": "bat",
+    "*.ps1": "powershell"
+  }
+}
+
