@@ -224,12 +224,27 @@ script_tool_and_config/
 
 **系统基础环境安装脚本 (`system_basic_env/`)**
 - ArchLinux 系统基础环境安装和配置脚本
-  - `configure_china_mirrors.sh`: 配置中国镜像源
+  - `configure_china_mirrors.sh`: 快速配置中国镜像源（9个可用镜像，2025年11月更新）
+    - 配置主仓库镜像（core, extra）
+    - 配置 archlinuxcn 仓库镜像（8个可用镜像）
+    - 自动备份原始配置
+    - 移除已废弃的 community 仓库配置
+  - `install_common_tools.sh`: 一键安装常用开发工具和环境
+    - **智能代理策略**：pacman 操作使用国内源直连，其他操作使用代理
+    - **两阶段安装**：
+      - 第一阶段：pacman 相关操作（镜像源配置、系统更新、基础包安装、AUR 助手）
+      - 第二阶段：其他工具安装（uv、fnm、Neovim、字体等）
+    - **Neovim Python 环境**：自动配置 Python 虚拟环境（支持系统级/用户级）
+    - **自动配置**：镜像源、pacman 优化、archlinuxcn-keyring 安装
+    - 详细日志记录和错误处理
+    - 支持 `USE_SYSTEM_NVIM_VENV=1` 环境变量（系统级 Python 环境）
+    - 支持 `NO_PROXY=1` 环境变量（完全禁用代理）
   - `install_environment.sh`: 安装开发环境
   - `install_neovim.sh`: 安装 Neovim
   - `install_common_software.sh`: 安装常用软件
   - `install_gnome.sh`: 安装 GNOME 桌面环境
   - `install_network_manager.sh`: 安装网络管理器
+  - `USAGE.md`: 脚本使用说明文档
 
 **网络配置脚本 (`network/`)**
 - `configure_ethernet_mac.sh`: 配置以太网 MAC 地址
@@ -342,6 +357,36 @@ cd scripts/linux/project_tools/cpp_project_generator
 cd scripts/linux/system_basic_env
 sudo ./configure_china_mirrors.sh
 ```
+
+#### 一键安装常用开发工具（ArchLinux）
+```bash
+cd scripts/linux/system_basic_env
+
+# 标准安装（用户级 Neovim Python 环境，默认启用代理）
+sudo ./install_common_tools.sh
+
+# 使用系统级 Neovim Python 环境（root 和所有用户共享）
+sudo -E USE_SYSTEM_NVIM_VENV=1 ./install_common_tools.sh
+
+# 完全禁用代理（所有操作都直连）
+sudo -E NO_PROXY=1 ./install_common_tools.sh
+
+# 组合使用
+sudo -E USE_SYSTEM_NVIM_VENV=1 NO_PROXY=1 ./install_common_tools.sh
+```
+
+**安装脚本功能**：
+- 自动配置中国镜像源（9个可用镜像）
+- 优化 pacman 配置（并行下载、移除废弃配置）
+- 安装基础开发工具（git、neovim、tmux、starship 等）
+- 安装 AUR 助手（yay）
+- 安装 Python 包管理器（uv）
+- 安装 Node.js 版本管理器（fnm）
+- 配置 Neovim Python 环境（pynvim、pyright、ruff-lsp 等）
+- 安装 Nerd Font 字体（FiraMono）
+- 安装 Oh My Zsh
+
+**详细说明**：参见 `scripts/linux/system_basic_env/USAGE.md`
 
 #### 安装和配置工具（使用统一安装脚本）
 

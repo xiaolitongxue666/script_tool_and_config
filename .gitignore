@@ -261,6 +261,14 @@ pip-debug.log
 logs/
 *.log
 *.log.*
+# 脚本执行日志（仅本地保留）
+scripts/**/log
+scripts/**/*.log
+scripts/**/logs/
+# 系统基础环境安装日志
+scripts/linux/system_basic_env/log
+scripts/windows/system_basic_env/log
+scripts/windows/system_basic_env/*.log
 
 # ============================================
 # 临时和缓存文件
@@ -269,3 +277,10 @@ logs/
 .tmp/
 tmp/
 temp/
+# 测试和临时脚本（开发用，不提交）
+scripts/**/test_*.sh
+scripts/**/TEST_*.md
+scripts/**/*_test.sh
+scripts/**/*_test_*.sh
+# VS Code SFTP 配置（可能包含敏感信息）
+.vscode/sftp.json
