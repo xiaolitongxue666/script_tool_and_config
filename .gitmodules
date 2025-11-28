@@ -1,3 +1,5 @@
 [submodule "dotfiles/nvim"]
 	path = dotfiles/nvim
 	url = git@github.com:xiaolitongxue666/nvim.git
+[submodule]
+	recurse = true
