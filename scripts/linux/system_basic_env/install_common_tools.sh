@@ -540,6 +540,20 @@ EOF
 # 安装字体
 install_font() {
     ensure_directory "${FONT_DIR}"
+
+    # 检查字体是否已经安装（检查目录中是否有字体文件）
+    local font_files_count=0
+    if [[ -d "${FONT_DIR}" ]]; then
+        font_files_count=$(find "${FONT_DIR}" -name "*.ttf" -o -name "*.otf" 2>/dev/null | wc -l)
+    fi
+
+    if [[ ${font_files_count} -gt 0 ]]; then
+        log_success "${FONT_NAME} Nerd Font already installed (${font_files_count} font files found)"
+        # 更新字体缓存以确保字体可用
+        fc-cache -f >/dev/null 2>&1 || true
+        return 0
+    fi
+
     local tmp_zip
     tmp_zip="$(mktemp)"
     # 字体文件可能较大，使用更长的超时时间（5分钟）和更多重试次数
@@ -685,14 +699,40 @@ install_fnm_official() {
     download_with_progress "https://fnm.vercel.app/install" "${install_script}" 120 3
     chmod +x "${install_script}"
     # 使用普通用户安装，允许失败
+    # 使用 --skip-shell 参数避免重复添加 shell 配置
     sudo -u "${INSTALL_USER}" env \
         http_proxy="${PROXY_URL:-}" https_proxy="${PROXY_URL:-}" \
-        bash "${install_script}" || true
+        bash "${install_script}" --skip-shell || true
     rm -f "${install_script}"
 
     # 确保 fnm 在 PATH 中
-    if [[ -f "${user_home}/.local/share/fnm/fnm" ]]; then
-        add_path_entry "${user_home}/.local/share/fnm"
+    # fnm 可能安装到不同的位置，检查多个可能的位置
+    local fnm_paths=(
+        "${user_home}/.local/share/fnm"
+        "${HOME}/.local/share/fnm"
+        "${user_home}/.fnm"
+        "${HOME}/.fnm"
+    )
+
+    local fnm_found=0
+    for fnm_dir in "${fnm_paths[@]}"; do
+        if [[ -f "${fnm_dir}/fnm" ]] || [[ -f "${fnm_dir}/fnm.exe" ]]; then
+            add_path_entry "${fnm_dir}"
+            fnm_found=1
+            log_info "fnm found at: ${fnm_dir}"
+            break
+        fi
+    done
+
+    # 如果通过 AUR 安装，fnm 可能在系统 PATH 中
+    if [[ ${fnm_found} -eq 0 ]] && command -v fnm >/dev/null 2>&1; then
+        log_info "fnm is already available in system PATH"
+        fnm_found=1
+    fi
+
+    if [[ ${fnm_found} -eq 0 ]]; then
+        log_warning "fnm binary not found in expected locations"
+        log_info "fnm may need to be manually added to PATH"
     fi
 }
 

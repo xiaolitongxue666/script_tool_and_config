@@ -12,7 +12,7 @@ if [[ "$OSTYPE" =~ ^(msys|mingw|cygwin) ]]; then
     # 修复 HOME 变量：Git Bash 启动的 zsh 中 HOME 可能被设置为 /home/Administrator
     # 或者可能是 Windows 路径格式 c:/users/administrator，需要转换为 /c/Users/Administrator
     # 注意：此修复必须在任何其他配置之前执行，因为 Oh My Zsh 和其他工具依赖正确的 HOME
-    
+
     # 首先，如果 HOME 是 Windows 路径格式（c:/users/administrator），转换为 Unix 格式
     if [[ "$HOME" =~ ^[a-zA-Z]: ]]; then
         # Windows 路径格式，转换为 Unix 格式
@@ -47,7 +47,7 @@ if [[ "$OSTYPE" =~ ^(msys|mingw|cygwin) ]]; then
         fi
         export HOME
     fi
-    
+
     # 如果 HOME 不正确，立即修复它
     if [ "$HOME" = "/home/Administrator" ] || [ ! -d "$HOME" ] || [ ! -f "$HOME/.zshrc" ]; then
         # 方法1: 从 USERPROFILE 环境变量获取（最可靠）
@@ -130,14 +130,14 @@ plugins=(
 if [ -d "$ZSH" ]; then
     # 加载 Oh My Zsh 核心
     source $ZSH/oh-my-zsh.sh
-    
+
     # 确保 cli.zsh 被加载（提供 omz 命令）
     # 显式加载 cli.zsh 以确保 omz 命令可用
     # 注意：必须在 oh-my-zsh.sh 加载后立即加载
     if [ -f "$ZSH/lib/cli.zsh" ]; then
         source "$ZSH/lib/cli.zsh"
     fi
-    
+
     # 验证 Oh My Zsh 是否正确加载
     if [ -z "$ZSH_VERSION" ]; then
         echo "警告: Oh My Zsh 可能未正确加载"
@@ -224,7 +224,7 @@ fi
 # 代理设置（通用，平台特定配置会覆盖）
 # 对应 Fish: alias h_proxy='set -gx http_proxy ...'
 # macOS 默认使用 7890，Linux 默认使用 1087
-alias h_proxy='export http_proxy=http://127.0.0.1:7890; export https_proxy=http://127.0.0.1:7890; export all_proxy=socks5://127.0.0.1:7890'
+alias h_proxy='export http_proxy=http://192.168.1.76:7890; export https_proxy=http://192.168.1.76:7890; export all_proxy=socks5://192.168.1.76:7890'
 alias unset_h='unset http_proxy; unset https_proxy; unset all_proxy'
 
 # PATH 配置
@@ -288,8 +288,8 @@ elif [[ "$OS" == "linux" ]]; then
     fi
 
     # 代理配置（Linux 默认端口可能不同）
-    # 对应 Fish: alias h_proxy='set -gx http_proxy http://127.0.0.1:1087 ...'
-    alias h_proxy='export http_proxy=http://127.0.0.1:1087; export https_proxy=http://127.0.0.1:1087; export all_proxy=socks5://127.0.0.1:1087'
+    # 对应 Fish: alias h_proxy='set -gx http_proxy http://192.168.1.76:7890 ...'
+    alias h_proxy='export http_proxy=http://192.168.1.76:7890; export https_proxy=http://192.168.1.76:7890; export all_proxy=socks5://192.168.1.76:7890'
     alias unset_h='unset http_proxy; unset https_proxy; unset all_proxy'
 
 # Windows Git Bash 特定配置
@@ -301,8 +301,8 @@ elif [[ "$OS" == "windows" ]]; then
     export LC_CTYPE=zh_CN.UTF-8
 
     # 代理配置（Windows 默认使用 7890）
-    # 对应 Fish: alias h_proxy='set -gx http_proxy http://127.0.0.1:7890 ...'
-    alias h_proxy='export http_proxy=http://127.0.0.1:7890; export https_proxy=http://127.0.0.1:7890; export all_proxy=socks5://127.0.0.1:7890'
+    # 对应 Fish: alias h_proxy='set -gx http_proxy http://192.168.1.76:7890 ...'
+    alias h_proxy='export http_proxy=http://192.168.1.76:7890; export https_proxy=http://192.168.1.76:7890; export all_proxy=socks5://192.168.1.76:7890'
     alias unset_h='unset http_proxy; unset https_proxy; unset all_proxy'
 
     # Windows 路径处理

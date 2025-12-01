@@ -86,7 +86,7 @@ fi
 # ============================================
 winget_install_zsh() {
     log_info "使用 winget 安装 zsh..."
-    
+
     # 方法1: 检查 MSYS2 是否已安装并包含 zsh
     log_info "检查 MSYS2 是否已安装..."
     MSYS2_DIR=""
@@ -99,12 +99,12 @@ winget_install_zsh() {
             fi
         done
     done
-    
+
     if [ -n "$MSYS2_DIR" ]; then
         # 检查 zsh 是否已安装在 MSYS2 中
         if [ -f "$MSYS2_DIR/usr/bin/zsh.exe" ]; then
             log_info "MSYS2 中已包含 zsh，配置 zsh 以在 Git Bash 中使用..."
-            
+
             # 配置 zsh 以在 Git Bash 中使用
             configure_zsh_for_gitbash "$MSYS2_DIR"
             return $?
@@ -121,7 +121,7 @@ winget_install_zsh() {
             fi
         fi
     fi
-    
+
     # 方法2: 尝试安装 MSYS2（如果未安装）
     log_info "尝试安装 MSYS2（包含 zsh）..."
     if winget install --id=MSYS2.MSYS2 -e --accept-source-agreements --accept-package-agreements 2>&1; then
@@ -140,7 +140,7 @@ winget_install_zsh() {
             done
         done
     fi
-    
+
     # 方法3: 手动下载 zsh（如果上述方法失败）
     log_warning "自动安装失败，请手动安装 zsh"
     log_info "方法1: 从 MSYS2 仓库下载 zsh 包"
@@ -155,14 +155,14 @@ configure_zsh_for_gitbash() {
     local msys2_dir="$1"
     local msys2_bin="$msys2_dir/usr/bin"
     local git_bin="/usr/bin"
-    
+
     if [ ! -d "$msys2_bin" ] || [ ! -f "$msys2_bin/zsh.exe" ]; then
         log_error "MSYS2 zsh 不存在: $msys2_bin/zsh.exe"
         return 1
     fi
-    
+
     log_info "配置 zsh 以在 Git Bash 中使用..."
-    
+
     # 1. 创建符号链接或复制 zsh
     if [ ! -f "$git_bin/zsh" ] && [ ! -L "$git_bin/zsh" ]; then
         log_info "创建 zsh 符号链接..."
@@ -180,7 +180,7 @@ configure_zsh_for_gitbash() {
     else
         log_info "zsh 已存在于 $git_bin"
     fi
-    
+
     # 2. 复制依赖的 DLL 文件
     log_info "复制 zsh 依赖文件..."
     local deps=("msys-zsh-5.9.dll" "msys-ncursesw6.dll" "msys-readline8.dll")
@@ -208,11 +208,11 @@ configure_zsh_for_gitbash() {
             fi
         fi
     done
-    
+
     if [ $deps_found -eq 0 ]; then
         log_warning "未找到 zsh 依赖文件，可能需要手动处理"
     fi
-    
+
     # 3. 添加 MSYS2 到 PATH（在 Git Bash 配置中）
     log_info "配置 PATH 以包含 MSYS2..."
     local bash_profile="$HOME/.bash_profile"
@@ -224,7 +224,7 @@ configure_zsh_for_gitbash() {
     elif [ -f "$bash_profile" ]; then
         log_info "MSYS2 已在 PATH 中"
     fi
-    
+
     # 4. 验证 zsh 是否可用
     export PATH="$msys2_bin:$PATH"
     if command -v zsh &> /dev/null; then
@@ -290,7 +290,7 @@ if [ "$INSTALL_OMZ" == "true" ]; then
         else
             curl_proxy=""
         fi
-        
+
         log_info "正在从 GitHub 下载 Oh My Zsh 安装脚本..."
         if sh -c "$(curl $curl_proxy -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended --keep-zshrc 2>&1; then
             log_success "Oh My Zsh 安装成功"
@@ -319,7 +319,55 @@ fi
 # ============================================
 echo ""
 log_info "同步配置文件..."
-ZSH_CONFIG_FILE="$HOME/.zshrc"
+
+# 根据操作系统确定配置文件位置
+determine_zshrc_path() {
+    local zshrc_path=""
+
+    if [[ "$PLATFORM" == "windows" ]]; then
+        # Windows Git Bash 环境
+        # Git Bash 中的 HOME 通常是 /c/Users/username 或 /home/username 格式
+        # 优先使用 $HOME，如果不存在或无效，尝试从 $USERPROFILE 转换
+        if [[ -n "$HOME" ]] && [[ -d "$HOME" ]]; then
+            # HOME 存在且是有效目录，直接使用
+            zshrc_path="$HOME/.zshrc"
+        elif [[ -n "$USERPROFILE" ]]; then
+            # 从 Windows 环境变量转换路径
+            # C:\Users\username -> /c/Users/username
+            local win_path="$USERPROFILE"
+            # 替换反斜杠为正斜杠
+            win_path=$(echo "$win_path" | sed 's|\\|/|g')
+            # 转换盘符格式：C:/ -> /c/
+            if [[ "$win_path" =~ ^([A-Za-z]):(.*)$ ]]; then
+                local drive_letter=$(echo "${BASH_REMATCH[1]}" | tr '[:upper:]' '[:lower:]')
+                local rest_path="${BASH_REMATCH[2]}"
+                # 移除开头的斜杠（如果有）
+                rest_path=$(echo "$rest_path" | sed 's|^/||')
+                zshrc_path="/${drive_letter}/${rest_path}/.zshrc"
+            else
+                # 如果无法解析，使用 $HOME
+                zshrc_path="$HOME/.zshrc"
+            fi
+        else
+            # 最后回退到 $HOME
+            zshrc_path="$HOME/.zshrc"
+        fi
+    elif [[ "$PLATFORM" == "macos" ]]; then
+        # macOS 使用标准路径
+        zshrc_path="$HOME/.zshrc"
+    elif [[ "$PLATFORM" == "linux" ]]; then
+        # Linux 使用标准路径
+        zshrc_path="$HOME/.zshrc"
+    else
+        # 默认使用 $HOME/.zshrc
+        zshrc_path="$HOME/.zshrc"
+    fi
+
+    echo "$zshrc_path"
+}
+
+ZSH_CONFIG_FILE=$(determine_zshrc_path)
+log_info "Zsh 配置文件路径: $ZSH_CONFIG_FILE"
 
 # 检查统一配置文件是否存在
 if [ ! -f "$SCRIPT_DIR/.zshrc" ]; then
@@ -329,13 +377,33 @@ else
     # 备份现有配置（如果存在）
     if [ -f "$ZSH_CONFIG_FILE" ]; then
         BACKUP_FILE="${ZSH_CONFIG_FILE}.backup.$(date +%Y%m%d_%H%M%S)"
-        cp "$ZSH_CONFIG_FILE" "$BACKUP_FILE"
-        log_success "已备份现有配置到: $BACKUP_FILE"
+        cp "$ZSH_CONFIG_FILE" "$BACKUP_FILE" 2>/dev/null || {
+            log_warning "备份失败，但将继续安装"
+        }
+        if [ -f "$BACKUP_FILE" ]; then
+            log_success "已备份现有配置到: $BACKUP_FILE"
+        fi
+    fi
+
+    # 确保目标目录存在
+    zshrc_dir=$(dirname "$ZSH_CONFIG_FILE")
+    if [ ! -d "$zshrc_dir" ]; then
+        mkdir -p "$zshrc_dir" 2>/dev/null || {
+            log_error "无法创建配置目录: $zshrc_dir"
+            exit 1
+        }
+        log_info "已创建配置目录: $zshrc_dir"
     fi
 
     # 复制统一配置文件
-    cp "$SCRIPT_DIR/.zshrc" "$ZSH_CONFIG_FILE"
-    log_success "已同步配置文件到: $ZSH_CONFIG_FILE"
+    if cp "$SCRIPT_DIR/.zshrc" "$ZSH_CONFIG_FILE" 2>/dev/null; then
+        log_success "已同步配置文件到: $ZSH_CONFIG_FILE"
+    else
+        log_error "复制配置文件失败"
+        log_info "源文件: $SCRIPT_DIR/.zshrc"
+        log_info "目标文件: $ZSH_CONFIG_FILE"
+        exit 1
+    fi
 fi
 
 # ============================================
@@ -376,7 +444,7 @@ fi
 if [ "$PLATFORM" == "windows" ]; then
     echo ""
     log_info "检查 Nerd Fonts..."
-    
+
     # 检测常见 Nerd Fonts
     NERD_FONTS_INSTALLED=false
     if [ -d "/c/Windows/Fonts" ]; then
@@ -389,7 +457,7 @@ if [ "$PLATFORM" == "windows" ]; then
             fi
         done
     fi
-    
+
     if [ "$NERD_FONTS_INSTALLED" == "false" ]; then
         log_warning "未检测到 Nerd Fonts"
         read -p "是否使用 winget 安装 Nerd Fonts？(y/n) " -n 1 -r
