@@ -11,10 +11,41 @@ Zsh (Z Shell) 是一个功能强大的 Shell，具有自动补全、语法高亮
 
 ```
 zsh/
-├── .zshrc              # 统一配置文件（自动检测系统）
+├── .zprofile           # 登录 Shell 环境变量配置（所有登录方式都会读取）
+├── .zshrc              # 交互式 Shell 配置（仅在交互式 shell 中加载）
 ├── install.sh          # 自动安装脚本（支持多平台，包含配置同步功能）
 └── README.md           # 本文件
 ```
+
+## 配置文件说明
+
+### `.zprofile` - 登录 Shell 环境变量配置
+
+**所有登录方式（本地登录、SSH 登录）都会读取此文件**
+
+此文件在 `.zshrc` 之前加载，用于设置环境变量：
+- PATH 配置（`~/.local/bin`、`~/.cargo/bin` 等）
+- fnm (Node.js 版本管理) 初始化
+- uv (Python 包管理器) 路径配置
+- pyenv (Python 版本管理) 初始化
+- 其他工具的环境变量
+
+**重要**：此文件确保 SSH 登录时也能正确加载所有环境变量。
+
+### `.zshrc` - 交互式 Shell 配置
+
+**仅在交互式 shell 中加载**
+
+此文件包含：
+- Oh My Zsh 配置
+- 插件配置
+- 别名定义
+- 交互式功能（自动补全、历史记录等）
+
+### 文件加载顺序
+
+1. `.zprofile` - 登录时加载（所有登录方式）
+2. `.zshrc` - 交互式 shell 时加载（`.zprofile` 会自动加载 `.zshrc`）
 
 ## 安装方法
 
@@ -158,7 +189,7 @@ source ~/.zshrc
 #### 代理配置
 - **完整代理支持**: 包括 `http_proxy`、`https_proxy` 和 `all_proxy`（socks5）
 - **快速切换**: 使用 `h_proxy` 启用代理，`unset_h` 禁用代理
-- **平台特定端口**: 
+- **平台特定端口**:
   - macOS: 默认使用 7890
   - Linux: 默认使用 1087
   - Windows: 默认使用 7890

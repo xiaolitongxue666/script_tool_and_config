@@ -831,6 +831,12 @@ install_optional_tools() {
 print_summary() {
     log_info "PATH environment file: ${PATH_ENV_FILE}"
     log_info "Log location: ${LOG_FILE}"
+    log_info ""
+    log_info "环境变量配置说明："
+    log_info "  - PATH 配置已记录到: ${PATH_ENV_FILE}"
+    log_info "  - 如果使用 zsh，环境变量会在 ~/.zprofile 中统一管理"
+    log_info "  - ~/.zprofile 确保所有登录方式（本地登录、SSH 登录）都能正确加载环境变量"
+    log_info ""
     log_info "Script execution completed. Please run 'chsh' to change default shell to zsh if needed."
 }
 

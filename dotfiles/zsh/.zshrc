@@ -83,16 +83,8 @@ fi
 # ============================================
 # 字符编码设置（确保中文正确显示）
 # ============================================
-# 检测操作系统
-if [[ "$OSTYPE" =~ ^(msys|mingw|cygwin) ]]; then
-    # Windows Git Bash 环境
-    # 字符编码设置
-    export LANG=zh_CN.UTF-8
-    export LC_ALL=zh_CN.UTF-8
-    export LC_CTYPE=zh_CN.UTF-8
-    # 设置终端编码
-    export TERM=xterm-256color
-fi
+# 注意：Windows 的字符编码设置已移至 .zprofile
+# 这里保留是为了兼容性，但主要配置在 .zprofile 中
 
 # ============================================
 # Oh My Zsh 配置
@@ -227,25 +219,15 @@ fi
 alias h_proxy='export http_proxy=http://192.168.1.76:7890; export https_proxy=http://192.168.1.76:7890; export all_proxy=socks5://192.168.1.76:7890'
 alias unset_h='unset http_proxy; unset https_proxy; unset all_proxy'
 
-# PATH 配置
-# 对应 Fish: set -gx PATH $PATH $HOME/.local/bin
-export PATH="$HOME/.local/bin:$PATH"
-export PATH="$HOME/.cargo/bin:$PATH"
-
 # ============================================
-# 平台特定配置
+# 平台特定配置（交互式 shell 专用）
 # ============================================
+# 注意：环境变量（PATH、fnm、pyenv 等）已移至 .zprofile
+# .zprofile 会在 .zshrc 之前加载，确保环境变量在所有登录方式下都可用
 
 # macOS 特定配置
 # 对应 Fish: if test "$OS" = "Darwin" ... end
 if [[ "$OS" == "macos" ]]; then
-    # Homebrew
-    if [ -f /opt/homebrew/bin/brew ]; then
-        eval "$(/opt/homebrew/bin/brew shellenv)"
-    elif [ -f /usr/local/bin/brew ]; then
-        eval "$(/usr/local/bin/brew shellenv)"
-    fi
-
     # Autojump（如果已安装）
     # 对应 Fish: if test -f /usr/local/share/autojump/autojump.fish; source ... end
     if [ -f /usr/local/share/autojump/autojump.sh ]; then
@@ -272,21 +254,6 @@ if [[ "$OS" == "macos" ]]; then
 # Linux 特定配置
 # 对应 Fish: else if test "$OS" = "Linux" ... end
 elif [[ "$OS" == "linux" ]]; then
-    # 添加路径（类似 fish 的 fish_add_path）
-    # 对应 Fish: fish_add_path ~/.cargo/bin
-    export PATH="$HOME/.cargo/bin:$PATH"
-    export PATH="/usr/local/opt/make/libexec/gnubin:$PATH"
-
-    # Pyenv（Linux 可能需要额外的路径初始化）
-    # 对应 Fish: if command -v pyenv > /dev/null; status is-login; and pyenv init --path | source; ... end
-    if command -v pyenv > /dev/null; then
-        export PYENV_ROOT="$HOME/.pyenv"
-        export PATH="$PYENV_ROOT/bin:$PATH"
-        eval "$(pyenv init --path)"
-        eval "$(pyenv init -)"
-        export PATH="$PYENV_ROOT/shims:$PATH"
-    fi
-
     # 代理配置（Linux 默认端口可能不同）
     # 对应 Fish: alias h_proxy='set -gx http_proxy http://192.168.1.76:7890 ...'
     alias h_proxy='export http_proxy=http://192.168.1.76:7890; export https_proxy=http://192.168.1.76:7890; export all_proxy=socks5://192.168.1.76:7890'
@@ -295,11 +262,6 @@ elif [[ "$OS" == "linux" ]]; then
 # Windows Git Bash 特定配置
 # 对应 Fish: else if test "$OS" = "Windows" ... end
 elif [[ "$OS" == "windows" ]]; then
-    # 字符编码设置（已在文件开头设置，这里确保覆盖）
-    export LANG=zh_CN.UTF-8
-    export LC_ALL=zh_CN.UTF-8
-    export LC_CTYPE=zh_CN.UTF-8
-
     # 代理配置（Windows 默认使用 7890）
     # 对应 Fish: alias h_proxy='set -gx http_proxy http://192.168.1.76:7890 ...'
     alias h_proxy='export http_proxy=http://192.168.1.76:7890; export https_proxy=http://192.168.1.76:7890; export all_proxy=socks5://192.168.1.76:7890'
@@ -313,35 +275,20 @@ elif [[ "$OS" == "windows" ]]; then
     if command -v explorer.exe &> /dev/null; then
         alias open='explorer.exe'
     fi
-
-    # Python 环境（如果使用 uv）
-    if [ -d "/c/Users/$USER/.local/bin" ]; then
-        export PATH="/c/Users/$USER/.local/bin:$PATH"
-    fi
-    if [ -d "/c/Users/$USER/AppData/Roaming/uv/python" ]; then
-        export PATH="/c/Users/$USER/AppData/Roaming/uv/python/cpython-3.10.16-windows-x86_64-none:$PATH"
-    fi
 fi
 
 # ============================================
-# 工具集成（通用，所有平台）
+# 工具集成（交互式 shell 专用）
 # ============================================
+# 注意：fnm 和 pyenv 的环境变量初始化已在 .zprofile 中完成
+# 这里只处理交互式 shell 特有的配置
 
-# fnm (Fast Node Manager) - 如果已安装
-# 对应 Fish: conf.d/fnm.fish - fnm env --use-on-cd --shell fish | source
-# 参考: https://github.com/Schniz/fnm
-# fnm 会自动处理 Node 版本管理和 .node-version/.nvmrc 文件的自动切换
+# fnm (Fast Node Manager) - 交互式 shell 配置
+# 注意：环境变量已在 .zprofile 中设置，这里只确保交互式功能正常
 if command -v fnm &> /dev/null; then
-    eval "$(fnm env --use-on-cd)"
-fi
-
-# Pyenv - 如果已安装（macOS 通用配置，Linux 在平台特定部分有额外配置）
-# 对应 Fish: if type -q pyenv; status --is-interactive; and pyenv init - | source; end
-# 注意：Linux 的 Pyenv 配置在平台特定部分，这里只处理 macOS
-if [[ "$OS" == "macos" ]] && command -v pyenv > /dev/null; then
-    export PYENV_ROOT="$HOME/.pyenv"
-    command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"
-    eval "$(pyenv init -)"
+    # fnm 的交互式功能（如自动切换版本）已在 .zprofile 中通过 --use-on-cd 配置
+    # 这里不需要额外配置
+    :
 fi
 
 # Direnv - 如果已安装（可选）

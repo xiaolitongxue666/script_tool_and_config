@@ -367,7 +367,9 @@ determine_zshrc_path() {
 }
 
 ZSH_CONFIG_FILE=$(determine_zshrc_path)
+ZSH_PROFILE_FILE="${ZSH_CONFIG_FILE%/.zshrc}/.zprofile"
 log_info "Zsh 配置文件路径: $ZSH_CONFIG_FILE"
+log_info "Zsh 登录配置文件路径: $ZSH_PROFILE_FILE"
 
 # 检查统一配置文件是否存在
 if [ ! -f "$SCRIPT_DIR/.zshrc" ]; then
@@ -375,15 +377,17 @@ if [ ! -f "$SCRIPT_DIR/.zshrc" ]; then
     log_info "将使用 Oh My Zsh 默认配置"
 else
     # 备份现有配置（如果存在）
-    if [ -f "$ZSH_CONFIG_FILE" ]; then
-        BACKUP_FILE="${ZSH_CONFIG_FILE}.backup.$(date +%Y%m%d_%H%M%S)"
-        cp "$ZSH_CONFIG_FILE" "$BACKUP_FILE" 2>/dev/null || {
-            log_warning "备份失败，但将继续安装"
-        }
-        if [ -f "$BACKUP_FILE" ]; then
-            log_success "已备份现有配置到: $BACKUP_FILE"
+    for config_file in "$ZSH_CONFIG_FILE" "$ZSH_PROFILE_FILE"; do
+        if [ -f "$config_file" ]; then
+            BACKUP_FILE="${config_file}.backup.$(date +%Y%m%d_%H%M%S)"
+            cp "$config_file" "$BACKUP_FILE" 2>/dev/null || {
+                log_warning "备份失败: $config_file，但将继续安装"
+            }
+            if [ -f "$BACKUP_FILE" ]; then
+                log_success "已备份现有配置到: $BACKUP_FILE"
+            fi
         fi
-    fi
+    done
 
     # 确保目标目录存在
     zshrc_dir=$(dirname "$ZSH_CONFIG_FILE")
@@ -395,7 +399,7 @@ else
         log_info "已创建配置目录: $zshrc_dir"
     fi
 
-    # 复制统一配置文件
+    # 复制 .zshrc 配置文件
     if cp "$SCRIPT_DIR/.zshrc" "$ZSH_CONFIG_FILE" 2>/dev/null; then
         log_success "已同步配置文件到: $ZSH_CONFIG_FILE"
     else
@@ -403,6 +407,21 @@ else
         log_info "源文件: $SCRIPT_DIR/.zshrc"
         log_info "目标文件: $ZSH_CONFIG_FILE"
         exit 1
+    fi
+
+    # 复制 .zprofile 配置文件（登录 shell 环境变量配置）
+    if [ -f "$SCRIPT_DIR/.zprofile" ]; then
+        if cp "$SCRIPT_DIR/.zprofile" "$ZSH_PROFILE_FILE" 2>/dev/null; then
+            log_success "已同步登录配置文件到: $ZSH_PROFILE_FILE"
+            log_info "此文件确保所有登录方式（包括 SSH）都能正确加载环境变量"
+        else
+            log_warning "复制 .zprofile 配置文件失败，但继续安装"
+            log_info "源文件: $SCRIPT_DIR/.zprofile"
+            log_info "目标文件: $ZSH_PROFILE_FILE"
+        fi
+    else
+        log_warning "未找到 .zprofile 配置文件: $SCRIPT_DIR/.zprofile"
+        log_info "将跳过登录配置文件安装"
     fi
 fi
 
@@ -512,6 +531,16 @@ if [ -f "$ZSH_CONFIG_FILE" ]; then
     log_success "Zsh 配置文件已存在: $ZSH_CONFIG_FILE"
 else
     log_warning "Zsh 配置文件不存在: $ZSH_CONFIG_FILE"
+    VERIFICATION_PASSED=false
+fi
+
+# 验证 .zprofile 配置文件
+if [ -f "$ZSH_PROFILE_FILE" ]; then
+    log_success "Zsh 登录配置文件已存在: $ZSH_PROFILE_FILE"
+    log_info "此文件确保所有登录方式（包括 SSH）都能正确加载环境变量"
+else
+    log_warning "Zsh 登录配置文件不存在: $ZSH_PROFILE_FILE"
+    log_info "SSH 登录时可能无法正确加载环境变量（如 fnm、uv 等）"
     VERIFICATION_PASSED=false
 fi
 
