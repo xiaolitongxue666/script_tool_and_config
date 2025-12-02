@@ -1,12 +1,12 @@
 # Configuration for Alacritty, the GPU enhanced terminal emulator.
 # Alacritty 配置，一款使用 GPU 加速的终端模拟器
-#
+# 
 # 参考: https://github.com/alacritty/alacritty
 # 配置文件格式: TOML (从 0.13.0 版本开始使用 TOML，替代了之前的 YAML)
 
 # Import additional configuration files
 # 导入额外的配置文件
-#
+# 
 # Imports are loaded in order, skipping all missing files, with the importing
 # file being loaded last. If a field is already present in a previous import, it
 # will be replaced.
@@ -22,7 +22,7 @@
   # Live config reload (changes require restart)
   # 实时配置重载（某些更改需要重启）
   live_config_reload = true
-
+  
   # 导入 Dracula 主题
   # 更多主题: https://github.com/alacritty/alacritty-theme
   import = [
@@ -225,12 +225,12 @@
 # 颜色配置
 # 注意：Dracula 主题通过 import 导入，以下颜色配置会被主题文件覆盖
 # 如果需要自定义颜色，可以在主题文件之后添加覆盖配置
-#
+# 
 # Dracula 主题颜色说明：
 # - 背景: #282a36 (深灰蓝)
 # - 前景: #f8f8f2 (浅灰白)
 # - 主要颜色: 紫色系 (#bd93f9, #ff79c6 等)
-#
+# 
 # 更多信息: https://draculatheme.com/alacritty
 
 # Bell configuration # 声音提示配置
@@ -328,37 +328,20 @@
 #   - (Linux/BSD) user login shell
 #   - (Windows) powershell
 #
-# 配置文件自动适配不同系统：
-#   - macOS/Linux: 不配置 [terminal.shell]，使用系统默认 shell
-#   - Windows: 配置 [terminal.shell] 使用 Git Bash（如果存在）
+# Windows: 配置为使用 Git Bash，并自动启动 zsh（如果已安装）
+# 安装脚本会自动检测 Git Bash 路径并配置
+# macOS/Linux: 保持注释状态，使用系统默认配置
 #
-# Windows 自动检测 Git Bash 路径（按优先级）：
-#   1. D:\Program Files\Git\usr\bin\bash.exe
-#   2. D:\Program Files\Git\bin\bash.exe
-#   3. C:\Program Files\Git\usr\bin\bash.exe
-#   4. C:\Program Files\Git\bin\bash.exe
-#   5. C:\msys64\usr\bin\bash.exe
-#   6. D:\msys64\usr\bin\bash.exe
-#
-# 如果以上路径都不存在，Windows 将使用默认的 PowerShell
-#
-# 注意：此配置文件是跨平台通用的，Alacritty 会自动根据平台应用相应配置
-# 注意：Alacritty 0.16.1 使用 [terminal.shell] 配置（推荐格式，无警告）
-
-# Windows: 配置 Git Bash（如果存在）
-# macOS/Linux: 此配置会被忽略，使用系统默认 shell
-[terminal.shell]
-  # Windows Git Bash 路径（自动检测，按常见安装位置顺序）
-  # 如果路径不存在，Alacritty 会回退到默认的 PowerShell
-  program = "D:\\Program Files\\Git\\usr\\bin\\bash.exe"
-  args = ["--login"]
-
-  # 如果上面的路径不存在，可以尝试以下路径（取消注释并注释掉上面的）：
-  # program = "D:\\Program Files\\Git\\bin\\bash.exe"
-  # program = "C:\\Program Files\\Git\\usr\\bin\\bash.exe"
-  # program = "C:\\Program Files\\Git\\bin\\bash.exe"
-  # program = "C:\\msys64\\usr\\bin\\bash.exe"
-  # program = "D:\\msys64\\usr\\bin\\bash.exe"
+# 注意：安装脚本会根据平台自动配置，无需手动修改
+# 注意：从新版本开始，使用 [terminal.shell] 替代已废弃的 [shell]
+# [terminal.shell]
+#   # macOS/Linux 配置（取消注释以使用）
+#   # program = "/bin/bash"
+#   # args = ["--login"]
+#   
+#   # Windows 配置（安装脚本会自动配置）
+#   # program = "C:\\Program Files\\Git\\usr\\bin\\bash.exe"
+#   # args = ["--login"]
 
 # Startup directory # 启动目录
 #

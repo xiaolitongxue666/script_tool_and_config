@@ -56,7 +56,7 @@ if [ "$PLATFORM" == "macos" ]; then
     if [ -d "/Applications/Alacritty.app" ]; then
         OLD_VERSION=$(/Applications/Alacritty.app/Contents/MacOS/alacritty --version 2>/dev/null | head -1 || echo "未知版本")
         log_warning "检测到已安装的 Alacritty: $OLD_VERSION"
-        
+
         # 备份旧版本
         BACKUP_NAME="Alacritty.app.backup.$(date +%Y%m%d_%H%M%S)"
         if [ -d "/Applications/$BACKUP_NAME" ]; then
@@ -77,6 +77,11 @@ elif [ "$PLATFORM" == "windows" ]; then
             if command -v winget &> /dev/null; then
                 winget uninstall --id=Alacritty.Alacritty -e 2>/dev/null || log_warning "卸载失败，请手动卸载"
             fi
+        else
+            # 用户选择不卸载，标记为已安装，跳过后续安装步骤
+            INSTALL_METHOD="existing"
+            SKIP_INSTALL=true
+            log_info "保留现有安装，跳过安装步骤"
         fi
     fi
 fi
@@ -100,12 +105,13 @@ fi
 # 安装方法选择
 # ============================================
 INSTALL_METHOD=""
+SKIP_INSTALL=false
 
 if [ "$PLATFORM" == "macos" ]; then
     # macOS: 使用 Homebrew 安装
     if command -v brew &> /dev/null; then
         log_info "检测到 Homebrew，尝试使用 Homebrew 安装（推荐）..."
-        
+
         # 尝试通过 brew 安装
         if [ -z "$INSTALL_METHOD" ]; then
             log_info "执行: brew install --cask alacritty"
@@ -125,7 +131,7 @@ if [ "$PLATFORM" == "macos" ]; then
     fi
 elif [ "$PLATFORM" == "windows" ]; then
     # Windows: 使用 winget 安装
-    if command -v winget &> /dev/null; then
+    if [ "$SKIP_INSTALL" != "true" ] && command -v winget &> /dev/null; then
         # 检查是否已安装
         if winget list --id=Alacritty.Alacritty 2>/dev/null | grep -q "Alacritty"; then
             INSTALLED_VERSION=$(winget list --id=Alacritty.Alacritty 2>/dev/null | grep "Alacritty" | awk '{print $3}' || echo "未知")
@@ -134,7 +140,7 @@ elif [ "$PLATFORM" == "windows" ]; then
             SKIP_INSTALL=true
         else
             log_info "检测到 winget，尝试使用 winget 安装（推荐）..."
-            
+
             # 检测代理设置
             PROXY="${http_proxy:-${https_proxy:-http://127.0.0.1:7890}}"
             if [ -n "$PROXY" ]; then
@@ -144,7 +150,7 @@ elif [ "$PLATFORM" == "windows" ]; then
                 export HTTPS_PROXY="$PROXY"
                 log_info "使用代理: $PROXY"
             fi
-            
+
             log_info "执行: winget install --id=Alacritty.Alacritty -e"
             if winget install --id=Alacritty.Alacritty -e --accept-source-agreements --accept-package-agreements 2>&1; then
                 INSTALL_METHOD="winget"
@@ -175,32 +181,32 @@ fi
 if [ "$INSTALL_METHOD" != "homebrew" ] && [ "$INSTALL_METHOD" != "winget" ] && [ "$SKIP_INSTALL" != "true" ]; then
     if [ "$PLATFORM" == "macos" ]; then
         log_info "使用手动安装方式（下载 DMG 文件）..."
-        
+
         # 获取最新版本号（从 GitHub API）
         ALACRITTY_VERSION="v0.16.1"  # 默认版本，可以从 API 获取最新版本
         DMG_URL="https://github.com/alacritty/alacritty/releases/download/${ALACRITTY_VERSION}/Alacritty-${ALACRITTY_VERSION}.dmg"
         DMG_FILE="/tmp/Alacritty-${ALACRITTY_VERSION}.dmg"
-        
+
         log_info "下载 Alacritty ${ALACRITTY_VERSION}..."
         if curl -L -f -o "$DMG_FILE" "$DMG_URL" 2>/dev/null; then
             log_success "下载完成: $(du -h "$DMG_FILE" | cut -f1)"
-            
+
             # 挂载 DMG
             log_info "挂载 DMG 文件..."
             hdiutil attach "$DMG_FILE" -quiet -nobrowse
-            
+
             # 查找挂载的卷名
             VOLUME_NAME=$(ls /Volumes/ | grep -i alacritty | head -1)
             if [ -n "$VOLUME_NAME" ] && [ -d "/Volumes/$VOLUME_NAME/Alacritty.app" ]; then
                 log_info "找到安装包: /Volumes/$VOLUME_NAME/Alacritty.app"
-                
+
                 # 复制应用到 Applications
                 log_info "安装到 /Applications..."
                 cp -R "/Volumes/$VOLUME_NAME/Alacritty.app" /Applications/
-                
+
                 # 卸载 DMG
                 hdiutil detach "/Volumes/$VOLUME_NAME" -quiet
-                
+
                 # 验证安装
                 if [ -d "/Applications/Alacritty.app" ]; then
                     INSTALLED_VERSION=$(/Applications/Alacritty.app/Contents/MacOS/alacritty --version 2>/dev/null | head -1 || echo "未知")
@@ -215,7 +221,7 @@ if [ "$INSTALL_METHOD" != "homebrew" ] && [ "$INSTALL_METHOD" != "winget" ] && [
                 hdiutil detach "/Volumes/$VOLUME_NAME" -quiet 2>/dev/null
                 exit 1
             fi
-            
+
             # 清理临时文件
             rm -f "$DMG_FILE"
         else
@@ -227,12 +233,12 @@ if [ "$INSTALL_METHOD" != "homebrew" ] && [ "$INSTALL_METHOD" != "winget" ] && [
         fi
     elif [ "$PLATFORM" == "windows" ]; then
         log_info "使用手动安装方式（下载 exe 安装程序）..."
-        
+
         # 获取最新版本号
         ALACRITTY_VERSION="v0.16.1"  # 默认版本
         EXE_URL="https://github.com/alacritty/alacritty/releases/download/${ALACRITTY_VERSION}/Alacritty-${ALACRITTY_VERSION}-installer.exe"
         EXE_FILE="/tmp/Alacritty-${ALACRITTY_VERSION}-installer.exe"
-        
+
         # 检测代理设置
         PROXY="${http_proxy:-${https_proxy:-http://127.0.0.1:7890}}"
         CURL_PROXY=""
@@ -240,7 +246,7 @@ if [ "$INSTALL_METHOD" != "homebrew" ] && [ "$INSTALL_METHOD" != "winget" ] && [
             CURL_PROXY="-x $PROXY"
             log_info "使用代理下载: $PROXY"
         fi
-        
+
         log_info "下载 Alacritty ${ALACRITTY_VERSION}..."
         if curl $CURL_PROXY -L -f -o "$EXE_FILE" "$EXE_URL" 2>/dev/null; then
             log_success "下载完成"
@@ -271,14 +277,14 @@ fi
 
 if [ "$PLATFORM" != "windows" ]; then
     log_info "检查 Terminfo 安装..."
-    
+
     # 检查是否已安装 terminfo
     if command -v infocmp &> /dev/null; then
         if infocmp alacritty &> /dev/null; then
             log_success "Terminfo 已安装"
         else
             log_info "Terminfo 未安装，尝试安装..."
-            
+
             # 尝试从已安装的 Alacritty 获取 terminfo
             if [ "$PLATFORM" == "macos" ] && [ -f "/Applications/Alacritty.app/Contents/Resources/alacritty.info" ]; then
                 log_info "找到 alacritty.info 文件，安装 Terminfo..."
@@ -307,7 +313,7 @@ if command -v fish &> /dev/null; then
     echo "安装 Fish Shell 自动补全..."
     FISH_COMPLETE_DIR="$HOME/.config/fish/completions"
     mkdir -p "$FISH_COMPLETE_DIR"
-    
+
     # 尝试从不同位置复制补全文件
     if [ -f "/Applications/Alacritty.app/Contents/Resources/completions/alacritty.fish" ]; then
         cp /Applications/Alacritty.app/Contents/Resources/completions/alacritty.fish "$FISH_COMPLETE_DIR/"
@@ -323,7 +329,7 @@ if command -v zsh &> /dev/null; then
     echo "安装 Zsh 自动补全..."
     ZSH_COMPLETE_DIR="$HOME/.zsh/completions"
     mkdir -p "$ZSH_COMPLETE_DIR"
-    
+
     if [ -f "/Applications/Alacritty.app/Contents/Resources/completions/_alacritty" ]; then
         cp /Applications/Alacritty.app/Contents/Resources/completions/_alacritty "$ZSH_COMPLETE_DIR/"
         # 添加到 .zshrc
@@ -340,7 +346,7 @@ if command -v bash &> /dev/null; then
     echo "安装 Bash 自动补全..."
     BASH_COMPLETE_DIR="$HOME/.local/share/bash-completion/completions"
     mkdir -p "$BASH_COMPLETE_DIR"
-    
+
     if [ -f "/Applications/Alacritty.app/Contents/Resources/completions/alacritty.bash" ]; then
         cp /Applications/Alacritty.app/Contents/Resources/completions/alacritty.bash "$BASH_COMPLETE_DIR/"
     fi
@@ -354,9 +360,18 @@ log_info "检查配置文件..."
 # 确定配置文件目录
 if [ "$PLATFORM" == "windows" ]; then
     # Windows: 使用 %APPDATA%\alacritty
-    CONFIG_DIR="$APPDATA/alacritty"
-    if [ -z "$CONFIG_DIR" ]; then
-        # 如果 APPDATA 未设置，使用默认路径
+    # 尝试从 Windows 环境变量获取 APPDATA
+    if [ -z "$APPDATA" ]; then
+        # 在 Git Bash 中，APPDATA 可能未设置，尝试从 Windows 环境变量获取
+        if command -v cmd.exe &> /dev/null; then
+            APPDATA=$(cmd.exe /c "echo %APPDATA%" 2>/dev/null | tr -d '\r\n' | sed 's|\\|/|g')
+        fi
+    fi
+
+    if [ -n "$APPDATA" ] && [ "$APPDATA" != "%APPDATA%" ]; then
+        CONFIG_DIR="$APPDATA/alacritty"
+    else
+        # 如果无法获取 APPDATA，使用默认路径
         CONFIG_DIR="$HOME/AppData/Roaming/alacritty"
     fi
 else
@@ -372,91 +387,8 @@ if [ -f "$SOURCE_CONFIG" ]; then
         log_info "复制配置文件..."
         mkdir -p "$CONFIG_DIR"
         cp "$SOURCE_CONFIG" "$CONFIG_FILE"
-        
-        # Windows: 配置 Git Bash 作为 shell
-        if [ "$PLATFORM" == "windows" ]; then
-            log_info "配置 Windows 特定的 shell 设置..."
-            # 检测 Git Bash 路径
-            GIT_BASH_PATH=""
-            if command -v bash.exe &> /dev/null; then
-                GIT_BASH_PATH=$(where.exe bash.exe 2>/dev/null | head -1 | tr -d '\r')
-            fi
-            
-            # 常见的 Git Bash 路径
-            if [ -z "$GIT_BASH_PATH" ]; then
-                for path in \
-                    "C:\\Program Files\\Git\\usr\\bin\\bash.exe" \
-                    "C:\\Program Files\\Git\\bin\\bash.exe" \
-                    "D:\\Program Files\\Git\\usr\\bin\\bash.exe" \
-                    "D:\\Program Files\\Git\\bin\\bash.exe"; do
-                    if [ -f "$path" ]; then
-                        GIT_BASH_PATH="$path"
-                        break
-                    fi
-                done
-            fi
-            
-            if [ -n "$GIT_BASH_PATH" ]; then
-                log_success "检测到 Git Bash: $GIT_BASH_PATH"
-                # 转义路径中的反斜杠（TOML 需要双反斜杠）
-                ESCAPED_PATH=$(echo "$GIT_BASH_PATH" | sed 's|\\|\\\\|g')
-                
-                # 迁移旧的 [shell] 配置到 [terminal.shell]（如果存在）
-                if grep -q "^\[shell\]" "$CONFIG_FILE"; then
-                    log_info "检测到旧的 [shell] 配置，迁移到 [terminal.shell]..."
-                    sed -i 's|^\[shell\]|[terminal.shell]|g' "$CONFIG_FILE"
-                fi
-                
-                # 检查配置文件中是否已有 [terminal.shell] 配置
-                if grep -q "^\[terminal.shell\]" "$CONFIG_FILE"; then
-                    # 如果已有配置，更新它
-                    if grep -q "^  program" "$CONFIG_FILE"; then
-                        # 更新现有的 program
-                        if [[ "$OSTYPE" == "msys" ]] || [[ "$OSTYPE" == "mingw" ]]; then
-                            # Git Bash 环境，使用 sed
-                            # TOML 只支持双引号字符串，路径中的反斜杠需要转义
-                            sed -i "s|^  program = .*|  program = \"$ESCAPED_PATH\"|" "$CONFIG_FILE"
-                            sed -i "s|^  args = .*|  args = [\"--login\"]|" "$CONFIG_FILE"
-                        else
-                            # 其他环境，可能需要不同的处理
-                            log_warning "无法自动更新配置文件，请手动编辑: $CONFIG_FILE"
-                            log_info "添加以下配置到 [terminal.shell] 部分："
-                            log_info "  program = \"$ESCAPED_PATH\""
-                            log_info "  args = [\"--login\"]"
-                        fi
-                    else
-                        # 添加 program 和 args
-                        if [[ "$OSTYPE" == "msys" ]] || [[ "$OSTYPE" == "mingw" ]]; then
-                            # TOML 只支持双引号字符串，路径中的反斜杠需要转义
-                            sed -i "/^\[terminal.shell\]/a\\  program = \"$ESCAPED_PATH\"\n  args = [\"--login\"]" "$CONFIG_FILE"
-                        else
-                            log_warning "无法自动更新配置文件，请手动编辑: $CONFIG_FILE"
-                        fi
-                    fi
-                else
-                    # 添加新的 [terminal.shell] 配置
-                    if [[ "$OSTYPE" == "msys" ]] || [[ "$OSTYPE" == "mingw" ]]; then
-                        # 在注释后添加配置，TOML 只支持双引号字符串
-                        sed -i "/^# \[terminal.shell\]/a\\[terminal.shell]\n  program = \"$ESCAPED_PATH\"\n  args = [\"--login\"]" "$CONFIG_FILE"
-                    else
-                        log_warning "无法自动更新配置文件，请手动编辑: $CONFIG_FILE"
-                        log_info "添加以下配置："
-                        log_info "[terminal.shell]"
-                        log_info "  program = \"$ESCAPED_PATH\""
-                        log_info "  args = [\"--login\"]"
-                    fi
-                fi
-                log_success "已配置 Git Bash 作为 Alacritty 的默认 shell"
-            else
-                log_warning "未找到 Git Bash，请手动配置 shell"
-                log_info "在 $CONFIG_FILE 中添加："
-                log_info "[terminal.shell]"
-                log_info "  program = \"C:\\\\Program Files\\\\Git\\\\usr\\\\bin\\\\bash.exe\""
-                log_info "  args = [\"--login\"]"
-            fi
-        fi
-        
         log_success "配置文件已复制到: $CONFIG_FILE"
+        log_info "注意: 配置文件是跨平台通用的，会自动适配不同系统"
     else
         log_info "配置文件已存在: $CONFIG_FILE"
         read -p "是否覆盖现有配置文件？(y/n) " -n 1 -r
@@ -467,51 +399,8 @@ if [ -f "$SOURCE_CONFIG" ]; then
             cp "$CONFIG_FILE" "$BACKUP_FILE"
             log_info "已备份现有配置到: $BACKUP_FILE"
             cp "$SOURCE_CONFIG" "$CONFIG_FILE"
-            
-            # Windows: 重新配置 Git Bash
-            if [ "$PLATFORM" == "windows" ]; then
-                # 检测 Git Bash 路径并配置（同上）
-                GIT_BASH_PATH=""
-                if command -v bash.exe &> /dev/null; then
-                    GIT_BASH_PATH=$(where.exe bash.exe 2>/dev/null | head -1 | tr -d '\r')
-                fi
-                
-                if [ -z "$GIT_BASH_PATH" ]; then
-                    for path in \
-                        "C:\\Program Files\\Git\\usr\\bin\\bash.exe" \
-                        "C:\\Program Files\\Git\\bin\\bash.exe" \
-                        "D:\\Program Files\\Git\\usr\\bin\\bash.exe" \
-                        "D:\\Program Files\\Git\\bin\\bash.exe"; do
-                        if [ -f "$path" ]; then
-                            GIT_BASH_PATH="$path"
-                            break
-                        fi
-                    done
-                fi
-                
-                if [ -n "$GIT_BASH_PATH" ]; then
-                    # 转义路径中的反斜杠（TOML 需要双反斜杠）
-                    ESCAPED_PATH=$(echo "$GIT_BASH_PATH" | sed 's|\\|\\\\|g')
-                    # 迁移旧的 [shell] 配置到 [terminal.shell]（如果存在）
-                    if grep -q "^\[shell\]" "$CONFIG_FILE"; then
-                        sed -i 's|^\[shell\]|[terminal.shell]|g' "$CONFIG_FILE"
-                    fi
-                    if grep -q "^\[terminal.shell\]" "$CONFIG_FILE"; then
-                        if [[ "$OSTYPE" == "msys" ]] || [[ "$OSTYPE" == "mingw" ]]; then
-                            # TOML 只支持双引号字符串，路径中的反斜杠需要转义
-                            sed -i "s|^  program = .*|  program = \"$ESCAPED_PATH\"|" "$CONFIG_FILE"
-                            sed -i "s|^  args = .*|  args = [\"--login\"]|" "$CONFIG_FILE"
-                        fi
-                    else
-                        if [[ "$OSTYPE" == "msys" ]] || [[ "$OSTYPE" == "mingw" ]]; then
-                            sed -i "/^# \[terminal.shell\]/a\\[terminal.shell]\n  program = \"$ESCAPED_PATH\"\n  args = [\"--login\"]" "$CONFIG_FILE"
-                        fi
-                    fi
-                    log_success "已重新配置 Git Bash"
-                fi
-            fi
-            
             log_success "配置文件已更新: $CONFIG_FILE"
+            log_info "注意: 配置文件是跨平台通用的，会自动适配不同系统"
         else
             log_info "跳过配置文件更新"
         fi
@@ -541,11 +430,22 @@ fi
 echo ""
 if [ "$PLATFORM" == "windows" ]; then
     echo "配置文件位置："
-    echo "  - %APPDATA%\\alacritty\\alacritty.toml (推荐)"
+    if [ -n "$CONFIG_FILE" ]; then
+        # 将路径转换为 Windows 格式显示
+        WIN_CONFIG_PATH=$(echo "$CONFIG_FILE" | sed 's|/|\\|g')
+        echo "  - $WIN_CONFIG_PATH"
+    else
+        echo "  - %APPDATA%\\alacritty\\alacritty.toml (推荐)"
+    fi
     echo ""
     echo "启动方式："
     echo "  从开始菜单搜索 'Alacritty' 并打开"
     echo "  或在命令行运行: alacritty"
+    echo ""
+    echo "如果无法启动，请检查："
+    echo "  1. 配置文件路径是否正确"
+    echo "  2. shell 配置是否正确（如果配置了 Git Bash，请确保路径存在）"
+    echo "  3. 尝试删除配置文件，让 Alacritty 使用默认配置"
 else
     echo "配置文件位置（按优先级顺序）："
     echo "  1. \$XDG_CONFIG_HOME/alacritty/alacritty.toml"
