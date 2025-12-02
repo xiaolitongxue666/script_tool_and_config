@@ -77,6 +77,9 @@
   # by DPI and the specified value is always added at both opposing sides.
   # 在窗口周围添加的空白区域（以像素为单位）。此填充已缩放
   # 通过 DPI 并且指定的值总是在相对的两边相加。
+  #
+  # Windows 特定：增加水平填充可以部分掩盖 Powerline 符号溢出问题
+  # 但这不是根本解决方案，主要依赖 glyph_offset 修复
   [window.padding]
     x = 5
     y = 5
@@ -198,7 +201,10 @@
   # 作为修改行距，`offset.x` 作为修改字母间距。
   [font.offset]
     x = 0
-    y = 7
+    # macOS/Linux: 通常使用较大的 y 值（如 7）以获得更好的行距
+    # Windows: 使用较小的值（如 2-4）以避免 Powerline 符号溢出
+    # 如果使用 Powerline/Oh My Posh 主题，建议从 2 开始调整
+    y = 2
 
   # Glyph offset determines the locations of the glyphs within their cells with
   # the default being at the bottom. Increasing `x` moves the glyph to the
@@ -206,9 +212,19 @@
   # 字形偏移确定字形在其单元格内的位置
   # 默认在底部。增加 `x` 将字形移动到
   # 右边，增加 `y` 会使字形向上移动。
+  #
+  # Windows 特定修复：Powerline 符号溢出问题
+  # 在 Windows + Git Bash + Powerline/Oh My Posh 主题下，Powerline 字符（如箭头、块）
+  # 可能被渲染为"双宽"或宽度计算错误，导致背景色溢出到行尾，形成多余的"尾巴"。
+  # 调整 glyph_offset.y 可以修复这个问题：
+  #   - 从 0 开始，如果还有溢出，逐渐增加到 1-2
+  #   - 常见有效值：0, 1, 2
+  #   - macOS/Linux 通常不需要此修复，可以保持 0
   [font.glyph_offset]
     x = 0
-    y = 7
+    # Windows: 修复 Powerline 符号溢出（常见值：0-2）
+    # macOS/Linux: 通常保持 0 即可
+    y = 1
 
   # Thin stroke font rendering (macOS only)
   # 细笔画字体渲染（仅限 macOS）
