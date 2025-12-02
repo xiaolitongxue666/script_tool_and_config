@@ -35,8 +35,8 @@ brew install --cask alacritty
 
 #### 方法 2: 使用安装脚本
 ```bash
-cd scripts
-./auto_install_alacritty_for_macos.sh
+cd dotfiles/alacritty
+bash install.sh
 ```
 
 #### 方法 3: 从 GitHub 下载预编译版本
@@ -65,7 +65,15 @@ sudo apt install alacritty
 
 ## 使用方法
 
-### 1. 复制配置文件
+### 1. 使用安装脚本（推荐）
+
+```bash
+# 运行安装脚本，会自动复制配置文件
+cd dotfiles/alacritty
+bash install.sh
+```
+
+### 2. 手动复制配置文件
 
 ```bash
 # macOS/Linux
@@ -77,7 +85,15 @@ mkdir %APPDATA%\alacritty
 copy dotfiles\alacritty\alacritty.toml %APPDATA%\alacritty\
 ```
 
-### 2. 安装 Terminfo (可选但推荐)
+### 3. 使用复制脚本
+
+```bash
+# 只复制配置文件，不进行安装
+cd dotfiles/alacritty
+bash copy_config.sh
+```
+
+### 4. 安装 Terminfo (可选但推荐)
 
 确保终端类型正确识别：
 
@@ -88,7 +104,7 @@ copy dotfiles\alacritty\alacritty.toml %APPDATA%\alacritty\
 sudo tic -xe alacritty,alacritty-direct <path-to-alacritty.info>
 ```
 
-### 3. 重启 Alacritty
+### 5. 重启 Alacritty
 
 配置更改后重启 Alacritty 以应用新设置。
 
@@ -96,49 +112,86 @@ sudo tic -xe alacritty,alacritty-direct <path-to-alacritty.info>
 
 配置文件 (`alacritty.toml`) 包含以下主要部分：
 
+- **通用配置** (`[general]`): 实时配置重载、主题导入等
 - **环境变量** (`[env]`): TERM 等环境变量设置
 - **窗口设置** (`[window]`): 尺寸、位置、填充、装饰、透明度等
 - **滚动设置** (`[scrolling]`): 历史记录行数、滚动倍数
-- **字体配置** (`[font]`): 字体族、大小、偏移等
-- **颜色主题** (`[colors]`): Tomorrow Night 主题配色
+- **字体配置** (`[font]`): 字体族、大小、偏移等（包含 Windows Powerline 修复）
+- **颜色主题** (`[colors]`): 通过 import 导入 Dracula 主题
 - **光标设置** (`[cursor]`): 样式、闪烁等
-- **Shell 设置** (`[shell]`): 默认 Shell 和启动目录
+- **Shell 设置** (`[terminal.shell]`): 默认 Shell 和启动目录（跨平台自动适配）
 - **键盘绑定** (`[[key_bindings]]`): 快捷键配置（大部分已注释，可按需启用）
 - **鼠标配置** (`[mouse]`): 鼠标行为设置
 
 ## 主题配置
 
-### 使用官方主题库
+### Dracula 主题
 
-1. 克隆主题库：
-```bash
-mkdir -p ~/.config/alacritty/themes
-git clone https://github.com/alacritty/alacritty-theme ~/.config/alacritty/themes
-```
+配置文件默认使用 Dracula 主题，通过 `import` 导入：
 
-2. 在 `alacritty.toml` 中导入主题：
 ```toml
-import = [
-  "~/.config/alacritty/themes/themes/catppuccin_mocha.toml",
-]
+[general]
+  import = [
+    "~/.config/alacritty/themes/dracula.toml",
+  ]
 ```
+
+**主题文件位置**:
+- macOS/Linux: `~/.config/alacritty/themes/dracula.toml`
+- Windows: `%APPDATA%\alacritty\themes\dracula.toml`
+
+**主题颜色**:
+- 背景: `#282a36` (深灰蓝)
+- 前景: `#f8f8f2` (浅灰白)
+- 主要颜色: 红色 `#ff5555`、绿色 `#50fa7b`、黄色 `#f1fa8c`、蓝色 `#bd93f9`、紫色 `#ff79c6`、青色 `#8be9fd`
+
+**参考**: [Dracula Theme](https://draculatheme.com/alacritty)
+
+### 使用其他主题
+
+1. 从 [Alacritty Theme](https://github.com/alacritty/alacritty-theme) 下载主题文件
+2. 保存到 `~/.config/alacritty/themes/` 目录（Windows: `%APPDATA%\alacritty\themes\`）
+3. 更新 `import` 配置
 
 ### 自定义主题
 
-可以直接在 `[colors]` 部分修改颜色值，或创建单独的主题文件通过 `import` 导入。
+如果需要在使用 Dracula 主题的同时自定义某些颜色，可以在 `alacritty.toml` 中主题导入之后添加覆盖配置：
 
-## 系统要求
+```toml
+import = [
+  "~/.config/alacritty/themes/dracula.toml",
+]
 
-- **OpenGL**: 至少需要 OpenGL ES 2.0 支持
-- **Windows**: Windows 10 版本 1809 或更高（需要 ConPTY 支持）
+# 覆盖主题中的某些颜色
+[colors.cursor]
+  text = "CellBackground"
+  cursor = "#f8f8f2"
+```
 
-## 参考链接
+## Windows 特定配置
 
-- [Alacritty 官方仓库](https://github.com/alacritty/alacritty)
-- [官方安装文档](https://github.com/alacritty/alacritty/blob/master/INSTALL.md)
-- [配置文件文档](https://github.com/alacritty/alacritty/blob/master/alacritty.toml)
-- [Alacritty 主题库](https://github.com/alacritty/alacritty-theme)
-- [官方网站](https://alacritty.org)
+### Git Bash 配置
+
+配置文件会自动适配 Windows 系统，使用 Git Bash 作为默认 shell。配置使用 `[terminal.shell]` 格式（Alacritty 0.16.1 推荐，无警告）。
+
+**自动检测路径**（按优先级）：
+1. `D:\Program Files\Git\usr\bin\bash.exe`
+2. `D:\Program Files\Git\bin\bash.exe`
+3. `C:\Program Files\Git\usr\bin\bash.exe`
+4. `C:\Program Files\Git\bin\bash.exe`
+5. `C:\msys64\usr\bin\bash.exe`
+6. `D:\msys64\usr\bin\bash.exe`
+
+如果以上路径都不存在，Windows 将使用默认的 PowerShell。
+
+### Powerline 符号溢出修复
+
+配置文件已包含针对 Windows + Git Bash + Powerline/Oh My Posh 主题的修复：
+
+- **`font.offset.y`**: 设置为 2（减少行距，避免溢出）
+- **`font.glyph_offset.y`**: 设置为 1（修复 Powerline 字符宽度计算错误）
+
+如果仍有溢出问题，可以调整 `glyph_offset.y` 的值（常见有效值：0, 1, 2）。
 
 ## 故障排除
 
@@ -152,6 +205,7 @@ import = [
 ### Terminfo 问题
 
 如果遇到终端类型识别问题：
+
 ```bash
 # 检查 terminfo 是否安装
 infocmp alacritty
@@ -160,3 +214,132 @@ infocmp alacritty
 sudo tic -xe alacritty,alacritty-direct <path-to-alacritty.info>
 ```
 
+**macOS 用户目录安装**（不需要 sudo）：
+
+```bash
+# 创建用户 terminfo 目录
+mkdir -p ~/.terminfo/61
+
+# 下载并编译到用户目录
+cd /tmp
+curl -L -o alacritty.info "https://raw.githubusercontent.com/alacritty/alacritty/master/extra/alacritty.info"
+tic -xe alacritty,alacritty-direct -o ~/.terminfo alacritty.info
+```
+
+### Windows 调试
+
+#### 查看启动日志
+
+```bash
+# 查看所有事件和详细日志
+alacritty.exe --print-events -vvv
+
+# 或者只查看错误信息
+alacritty.exe -vvv 2>&1 | tee alacritty_debug.log
+```
+
+#### 常见问题
+
+**1. 闪退问题**
+
+- 检查 Shell 路径配置是否正确
+- 验证配置文件语法：`alacritty.exe --config-file "%APPDATA%\alacritty\alacritty.toml" --print-events -vvv`
+- 临时使用默认配置：备份当前配置后删除配置文件，使用默认配置启动
+
+**2. Shell 路径格式错误**
+
+TOML 配置文件中，Windows 路径的反斜杠需要转义为双反斜杠：
+
+```toml
+# 错误示例
+[terminal.shell]
+  program = "C:\msys64\usr\bin\bash.exe"  # ❌ 错误
+
+# 正确示例
+[terminal.shell]
+  program = "C:\\msys64\\usr\\bin\\bash.exe"  # ✅ 正确
+```
+
+**3. 使用 PowerShell 作为默认 Shell**
+
+如果 Git Bash 有问题，可以临时使用 PowerShell：
+
+```toml
+[terminal.shell]
+  program = "powershell.exe"
+  args = []
+```
+
+或者完全注释掉 `[terminal.shell]` 部分，让 Alacritty 使用默认的 PowerShell。
+
+#### 调试命令速查
+
+```bash
+# 1. 查看 Alacritty 版本
+alacritty.exe --version
+
+# 2. 查看帮助信息
+alacritty.exe --help
+
+# 3. 使用调试模式启动
+alacritty.exe --print-events -vvv
+
+# 4. 指定配置文件启动
+alacritty.exe --config-file "C:\path\to\alacritty.toml" -vvv
+
+# 5. 验证配置文件语法
+alacritty.exe --config-file "%APPDATA%\alacritty\alacritty.toml" --print-events 2>&1 | head -50
+
+# 6. 检查 shell 路径是否存在
+where.exe bash.exe
+test -f "C:\msys64\usr\bin\bash.exe" && echo "存在" || echo "不存在"
+```
+
+### 配置警告修复
+
+#### 已修复的配置项
+
+- ✅ `live_config_reload`: 已移至 `[general]` 部分
+- ✅ 所有废弃的配置项已注释（如 `use_thin_strokes`、`decorations` 等）
+
+#### 配置迁移
+
+如果从旧版本升级，可以使用 `alacritty migrate` 命令自动迁移配置：
+
+```bash
+# macOS
+/Applications/Alacritty.app/Contents/MacOS/alacritty migrate
+
+# Linux/Windows
+alacritty migrate
+```
+
+### 主题未生效
+
+1. 检查主题文件是否存在：
+   ```bash
+   ls ~/.config/alacritty/themes/dracula.toml
+   ```
+
+2. 检查配置文件语法：
+   ```bash
+   alacritty --print-events 2>&1 | grep -i error
+   ```
+
+3. 确认导入路径正确（支持 `~` 和绝对路径）
+
+4. 恢复默认主题：删除或注释掉 `import` 行
+
+## 系统要求
+
+- **OpenGL**: 至少需要 OpenGL ES 2.0 支持
+- **Windows**: Windows 10 版本 1809 或更高（需要 ConPTY 支持）
+
+## 参考链接
+
+- [Alacritty 官方仓库](https://github.com/alacritty/alacritty)
+- [官方安装文档](https://github.com/alacritty/alacritty/blob/master/INSTALL.md)
+- [配置文件文档](https://github.com/alacritty/alacritty/blob/master/alacritty.toml)
+- [Alacritty 主题库](https://github.com/alacritty/alacritty-theme)
+- [官方网站](https://alacritty.org)
+- [Dracula Theme](https://draculatheme.com/alacritty)
