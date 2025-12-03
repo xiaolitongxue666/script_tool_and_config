@@ -179,6 +179,19 @@ if [ "$PLATFORM" == "macos" ] && [ "$SKIP_INSTALL" != "true" ]; then
 
     log_success "通过 Homebrew 安装成功"
     INSTALL_METHOD="homebrew"
+
+    # 移除 macOS Gatekeeper 隔离属性
+    if [ -d "/Applications/Alacritty.app" ]; then
+        log_info "移除 macOS Gatekeeper 隔离属性..."
+        if xattr -d com.apple.quarantine /Applications/Alacritty.app 2>/dev/null; then
+            log_success "已移除隔离属性，可以正常使用"
+        else
+            log_warning "无法自动移除隔离属性，如果遇到安全提示，请手动处理："
+            log_info "  方法1: xattr -d com.apple.quarantine /Applications/Alacritty.app"
+            log_info "  方法2: 在系统设置中允许运行"
+            log_info "  方法3: 右键点击应用，选择'打开'"
+        fi
+    fi
 elif [ "$PLATFORM" == "windows" ]; then
     # Windows: 使用 winget 安装
     if [ "$SKIP_INSTALL" != "true" ]; then
@@ -339,9 +352,9 @@ if [ -f "$SOURCE_CONFIG" ]; then
         mkdir -p "$CONFIG_DIR"
         cp "$SOURCE_CONFIG" "$CONFIG_FILE"
 
-        # macOS: 自动检测并配置 zsh 路径
+        # macOS: 自动检测并修复 shell 路径
         if [ "$PLATFORM" == "macos" ]; then
-            log_info "检测 macOS 平台，配置 zsh 路径..."
+            log_info "检测并修复 shell 路径..."
             ZSH_PATH=""
 
             # 优先使用 Homebrew 安装的 zsh（Apple Silicon）
@@ -355,9 +368,17 @@ if [ -f "$SOURCE_CONFIG" ]; then
             fi
 
             if [ -n "$ZSH_PATH" ]; then
-                # 使用 sed 更新配置文件中的 zsh 路径
+                # 检查配置文件中当前的 shell 路径是否存在
+                CURRENT_SHELL=$(grep -E "^\s*program\s*=" "$CONFIG_FILE" 2>/dev/null | head -1 | sed -E 's|.*program\s*=\s*"([^"]+)".*|\1|')
+
+                if [ -n "$CURRENT_SHELL" ] && [ ! -f "$CURRENT_SHELL" ]; then
+                    log_warning "配置的 shell 路径不存在: $CURRENT_SHELL"
+                    log_info "自动修复为: $ZSH_PATH"
+                fi
+
+                # 使用 sed 更新配置文件中的 zsh 路径（自动修复）
                 if [[ "$OSTYPE" == "darwin"* ]]; then
-                    # macOS 使用 BSD sed，需要不同的语法
+                    # macOS 使用 BSD sed
                     sed -i '' "s|program = \"/opt/homebrew/bin/zsh\"|program = \"$ZSH_PATH\"|g" "$CONFIG_FILE" 2>/dev/null || \
                     sed -i '' "s|program = \"/bin/zsh\"|program = \"$ZSH_PATH\"|g" "$CONFIG_FILE" 2>/dev/null
                 else
@@ -384,9 +405,9 @@ if [ -f "$SOURCE_CONFIG" ]; then
             log_info "已备份现有配置到: $BACKUP_FILE"
             cp "$SOURCE_CONFIG" "$CONFIG_FILE"
 
-            # macOS: 自动检测并配置 zsh 路径
+            # macOS: 自动检测并修复 shell 路径
             if [ "$PLATFORM" == "macos" ]; then
-                log_info "检测 macOS 平台，配置 zsh 路径..."
+                log_info "检测并修复 shell 路径..."
                 ZSH_PATH=""
 
                 # 优先使用 Homebrew 安装的 zsh（Apple Silicon）
@@ -400,9 +421,17 @@ if [ -f "$SOURCE_CONFIG" ]; then
                 fi
 
                 if [ -n "$ZSH_PATH" ]; then
-                    # 使用 sed 更新配置文件中的 zsh 路径
+                    # 检查配置文件中当前的 shell 路径是否存在
+                    CURRENT_SHELL=$(grep -E "^\s*program\s*=" "$CONFIG_FILE" 2>/dev/null | head -1 | sed -E 's|.*program\s*=\s*"([^"]+)".*|\1|')
+
+                    if [ -n "$CURRENT_SHELL" ] && [ ! -f "$CURRENT_SHELL" ]; then
+                        log_warning "配置的 shell 路径不存在: $CURRENT_SHELL"
+                        log_info "自动修复为: $ZSH_PATH"
+                    fi
+
+                    # 使用 sed 更新配置文件中的 zsh 路径（自动修复）
                     if [[ "$OSTYPE" == "darwin"* ]]; then
-                        # macOS 使用 BSD sed，需要不同的语法
+                        # macOS 使用 BSD sed
                         sed -i '' "s|program = \"/opt/homebrew/bin/zsh\"|program = \"$ZSH_PATH\"|g" "$CONFIG_FILE" 2>/dev/null || \
                         sed -i '' "s|program = \"/bin/zsh\"|program = \"$ZSH_PATH\"|g" "$CONFIG_FILE" 2>/dev/null
                     else
@@ -424,6 +453,55 @@ if [ -f "$SOURCE_CONFIG" ]; then
     fi
 else
     log_warning "未找到源配置文件: $SOURCE_CONFIG"
+fi
+
+# ============================================
+# 安装主题文件
+# ============================================
+if [ -f "$CONFIG_FILE" ]; then
+    log_info "检查主题文件..."
+
+    THEMES_DIR="$CONFIG_DIR/themes"
+    mkdir -p "$THEMES_DIR"
+
+    # 从配置文件中提取主题文件名
+    THEME_NAME=$(grep -E "themes/.*\.toml" "$CONFIG_FILE" 2>/dev/null | sed -E "s|.*themes/([^/]+)\.toml.*|\1|" | head -1)
+
+    if [ -n "$THEME_NAME" ]; then
+        THEME_FILE="$THEMES_DIR/${THEME_NAME}.toml"
+        log_info "检测到主题: $THEME_NAME"
+
+        if [ -f "$THEME_FILE" ]; then
+            log_success "主题文件已存在: $THEME_FILE"
+        else
+            log_info "主题文件不存在，正在下载..."
+            THEME_URL="https://raw.githubusercontent.com/alacritty/alacritty-theme/master/themes/${THEME_NAME}.toml"
+
+            if command -v curl &> /dev/null; then
+                if curl -L -f -o "$THEME_FILE" "$THEME_URL" 2>/dev/null; then
+                    log_success "主题文件下载成功: $THEME_FILE"
+                else
+                    log_warning "主题文件下载失败"
+                    log_info "请手动下载: $THEME_URL"
+                    log_info "保存到: $THEME_FILE"
+                fi
+            elif command -v wget &> /dev/null; then
+                if wget -q -O "$THEME_FILE" "$THEME_URL" 2>/dev/null; then
+                    log_success "主题文件下载成功: $THEME_FILE"
+                else
+                    log_warning "主题文件下载失败"
+                    log_info "请手动下载: $THEME_URL"
+                    log_info "保存到: $THEME_FILE"
+                fi
+            else
+                log_warning "未找到 curl 或 wget，无法自动下载主题文件"
+                log_info "请手动下载: $THEME_URL"
+                log_info "保存到: $THEME_FILE"
+            fi
+        fi
+    else
+        log_info "未检测到主题文件引用"
+    fi
 fi
 
 # ============================================
@@ -469,6 +547,9 @@ else
     echo "  2. \$XDG_CONFIG_HOME/alacritty.toml"
     echo "  3. ~/.config/alacritty/alacritty.toml (推荐)"
     echo "  4. ~/.alacritty.toml"
+    if [ -n "$THEME_NAME" ] && [ -n "$THEMES_DIR" ]; then
+        echo "主题文件位置: $THEMES_DIR/${THEME_NAME}.toml"
+    fi
     echo ""
     echo "启动方式："
     echo "  open -a Alacritty"

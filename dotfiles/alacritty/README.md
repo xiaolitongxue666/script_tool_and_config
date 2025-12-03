@@ -65,15 +65,69 @@ sudo apt install alacritty
 
 ## 使用方法
 
-### 1. 使用安装脚本（推荐）
+### 脚本说明
 
+本目录包含两个脚本，用途不同：
+
+#### `install.sh` - 完整安装脚本
+
+**功能**：
+- ✅ 安装 Alacritty（macOS: Homebrew, Windows: winget）
+- ✅ 处理 terminfo 文件冲突
+- ✅ 安装配置文件到部署位置
+- ✅ 自动下载并安装主题文件
+- ✅ 自动检测并修复 shell 路径问题（macOS）
+- ✅ 安装 Shell 自动补全
+- ✅ 移除 macOS Gatekeeper 隔离属性
+- ✅ 自动配置 zsh 路径（macOS）
+
+**使用场景**：
+- 首次安装 Alacritty
+- 需要完整安装和配置
+
+**使用方法**：
 ```bash
-# 运行安装脚本，会自动复制配置文件
 cd dotfiles/alacritty
 bash install.sh
 ```
 
-### 2. 手动复制配置文件
+#### `copy_config.sh` - 配置文件复制脚本
+
+**功能**：
+- ✅ 复制配置文件到部署位置
+- ✅ 检查并下载主题文件（如果不存在）
+- ✅ 自动检测并修复 shell 路径问题（macOS）
+- ✅ 跨平台支持（macOS/Linux/Windows）
+
+**使用场景**：
+- Alacritty 已安装，只需更新配置
+- 在多台机器上同步配置
+- 快速部署配置文件
+- 修复 shell 路径导致的闪退问题
+
+**使用方法**：
+```bash
+cd dotfiles/alacritty
+bash copy_config.sh
+```
+
+### 1. 使用安装脚本（推荐，首次安装）
+
+```bash
+# 运行安装脚本，会自动安装 Alacritty、配置文件和主题
+cd dotfiles/alacritty
+bash install.sh
+```
+
+### 2. 使用复制脚本（仅更新配置）
+
+```bash
+# 只复制配置文件，不进行安装（适用于已安装 Alacritty 的情况）
+cd dotfiles/alacritty
+bash copy_config.sh
+```
+
+### 3. 手动复制配置文件
 
 ```bash
 # macOS/Linux
@@ -83,14 +137,6 @@ cp dotfiles/alacritty/alacritty.toml ~/.config/alacritty/
 # Windows
 mkdir %APPDATA%\alacritty
 copy dotfiles\alacritty\alacritty.toml %APPDATA%\alacritty\
-```
-
-### 3. 使用复制脚本
-
-```bash
-# 只复制配置文件，不进行安装
-cd dotfiles/alacritty
-bash copy_config.sh
 ```
 
 ### 4. 安装 Terminfo (可选但推荐)
@@ -125,27 +171,31 @@ sudo tic -xe alacritty,alacritty-direct <path-to-alacritty.info>
 
 ## 主题配置
 
-### Dracula 主题
+### falcon 主题
 
-配置文件默认使用 Dracula 主题，通过 `import` 导入：
+配置文件默认使用 falcon 主题，通过 `import` 导入：
 
 ```toml
 [general]
   import = [
-    "~/.config/alacritty/themes/dracula.toml",
+    "~/.config/alacritty/themes/falcon.toml",
   ]
 ```
 
 **主题文件位置**:
-- macOS/Linux: `~/.config/alacritty/themes/dracula.toml`
-- Windows: `%APPDATA%\alacritty\themes\dracula.toml`
+- macOS/Linux: `~/.config/alacritty/themes/falcon.toml`
+- Windows: `%APPDATA%\alacritty\themes\falcon.toml`
 
 **主题颜色**:
-- 背景: `#282a36` (深灰蓝)
-- 前景: `#f8f8f2` (浅灰白)
-- 主要颜色: 红色 `#ff5555`、绿色 `#50fa7b`、黄色 `#f1fa8c`、蓝色 `#bd93f9`、紫色 `#ff79c6`、青色 `#8be9fd`
+- 背景: `#020221` (深蓝黑)
+- 前景: `#b4b4b9` (浅灰)
+- 特点: 深色主题，文件夹背景色和文字颜色对比度较低
 
-**参考**: [Dracula Theme](https://draculatheme.com/alacritty)
+**参考**: [Alacritty Theme](https://github.com/alacritty/alacritty-theme)
+
+**主题文件自动安装**：
+- `install.sh` 和 `copy_config.sh` 会自动检测并下载主题文件
+- 如果主题文件不存在，脚本会提示并自动下载
 
 ### 使用其他主题
 

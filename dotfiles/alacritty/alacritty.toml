@@ -23,10 +23,10 @@
   # 实时配置重载（某些更改需要重启）
   live_config_reload = true
 
-  # 导入 Dracula 主题
+  # 导入 falcon 主题
   # 更多主题: https://github.com/alacritty/alacritty-theme
   import = [
-    "~/.config/alacritty/themes/dracula.toml",
+    "~/.config/alacritty/themes/falcon.toml",
   ]
 
 # Environment variables
@@ -239,15 +239,15 @@
 
 # Colors configuration
 # 颜色配置
-# 注意：Dracula 主题通过 import 导入，以下颜色配置会被主题文件覆盖
+# 注意：falcon 主题通过 import 导入，以下颜色配置会被主题文件覆盖
 # 如果需要自定义颜色，可以在主题文件之后添加覆盖配置
 #
-# Dracula 主题颜色说明：
-# - 背景: #282a36 (深灰蓝)
-# - 前景: #f8f8f2 (浅灰白)
-# - 主要颜色: 紫色系 (#bd93f9, #ff79c6 等)
+# falcon 主题颜色说明：
+# - 背景: #020221 (深蓝黑)
+# - 前景: #b4b4b9 (浅灰)
+# - 特点: 深色主题，文件夹背景色和文字颜色对比度较低
 #
-# 更多信息: https://draculatheme.com/alacritty
+# 更多信息: https://github.com/alacritty/alacritty-theme
 
 # Bell configuration # 声音提示配置
 #
