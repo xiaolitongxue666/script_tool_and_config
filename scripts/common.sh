@@ -45,8 +45,9 @@ readonly NO_COLOR='\e[0m'
 # ============================================
 
 # 输出带颜色的消息
+# 使用 printf 而不是 echo -e，以确保跨平台兼容性
 function echo_color_message() {
-    echo -e "${1}${2}${NO_COLOR}"
+    printf "%b%b%b\n" "${1}" "${2}" "${NO_COLOR}"
 }
 
 # 信息日志（蓝色）

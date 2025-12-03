@@ -47,220 +47,171 @@ if [ -n "$http_proxy" ] || [ -n "$https_proxy" ]; then
 fi
 
 # ============================================
-# 检查并删除旧版本
+# 检查已安装版本并询问是否更新
 # ============================================
 log_info "检查已安装的 Alacritty..."
 
+SKIP_INSTALL=false
 if [ "$PLATFORM" == "macos" ]; then
     # macOS: 检查 Applications 目录中的旧版本
     if [ -d "/Applications/Alacritty.app" ]; then
         OLD_VERSION=$(/Applications/Alacritty.app/Contents/MacOS/alacritty --version 2>/dev/null | head -1 || echo "未知版本")
-        log_warning "检测到已安装的 Alacritty: $OLD_VERSION"
-
-        # 备份旧版本
-        BACKUP_NAME="Alacritty.app.backup.$(date +%Y%m%d_%H%M%S)"
-        if [ -d "/Applications/$BACKUP_NAME" ]; then
-            rm -rf "/Applications/$BACKUP_NAME"
+        log_info "检测到已安装的 Alacritty: $OLD_VERSION"
+        read -p "是否更新到最新版本？(y/n) " -n 1 -r
+        echo
+        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+            log_info "跳过更新，保留现有版本"
+            SKIP_INSTALL=true
+        else
+            log_info "将更新到最新版本..."
+            # 卸载旧版本（Homebrew 会自动处理）
+            if command -v brew &> /dev/null; then
+                brew uninstall --cask alacritty 2>/dev/null || log_info "旧版本将通过 Homebrew 更新"
+            fi
         fi
-        mv "/Applications/Alacritty.app" "/Applications/$BACKUP_NAME" 2>/dev/null && \
-            log_info "已备份旧版本到: $BACKUP_NAME" || \
-            log_warning "无法备份旧版本，可能正在使用中"
     fi
 elif [ "$PLATFORM" == "windows" ]; then
     # Windows: 检查是否已安装
     if command -v alacritty.exe &> /dev/null; then
         OLD_VERSION=$(alacritty.exe --version 2>/dev/null | head -1 || echo "未知版本")
-        log_warning "检测到已安装的 Alacritty: $OLD_VERSION"
-        read -p "是否卸载旧版本？(y/n) " -n 1 -r
+        log_info "检测到已安装的 Alacritty: $OLD_VERSION"
+        read -p "是否更新到最新版本？(y/n) " -n 1 -r
+        echo
+        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+            log_info "跳过更新，保留现有版本"
+            SKIP_INSTALL=true
+        else
+            log_info "将更新到最新版本..."
+            if command -v winget &> /dev/null; then
+                winget upgrade --id=Alacritty.Alacritty -e 2>/dev/null || log_info "将通过 winget 安装最新版本"
+            fi
+        fi
+    fi
+fi
+
+# ============================================
+# 检查并处理 terminfo 文件冲突
+# ============================================
+# Terminfo 文件说明（参考: https://github.com/alacritty/alacritty）:
+# - 作用：终端信息数据库，用于描述终端的特性和功能
+# - 位置：~/.terminfo/61/alacritty 和 ~/.terminfo/61/alacritty-direct
+# - 权限问题：旧版本可能以 root 权限安装，导致新版本无法覆盖
+# - 影响：如果不处理，brew 安装会失败
+# - 解决方案：删除或修复权限，或安装到用户目录
+if [ "$PLATFORM" == "macos" ] && [ "$SKIP_INSTALL" != "true" ]; then
+    TERMINFO_DIR="$HOME/.terminfo/61"
+    TERMINFO_FILES=("alacritty" "alacritty-direct")
+    FOUND_ROOT_FILES=()
+
+    # 检查所有 terminfo 文件
+    for terminfo_file in "${TERMINFO_FILES[@]}"; do
+        if [ -f "$TERMINFO_DIR/$terminfo_file" ] || [ -L "$TERMINFO_DIR/$terminfo_file" ]; then
+            FILE_OWNER=$(stat -f "%Su" "$TERMINFO_DIR/$terminfo_file" 2>/dev/null || echo "unknown")
+            if [ "$FILE_OWNER" = "root" ]; then
+                FOUND_ROOT_FILES+=("$terminfo_file")
+            fi
+        fi
+    done
+
+    # 如果发现 root 拥有的文件，询问是否删除
+    if [ ${#FOUND_ROOT_FILES[@]} -gt 0 ]; then
+        log_warning "检测到 root 拥有的 terminfo 文件: ${FOUND_ROOT_FILES[*]}"
+        read -p "是否删除这些 root 拥有的 terminfo 文件？(y/n，推荐 y) " -n 1 -r
         echo
         if [[ $REPLY =~ ^[Yy]$ ]]; then
-            if command -v winget &> /dev/null; then
-                winget uninstall --id=Alacritty.Alacritty -e 2>/dev/null || log_warning "卸载失败，请手动卸载"
-            fi
+            for terminfo_file in "${FOUND_ROOT_FILES[@]}"; do
+                if sudo rm -f "$TERMINFO_DIR/$terminfo_file" 2>/dev/null; then
+                    log_success "已删除 root 拥有的 terminfo 文件: $terminfo_file"
+                else
+                    log_error "无法删除 terminfo 文件: $terminfo_file"
+                fi
+            done
         else
-            # 用户选择不卸载，标记为已安装，跳过后续安装步骤
-            INSTALL_METHOD="existing"
-            SKIP_INSTALL=true
-            log_info "保留现有安装，跳过安装步骤"
+            log_warning "保留 terminfo 文件，如果安装失败请手动处理"
         fi
     fi
 fi
 
-# 检查并处理 terminfo 文件冲突
-# Terminfo 文件说明：
-# - 作用：终端信息数据库，用于描述终端的特性和功能
-# - 位置：~/.terminfo/61/alacritty (用户目录) 或系统目录
-# - 权限问题：旧版本可能以 root 权限安装，导致新版本无法覆盖
-# - 影响：如果不处理，brew 安装会失败，但手动安装不受影响
-if [ -f "$HOME/.terminfo/61/alacritty" ]; then
-    log_info "检测到 terminfo 文件: $HOME/.terminfo/61/alacritty"
-    FILE_OWNER=$(stat -f "%Su" "$HOME/.terminfo/61/alacritty" 2>/dev/null || echo "unknown")
-    if [ "$FILE_OWNER" = "root" ]; then
-        log_warning "terminfo 文件属于 root，可能需要 sudo 权限删除"
-        log_info "如果 brew 安装失败，将使用手动安装方式"
-    fi
-fi
-
 # ============================================
-# 安装方法选择
+# 使用 Homebrew 安装（macOS）
 # ============================================
-INSTALL_METHOD=""
-SKIP_INSTALL=false
-
-if [ "$PLATFORM" == "macos" ]; then
-    # macOS: 使用 Homebrew 安装
-    if command -v brew &> /dev/null; then
-        log_info "检测到 Homebrew，尝试使用 Homebrew 安装（推荐）..."
-
-        # 尝试通过 brew 安装
-        if [ -z "$INSTALL_METHOD" ]; then
-            log_info "执行: brew install --cask alacritty"
-            if brew install --cask alacritty 2>&1 | tee /tmp/brew_install.log; then
-                INSTALL_METHOD="homebrew"
-                log_success "通过 Homebrew 安装成功"
-            else
-                # 检查是否是 terminfo 冲突
-                if grep -q "terminfo" /tmp/brew_install.log; then
-                    log_warning "Homebrew 安装失败：terminfo 文件冲突"
-                    log_info "将使用手动安装方式（DMG 下载）"
-                else
-                    log_warning "Homebrew 安装失败，将尝试其他方法"
-                fi
-            fi
-        fi
-    fi
-elif [ "$PLATFORM" == "windows" ]; then
-    # Windows: 使用 winget 安装
-    if [ "$SKIP_INSTALL" != "true" ] && command -v winget &> /dev/null; then
-        # 检查是否已安装
-        if winget list --id=Alacritty.Alacritty 2>/dev/null | grep -q "Alacritty"; then
-            INSTALLED_VERSION=$(winget list --id=Alacritty.Alacritty 2>/dev/null | grep "Alacritty" | awk '{print $3}' || echo "未知")
-            log_success "检测到已安装的 Alacritty: $INSTALLED_VERSION"
-            INSTALL_METHOD="winget"
-            SKIP_INSTALL=true
-        else
-            log_info "检测到 winget，尝试使用 winget 安装（推荐）..."
-
-            # 检测代理设置
-            PROXY="${http_proxy:-${https_proxy:-http://127.0.0.1:7890}}"
-            if [ -n "$PROXY" ]; then
-                export http_proxy="$PROXY"
-                export https_proxy="$PROXY"
-                export HTTP_PROXY="$PROXY"
-                export HTTPS_PROXY="$PROXY"
-                log_info "使用代理: $PROXY"
-            fi
-
-            log_info "执行: winget install --id=Alacritty.Alacritty -e"
-            if winget install --id=Alacritty.Alacritty -e --accept-source-agreements --accept-package-agreements 2>&1; then
-                INSTALL_METHOD="winget"
-                log_success "通过 winget 安装成功"
-            else
-                # 检查是否是"已安装"或"无更新"的错误
-                if winget list --id=Alacritty.Alacritty 2>/dev/null | grep -q "Alacritty"; then
-                    INSTALLED_VERSION=$(winget list --id=Alacritty.Alacritty 2>/dev/null | grep "Alacritty" | awk '{print $3}' || echo "未知")
-                    log_success "Alacritty 已安装: $INSTALLED_VERSION"
-                    INSTALL_METHOD="winget"
-                    SKIP_INSTALL=true
-                else
-                    log_warning "winget 安装失败，将尝试手动安装方式"
-                fi
-            fi
-        fi
-    else
-        log_error "未找到 winget，请先安装 Windows Package Manager"
-        log_info "安装方法: 从 Microsoft Store 安装 'App Installer'"
-        log_info "或访问: https://aka.ms/getwinget"
+if [ "$PLATFORM" == "macos" ] && [ "$SKIP_INSTALL" != "true" ]; then
+    if ! command -v brew &> /dev/null; then
+        log_error "未找到 Homebrew，请先安装 Homebrew"
+        log_info "安装方法: https://brew.sh"
         exit 1
     fi
-fi
 
-# ============================================
-# 手动安装（如果自动安装失败）
-# ============================================
-if [ "$INSTALL_METHOD" != "homebrew" ] && [ "$INSTALL_METHOD" != "winget" ] && [ "$SKIP_INSTALL" != "true" ]; then
-    if [ "$PLATFORM" == "macos" ]; then
-        log_info "使用手动安装方式（下载 DMG 文件）..."
+    log_info "使用 Homebrew 安装 Alacritty..."
+    log_info "执行: brew install --cask alacritty"
 
-        # 获取最新版本号（从 GitHub API）
-        ALACRITTY_VERSION="v0.16.1"  # 默认版本，可以从 API 获取最新版本
-        DMG_URL="https://github.com/alacritty/alacritty/releases/download/${ALACRITTY_VERSION}/Alacritty-${ALACRITTY_VERSION}.dmg"
-        DMG_FILE="/tmp/Alacritty-${ALACRITTY_VERSION}.dmg"
+    # 执行安装，如果失败直接退出
+    BREW_OUTPUT=$(brew install --cask alacritty 2>&1)
+    BREW_EXIT_CODE=$?
 
-        log_info "下载 Alacritty ${ALACRITTY_VERSION}..."
-        if curl -L -f -o "$DMG_FILE" "$DMG_URL" 2>/dev/null; then
-            log_success "下载完成: $(du -h "$DMG_FILE" | cut -f1)"
+    if [ $BREW_EXIT_CODE -ne 0 ]; then
+        log_error "Homebrew 安装失败（退出码: $BREW_EXIT_CODE）"
+        echo "$BREW_OUTPUT" | grep -i "error\|fail" || echo "$BREW_OUTPUT"
 
-            # 挂载 DMG
-            log_info "挂载 DMG 文件..."
-            hdiutil attach "$DMG_FILE" -quiet -nobrowse
-
-            # 查找挂载的卷名
-            VOLUME_NAME=$(ls /Volumes/ | grep -i alacritty | head -1)
-            if [ -n "$VOLUME_NAME" ] && [ -d "/Volumes/$VOLUME_NAME/Alacritty.app" ]; then
-                log_info "找到安装包: /Volumes/$VOLUME_NAME/Alacritty.app"
-
-                # 复制应用到 Applications
-                log_info "安装到 /Applications..."
-                cp -R "/Volumes/$VOLUME_NAME/Alacritty.app" /Applications/
-
-                # 卸载 DMG
-                hdiutil detach "/Volumes/$VOLUME_NAME" -quiet
-
-                # 验证安装
-                if [ -d "/Applications/Alacritty.app" ]; then
-                    INSTALLED_VERSION=$(/Applications/Alacritty.app/Contents/MacOS/alacritty --version 2>/dev/null | head -1 || echo "未知")
-                    log_success "安装成功: $INSTALLED_VERSION"
-                    INSTALL_METHOD="manual"
-                else
-                    log_error "安装失败：应用未正确复制"
-                    exit 1
-                fi
-            else
-                log_error "无法找到安装包"
-                hdiutil detach "/Volumes/$VOLUME_NAME" -quiet 2>/dev/null
-                exit 1
-            fi
-
-            # 清理临时文件
-            rm -f "$DMG_FILE"
+        # 检查是否是 terminfo 冲突
+        if echo "$BREW_OUTPUT" | grep -qi "terminfo\|alacritty-direct"; then
+            log_error "检测到 terminfo 文件冲突问题"
+            log_info "参考解决方案: https://github.com/alacritty/alacritty"
+            log_info ""
+            log_info "解决方法："
+            log_info "1. 删除 root 拥有的 terminfo 文件:"
+            log_info "   sudo rm -f $HOME/.terminfo/61/alacritty"
+            log_info "   sudo rm -f $HOME/.terminfo/61/alacritty-direct"
+            log_info ""
+            log_info "2. 或者安装到用户目录（推荐）:"
+            log_info "   mkdir -p ~/.terminfo/61"
+            log_info "   cd /tmp"
+            log_info "   curl -L -o alacritty.info https://raw.githubusercontent.com/alacritty/alacritty/master/extra/alacritty.info"
+            log_info "   tic -xe alacritty,alacritty-direct -o ~/.terminfo alacritty.info"
+            log_info ""
+            log_info "3. 然后重新运行此脚本"
         else
-            log_error "下载失败，请检查网络连接或代理设置"
-            log_info "提示：如果网络不通，可以设置代理："
-            log_info "  export http_proxy=http://127.0.0.1:7890"
-            log_info "  export https_proxy=http://127.0.0.1:7890"
+            log_error "请检查错误信息并手动解决"
+        fi
+
+        exit 1
+    fi
+
+    log_success "通过 Homebrew 安装成功"
+    INSTALL_METHOD="homebrew"
+elif [ "$PLATFORM" == "windows" ]; then
+    # Windows: 使用 winget 安装
+    if [ "$SKIP_INSTALL" != "true" ]; then
+        if ! command -v winget &> /dev/null; then
+            log_error "未找到 winget，请先安装 Windows Package Manager"
+            log_info "安装方法: 从 Microsoft Store 安装 'App Installer'"
+            log_info "或访问: https://aka.ms/getwinget"
             exit 1
         fi
-    elif [ "$PLATFORM" == "windows" ]; then
-        log_info "使用手动安装方式（下载 exe 安装程序）..."
 
-        # 获取最新版本号
-        ALACRITTY_VERSION="v0.16.1"  # 默认版本
-        EXE_URL="https://github.com/alacritty/alacritty/releases/download/${ALACRITTY_VERSION}/Alacritty-${ALACRITTY_VERSION}-installer.exe"
-        EXE_FILE="/tmp/Alacritty-${ALACRITTY_VERSION}-installer.exe"
+        log_info "使用 winget 安装 Alacritty..."
 
         # 检测代理设置
-        PROXY="${http_proxy:-${https_proxy:-http://127.0.0.1:7890}}"
-        CURL_PROXY=""
+        PROXY="${http_proxy:-${https_proxy:-}}"
         if [ -n "$PROXY" ]; then
-            CURL_PROXY="-x $PROXY"
-            log_info "使用代理下载: $PROXY"
+            export http_proxy="$PROXY"
+            export https_proxy="$PROXY"
+            export HTTP_PROXY="$PROXY"
+            export HTTPS_PROXY="$PROXY"
+            log_info "使用代理: $PROXY"
         fi
 
-        log_info "下载 Alacritty ${ALACRITTY_VERSION}..."
-        if curl $CURL_PROXY -L -f -o "$EXE_FILE" "$EXE_URL" 2>/dev/null; then
-            log_success "下载完成"
-            log_info "请手动运行安装程序: $EXE_FILE"
-            log_info "或双击下载的文件进行安装"
-            INSTALL_METHOD="manual"
-        else
-            log_error "下载失败，请检查网络连接或代理设置"
-            log_info "提示：如果网络不通，可以设置代理："
-            log_info "  export http_proxy=http://127.0.0.1:7890"
-            log_info "  export https_proxy=http://127.0.0.1:7890"
-            log_info "或从 GitHub Releases 手动下载: https://github.com/alacritty/alacritty/releases"
+        log_info "执行: winget install --id=Alacritty.Alacritty -e"
+
+        # 执行安装，如果失败直接退出
+        if ! winget install --id=Alacritty.Alacritty -e --accept-source-agreements --accept-package-agreements; then
+            log_error "winget 安装失败"
+            log_error "请检查错误信息并手动解决"
             exit 1
         fi
+
+        log_success "通过 winget 安装成功"
+        INSTALL_METHOD="winget"
     fi
 fi
 
