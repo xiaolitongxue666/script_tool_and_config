@@ -48,7 +48,19 @@ if [[ "$OS" == "Darwin" ]]; then
         log_info "注意: macOS 通常已预装 Zsh"
         INSTALL_CMD=""
     fi
-    ZSH_PATH="/bin/zsh"
+    # 优先使用 Homebrew 安装的 zsh（Apple Silicon: /opt/homebrew/bin/zsh）
+    # 如果不存在，则使用系统默认的 zsh（/bin/zsh）
+    if [ -f "/opt/homebrew/bin/zsh" ]; then
+        ZSH_PATH="/opt/homebrew/bin/zsh"
+        log_info "检测到 Homebrew 安装的 zsh: $ZSH_PATH"
+    elif [ -f "/bin/zsh" ]; then
+        ZSH_PATH="/bin/zsh"
+        log_info "使用系统默认的 zsh: $ZSH_PATH"
+    else
+        # 如果都不存在，尝试使用 which 查找
+        ZSH_PATH=$(which zsh 2>/dev/null || echo "/bin/zsh")
+        log_warning "未找到标准 zsh 路径，使用: $ZSH_PATH"
+    fi
 elif [[ "$OS" == "Linux" ]]; then
     PLATFORM="linux"
     if command -v pacman &> /dev/null; then

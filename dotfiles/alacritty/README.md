@@ -168,6 +168,35 @@ import = [
   cursor = "#f8f8f2"
 ```
 
+## macOS 特定配置
+
+### Zsh + Oh My Zsh 配置
+
+配置文件默认配置使用 zsh + Oh My Zsh。安装脚本会自动检测并配置正确的 zsh 路径。
+
+**自动检测路径**（按优先级）：
+1. `/opt/homebrew/bin/zsh` - Homebrew 安装的 zsh（Apple Silicon Mac）
+2. `/bin/zsh` - 系统默认的 zsh（Intel Mac 或未通过 Homebrew 安装）
+
+**安装脚本自动配置**：
+- 运行 `install.sh` 时，脚本会自动检测 macOS 平台
+- 自动检测 zsh 路径并更新配置文件
+- 如果未找到 zsh，会显示警告信息
+
+**手动配置**：
+如果需要手动修改 zsh 路径，编辑 `~/.config/alacritty/alacritty.toml`：
+
+```toml
+[terminal.shell]
+  program = "/opt/homebrew/bin/zsh"  # 或 "/bin/zsh"
+  args = ["-l"]
+```
+
+**与系统默认 Shell 的关系**：
+- Alacritty 配置的 zsh 路径独立于系统默认 shell
+- 即使系统默认 shell 不是 zsh，Alacritty 也会使用配置的 zsh
+- 建议同时将系统默认 shell 设置为 zsh（通过 `chsh -s /bin/zsh`）
+
 ## Windows 特定配置
 
 ### Git Bash 配置

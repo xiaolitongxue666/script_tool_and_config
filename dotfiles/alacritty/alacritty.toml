@@ -345,36 +345,45 @@
 #   - (Windows) powershell
 #
 # 配置文件自动适配不同系统：
-#   - macOS/Linux: 不配置 [terminal.shell]，使用系统默认 shell
-#   - Windows: 配置 [terminal.shell] 使用 Git Bash（如果存在）
+#   - macOS: 配置使用 zsh（优先使用 Homebrew 安装的版本）
+#   - Linux: 不配置，使用系统默认 shell
+#   - Windows: 配置使用 Git Bash（如果存在）
 #
-# Windows 自动检测 Git Bash 路径（按优先级）：
-#   1. D:\Program Files\Git\usr\bin\bash.exe
-#   2. D:\Program Files\Git\bin\bash.exe
-#   3. C:\Program Files\Git\usr\bin\bash.exe
-#   4. C:\Program Files\Git\bin\bash.exe
-#   5. C:\msys64\usr\bin\bash.exe
-#   6. D:\msys64\usr\bin\bash.exe
-#
-# 如果以上路径都不存在，Windows 将使用默认的 PowerShell
-#
-# 注意：此配置文件是跨平台通用的，Alacritty 会自动根据平台应用相应配置
+# 注意：Alacritty 会根据运行平台自动应用相应的配置
 # 注意：Alacritty 0.16.1 使用 [terminal.shell] 配置（推荐格式，无警告）
+#
+# macOS: 配置使用 zsh + Oh My Zsh
+# 优先使用 Homebrew 安装的 zsh（Apple Silicon: /opt/homebrew/bin/zsh）
+# 如果不存在，则使用系统默认的 zsh（/bin/zsh）
+# 注意：此配置仅在 macOS 上生效，Windows 和 Linux 会忽略此配置
+[terminal.shell]
+  # macOS zsh 路径（按优先级）
+  # 1. Homebrew 安装的 zsh（Apple Silicon）
+  # 2. 系统默认的 zsh
+  # 如果路径不存在，Alacritty 会回退到系统默认 shell
+  program = "/opt/homebrew/bin/zsh"
+  args = ["-l"]
+
+  # 如果上面的路径不存在（Intel Mac 或未通过 Homebrew 安装 zsh），
+  # 取消注释下面的配置并注释掉上面的：
+  # program = "/bin/zsh"
+  # args = ["-l"]
 
 # Windows: 配置 Git Bash（如果存在）
-# macOS/Linux: 此配置会被忽略，使用系统默认 shell
-[terminal.shell]
-  # Windows Git Bash 路径（自动检测，按常见安装位置顺序）
-  # 如果路径不存在，Alacritty 会回退到默认的 PowerShell
-  program = "D:\\Program Files\\Git\\usr\\bin\\bash.exe"
-  args = ["--login"]
-
-  # 如果上面的路径不存在，可以尝试以下路径（取消注释并注释掉上面的）：
-  # program = "D:\\Program Files\\Git\\bin\\bash.exe"
-  # program = "C:\\Program Files\\Git\\usr\\bin\\bash.exe"
-  # program = "C:\\Program Files\\Git\\bin\\bash.exe"
-  # program = "C:\\msys64\\usr\\bin\\bash.exe"
-  # program = "D:\\msys64\\usr\\bin\\bash.exe"
+# 注意：此配置仅在 Windows 上生效，macOS 和 Linux 会忽略此配置
+# 如果需要使用 Windows 配置，请取消注释下面的配置并注释掉上面的 macOS 配置
+# [terminal.shell]
+#   # Windows Git Bash 路径（自动检测，按常见安装位置顺序）
+#   # 如果路径不存在，Alacritty 会回退到默认的 PowerShell
+#   program = "D:\\Program Files\\Git\\usr\\bin\\bash.exe"
+#   args = ["--login"]
+#
+#   # 如果上面的路径不存在，可以尝试以下路径（取消注释并注释掉上面的）：
+#   # program = "D:\\Program Files\\Git\\bin\\bash.exe"
+#   # program = "C:\\Program Files\\Git\\usr\\bin\\bash.exe"
+#   # program = "C:\\Program Files\\Git\\bin\\bash.exe"
+#   # program = "C:\\msys64\\usr\\bin\\bash.exe"
+#   # program = "D:\\msys64\\usr\\bin\\bash.exe"
 
 # Startup directory # 启动目录
 #

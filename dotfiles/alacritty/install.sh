@@ -387,8 +387,41 @@ if [ -f "$SOURCE_CONFIG" ]; then
         log_info "复制配置文件..."
         mkdir -p "$CONFIG_DIR"
         cp "$SOURCE_CONFIG" "$CONFIG_FILE"
+
+        # macOS: 自动检测并配置 zsh 路径
+        if [ "$PLATFORM" == "macos" ]; then
+            log_info "检测 macOS 平台，配置 zsh 路径..."
+            ZSH_PATH=""
+
+            # 优先使用 Homebrew 安装的 zsh（Apple Silicon）
+            if [ -f "/opt/homebrew/bin/zsh" ]; then
+                ZSH_PATH="/opt/homebrew/bin/zsh"
+                log_info "检测到 Homebrew 安装的 zsh: $ZSH_PATH"
+            # 其次使用系统默认的 zsh
+            elif [ -f "/bin/zsh" ]; then
+                ZSH_PATH="/bin/zsh"
+                log_info "使用系统默认的 zsh: $ZSH_PATH"
+            fi
+
+            if [ -n "$ZSH_PATH" ]; then
+                # 使用 sed 更新配置文件中的 zsh 路径
+                if [[ "$OSTYPE" == "darwin"* ]]; then
+                    # macOS 使用 BSD sed，需要不同的语法
+                    sed -i '' "s|program = \"/opt/homebrew/bin/zsh\"|program = \"$ZSH_PATH\"|g" "$CONFIG_FILE" 2>/dev/null || \
+                    sed -i '' "s|program = \"/bin/zsh\"|program = \"$ZSH_PATH\"|g" "$CONFIG_FILE" 2>/dev/null
+                else
+                    # Linux 使用 GNU sed
+                    sed -i "s|program = \"/opt/homebrew/bin/zsh\"|program = \"$ZSH_PATH\"|g" "$CONFIG_FILE" 2>/dev/null || \
+                    sed -i "s|program = \"/bin/zsh\"|program = \"$ZSH_PATH\"|g" "$CONFIG_FILE" 2>/dev/null
+                fi
+                log_success "已配置 Alacritty 使用 zsh: $ZSH_PATH"
+            else
+                log_warning "未找到 zsh，Alacritty 将使用系统默认 shell"
+            fi
+        fi
+
         log_success "配置文件已复制到: $CONFIG_FILE"
-        log_info "注意: 配置文件是跨平台通用的，会自动适配不同系统"
+        log_info "注意: 配置文件已根据平台自动调整"
     else
         log_info "配置文件已存在: $CONFIG_FILE"
         read -p "是否覆盖现有配置文件？(y/n) " -n 1 -r
@@ -399,8 +432,41 @@ if [ -f "$SOURCE_CONFIG" ]; then
             cp "$CONFIG_FILE" "$BACKUP_FILE"
             log_info "已备份现有配置到: $BACKUP_FILE"
             cp "$SOURCE_CONFIG" "$CONFIG_FILE"
+
+            # macOS: 自动检测并配置 zsh 路径
+            if [ "$PLATFORM" == "macos" ]; then
+                log_info "检测 macOS 平台，配置 zsh 路径..."
+                ZSH_PATH=""
+
+                # 优先使用 Homebrew 安装的 zsh（Apple Silicon）
+                if [ -f "/opt/homebrew/bin/zsh" ]; then
+                    ZSH_PATH="/opt/homebrew/bin/zsh"
+                    log_info "检测到 Homebrew 安装的 zsh: $ZSH_PATH"
+                # 其次使用系统默认的 zsh
+                elif [ -f "/bin/zsh" ]; then
+                    ZSH_PATH="/bin/zsh"
+                    log_info "使用系统默认的 zsh: $ZSH_PATH"
+                fi
+
+                if [ -n "$ZSH_PATH" ]; then
+                    # 使用 sed 更新配置文件中的 zsh 路径
+                    if [[ "$OSTYPE" == "darwin"* ]]; then
+                        # macOS 使用 BSD sed，需要不同的语法
+                        sed -i '' "s|program = \"/opt/homebrew/bin/zsh\"|program = \"$ZSH_PATH\"|g" "$CONFIG_FILE" 2>/dev/null || \
+                        sed -i '' "s|program = \"/bin/zsh\"|program = \"$ZSH_PATH\"|g" "$CONFIG_FILE" 2>/dev/null
+                    else
+                        # Linux 使用 GNU sed
+                        sed -i "s|program = \"/opt/homebrew/bin/zsh\"|program = \"$ZSH_PATH\"|g" "$CONFIG_FILE" 2>/dev/null || \
+                        sed -i "s|program = \"/bin/zsh\"|program = \"$ZSH_PATH\"|g" "$CONFIG_FILE" 2>/dev/null
+                    fi
+                    log_success "已配置 Alacritty 使用 zsh: $ZSH_PATH"
+                else
+                    log_warning "未找到 zsh，Alacritty 将使用系统默认 shell"
+                fi
+            fi
+
             log_success "配置文件已更新: $CONFIG_FILE"
-            log_info "注意: 配置文件是跨平台通用的，会自动适配不同系统"
+            log_info "注意: 配置文件已根据平台自动调整"
         else
             log_info "跳过配置文件更新"
         fi

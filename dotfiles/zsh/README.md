@@ -208,6 +208,24 @@ source ~/.zshrc
 
 ## 设置 Zsh 为默认 Shell
 
+### 使用安装脚本（推荐）
+
+运行安装脚本时，会询问是否将 Zsh 设置为默认 Shell：
+
+```bash
+cd dotfiles/zsh
+chmod +x install.sh
+./install.sh
+```
+
+**macOS 特定说明**：
+- 安装脚本会自动检测 zsh 路径（优先使用 Homebrew 安装的版本）
+- 如果检测到 `/opt/homebrew/bin/zsh`（Apple Silicon），会优先使用
+- 否则使用系统默认的 `/bin/zsh`
+- 脚本会询问是否设置 zsh 为默认 shell，需要用户确认
+
+### 手动设置
+
 ```bash
 # 查看 Zsh 路径
 which zsh
@@ -216,9 +234,15 @@ which zsh
 chsh -s $(which zsh)
 
 # 或指定完整路径
-chsh -s /bin/zsh        # macOS
-chsh -s /usr/bin/zsh    # Linux
+chsh -s /opt/homebrew/bin/zsh  # macOS (Apple Silicon, Homebrew)
+chsh -s /bin/zsh                # macOS (系统默认)
+chsh -s /usr/bin/zsh            # Linux
 ```
+
+**macOS 路径说明**：
+- **Apple Silicon Mac (M1/M2/M3)**: 如果通过 Homebrew 安装 zsh，路径通常是 `/opt/homebrew/bin/zsh`
+- **Intel Mac**: 系统默认 zsh 路径是 `/bin/zsh`
+- 安装脚本会自动检测并使用正确的路径
 
 ## 常用 Oh My Zsh 主题
 

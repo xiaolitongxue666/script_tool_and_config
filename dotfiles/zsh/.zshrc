@@ -192,17 +192,18 @@ else
 fi
 
 # 使用 lsd 或 exa 替代 ls
-# 对应 Fish: if command -v lsd > /dev/null; alias l='lsd' ... end
+# 对应 Fish: if command -v lsd > /dev/null; alias l='lsd --icon=always' ... end
+# 注意：需要安装 Nerd Fonts 才能正确显示图标
 if command -v lsd &> /dev/null; then
-    alias l='lsd'
-    alias la='lsd -a'
-    alias ll='lsd -lah'
-    alias ls='lsd --color=auto'
+    alias l='lsd --icon=always'
+    alias la='lsd --icon=always -a'
+    alias ll='lsd --icon=always -lah'
+    alias ls='lsd --icon=always --color=auto'
 elif command -v exa &> /dev/null; then
-    alias l='exa'
-    alias la='exa -a'
-    alias ll='exa -lah'
-    alias ls='exa --color=auto'
+    alias l='exa --icons'
+    alias la='exa --icons -a'
+    alias ll='exa --icons -lah'
+    alias ls='exa --icons --color=auto'
 fi
 
 # 使用 trash 替换 rm，实现更安全的删除操作
@@ -213,12 +214,6 @@ else
     alias rm='rm'
 fi
 
-# 代理设置（通用，平台特定配置会覆盖）
-# 对应 Fish: alias h_proxy='set -gx http_proxy ...'
-# macOS 默认使用 7890，Linux 默认使用 1087
-alias h_proxy='export http_proxy=http://192.168.1.76:7890; export https_proxy=http://192.168.1.76:7890; export all_proxy=socks5://192.168.1.76:7890'
-alias unset_h='unset http_proxy; unset https_proxy; unset all_proxy'
-
 # ============================================
 # 平台特定配置（交互式 shell 专用）
 # ============================================
@@ -228,6 +223,11 @@ alias unset_h='unset http_proxy; unset https_proxy; unset all_proxy'
 # macOS 特定配置
 # 对应 Fish: if test "$OS" = "Darwin" ... end
 if [[ "$OS" == "macos" ]]; then
+    # 代理配置（macOS 使用本地代理）
+    # 对应 Fish: alias h_proxy='set -gx http_proxy http://127.0.0.1:7890 ...'
+    alias h_proxy='export http_proxy=http://127.0.0.1:7890; export https_proxy=http://127.0.0.1:7890; export all_proxy=socks5://127.0.0.1:7890'
+    alias unset_h='unset http_proxy; unset https_proxy; unset all_proxy'
+
     # Autojump（如果已安装）
     # 对应 Fish: if test -f /usr/local/share/autojump/autojump.fish; source ... end
     if [ -f /usr/local/share/autojump/autojump.sh ]; then
