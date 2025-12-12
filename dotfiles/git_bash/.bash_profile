@@ -45,14 +45,61 @@ shopt -s histappend
 # 代理配置
 # ============================================
 # 默认代理设置（自动启用）
+# 同时设置大小写环境变量，确保不同工具都能识别
 export http_proxy=http://127.0.0.1:7890
 export https_proxy=http://127.0.0.1:7890
+export HTTP_PROXY=http://127.0.0.1:7890
+export HTTPS_PROXY=http://127.0.0.1:7890
+export all_proxy=http://127.0.0.1:7890
+export ALL_PROXY=http://127.0.0.1:7890
 
 # 代理控制别名
-# h_proxy: 快速启用代理
-alias h_proxy='export http_proxy=http://127.0.0.1:7890; export https_proxy=http://127.0.0.1:7890'
-# unset_h: 关闭代理
-alias unset_h='unset http_proxy; unset https_proxy'
+# h_proxy: 快速启用代理（同时设置大小写环境变量）
+alias h_proxy='export http_proxy=http://127.0.0.1:7890; export https_proxy=http://127.0.0.1:7890; export HTTP_PROXY=http://127.0.0.1:7890; export HTTPS_PROXY=http://127.0.0.1:7890; export all_proxy=http://127.0.0.1:7890; export ALL_PROXY=http://127.0.0.1:7890'
+# unset_h: 关闭代理（清除所有代理环境变量）
+alias unset_h='unset http_proxy; unset https_proxy; unset HTTP_PROXY; unset HTTPS_PROXY; unset all_proxy; unset ALL_PROXY'
+
+# curl 包装函数（确保代理生效）
+# Windows Git Bash 中的 curl 可能不会自动识别环境变量，需要显式使用 --proxy
+curl() {
+    local proxy_url=""
+    # 检查代理环境变量（优先使用小写，然后大写）
+    if [ -n "$http_proxy" ]; then
+        proxy_url="$http_proxy"
+    elif [ -n "$HTTP_PROXY" ]; then
+        proxy_url="$HTTP_PROXY"
+    elif [ -n "$all_proxy" ]; then
+        proxy_url="$all_proxy"
+    elif [ -n "$ALL_PROXY" ]; then
+        proxy_url="$ALL_PROXY"
+    fi
+
+    # 如果设置了代理且没有显式指定 --proxy 或 --noproxy，则自动添加 --proxy
+    if [ -n "$proxy_url" ]; then
+        # 检查参数中是否已有 --proxy 或 --noproxy
+        local has_proxy_flag=false
+        local has_noproxy_flag=false
+        for arg in "$@"; do
+            if [[ "$arg" == --proxy* ]] || [[ "$arg" == --proxy=* ]]; then
+                has_proxy_flag=true
+                break
+            fi
+            if [[ "$arg" == --noproxy* ]]; then
+                has_noproxy_flag=true
+                break
+            fi
+        done
+
+        # 如果没有代理标志且没有禁用代理标志，则添加 --proxy
+        if [ "$has_proxy_flag" = false ] && [ "$has_noproxy_flag" = false ]; then
+            command curl --proxy "$proxy_url" "$@"
+            return $?
+        fi
+    fi
+
+    # 如果没有代理或已有代理标志，直接调用原始 curl
+    command curl "$@"
+}
 
 # 网络检查别名（可选，已注释）
 # alias check_network='curl -IL https://www.google.com 2>/dev/null | grep -q -E "200 OK|Connection established" && echo "Network is OK" || echo "Network is down"'
