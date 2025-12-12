@@ -284,3 +284,10 @@ scripts/**/*_test.sh
 scripts/**/*_test_*.sh
 # VS Code SFTP 配置（可能包含敏感信息）
 .vscode/sftp.json
+
+# ============================================
+# Claude Code 配置
+# ============================================
+# Claude Code 本地配置文件（用户特定设置，不应推送到版本控制）
+.claude/
+.claude/settings.local.json
