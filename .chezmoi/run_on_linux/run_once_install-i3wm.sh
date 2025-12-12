@@ -1,0 +1,91 @@
+#!/bin/bash
+
+# ============================================
+# i3wm 窗口管理器安装脚本（chezmoi run_once_）
+# 仅支持 Linux
+# ============================================
+
+# 获取 common_install.sh 路径
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../../.." && pwd 2>/dev/null || echo "$HOME")"
+COMMON_INSTALL="${PROJECT_ROOT}/scripts/chezmoi/common_install.sh"
+
+if [ ! -f "$COMMON_INSTALL" ]; then
+    COMMON_INSTALL="$HOME/.local/share/chezmoi/scripts/chezmoi/common_install.sh"
+fi
+
+# 加载通用函数库
+if [ -f "$COMMON_INSTALL" ]; then
+    source "$COMMON_INSTALL"
+else
+    echo "[WARNING] 未找到 common_install.sh，使用基本函数"
+    function setup_proxy() { :; }
+    function detect_os_and_package_manager() {
+        OS="$(uname -s)"
+        if [[ "$OS" != "Linux" ]]; then
+            echo "[ERROR] i3wm 仅支持 Linux"
+            exit 1
+        fi
+        if command -v pacman &> /dev/null; then
+            PACKAGE_MANAGER="pacman"
+        elif command -v apt-get &> /dev/null; then
+            PACKAGE_MANAGER="apt"
+        elif command -v yum &> /dev/null; then
+            PACKAGE_MANAGER="yum"
+        fi
+    }
+    function install_package() {
+        local pkg="$1"
+        if [[ "$PACKAGE_MANAGER" == "pacman" ]]; then
+            sudo pacman -S --noconfirm "$pkg"
+        elif [[ "$PACKAGE_MANAGER" == "apt" ]]; then
+            sudo apt-get update && sudo apt-get install -y "$pkg"
+        elif [[ "$PACKAGE_MANAGER" == "yum" ]]; then
+            sudo yum install -y "$pkg"
+        fi
+    }
+    function install_dependencies() {
+        for dep in "$@"; do
+            install_package "$dep"
+        done
+    }
+fi
+
+# 设置代理
+setup_proxy "${PROXY:-http://127.0.0.1:7890}"
+
+# 检测操作系统和包管理器
+detect_os_and_package_manager || exit 1
+
+# 检查 i3 是否已安装
+if command -v i3 &> /dev/null; then
+    echo "[INFO] i3wm 已安装: $(i3 --version | head -n 1)"
+    exit 0
+fi
+
+echo "[INFO] 开始安装 i3wm..."
+
+# 安装前置依赖
+install_dependencies "xorg-server" "xorg-xinit" "base-devel" "git"
+
+# 安装 i3wm
+if [[ "$PACKAGE_MANAGER" == "pacman" ]]; then
+    install_package "i3-wm"
+    install_package "i3status"
+    install_package "i3lock"
+elif [[ "$PACKAGE_MANAGER" == "apt" ]]; then
+    install_package "i3"
+    install_package "i3status"
+    install_package "i3lock"
+elif [[ "$PACKAGE_MANAGER" == "yum" ]]; then
+    install_package "i3"
+    install_package "i3status"
+    install_package "i3lock"
+fi
+
+if command -v i3 &> /dev/null; then
+    echo "[SUCCESS] i3wm 安装成功: $(i3 --version | head -n 1)"
+else
+    echo "[ERROR] i3wm 安装失败"
+    exit 1
+fi

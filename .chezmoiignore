@@ -1,0 +1,42 @@
+# 忽略不需要管理的文件
+
+# 脚本目录
+scripts/
+
+# 原始 dotfiles 目录（已迁移到 .chezmoi）
+dotfiles/
+
+# Git 相关
+.git/
+.gitignore
+.gitmodules
+.gitattributes
+
+# 编辑器配置
+.vscode/
+.claude/
+.editorconfig
+
+# 文档和配置文件
+README.md
+LICENSE
+MULTI_OS_COMMON_TOOLS.md
+PROJECT_HISTORY.md
+star_repos.md
+settings.json
+settings.local.json
+
+# 安装脚本（根目录的 install.sh 保留，但 .chezmoi 中的脚本会被管理）
+# install.sh
+
+# 临时文件和构建产物
+*.tmp
+*.log
+*.swp
+*.swo
+*~
+
+# 系统文件
+.DS_Store
+Thumbs.db
+desktop.ini

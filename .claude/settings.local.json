@@ -9,7 +9,9 @@
       "Bash(cmd //c set)",
       "Bash(cmd //c:*)",
       "Bash(cat -n:*)",
-      "Bash(printf \"%s\\n\" $PATH//:/n)"
+      "Bash(printf \"%s\\n\" $PATH//:/n)",
+      "Bash(git add:*)",
+      "Bash(test:*)"
     ],
     "deny": [],
     "ask": []

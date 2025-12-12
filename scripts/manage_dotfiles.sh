@@ -1,0 +1,207 @@
+#!/bin/bash
+
+# ============================================
+# 统一 dotfiles 管理脚本
+# 封装 chezmoi 命令，提供友好的中文提示
+# ============================================
+
+set -e
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+COMMON_SH="${PROJECT_ROOT}/scripts/common.sh"
+
+# 加载通用函数库
+if [ -f "$COMMON_SH" ]; then
+    source "$COMMON_SH"
+else
+    function log_info() { echo "[INFO] $*"; }
+    function log_success() { echo "[SUCCESS] $*"; }
+    function log_warning() { echo "[WARNING] $*"; }
+    function log_error() { echo "[ERROR] $*" >&2; }
+    function error_exit() { log_error "$1"; exit "${2:-1}"; }
+fi
+
+# ============================================
+# 检查 chezmoi 是否已安装
+# ============================================
+check_chezmoi() {
+    if ! command -v chezmoi &> /dev/null; then
+        log_error "chezmoi 未安装"
+        log_info "请先运行: ./scripts/chezmoi/install_chezmoi.sh"
+        exit 1
+    fi
+}
+
+# ============================================
+# 初始化 chezmoi 环境（Windows 特定）
+# ============================================
+init_chezmoi_env() {
+    # 检测是否为 Windows 环境
+    if [[ "$OSTYPE" =~ ^(msys|mingw|cygwin) ]]; then
+        # Windows Git Bash 环境
+        # 创建 chezmoi 状态目录（chezmoi 需要此目录存储状态信息）
+        local chezmoi_state_dir="$HOME/.local/share/chezmoi"
+        if [ ! -d "$chezmoi_state_dir" ]; then
+            log_info "创建 chezmoi 状态目录: $chezmoi_state_dir"
+            mkdir -p "$chezmoi_state_dir"
+        fi
+    fi
+}
+
+# ============================================
+# 设置 chezmoi 源状态目录
+# ============================================
+setup_chezmoi_source() {
+    # 先初始化环境（Windows 需要）
+    init_chezmoi_env
+
+    local source_dir="${PROJECT_ROOT}/.chezmoi"
+    if [ -d "$source_dir" ]; then
+        export CHEZMOI_SOURCE_DIR="$source_dir"
+        log_info "使用源状态目录: $source_dir"
+    else
+        log_warning "源状态目录不存在: $source_dir"
+        log_info "将使用默认源状态目录"
+    fi
+}
+
+# ============================================
+# 命令处理
+# ============================================
+
+cmd_install() {
+    log_info "安装 chezmoi..."
+    bash "${SCRIPT_DIR}/chezmoi/install_chezmoi.sh"
+
+    log_info "初始化 chezmoi 仓库..."
+    setup_chezmoi_source
+
+    if [ -n "$CHEZMOI_SOURCE_DIR" ] && [ ! -d "${CHEZMOI_SOURCE_DIR}/.git" ]; then
+        log_info "初始化 Git 仓库..."
+        cd "$CHEZMOI_SOURCE_DIR"
+        git init
+        git add .
+        git commit -m "Initial commit" || true
+        cd - > /dev/null
+    fi
+}
+
+cmd_apply() {
+    check_chezmoi
+    setup_chezmoi_source
+    log_info "应用所有配置..."
+    chezmoi apply -v
+}
+
+cmd_update() {
+    check_chezmoi
+    setup_chezmoi_source
+    log_info "更新配置..."
+    chezmoi update -v
+}
+
+cmd_diff() {
+    check_chezmoi
+    setup_chezmoi_source
+    log_info "查看配置差异..."
+    chezmoi diff
+}
+
+cmd_status() {
+    check_chezmoi
+    setup_chezmoi_source
+    log_info "查看配置状态..."
+    chezmoi status
+}
+
+cmd_edit() {
+    check_chezmoi
+    setup_chezmoi_source
+    if [ -z "$1" ]; then
+        error_exit "请指定要编辑的文件，例如: $0 edit ~/.zshrc"
+    fi
+    log_info "编辑配置文件: $1"
+    chezmoi edit "$1"
+}
+
+cmd_list() {
+    check_chezmoi
+    setup_chezmoi_source
+    log_info "列出所有受管理的文件..."
+    chezmoi managed
+}
+
+cmd_cd() {
+    check_chezmoi
+    setup_chezmoi_source
+    log_info "进入 chezmoi 源状态目录..."
+    chezmoi cd
+}
+
+cmd_help() {
+    cat << EOF
+用法: $0 <command> [options]
+
+命令:
+  install         安装 chezmoi 并初始化仓库
+  apply           应用所有配置到系统
+  update          更新配置（拉取仓库后使用）
+  diff            查看配置差异
+  status          查看配置状态
+  edit <file>     编辑配置文件
+  list            列出所有受管理的文件
+  cd              进入 chezmoi 源状态目录
+  help            显示此帮助信息
+
+示例:
+  $0 install              # 安装并初始化
+  $0 apply                # 应用所有配置
+  $0 edit ~/.zshrc        # 编辑 zsh 配置
+  $0 diff                 # 查看差异
+EOF
+}
+
+# ============================================
+# 主函数
+# ============================================
+main() {
+    local cmd="${1:-help}"
+
+    case "$cmd" in
+        install)
+            cmd_install
+            ;;
+        apply)
+            cmd_apply
+            ;;
+        update)
+            cmd_update
+            ;;
+        diff)
+            cmd_diff
+            ;;
+        status)
+            cmd_status
+            ;;
+        edit)
+            cmd_edit "$2"
+            ;;
+        list)
+            cmd_list
+            ;;
+        cd)
+            cmd_cd
+            ;;
+        help|--help|-h)
+            cmd_help
+            ;;
+        *)
+            log_error "未知命令: $cmd"
+            cmd_help
+            exit 1
+            ;;
+    esac
+}
+
+main "$@"

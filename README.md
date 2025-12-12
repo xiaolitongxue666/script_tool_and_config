@@ -4,10 +4,512 @@
 
 本项目包含我在日常开发中使用的各种脚本工具和软件配置文件，涵盖 Linux、macOS 和 Windows 平台。
 
+## 支持的平台
+
+- **Windows**: Windows 10/11 (winget, MSYS2)
+- **macOS**: macOS 10.15+ (Homebrew)
+- **Linux**:
+  - ArchLinux (pacman)
+  - Ubuntu/Debian (apt)
+  - CentOS/RHEL (dnf/yum)
+  - Fedora (dnf)
+
+详细平台支持说明请参考：[PLATFORM_SUPPORT.md](PLATFORM_SUPPORT.md)
+
+## 快速开始（使用 chezmoi）
+
+本项目使用 [chezmoi](https://www.chezmoi.io/) 统一管理所有 dotfiles 配置。chezmoi 是一个强大的 dotfiles 管理工具，支持跨平台配置管理、模板变量、加密等功能。
+
+### 一键安装
+
+```bash
+# 克隆项目
+git clone <repo-url>
+cd script_tool_and_config
+
+# 运行一键安装脚本
+./install.sh
+```
+
+安装脚本会自动：
+- 检测操作系统
+- 安装 chezmoi（如果未安装）
+- 初始化 chezmoi 仓库
+- 应用所有配置文件到系统
+
+### 使用管理脚本
+
+项目提供了统一的管理脚本 `scripts/manage_dotfiles.sh`：
+
+```bash
+# 安装 chezmoi 并初始化
+./scripts/manage_dotfiles.sh install
+
+# 应用所有配置
+./scripts/manage_dotfiles.sh apply
+
+# 查看配置差异
+./scripts/manage_dotfiles.sh diff
+
+# 查看配置状态
+./scripts/manage_dotfiles.sh status
+
+# 编辑配置文件
+./scripts/manage_dotfiles.sh edit ~/.zshrc
+
+# 查看帮助
+./scripts/manage_dotfiles.sh help
+```
+
+### 日常使用
+
+```bash
+# 应用所有配置
+chezmoi apply -v
+
+# 查看配置差异
+chezmoi diff
+
+# 编辑配置文件
+chezmoi edit ~/.zshrc
+
+# 添加新配置文件
+chezmoi add ~/.new_config
+
+# 更新配置到仓库
+chezmoi re-add
+git add .chezmoi
+git commit -m "Update config"
+git push
+```
+
+### 详细文档
+
+更多使用说明请参考：
+- [CHEZMOI_GUIDE.md](CHEZMOI_GUIDE.md) - 完整的 chezmoi 使用指南
+- [chezmoi 官方文档](https://www.chezmoi.io/docs/)
+
+## 详细使用说明
+
+### 1. 如何下载安装 chezmoi
+
+chezmoi 是一个跨平台的 dotfiles 管理工具，支持 Linux、macOS 和 Windows。
+
+#### 方法一：使用项目提供的安装脚本（推荐）
+
+```bash
+# 进入项目目录
+cd script_tool_and_config
+
+# 运行安装脚本（会自动检测系统并安装）
+bash scripts/chezmoi/install_chezmoi.sh
+```
+
+#### 方法二：使用系统包管理器
+
+**Linux (Arch Linux)**
+```bash
+sudo pacman -S chezmoi
+```
+
+**Linux (Ubuntu/Debian)**
+```bash
+sudo apt-get update
+sudo apt-get install chezmoi
+```
+
+**macOS**
+```bash
+brew install chezmoi
+```
+
+**Windows**
+```bash
+# 使用 winget
+winget install --id=twpayne.chezmoi -e
+
+# 或使用 MSYS2
+pacman -S chezmoi
+```
+
+#### 方法三：使用官方安装脚本
+
+```bash
+# 适用于所有平台
+sh -c "$(curl -fsLS get.chezmoi.io)" -- -b "$HOME/.local/bin"
+
+# 安装后需要将 ~/.local/bin 添加到 PATH
+# Linux/macOS: 添加到 ~/.bashrc 或 ~/.zshrc
+echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
+
+# Windows (Git Bash): 添加到 ~/.bash_profile
+echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bash_profile
+```
+
+#### 验证安装
+
+```bash
+# 检查版本
+chezmoi --version
+
+# 查看帮助
+chezmoi help
+```
+
+### 2. 如何在当前系统安装所需软件
+
+本项目使用 chezmoi 的 `run_once_` 脚本机制自动安装所需软件。这些脚本只会在首次应用配置时执行一次。
+
+#### 初始化项目并应用配置
+
+```bash
+# 1. 克隆项目
+git clone <repo-url>
+cd script_tool_and_config
+
+# 2. 设置源状态目录（重要！）
+export CHEZMOI_SOURCE_DIR="$(pwd)/.chezmoi"
+
+# 3. 应用所有配置（会自动执行 run_once_ 安装脚本）
+chezmoi apply -v
+```
+
+#### 可用的安装脚本
+
+项目包含以下 `run_once_install-*.sh` 脚本，会在首次应用时自动执行：
+
+**通用软件（Linux/macOS）**
+- `run_once_install-tmux.sh` - 安装 Tmux
+- `run_once_install-starship.sh` - 安装 Starship 提示符
+- `run_once_install-alacritty.sh` - 安装 Alacritty 终端
+
+**Linux 特定软件**
+- `run_on_linux/run_once_install-zsh.sh` - 安装 Zsh 和 Oh My Zsh
+- `run_on_linux/run_once_install-fish.sh` - 安装 Fish Shell
+- `run_on_linux/run_once_install-i3wm.sh` - 安装 i3 窗口管理器
+- `run_on_linux/run_once_install-dwm.sh` - 安装 dwm 窗口管理器
+
+**macOS 特定软件**
+- `run_on_darwin/run_once_install-zsh.sh` - 安装 Zsh 和 Oh My Zsh
+- `run_on_darwin/run_once_install-fish.sh` - 安装 Fish Shell
+- `run_on_darwin/run_once_install-yabai.sh` - 安装 Yabai 窗口管理器
+- `run_on_darwin/run_once_install-skhd.sh` - 安装 skhd 快捷键守护进程
+
+**Windows 特定软件**
+- `run_on_windows/run_once_install-zsh.sh` - 通过 MSYS2 安装 Zsh（可选）
+
+**注意**：
+- Windows 上默认使用 **Git Bash**，不安装 Fish Shell
+- Windows 上的 Zsh 安装是可选的（需要 MSYS2）
+- 所有平台特定的脚本只会在对应操作系统上执行
+
+#### 代理配置（可选）
+
+如果需要在安装过程中使用代理，可以设置环境变量：
+
+```bash
+# 设置代理
+export PROXY="http://127.0.0.1:7890"
+export http_proxy="$PROXY"
+export https_proxy="$PROXY"
+
+# 然后应用配置
+chezmoi apply -v
+```
+
+代理配置会自动传递给所有安装脚本。
+
+#### 手动触发安装脚本
+
+如果需要重新运行某个安装脚本（例如软件被卸载后），可以：
+
+```bash
+# 方法一：删除 chezmoi 的执行记录（不推荐）
+chezmoi forget ~/.local/share/chezmoi/run_once_install-*.sh
+
+# 方法二：直接运行脚本
+bash .chezmoi/run_once_install-zsh.sh
+```
+
+### 3. 如何在当前系统配置所需配置文件
+
+chezmoi 会将 `.chezmoi/` 目录中的配置文件应用到系统的相应位置。
+
+#### 配置文件映射规则
+
+chezmoi 使用以下命名规则将源文件映射到目标位置：
+
+- `dot_*` → `~/.`（例如：`dot_zshrc` → `~/.zshrc`）
+- `dot_config/*` → `~/.config/*`（例如：`dot_config/fish/config.fish` → `~/.config/fish/config.fish`）
+- `run_once_*.sh` → 执行一次（安装脚本）
+- `run_on_<os>/*` → 仅在指定操作系统执行
+
+#### 应用配置文件
+
+```bash
+# 1. 确保已设置源状态目录
+export CHEZMOI_SOURCE_DIR="$(pwd)/.chezmoi"
+
+# 2. 应用所有配置
+chezmoi apply -v
+
+# 3. 或应用特定文件
+chezmoi apply ~/.zshrc
+```
+
+#### 查看配置状态
+
+```bash
+# 查看所有文件状态
+chezmoi status
+
+# 查看特定文件状态
+chezmoi status ~/.zshrc
+
+# 查看配置差异
+chezmoi diff
+
+# 查看特定文件差异
+chezmoi diff ~/.zshrc
+```
+
+#### 编辑配置文件
+
+```bash
+# 编辑配置文件（会自动打开编辑器）
+chezmoi edit ~/.zshrc
+
+# 或直接编辑源文件
+# 编辑后需要重新应用
+chezmoi apply ~/.zshrc
+```
+
+#### 添加新配置文件
+
+```bash
+# 1. 添加文件到 chezmoi 管理
+chezmoi add ~/.new_config
+
+# 2. 编辑配置
+chezmoi edit ~/.new_config
+
+# 3. 应用配置
+chezmoi apply ~/.new_config
+
+# 4. 提交到 Git
+git add .chezmoi
+git commit -m "Add new config"
+git push
+```
+
+#### 使用模板变量
+
+chezmoi 支持在配置文件中使用模板变量，实现跨平台配置：
+
+**在 `.chezmoi.toml` 中定义变量：**
+```toml
+[data]
+    os = "{{ .chezmoi.os }}"
+    proxy = "{{ envOrDefault \"PROXY\" \"http://127.0.0.1:7890\" }}"
+```
+
+**在配置文件中使用（文件名需要包含 `.tmpl` 或使用 `.tmpl` 扩展名）：**
+```bash
+# .chezmoi/dot_bashrc.tmpl
+{{ if eq .chezmoi.os "darwin" }}
+# macOS 特定配置
+export PATH="/opt/homebrew/bin:$PATH"
+{{ else if eq .chezmoi.os "linux" }}
+# Linux 特定配置
+export PATH="/usr/local/bin:$PATH"
+{{ end }}
+
+# 使用代理变量
+alias h_proxy='export http_proxy={{ .proxy }}'
+```
+
+#### 平台特定配置
+
+项目使用 `run_on_<os>/` 目录组织平台特定配置：
+
+- **Linux 配置**：`.chezmoi/run_on_linux/`
+  - `dot_config/i3/config` → `~/.config/i3/config`
+
+- **macOS 配置**：`.chezmoi/run_on_darwin/`
+  - `dot_yabairc` → `~/.yabairc`
+  - `dot_skhdrc` → `~/.skhdrc`
+
+- **Windows 配置**：`.chezmoi/run_on_windows/`
+  - `dot_bash_profile` → `~/.bash_profile`
+  - `dot_bashrc` → `~/.bashrc`
+
+这些配置只会在对应的操作系统上应用。
+
+#### 更新配置
+
+```bash
+# 1. 从仓库拉取最新配置
+git pull
+
+# 2. 更新到系统
+chezmoi update -v
+
+# 3. 查看变更
+chezmoi diff
+```
+
+#### 配置文件列表
+
+当前项目管理的配置文件包括：
+
+**Shell 配置**
+- `~/.zshrc` - Zsh 配置
+- `~/.zprofile` - Zsh 启动配置
+- `~/.bashrc` - Bash 配置（模板，支持多平台）
+- `~/.config/fish/config.fish` - Fish Shell 配置
+
+**终端和工具配置**
+- `~/.config/alacritty/alacritty.toml` - Alacritty 终端配置
+- `~/.tmux.conf` - Tmux 配置
+- `~/.config/starship/starship.toml` - Starship 提示符配置
+
+**窗口管理器配置（平台特定）**
+- `~/.config/i3/config` - i3wm 配置（Linux）
+- `~/.yabairc` - Yabai 配置（macOS）
+- `~/.skhdrc` - skhd 配置（macOS）
+
+### 使用项目管理脚本
+
+项目提供了统一的管理脚本 `scripts/manage_dotfiles.sh`，封装了常用操作：
+
+```bash
+# 安装 chezmoi 并初始化
+./scripts/manage_dotfiles.sh install
+
+# 应用所有配置
+./scripts/manage_dotfiles.sh apply
+
+# 更新配置
+./scripts/manage_dotfiles.sh update
+
+# 查看配置差异
+./scripts/manage_dotfiles.sh diff
+
+# 查看配置状态
+./scripts/manage_dotfiles.sh status
+
+# 编辑配置文件
+./scripts/manage_dotfiles.sh edit ~/.zshrc
+
+# 列出所有受管理的文件
+./scripts/manage_dotfiles.sh list
+
+# 进入源状态目录
+./scripts/manage_dotfiles.sh cd
+
+# 查看帮助
+./scripts/manage_dotfiles.sh help
+```
+
+### 故障排除
+
+#### 问题：chezmoi 找不到源状态目录
+
+**解决：**
+```bash
+# 设置源状态目录环境变量
+export CHEZMOI_SOURCE_DIR="$(pwd)/.chezmoi"
+
+# 或使用项目管理脚本（会自动设置）
+./scripts/manage_dotfiles.sh apply
+```
+
+#### 问题：配置文件冲突
+
+**解决：**
+```bash
+# 查看差异
+chezmoi diff ~/.zshrc
+
+# 如果确定要覆盖，使用 --force
+chezmoi apply --force ~/.zshrc
+
+# 或先备份
+cp ~/.zshrc ~/.zshrc.backup
+chezmoi apply ~/.zshrc
+```
+
+#### 问题：模板变量未解析
+
+**解决：**
+- 确保文件扩展名为 `.tmpl` 或在文件名中包含 `.tmpl`
+- 检查 `.chezmoi.toml` 中的变量定义
+- 使用 `chezmoi execute-template` 测试模板：
+  ```bash
+  chezmoi execute-template '{{ .chezmoi.os }}'
+  ```
+
+#### 问题：run_once_ 脚本重复执行
+
+**解决：**
+- 检查脚本是否有正确的 `run_once_` 前缀
+- 确保脚本在源状态目录中
+- 查看 chezmoi 状态：`chezmoi status`
+
+#### 问题：Windows Git Bash 上 chezmoi 找不到状态目录
+
+**问题**：在 Windows Git Bash 上运行 `chezmoi apply` 或 `chezmoi diff` 时出现错误：
+```
+chezmoi: GetFileAttributesEx C:/Users/Administrator/.local/share/chezmoi: The system cannot find the file specified.
+```
+
+**原因**：chezmoi 需要 `~/.local/share/chezmoi` 目录来存储状态信息，但在 Windows 上该目录可能不存在。
+
+**解决**：
+
+**方法一：使用项目管理脚本（推荐）**
+```bash
+# 项目管理脚本会自动创建必要的目录
+./scripts/manage_dotfiles.sh apply
+./scripts/manage_dotfiles.sh diff
+```
+
+**方法二：手动创建目录**
+```bash
+# 创建 chezmoi 状态目录
+mkdir -p ~/.local/share/chezmoi
+
+# 然后运行 chezmoi 命令
+export CHEZMOI_SOURCE_DIR="$(pwd)/.chezmoi"
+chezmoi apply -v
+```
+
+**方法三：使用 chezmoi init（如果使用默认源状态目录）**
+```bash
+# 如果使用默认源状态目录（非项目内目录）
+chezmoi init <repo-url>
+```
+
+**注意**：本项目使用项目内源状态目录模式（`.chezmoi/`），因此需要设置 `CHEZMOI_SOURCE_DIR` 环境变量，并确保状态目录存在。
+
+### 传统方式（Legacy）
+
+原有的 `dotfiles/` 目录已标记为 legacy，保留作为参考。如需使用传统方式，请参考各工具目录下的 `install.sh` 脚本。
+
 ## 项目结构
 
 ```
 script_tool_and_config/
+├── .chezmoi/                       # chezmoi 源状态目录（所有配置文件）
+│   ├── dot_*                       # 通用配置文件（dot_* 格式）
+│   ├── dot_config/                 # ~/.config 目录下的配置
+│   ├── run_once_install-*.sh       # 一次性安装脚本
+│   ├── run_on_linux/               # Linux 特定配置和脚本
+│   ├── run_on_darwin/              # macOS 特定配置和脚本
+│   └── run_on_windows/             # Windows 特定配置和脚本
+├── .chezmoi.toml                   # chezmoi 配置文件
+├── .chezmoiignore                  # chezmoi 忽略文件
+├── install.sh                      # 一键安装脚本
 ├── environment_setup/              # 环境构建和配置脚本
 │   ├── linux/                      # Linux 相关配置
 │   │   ├── archlinux_nvim_dockerfile/          # ArchLinux Neovim Dockerfile
