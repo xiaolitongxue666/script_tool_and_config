@@ -314,6 +314,154 @@ git config --global user.email "your.email@example.com"
 git config --global --list
 ```
 
+## 管理的配置文件
+
+### 当前管理的文件
+
+通过 `chezmoi add` 命令，以下文件现在已被 chezmoi 管理：
+
+```
+.config
+.config/alacritty/alacritty.toml
+.config/fish/config.fish
+.config/fish/completions/alacritty.fish
+.config/fish/conf.d/fnm.fish
+.config/fish/conf.d/omf.fish
+.config/starship/starship.toml
+.tmux.conf
+.zprofile
+.zshrc
+```
+
+**详细列表：**
+
+- **Shell 配置**
+  - `~/.zshrc` - Zsh 配置
+  - `~/.zprofile` - Zsh 启动配置
+  - `~/.config/fish/config.fish` - Fish Shell 主配置
+  - `~/.config/fish/completions/alacritty.fish` - Fish 补全
+  - `~/.config/fish/conf.d/fnm.fish` - Fish fnm 配置
+  - `~/.config/fish/conf.d/omf.fish` - Fish OMF 配置
+
+- **终端和工具配置**
+  - `~/.tmux.conf` - Tmux 配置
+  - `~/.config/starship/starship.toml` - Starship 提示符配置
+  - `~/.config/alacritty/alacritty.toml` - Alacritty 终端配置
+
+- **macOS 特有配置（需要先安装软件）**
+  - `~/.yabairc` - Yabai 窗口管理器配置（需要先安装 yabai）
+  - `~/.skhdrc` - skhd 快捷键配置（需要先安装 skhd）
+
+### 添加文件到管理
+
+如果某些配置文件还未被管理，可以手动添加：
+
+```bash
+export CHEZMOI_SOURCE_DIR="$(pwd)/.chezmoi"
+
+# 添加现有文件到管理
+chezmoi add ~/.zprofile
+chezmoi add ~/.tmux.conf
+chezmoi add ~/.config/starship/starship.toml
+chezmoi add ~/.config/alacritty/alacritty.toml
+chezmoi add ~/.config/fish/config.fish
+```
+
+## 后续操作
+
+### 1. 添加 Fish Shell 配置片段（如果使用 Fish）
+
+```bash
+export CHEZMOI_SOURCE_DIR="$(pwd)/.chezmoi"
+chezmoi add ~/.config/fish/completions/alacritty.fish
+chezmoi add ~/.config/fish/conf.d/fnm.fish
+chezmoi add ~/.config/fish/conf.d/omf.fish
+```
+
+### 2. 安装 macOS 特有软件（可选）
+
+如果需要使用窗口管理器：
+
+```bash
+# 安装 yabai 和 skhd
+brew install koekeishiya/formulae/yabai
+brew install koekeishiya/formulae/skhd
+
+# 添加到 chezmoi 管理
+export CHEZMOI_SOURCE_DIR="$(pwd)/.chezmoi"
+chezmoi add ~/.yabairc
+chezmoi add ~/.skhdrc
+
+# 启动服务
+brew services start yabai
+brew services start skhd
+
+# 配置权限（首次需要）
+# 系统设置 > 隐私与安全性 > 辅助功能 > 添加 Terminal
+```
+
+### 3. 验证所有配置
+
+```bash
+export CHEZMOI_SOURCE_DIR="$(pwd)/.chezmoi"
+
+# 查看所有管理的文件
+chezmoi managed
+
+# 查看配置状态
+chezmoi status
+
+# 查看配置差异
+chezmoi diff
+
+# 应用所有配置
+chezmoi apply -v
+```
+
+### 4. 日常使用
+
+**修改配置文件：**
+```bash
+# 使用 chezmoi 编辑（推荐）
+./scripts/manage_dotfiles.sh edit ~/.zshrc
+
+# 或直接编辑
+chezmoi edit ~/.zshrc
+
+# 编辑后应用
+chezmoi apply ~/.zshrc
+```
+
+**添加新配置文件：**
+```bash
+# 1. 添加文件到管理
+chezmoi add ~/.new_config
+
+# 2. 编辑配置
+chezmoi edit ~/.new_config
+
+# 3. 应用配置
+chezmoi apply ~/.new_config
+
+# 4. 提交到 Git
+git add .chezmoi
+git commit -m "Add new config"
+git push
+```
+
+**更新配置：**
+```bash
+# 从仓库拉取最新配置
+git pull
+
+# 更新到系统
+./scripts/manage_dotfiles.sh update
+
+# 或手动
+export CHEZMOI_SOURCE_DIR="$(pwd)/.chezmoi"
+chezmoi update -v
+```
+
 ## 完成
 
 安装完成后，重启终端或执行：
