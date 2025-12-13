@@ -14,7 +14,117 @@
   - CentOS/RHEL (dnf/yum)
   - Fedora (dnf)
 
-详细平台支持说明请参考：[PLATFORM_SUPPORT.md](PLATFORM_SUPPORT.md)
+详细平台支持说明见下方"平台支持"章节。
+
+## 平台支持
+
+### 支持的操作系统
+
+#### Windows
+- **支持版本**: Windows 10/11
+- **包管理器**:
+  - `winget` (Windows Package Manager) - 优先使用
+  - `pacman` (MSYS2) - 备选
+- **Shell 环境**: Git Bash, MSYS2
+- **特殊说明**:
+  - 需要创建 `~/.local/share/chezmoi` 目录（脚本会自动处理）
+  - 支持通过 MSYS2 安装 Unix 工具
+
+#### macOS
+- **支持版本**: macOS 10.15+ (Catalina 及以上)
+- **包管理器**: `brew` (Homebrew) - 必需
+- **架构支持**: Intel (x86_64) 和 Apple Silicon (arm64)
+- **特殊说明**:
+  - 需要先安装 Homebrew
+  - Apple Silicon Mac 使用 `/opt/homebrew`，Intel Mac 使用 `/usr/local`
+
+#### Linux
+
+**ArchLinux**
+- **包管理器**: `pacman`
+- **支持版本**: 最新稳定版
+- **特殊脚本**:
+  - `scripts/linux/system_basic_env/install_common_tools.sh` - 仅支持 ArchLinux
+  - `scripts/linux/system_basic_env/configure_china_mirrors.sh` - 配置中国镜像源
+
+**Ubuntu/Debian**
+- **包管理器**: `apt` (apt-get)
+- **支持版本**:
+  - Ubuntu 18.04+ (LTS 和最新版)
+  - Debian 10+ (Buster 及以上)
+- **特殊说明**: 使用 `apt-get` 命令
+
+**CentOS/RHEL**
+- **包管理器**:
+  - `dnf` (CentOS 8+, RHEL 8+, Fedora) - 优先使用
+  - `yum` (CentOS 7-, RHEL 7-) - 旧版本
+- **支持版本**:
+  - CentOS 7 (使用 yum)
+  - CentOS 8+ (使用 dnf)
+  - RHEL 7 (使用 yum)
+  - RHEL 8+ (使用 dnf)
+  - Fedora (使用 dnf)
+
+### 包管理器检测顺序
+
+**Linux**
+1. `pacman` (ArchLinux)
+2. `apt-get` (Ubuntu/Debian)
+3. `dnf` (CentOS 8+/RHEL 8+/Fedora)
+4. `yum` (CentOS 7-/RHEL 7-)
+
+**Windows**
+1. `winget` (Windows Package Manager)
+2. `pacman.exe` (MSYS2)
+
+**macOS**
+1. `brew` (Homebrew) - 必需
+
+### 平台特定功能
+
+**Windows**
+- Git Bash 配置 (`~/.bash_profile`, `~/.bashrc`)
+- MSYS2 支持
+- Zsh 通过 MSYS2 安装
+
+**macOS**
+- Yabai 窗口管理器配置
+- skhd 快捷键配置
+- Homebrew 集成
+
+**Linux**
+- **ArchLinux 特定**:
+  - i3wm 窗口管理器配置
+  - dwm 窗口管理器配置
+  - 中国镜像源配置脚本
+  - AUR 助手 (yay) 安装
+- **通用 Linux**:
+  - Shell 配置 (Bash, Zsh, Fish)
+  - Tmux 配置
+  - Starship 提示符
+  - Alacritty 终端
+
+### 测试状态
+
+**已验证平台**
+- ✅ Windows 10/11 (Git Bash)
+- ✅ macOS (Intel 和 Apple Silicon)
+- ✅ ArchLinux
+- ✅ Ubuntu 20.04/22.04
+- ✅ CentOS 7 (yum)
+- ✅ CentOS 8+ (dnf)
+
+**部分支持**
+- ⚠️ Debian (理论上支持，未充分测试)
+- ⚠️ RHEL (理论上支持，未充分测试)
+- ⚠️ Fedora (理论上支持，未充分测试)
+
+### 已知限制
+
+1. **ArchLinux 特定脚本**: `install_common_tools.sh` 仅支持 ArchLinux，其他发行版会报错
+2. **Windows 路径**: 某些脚本在 Windows 上可能需要路径转换
+3. **权限要求**: Linux 安装脚本需要 sudo 权限
+4. **网络要求**: 首次安装需要网络连接（下载软件包）
 
 ## 快速开始（使用 chezmoi）
 
@@ -86,9 +196,9 @@ git push
 ### 详细文档
 
 更多使用说明请参考：
-- [SOFTWARE_LIST.md](SOFTWARE_LIST.md) - 完整的软件清单和分类
-- [PLATFORM_SUPPORT.md](PLATFORM_SUPPORT.md) - 平台支持说明
-- [CHEZMOI_GUIDE.md](CHEZMOI_GUIDE.md) - 完整的 chezmoi 使用指南
+- [software_list.md](software_list.md) - 完整的软件清单和分类
+- [chezmoi_guide.md](chezmoi_guide.md) - 完整的 chezmoi 使用指南
+- [project_structure.md](project_structure.md) - 项目结构说明
 - [chezmoi 官方文档](https://www.chezmoi.io/docs/)
 
 ## 详细使用说明
@@ -208,7 +318,7 @@ chezmoi apply -v
 - 所有脚本使用模板条件判断，不符合平台条件的脚本不会执行
 - Windows 上默认使用 **Git Bash**，不安装 Fish Shell
 - Windows 上的 Zsh 安装是可选的（需要 MSYS2）
-- 详细软件清单请参考：[SOFTWARE_LIST.md](SOFTWARE_LIST.md)
+- 详细软件清单请参考：[software_list.md](software_list.md)
 
 #### 代理配置（可选）
 
@@ -394,7 +504,7 @@ chezmoi diff
 - `~/.yabairc` - Yabai 配置（macOS）
 - `~/.skhdrc` - skhd 配置（macOS）
 
-完整的软件清单和配置文件映射请参考：[SOFTWARE_LIST.md](SOFTWARE_LIST.md)
+完整的软件清单和配置文件映射请参考：[software_list.md](software_list.md)
 
 ### 使用项目管理脚本
 
@@ -512,7 +622,7 @@ chezmoi init <repo-url>
 
 ### 传统方式（Legacy）
 
-原有的 `dotfiles/` 目录已标记为 legacy，仅保留配置文件作为参考。所有安装脚本已迁移到 `.chezmoi/` 目录并使用模板系统管理。详情请参考：[dotfiles/LEGACY.md](dotfiles/LEGACY.md)
+原有的 `dotfiles/` 目录已标记为 legacy，仅保留配置文件作为参考。所有安装脚本已迁移到 `.chezmoi/` 目录并使用模板系统管理。详情请参考：[dotfiles/legacy.md](dotfiles/legacy.md)
 
 ## 项目结构
 
@@ -529,7 +639,7 @@ script_tool_and_config/
 ├── .chezmoiignore                  # chezmoi 忽略文件
 ├── install.sh                      # 一键安装脚本
 ├── dotfiles/                       # 配置文件（Legacy，仅保留配置文件）
-│   ├── LEGACY.md                   # Legacy 说明文档
+│   ├── legacy.md                   # Legacy 说明文档
 │   ├── alacritty/                  # Alacritty 配置（仅配置文件）
 │   ├── bash/                       # Bash 配置（仅配置文件）
 │   ├── fish/                       # Fish Shell 配置（仅配置文件）
@@ -595,7 +705,7 @@ script_tool_and_config/
 
 ### 2. 点配置文件 (dotfiles)
 
-所有工具配置遵循统一的结构：**工具名/配置文件/README.md/install.sh**
+所有工具配置遵循统一的结构：**工具名/配置文件/readme.md/install.sh**
 
 #### Shell 配置
 - **Fish Shell** (`fish/`)
@@ -694,7 +804,7 @@ script_tool_and_config/
 
 ### 3. 脚本工具 (scripts)
 
-脚本按操作系统分类组织，详见 `scripts/README.md`。
+脚本按操作系统分类组织，详见 `scripts/readme.md`。
 
 #### Windows 专用脚本 (`scripts/windows/`)
 - **windows_scripts/**: Windows 批处理脚本
@@ -728,7 +838,7 @@ script_tool_and_config/
   - `install_common_software.sh`: 安装常用软件
   - `install_gnome.sh`: 安装 GNOME 桌面环境
   - `install_network_manager.sh`: 安装网络管理器
-  - `USAGE.md`: 脚本使用说明文档
+  - `usage.md`: 脚本使用说明文档
 
 **网络配置脚本 (`network/`)**
 - `configure_ethernet_mac.sh`: 配置以太网 MAC 地址
@@ -777,7 +887,7 @@ script_tool_and_config/
 **补丁示例 (`patch_examples/`) - 跨平台**
 - `create_patch.sh`: 创建补丁文件
 - `use_patch.sh`: 应用补丁文件
-- `README.md`: 详细使用说明
+- `readme.md`: 详细使用说明
 
 **Shell 脚本编译器 (`shc/`) - 跨平台**
 - **shc** 是 "Shell Script Compiler" 的缩写，用于将 Shell 脚本编译为二进制可执行文件
@@ -870,7 +980,7 @@ sudo -E USE_SYSTEM_NVIM_VENV=1 NO_PROXY=1 ./install_common_tools.sh
 - 安装 Nerd Font 字体（FiraMono）
 - 安装 Oh My Zsh
 
-**详细说明**：参见 `scripts/linux/system_basic_env/USAGE.md`
+**详细说明**：参见 `scripts/linux/system_basic_env/usage.md`
 
 #### 安装和配置工具（使用统一安装脚本）
 
@@ -965,7 +1075,7 @@ chmod +x install.sh
 - 可选安装 st (Simple Terminal)
 - 创建 XSession 桌面文件
 
-**注意**: dwm 的配置通过编辑源代码（`config.h`）完成，需要重新编译。详见 `dotfiles/dwm/README.md`。
+**注意**: dwm 的配置通过编辑源代码（`config.h`）完成，需要重新编译。详见 `dotfiles/dwm/readme.md`。
 
 **同步配置**
 
@@ -1001,7 +1111,7 @@ chmod +x install.sh
 ├── 配置文件              # 工具的主配置文件
 ├── install.sh            # 自动安装脚本（自动检测系统）
 ├── config_loader.sh      # 配置加载脚本（多系统工具，自动检测系统）
-└── README.md             # 配置说明和使用指南
+└── readme.md             # 配置说明和使用指南
 ```
 
 ### 多系统配置工具
@@ -1013,7 +1123,7 @@ chmod +x install.sh
 ├── config.fish 或 config.sh  # 统一配置文件（自动检测系统）
 ├── completions/             # 补全脚本目录（如适用）
 ├── install.sh               # 自动安装脚本（自动检测系统，包含配置同步和备份）
-└── README.md                # 配置说明
+└── readme.md                # 配置说明
 ```
 
 **优势**：
@@ -1087,7 +1197,7 @@ chmod +x install.sh
 - ✅ 重命名拼写错误的文件和目录
 - ✅ 根据功能和作用重命名文件和文件夹
 - ✅ 添加 Alacritty 终端安装脚本和配置文件
-- ✅ 统一工具配置结构（工具名/配置文件/README.md/install.sh）
+- ✅ 统一工具配置结构（工具名/配置文件/readme.md/install.sh）
 - ✅ 为多系统配置工具创建统一配置加载脚本
 - ✅ 移动安装脚本到对应工具目录
 - ✅ 添加 dwm (Dynamic Window Manager) 配置

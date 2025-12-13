@@ -8,7 +8,7 @@
 scripts/
 ├── common.sh                    # 通用函数库（所有脚本共享）
 ├── PROJECT_HISTORY.md           # 项目优化历史记录
-├── README.md                    # 本文件
+├── readme.md                    # 本文件
 │
 ├── windows/                     # Windows 专用脚本
 │   └── windows_scripts/         # Windows 批处理脚本

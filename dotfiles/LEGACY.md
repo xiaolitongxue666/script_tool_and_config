@@ -127,8 +127,8 @@ SecureCRT 是 Windows 特定工具，配置文件保留在 `dotfiles/secure_crt/
 
 ## 相关文档
 
-- [README.md](../README.md) - 项目主文档
-- [CHEZMOI_GUIDE.md](../CHEZMOI_GUIDE.md) - chezmoi 使用指南
+- [readme.md](../readme.md) - 项目主文档
+- [chezmoi_guide.md](../chezmoi_guide.md) - chezmoi 使用指南
 - [scripts/migration/migrate_to_chezmoi.sh](../scripts/migration/migrate_to_chezmoi.sh) - 迁移脚本
 
 ## 注意事项

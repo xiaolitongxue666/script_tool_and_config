@@ -636,7 +636,7 @@ winget uninstall --id Kitware.CMake
 ## 参考
 
 - [winutil 项目](https://github.com/ChrisTitusTech/winutil) - 参考了 winutil 的安装方式
-- [MULTI_OS_COMMON_TOOLS.md](../../../MULTI_OS_COMMON_TOOLS.md) - 工具清单来源
+- [software_list.md](../../../software_list.md) - 工具清单来源
 - [Winget 文档](https://learn.microsoft.com/en-us/windows/package-manager/winget/)
 - [Chocolatey 文档](https://chocolatey.org/docs)
 
