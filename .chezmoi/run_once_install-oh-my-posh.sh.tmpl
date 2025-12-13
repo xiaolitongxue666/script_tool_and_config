@@ -1,0 +1,74 @@
+{{- if eq .chezmoi.os "windows" -}}
+#!/bin/bash
+
+# ============================================
+# Oh My Posh 安装脚本（chezmoi run_once_）
+# 仅支持 Windows
+# ============================================
+
+# 获取 common_install.sh 路径
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd 2>/dev/null || echo "$HOME")"
+COMMON_INSTALL="${PROJECT_ROOT}/scripts/chezmoi/common_install.sh"
+
+if [ ! -f "$COMMON_INSTALL" ]; then
+    COMMON_INSTALL="$HOME/.local/share/chezmoi/scripts/chezmoi/common_install.sh"
+fi
+
+# 加载通用函数库
+if [ -f "$COMMON_INSTALL" ]; then
+    source "$COMMON_INSTALL"
+else
+    echo "[WARNING] 未找到 common_install.sh，使用基本函数"
+    function setup_proxy() { :; }
+    function detect_os_and_package_manager() {
+        OS="$(uname -s)"
+        if [[ ! "$OS" =~ ^(MINGW|MSYS|CYGWIN) ]]; then
+            echo "[ERROR] Oh My Posh 仅支持 Windows"
+            exit 1
+        fi
+        if command -v winget &> /dev/null; then
+            PACKAGE_MANAGER="winget"
+        else
+            PACKAGE_MANAGER="script"
+        fi
+    }
+    function install_package() {
+        local pkg="$1"
+        if [[ "$PACKAGE_MANAGER" == "winget" ]]; then
+            winget install --id="$pkg" -e --accept-source-agreements --accept-package-agreements
+        fi
+    }
+fi
+
+# 设置代理
+setup_proxy "${PROXY:-{{ .proxy }}}"
+
+# 检测操作系统和包管理器
+detect_os_and_package_manager || exit 1
+
+# 检查 Oh My Posh 是否已安装
+if command -v oh-my-posh &> /dev/null; then
+    echo "[INFO] Oh My Posh 已安装: $(oh-my-posh --version)"
+    exit 0
+fi
+
+echo "[INFO] 开始安装 Oh My Posh..."
+
+# 根据包管理器安装
+if [[ "$PACKAGE_MANAGER" == "winget" ]]; then
+    install_package "JanDeDobbeleer.OhMyPosh"
+else
+    # 使用官方安装脚本
+    echo "[INFO] 使用官方安装脚本..."
+    curl -s https://ohmyposh.dev/install.sh | bash -s
+fi
+
+if command -v oh-my-posh &> /dev/null; then
+    echo "[SUCCESS] Oh My Posh 安装成功: $(oh-my-posh --version)"
+else
+    echo "[ERROR] Oh My Posh 安装失败"
+    exit 1
+fi
+{{- end -}}
+

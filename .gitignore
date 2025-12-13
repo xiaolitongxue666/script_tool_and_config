@@ -183,6 +183,16 @@ scripts/windows/system_basic_env/InstallationLog.txt
 scripts/windows/system_basic_env/*.backup
 
 # ============================================
+# chezmoi 相关文件
+# ============================================
+
+# chezmoi 状态目录（如果使用默认位置）
+.chezmoistate
+
+# chezmoi 临时文件
+.chezmoi.*.tmp
+
+# ============================================
 # 环境变量和敏感信息
 # ============================================
 

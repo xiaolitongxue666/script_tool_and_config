@@ -1,0 +1,153 @@
+{{- if eq .chezmoi.os "linux" -}}
+#!/bin/bash
+
+# ============================================
+# AUR 助手安装脚本（chezmoi run_once_）
+# 安装 yay 或 paru（优先 yay）
+# 需要 root 权限（但使用普通用户构建）
+# ============================================
+
+# 获取 common_install.sh 路径
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../../.." && pwd 2>/dev/null || echo "$HOME")"
+COMMON_INSTALL="${PROJECT_ROOT}/scripts/chezmoi/common_install.sh"
+
+if [ ! -f "$COMMON_INSTALL" ]; then
+    COMMON_INSTALL="$HOME/.local/share/chezmoi/scripts/chezmoi/common_install.sh"
+fi
+
+# 加载通用函数库
+if [ -f "$COMMON_INSTALL" ]; then
+    source "$COMMON_INSTALL"
+else
+    echo "[WARNING] 未找到 common_install.sh，使用基本函数"
+    function log_info() { echo "[INFO] $*"; }
+    function log_success() { echo "[SUCCESS] $*"; }
+    function log_warning() { echo "[WARNING] $*"; }
+    function log_error() { echo "[ERROR] $*" >&2; }
+    function check_root() {
+        if [[ $EUID -ne 0 ]]; then
+            log_error "此脚本需要 root 权限，请使用 sudo 运行"
+            return 1
+        fi
+        return 0
+    }
+    function detect_install_user() {
+        if [[ -n "${SUDO_USER:-}" ]] && [[ "${SUDO_USER}" != "root" ]]; then
+            INSTALL_USER="${SUDO_USER}"
+        elif [[ -n "${PKEXEC_UID:-}" ]]; then
+            INSTALL_USER="$(id -un "${PKEXEC_UID}")"
+        else
+            log_error "请使用 sudo 运行此脚本，以便使用非特权用户进行 AUR 构建任务"
+            return 1
+        fi
+        log_info "非特权用户: ${INSTALL_USER}"
+        return 0
+    }
+fi
+
+# 检查 root 权限
+if ! check_root; then
+    exit 1
+fi
+
+# 检测安装用户（用于 AUR 构建）
+if ! detect_install_user; then
+    exit 1
+fi
+
+# 检查是否为 Arch Linux
+if [[ ! -f /etc/os-release ]]; then
+    log_error "无法检测系统版本"
+    exit 1
+fi
+
+source /etc/os-release
+if [[ "${ID:-}" != "arch" ]]; then
+    log_error "此脚本仅支持 Arch Linux"
+    exit 1
+fi
+
+log_info "检测到 Arch Linux"
+
+# ============================================
+# 确保 AUR 助手已安装
+# ============================================
+ensure_aur_helper() {
+    # pacman 操作前禁用代理（使用国内源）
+    if type disable_proxy &>/dev/null; then
+        disable_proxy
+    fi
+
+    if command -v yay >/dev/null 2>&1; then
+        AUR_HELPER="yay"
+        log_info "yay 已安装: $(yay --version | head -n 1)"
+    elif command -v paru >/dev/null 2>&1; then
+        AUR_HELPER="paru"
+        log_info "paru 已安装: $(paru --version | head -n 1)"
+    else
+        log_info "未找到 AUR 助手，开始安装 yay..."
+
+        # 确保 base-devel 已安装（构建 AUR 包需要）
+        if ! pacman -Qi base-devel >/dev/null 2>&1; then
+            log_info "安装 base-devel（构建 AUR 包需要）..."
+            pacman -S --needed --noconfirm base-devel || {
+                log_error "base-devel 安装失败"
+                return 1
+            }
+        fi
+
+        local tmp_dir
+        tmp_dir="$(mktemp -d)"
+        # 设置临时目录的所有者为安装用户
+        chown "${INSTALL_USER}:${INSTALL_USER}" "${tmp_dir}"
+
+        # 使用普通用户构建 AUR 包
+        log_info "使用普通用户 ${INSTALL_USER} 构建 yay..."
+        sudo -u "${INSTALL_USER}" bash -s "${tmp_dir}" <<'EOF'
+set -euo pipefail
+cd "$1"
+git clone https://aur.archlinux.org/yay.git
+cd yay
+makepkg --noconfirm -si
+EOF
+
+        # 清理临时目录
+        rm -rf "${tmp_dir}"
+
+        if command -v yay >/dev/null 2>&1; then
+            AUR_HELPER="yay"
+            log_success "yay 安装成功"
+        else
+            log_error "yay 安装失败"
+            return 1
+        fi
+    fi
+
+    log_success "AUR 助手: ${AUR_HELPER}"
+
+    # pacman 操作完成后启用代理（用于后续操作）
+    if type enable_proxy &>/dev/null; then
+        enable_proxy "${DEFAULT_PROXY_URL:-http://127.0.0.1:7890}"
+    fi
+}
+
+# ============================================
+# 主函数
+# ============================================
+main() {
+    log_info "=========================================="
+    log_info "开始安装 AUR 助手"
+    log_info "=========================================="
+
+    ensure_aur_helper
+
+    log_success "=========================================="
+    log_success "AUR 助手安装完成: ${AUR_HELPER}"
+    log_success "=========================================="
+}
+
+# 执行主函数
+main "$@"
+{{- end -}}
+

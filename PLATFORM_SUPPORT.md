@@ -103,22 +103,44 @@
 
 ## 安装脚本支持
 
-### 通用安装脚本 (run_once_)
-- `run_once_install-zsh.sh` - Zsh 和 Oh My Zsh
-- `run_once_install-fish.sh` - Fish Shell
-- `run_once_install-tmux.sh` - Tmux
-- `run_once_install-starship.sh` - Starship
-- `run_once_install-alacritty.sh` - Alacritty
+### 模板化安装脚本
 
-### 平台特定安装脚本
-- **Linux**:
-  - `run_on_linux/run_once_install-i3wm.sh`
-  - `run_on_linux/run_once_install-dwm.sh`
-- **macOS**:
-  - `run_on_darwin/run_once_install-yabai.sh`
-  - `run_on_darwin/run_once_install-skhd.sh`
-- **Windows**:
-  - `run_on_windows/run_once_install-zsh.sh`
+所有安装脚本已转换为模板格式（`.tmpl`），使用 chezmoi 模板条件判断平台。脚本位于 `.chezmoi/` 目录中。
+
+**通用工具（所有平台）**
+- `run_once_install-starship.sh.tmpl` - Starship 提示符
+- `run_once_install-git.sh.tmpl` - Git
+- `run_once_install-neovim.sh.tmpl` - Neovim
+- `run_once_install-common-tools.sh.tmpl` - 通用工具（bat, eza, fd, rg, fzf, lazygit, git-delta, gh）
+- `run_once_install-version-managers.sh.tmpl` - 版本管理器（fnm, uv, rustup）
+
+**Linux/macOS 通用**
+- `run_once_install-tmux.sh.tmpl` - Tmux
+- `run_once_install-alacritty.sh.tmpl` - Alacritty
+- `run_once_install-zsh.sh.tmpl` - Zsh 和 Oh My Zsh
+- `run_once_install-fish.sh.tmpl` - Fish Shell
+
+**Linux 特有**
+- `run_once_install-i3wm.sh.tmpl` - i3wm 窗口管理器
+- `run_once_install-dwm.sh.tmpl` - dwm 窗口管理器
+
+**macOS 特有**
+- `run_once_install-yabai.sh.tmpl` - Yabai 窗口管理器
+- `run_once_install-skhd.sh.tmpl` - skhd 快捷键守护进程
+
+**Windows 特有**
+- `run_once_install-oh-my-posh.sh.tmpl` - Oh My Posh
+
+### 安装方式
+
+所有软件通过 chezmoi 的 `run_once_` 脚本机制自动安装。首次运行 `chezmoi apply` 时，这些脚本会自动执行。
+
+```bash
+# 应用所有配置（包括安装脚本）
+chezmoi apply -v
+```
+
+详细软件清单和安装说明请参考：[SOFTWARE_LIST.md](SOFTWARE_LIST.md)
 
 ## 测试状态
 

@@ -1,11 +1,12 @@
+{{- if or (eq .chezmoi.os "linux") (eq .chezmoi.os "darwin") (eq .chezmoi.os "windows") -}}
 #!/bin/bash
 
 # ============================================
 # Starship 提示符安装脚本（chezmoi run_once_）
+# 支持所有平台
 # ============================================
 
 # 获取 common_install.sh 路径
-# chezmoi 会将脚本复制到 ~/.local/share/chezmoi/scripts/ 或使用项目路径
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd 2>/dev/null || echo "$HOME")"
 COMMON_INSTALL="${PROJECT_ROOT}/scripts/chezmoi/common_install.sh"
@@ -28,10 +29,18 @@ else
             PACKAGE_MANAGER="brew"
         elif [[ "$OS" == "Linux" ]]; then
             PLATFORM="linux"
-            PACKAGE_MANAGER="pacman"
-        else
-            echo "[ERROR] 不支持的操作系统"
-            exit 1
+            if command -v pacman &> /dev/null; then
+                PACKAGE_MANAGER="pacman"
+            elif command -v apt-get &> /dev/null; then
+                PACKAGE_MANAGER="apt"
+            fi
+        elif [[ "$OS" =~ ^(MINGW|MSYS|CYGWIN) ]]; then
+            PLATFORM="windows"
+            if command -v winget &> /dev/null; then
+                PACKAGE_MANAGER="winget"
+            elif command -v pacman.exe &> /dev/null; then
+                PACKAGE_MANAGER="pacman"
+            fi
         fi
     }
     function install_package() {
@@ -39,15 +48,21 @@ else
         if [[ "$PACKAGE_MANAGER" == "brew" ]]; then
             brew install "$pkg"
         elif [[ "$PACKAGE_MANAGER" == "pacman" ]]; then
-            sudo pacman -S --noconfirm "$pkg"
+            if [[ "$PLATFORM" == "windows" ]]; then
+                pacman.exe -S --noconfirm "$pkg"
+            else
+                sudo pacman -S --noconfirm "$pkg"
+            fi
         elif [[ "$PACKAGE_MANAGER" == "apt" ]]; then
             sudo apt-get update && sudo apt-get install -y "$pkg"
+        elif [[ "$PACKAGE_MANAGER" == "winget" ]]; then
+            winget install --id="$pkg" -e --accept-source-agreements --accept-package-agreements
         fi
     }
 fi
 
 # 设置代理（默认 127.0.0.1:7890）
-setup_proxy "${PROXY:-http://127.0.0.1:7890}"
+setup_proxy "${PROXY:-{{ .proxy }}}"
 
 # 检测操作系统和包管理器
 detect_os_and_package_manager || exit 1
@@ -80,6 +95,16 @@ case "$PLATFORM" in
             curl -sS https://starship.rs/install.sh | sh
         fi
         ;;
+    windows)
+        if [[ "$PACKAGE_MANAGER" == "winget" ]]; then
+            install_package "starship.starship"
+        elif [[ "$PACKAGE_MANAGER" == "pacman" ]]; then
+            install_package "starship"
+        else
+            echo "[INFO] 使用官方安装脚本..."
+            curl -sS https://starship.rs/install.sh | sh
+        fi
+        ;;
     *)
         echo "[INFO] 使用官方安装脚本..."
         curl -sS https://starship.rs/install.sh | sh
@@ -92,3 +117,5 @@ else
     echo "[ERROR] Starship 安装失败"
     exit 1
 fi
+{{- end -}}
+

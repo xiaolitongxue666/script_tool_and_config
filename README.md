@@ -86,6 +86,8 @@ git push
 ### 详细文档
 
 更多使用说明请参考：
+- [SOFTWARE_LIST.md](SOFTWARE_LIST.md) - 完整的软件清单和分类
+- [PLATFORM_SUPPORT.md](PLATFORM_SUPPORT.md) - 平台支持说明
 - [CHEZMOI_GUIDE.md](CHEZMOI_GUIDE.md) - 完整的 chezmoi 使用指南
 - [chezmoi 官方文档](https://www.chezmoi.io/docs/)
 
@@ -176,32 +178,37 @@ chezmoi apply -v
 
 #### 可用的安装脚本
 
-项目包含以下 `run_once_install-*.sh` 脚本，会在首次应用时自动执行：
+项目包含以下 `run_once_install-*.sh.tmpl` 模板脚本，会在首次应用时自动执行。所有脚本已使用 chezmoi 模板系统，根据平台自动判断是否执行。
 
-**通用软件（Linux/macOS）**
-- `run_once_install-tmux.sh` - 安装 Tmux
-- `run_once_install-starship.sh` - 安装 Starship 提示符
-- `run_once_install-alacritty.sh` - 安装 Alacritty 终端
+**通用工具（所有平台）**
+- `run_once_install-starship.sh.tmpl` - Starship 提示符
+- `run_once_install-git.sh.tmpl` - Git
+- `run_once_install-neovim.sh.tmpl` - Neovim
+- `run_once_install-common-tools.sh.tmpl` - 通用工具（bat, eza, fd, ripgrep, fzf, lazygit, git-delta, gh）
+- `run_once_install-version-managers.sh.tmpl` - 版本管理器（fnm, uv, rustup）
 
-**Linux 特定软件**
-- `run_on_linux/run_once_install-zsh.sh` - 安装 Zsh 和 Oh My Zsh
-- `run_on_linux/run_once_install-fish.sh` - 安装 Fish Shell
-- `run_on_linux/run_once_install-i3wm.sh` - 安装 i3 窗口管理器
-- `run_on_linux/run_once_install-dwm.sh` - 安装 dwm 窗口管理器
+**Linux/macOS 通用**
+- `run_once_install-tmux.sh.tmpl` - Tmux
+- `run_once_install-alacritty.sh.tmpl` - Alacritty
+- `run_once_install-zsh.sh.tmpl` - Zsh 和 Oh My Zsh
+- `run_once_install-fish.sh.tmpl` - Fish Shell
 
-**macOS 特定软件**
-- `run_on_darwin/run_once_install-zsh.sh` - 安装 Zsh 和 Oh My Zsh
-- `run_on_darwin/run_once_install-fish.sh` - 安装 Fish Shell
-- `run_on_darwin/run_once_install-yabai.sh` - 安装 Yabai 窗口管理器
-- `run_on_darwin/run_once_install-skhd.sh` - 安装 skhd 快捷键守护进程
+**Linux 特有**
+- `run_once_install-i3wm.sh.tmpl` - i3wm 窗口管理器
+- `run_once_install-dwm.sh.tmpl` - dwm 窗口管理器
 
-**Windows 特定软件**
-- `run_on_windows/run_once_install-zsh.sh` - 通过 MSYS2 安装 Zsh（可选）
+**macOS 特有**
+- `run_once_install-yabai.sh.tmpl` - Yabai 窗口管理器
+- `run_once_install-skhd.sh.tmpl` - skhd 快捷键守护进程
+
+**Windows 特有**
+- `run_once_install-oh-my-posh.sh.tmpl` - Oh My Posh
 
 **注意**：
+- 所有脚本使用模板条件判断，不符合平台条件的脚本不会执行
 - Windows 上默认使用 **Git Bash**，不安装 Fish Shell
 - Windows 上的 Zsh 安装是可选的（需要 MSYS2）
-- 所有平台特定的脚本只会在对应操作系统上执行
+- 详细软件清单请参考：[SOFTWARE_LIST.md](SOFTWARE_LIST.md)
 
 #### 代理配置（可选）
 
@@ -225,10 +232,10 @@ chezmoi apply -v
 
 ```bash
 # 方法一：删除 chezmoi 的执行记录（不推荐）
-chezmoi forget ~/.local/share/chezmoi/run_once_install-*.sh
+chezmoi forget ~/.local/share/chezmoi/run_once_install-*.sh.tmpl
 
-# 方法二：直接运行脚本
-bash .chezmoi/run_once_install-zsh.sh
+# 方法二：直接运行脚本（需要先执行模板）
+chezmoi execute-template < .chezmoi/run_once_install-zsh.sh.tmpl | bash
 ```
 
 ### 3. 如何在当前系统配置所需配置文件
@@ -304,7 +311,7 @@ git push
 
 #### 使用模板变量
 
-chezmoi 支持在配置文件中使用模板变量，实现跨平台配置：
+chezmoi 支持在配置文件中使用模板变量，实现跨平台配置。所有安装脚本已转换为模板格式（`.tmpl`），使用模板条件判断平台。
 
 **在 `.chezmoi.toml` 中定义变量：**
 ```toml
@@ -328,9 +335,18 @@ export PATH="/usr/local/bin:$PATH"
 alias h_proxy='export http_proxy={{ .proxy }}'
 ```
 
+**安装脚本模板示例：**
+```bash
+# .chezmoi/run_once_install-tmux.sh.tmpl
+{{- if or (eq .chezmoi.os "linux") (eq .chezmoi.os "darwin") -}}
+#!/bin/bash
+# 安装逻辑（仅在 Linux/macOS 上执行）
+{{- end -}}
+```
+
 #### 平台特定配置
 
-项目使用 `run_on_<os>/` 目录组织平台特定配置：
+项目使用 `run_on_<os>/` 目录组织平台特定的配置文件，安装脚本已统一到根目录并使用模板条件判断：
 
 - **Linux 配置**：`.chezmoi/run_on_linux/`
   - `dot_config/i3/config` → `~/.config/i3/config`
@@ -343,7 +359,7 @@ alias h_proxy='export http_proxy={{ .proxy }}'
   - `dot_bash_profile` → `~/.bash_profile`
   - `dot_bashrc` → `~/.bashrc`
 
-这些配置只会在对应的操作系统上应用。
+这些配置只会在对应的操作系统上应用。安装脚本使用模板条件判断，不符合平台条件的脚本不会执行。
 
 #### 更新配置
 
@@ -377,6 +393,8 @@ chezmoi diff
 - `~/.config/i3/config` - i3wm 配置（Linux）
 - `~/.yabairc` - Yabai 配置（macOS）
 - `~/.skhdrc` - skhd 配置（macOS）
+
+完整的软件清单和配置文件映射请参考：[SOFTWARE_LIST.md](SOFTWARE_LIST.md)
 
 ### 使用项目管理脚本
 
@@ -494,87 +512,45 @@ chezmoi init <repo-url>
 
 ### 传统方式（Legacy）
 
-原有的 `dotfiles/` 目录已标记为 legacy，保留作为参考。如需使用传统方式，请参考各工具目录下的 `install.sh` 脚本。
+原有的 `dotfiles/` 目录已标记为 legacy，仅保留配置文件作为参考。所有安装脚本已迁移到 `.chezmoi/` 目录并使用模板系统管理。详情请参考：[dotfiles/LEGACY.md](dotfiles/LEGACY.md)
 
 ## 项目结构
 
 ```
 script_tool_and_config/
 ├── .chezmoi/                       # chezmoi 源状态目录（所有配置文件）
-│   ├── dot_*                       # 通用配置文件（dot_* 格式）
+│   ├── dot_*                       # 通用配置文件（模板格式）
 │   ├── dot_config/                 # ~/.config 目录下的配置
-│   ├── run_once_install-*.sh       # 一次性安装脚本
-│   ├── run_on_linux/               # Linux 特定配置和脚本
-│   ├── run_on_darwin/              # macOS 特定配置和脚本
-│   └── run_on_windows/             # Windows 特定配置和脚本
+│   ├── run_once_install-*.sh.tmpl  # 模板化的安装脚本（使用 chezmoi 模板条件）
+│   ├── run_on_linux/               # Linux 特定配置
+│   ├── run_on_darwin/              # macOS 特定配置
+│   └── run_on_windows/             # Windows 特定配置
 ├── .chezmoi.toml                   # chezmoi 配置文件
 ├── .chezmoiignore                  # chezmoi 忽略文件
 ├── install.sh                      # 一键安装脚本
-├── environment_setup/              # 环境构建和配置脚本
-│   ├── linux/                      # Linux 相关配置
-│   │   ├── archlinux_nvim_dockerfile/          # ArchLinux Neovim Dockerfile
-│   │   ├── archlinux_pacman_config/            # ArchLinux Pacman 配置
-│   │   ├── archlinux_software_auto_install/    # ArchLinux 软件自动安装
-│   │   ├── i3wm_config/                         # i3 窗口管理器配置
-│   │   ├── no_more_use_nvim_config_and_plug_install/  # 已废弃的 Neovim 配置
-│   │   └── no_more_use_nvim_vim_config/         # 已废弃的 Vim 配置
-│   └── windows/                    # Windows 相关配置
-│       ├── keyboard_exchange_esc_and_tab/      # 键盘 ESC 和 TAB 交换
-│       └── no_more_use_cmder_config/           # 已废弃的 Cmder 配置
-│
-├── dotfiles/                       # 点配置文件（各种工具的配置文件）
-│   │                               # 每个工具遵循统一结构：工具名/配置文件/README.md/install.sh
-│   ├── alacritty/                  # Alacritty 终端配置
-│   │   ├── alacritty.toml          # Alacritty 配置文件（TOML 格式）
-│   │   ├── install.sh              # 自动安装脚本（macOS）
-│   │   └── README.md               # 配置说明
-│   ├── bash/                       # Bash 配置
-│   │   ├── macos/                  # macOS 平台配置
-│   │   ├── windows/                # Windows 平台配置
-│   │   ├── install.sh              # 自动安装脚本
-│   │   ├── config_loader.sh       # 配置加载脚本（自动检测系统）
-│   │   └── README.md               # 配置说明
-│   ├── fish/                       # Fish Shell 配置
-│   │   ├── linux/                  # Linux 平台配置
-│   │   ├── macos/                  # macOS 平台配置
-│   │   ├── install.sh              # 自动安装脚本（支持多平台）
-│   │   ├── config_loader.sh       # 配置加载脚本（自动检测系统）
-│   │   └── README.md               # 配置说明
-│   ├── i3wm/                       # i3 窗口管理器配置
-│   │   ├── config                  # i3 配置文件
-│   │   ├── install.sh              # 自动安装脚本（仅 Linux）
-│   │   └── README.md               # 配置说明
-│   ├── secure_crt/                 # SecureCRT 配置和脚本
-│   │   ├── SecureCRTV8_VM_Login_TOP.vbs  # VBScript 自动化脚本
-│   │   ├── windows7_securecrt_config.xml   # SecureCRT 配置文件
-│   │   ├── install.sh              # 自动安装脚本（Windows）
-│   │   └── README.md               # 配置说明
-│   ├── skhd/                       # skhd (macOS 快捷键配置)
-│   │   ├── skhdrc                  # skhd 配置文件
-│   │   ├── install.sh              # 自动安装脚本（仅 macOS）
-│   │   └── README.md               # 配置说明
-│   ├── tmux/                       # Tmux 配置
-│   │   ├── tmux.conf               # Tmux 配置文件
-│   │   ├── install.sh              # 自动安装脚本（支持多平台）
-│   │   └── README.md               # 配置说明
-│   ├── yabai/                      # Yabai (macOS 窗口管理)
-│   │   ├── yabairc                 # Yabai 配置文件
-│   │   ├── install.sh              # 自动安装脚本（仅 macOS）
-│   │   └── README.md               # 配置说明
-│   └── zsh/                        # Zsh 安装和配置
-│       ├── .zshrc                 # 统一配置文件（自动检测系统）
-│       ├── install.sh              # 自动安装脚本（支持多平台，包含配置同步功能）
-│       └── README.md               # 配置说明
+├── dotfiles/                       # 配置文件（Legacy，仅保留配置文件）
+│   ├── LEGACY.md                   # Legacy 说明文档
+│   ├── alacritty/                  # Alacritty 配置（仅配置文件）
+│   ├── bash/                       # Bash 配置（仅配置文件）
+│   ├── fish/                       # Fish Shell 配置（仅配置文件）
+│   ├── i3wm/                       # i3 窗口管理器配置（仅配置文件）
+│   ├── skhd/                       # skhd 配置（仅配置文件）
+│   ├── starship/                   # Starship 配置（仅配置文件）
+│   ├── tmux/                       # Tmux 配置（仅配置文件）
+│   ├── yabai/                      # Yabai 配置（仅配置文件）
+│   └── zsh/                        # Zsh 配置（仅配置文件）
 │
 └── scripts/                        # 脚本工具集合（按系统分类）
     ├── common.sh                    # 通用函数库（所有脚本共享）
-    ├── README.md                    # 脚本目录说明
-    ├── PROJECT_HISTORY.md           # 项目优化历史记录
+    ├── chezmoi/                     # chezmoi 相关脚本
+    │   ├── common_install.sh        # 通用安装函数库
+    │   ├── install_chezmoi.sh      # chezmoi 安装脚本
+    │   └── helpers.sh              # 辅助函数
+    ├── manage_dotfiles.sh           # dotfiles 管理脚本
     ├── windows/                     # Windows 专用脚本
-    │   └── windows_scripts/         # Windows 批处理脚本
-    │       ├── open_multi_vlc.bat  # 打开多个 VLC 播放器
-    │       └── open_16_vlc.bat      # 打开 16 个 VLC 播放器
-    ├── macos/                       # macOS 专用脚本（预留）
+    │   └── system_basic_env/        # Windows 基础环境安装
+    ├── macos/                       # macOS 专用脚本
+    │   └── system_basic_env/        # macOS 基础环境安装
     └── linux/                       # Linux 专用脚本和跨平台脚本
         ├── system_basic_env/        # 系统基础环境安装脚本（ArchLinux）
         ├── network/                 # 网络配置脚本
@@ -587,6 +563,12 @@ script_tool_and_config/
         ├── shc/                     # Shell 脚本编译器示例（跨平台）
         └── auto_edit_redis_config/  # Redis 配置编辑（跨平台）
 ```
+
+### 关键目录说明
+
+- **`.chezmoi/`**: 所有配置文件和管理脚本，使用 chezmoi 模板系统
+- **`dotfiles/`**: Legacy 目录，仅保留配置文件作为参考（已迁移到 `.chezmoi/`）
+- **`scripts/`**: 功能性脚本，按平台分类组织
 
 ## 主要功能分类
 

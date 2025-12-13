@@ -1,0 +1,177 @@
+{{- if eq .chezmoi.os "darwin" -}}
+#!/bin/bash
+
+# ============================================
+# macOS Homebrew 配置脚本（chezmoi run_once_）
+# 检查并安装 Homebrew（如果不存在）、更新 Homebrew 仓库、配置 Homebrew 环境
+# ============================================
+
+# 获取 common_install.sh 路径
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../../.." && pwd 2>/dev/null || echo "$HOME")"
+COMMON_INSTALL="${PROJECT_ROOT}/scripts/chezmoi/common_install.sh"
+
+if [ ! -f "$COMMON_INSTALL" ]; then
+    COMMON_INSTALL="$HOME/.local/share/chezmoi/scripts/chezmoi/common_install.sh"
+fi
+
+# 加载通用函数库
+if [ -f "$COMMON_INSTALL" ]; then
+    source "$COMMON_INSTALL"
+else
+    echo "[WARNING] 未找到 common_install.sh，使用基本函数"
+    function log_info() { echo "[INFO] $*"; }
+    function log_success() { echo "[SUCCESS] $*"; }
+    function log_warning() { echo "[WARNING] $*"; }
+    function log_error() { echo "[ERROR] $*" >&2; }
+    function setup_proxy() { :; }
+    function enable_proxy() { :; }
+    function download_with_progress() {
+        local url="$1"
+        local dest="$2"
+        if command -v curl >/dev/null 2>&1; then
+            curl -fsSL "$url" -o "$dest"
+        elif command -v wget >/dev/null 2>&1; then
+            wget -O "$dest" "$url"
+        else
+            log_error "没有可用的下载工具"
+            return 1
+        fi
+    }
+fi
+
+# 检查是否为 macOS
+if [[ "$(uname)" != "Darwin" ]]; then
+    log_error "此脚本仅支持 macOS"
+    exit 1
+fi
+
+log_info "检测到 macOS: $(sw_vers -productVersion)"
+
+# ============================================
+# 配置变量
+# ============================================
+readonly DEFAULT_PROXY_URL="${DEFAULT_PROXY_URL:-http://127.0.0.1:7890}"
+
+# ============================================
+# 检查 Homebrew 包是否已安装
+# ============================================
+is_package_installed() {
+    local package="$1"
+    if brew list "${package}" 2>/dev/null | grep -q "^${package}$"; then
+        return 0
+    fi
+    return 1
+}
+
+# ============================================
+# 检查并安装 Homebrew
+# ============================================
+check_homebrew() {
+    if command -v brew &> /dev/null; then
+        log_info "Homebrew 已安装: $(brew --version | head -n 1)"
+        # 确保 Homebrew 在 PATH 中
+        if [[ -f "/opt/homebrew/bin/brew" ]]; then
+            eval "$(/opt/homebrew/bin/brew shellenv)" 2>/dev/null || true
+        elif [[ -f "/usr/local/bin/brew" ]]; then
+            eval "$(/usr/local/bin/brew shellenv)" 2>/dev/null || true
+        fi
+        return 0
+    fi
+
+    log_info "未找到 Homebrew，开始安装..."
+
+    local install_script="/tmp/install_homebrew.sh"
+
+    # 下载 Homebrew 安装脚本
+    if command -v curl &> /dev/null; then
+        if download_with_progress "https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh" "${install_script}"; then
+            chmod +x "${install_script}"
+        else
+            log_error "下载 Homebrew 安装脚本失败"
+            return 1
+        fi
+    else
+        log_error "未找到 curl，请先安装 curl"
+        return 1
+    fi
+
+    # 使用代理安装（如果设置了代理）
+    local proxy_url="${PROXY:-${http_proxy:-${DEFAULT_PROXY_URL}}}"
+    if [[ -n "${proxy_url:-}" ]] && [[ "${NO_PROXY:-0}" != "1" ]]; then
+        log_info "使用代理安装 Homebrew: ${proxy_url}"
+        env http_proxy="${proxy_url}" https_proxy="${proxy_url}" \
+            HTTP_PROXY="${proxy_url}" HTTPS_PROXY="${proxy_url}" \
+            bash "${install_script}" || {
+            log_error "Homebrew 安装失败"
+            rm -f "${install_script}"
+            return 1
+        }
+    else
+        log_info "直连安装 Homebrew..."
+        bash "${install_script}" || {
+            log_error "Homebrew 安装失败"
+            rm -f "${install_script}"
+            return 1
+        }
+    fi
+
+    rm -f "${install_script}"
+
+    # 添加 Homebrew 到 PATH（Apple Silicon 和 Intel 路径不同）
+    if [[ -f "/opt/homebrew/bin/brew" ]]; then
+        eval "$(/opt/homebrew/bin/brew shellenv)"
+        add_path_entry "/opt/homebrew/bin" 2>/dev/null || true
+    elif [[ -f "/usr/local/bin/brew" ]]; then
+        eval "$(/usr/local/bin/brew shellenv)"
+        add_path_entry "/usr/local/bin" 2>/dev/null || true
+    fi
+
+    if command -v brew &> /dev/null; then
+        log_success "Homebrew 安装成功"
+    else
+        log_error "Homebrew 安装完成但 brew 命令未找到"
+        log_info "请重新打开终端或运行: eval \"\$(/opt/homebrew/bin/brew shellenv)\""
+        return 1
+    fi
+}
+
+# ============================================
+# 更新 Homebrew
+# ============================================
+update_homebrew() {
+    log_info "更新 Homebrew..."
+    if brew update; then
+        log_success "Homebrew 更新成功"
+    else
+        log_warning "Homebrew 更新失败，但继续..."
+    fi
+}
+
+# ============================================
+# 主函数
+# ============================================
+main() {
+    log_info "=========================================="
+    log_info "开始配置 macOS Homebrew"
+    log_info "=========================================="
+
+    # 设置代理（用于下载 Homebrew 安装脚本）
+    setup_proxy "${PROXY:-{{ .proxy }}}"
+
+    # 检查并安装 Homebrew
+    check_homebrew
+
+    # 更新 Homebrew 仓库
+    update_homebrew
+
+    log_success "=========================================="
+    log_success "macOS Homebrew 配置完成"
+    log_success "=========================================="
+    log_info "Homebrew 路径: $(which brew)"
+}
+
+# 执行主函数
+main "$@"
+{{- end -}}
+

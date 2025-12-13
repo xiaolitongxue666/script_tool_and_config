@@ -1,0 +1,176 @@
+{{- if or (eq .chezmoi.os "linux") (eq .chezmoi.os "darwin") (eq .chezmoi.os "windows") -}}
+#!/bin/bash
+
+# ============================================
+# 通用工具安装脚本（chezmoi run_once_）
+# 安装 bat, eza, fd, ripgrep, fzf, lazygit, git-delta, gh 等
+# 支持所有平台
+# ============================================
+
+# 获取 common_install.sh 路径
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd 2>/dev/null || echo "$HOME")"
+COMMON_INSTALL="${PROJECT_ROOT}/scripts/chezmoi/common_install.sh"
+
+if [ ! -f "$COMMON_INSTALL" ]; then
+    COMMON_INSTALL="$HOME/.local/share/chezmoi/scripts/chezmoi/common_install.sh"
+fi
+
+# 加载通用函数库
+if [ -f "$COMMON_INSTALL" ]; then
+    source "$COMMON_INSTALL"
+else
+    echo "[WARNING] 未找到 common_install.sh，使用基本函数"
+    function setup_proxy() { :; }
+    function detect_os_and_package_manager() {
+        OS="$(uname -s)"
+        if [[ "$OS" == "Darwin" ]]; then
+            PLATFORM="macos"
+            PACKAGE_MANAGER="brew"
+        elif [[ "$OS" == "Linux" ]]; then
+            PLATFORM="linux"
+            if command -v pacman &> /dev/null; then
+                PACKAGE_MANAGER="pacman"
+            elif command -v apt-get &> /dev/null; then
+                PACKAGE_MANAGER="apt"
+            elif command -v dnf &> /dev/null; then
+                PACKAGE_MANAGER="dnf"
+            elif command -v yum &> /dev/null; then
+                PACKAGE_MANAGER="yum"
+            fi
+        elif [[ "$OS" =~ ^(MINGW|MSYS|CYGWIN) ]]; then
+            PLATFORM="windows"
+            if command -v winget &> /dev/null; then
+                PACKAGE_MANAGER="winget"
+            elif command -v pacman.exe &> /dev/null; then
+                PACKAGE_MANAGER="pacman"
+            fi
+        fi
+    }
+    function install_package() {
+        local pkg="$1"
+        if [[ "$PACKAGE_MANAGER" == "brew" ]]; then
+            brew install "$pkg"
+        elif [[ "$PACKAGE_MANAGER" == "pacman" ]]; then
+            if [[ "$PLATFORM" == "windows" ]]; then
+                pacman.exe -S --noconfirm "$pkg"
+            else
+                sudo pacman -S --noconfirm "$pkg"
+            fi
+        elif [[ "$PACKAGE_MANAGER" == "apt" ]]; then
+            sudo apt-get update && sudo apt-get install -y "$pkg"
+        elif [[ "$PACKAGE_MANAGER" == "dnf" ]]; then
+            sudo dnf install -y "$pkg"
+        elif [[ "$PACKAGE_MANAGER" == "yum" ]]; then
+            sudo yum install -y "$pkg"
+        elif [[ "$PACKAGE_MANAGER" == "winget" ]]; then
+            winget install --id="$pkg" -e --accept-source-agreements --accept-package-agreements
+        fi
+    }
+fi
+
+# 设置代理
+setup_proxy "${PROXY:-{{ .proxy }}}"
+
+# 检测操作系统和包管理器
+detect_os_and_package_manager || exit 1
+
+echo "[INFO] 开始安装通用工具..."
+
+# 定义工具列表（包名映射）
+declare -A TOOLS
+
+case "$PLATFORM" in
+    macos)
+        TOOLS["bat"]="bat"
+        TOOLS["eza"]="eza"
+        TOOLS["fd"]="fd"
+        TOOLS["ripgrep"]="ripgrep"
+        TOOLS["fzf"]="fzf"
+        TOOLS["lazygit"]="lazygit"
+        TOOLS["git-delta"]="git-delta"
+        TOOLS["gh"]="gh"
+        TOOLS["trash"]="trash-cli"
+        ;;
+    linux)
+        if [[ "$PACKAGE_MANAGER" == "pacman" ]]; then
+            TOOLS["bat"]="bat"
+            TOOLS["eza"]="eza"
+            TOOLS["fd"]="fd"
+            TOOLS["ripgrep"]="ripgrep"
+            TOOLS["fzf"]="fzf"
+            TOOLS["lazygit"]="lazygit"
+            TOOLS["git-delta"]="git-delta"
+            TOOLS["gh"]="github-cli"
+            TOOLS["trash"]="trash-cli"
+        elif [[ "$PACKAGE_MANAGER" == "apt" ]]; then
+            TOOLS["bat"]="bat"
+            TOOLS["eza"]="eza"
+            TOOLS["fd"]="fd-find"
+            TOOLS["ripgrep"]="ripgrep"
+            TOOLS["fzf"]="fzf"
+            TOOLS["lazygit"]="lazygit"
+            TOOLS["git-delta"]="git-delta"
+            TOOLS["gh"]="gh"
+            TOOLS["trash"]="trash-cli"
+        else
+            TOOLS["bat"]="bat"
+            TOOLS["eza"]="eza"
+            TOOLS["fd"]="fd"
+            TOOLS["ripgrep"]="ripgrep"
+            TOOLS["fzf"]="fzf"
+            TOOLS["lazygit"]="lazygit"
+            TOOLS["git-delta"]="git-delta"
+            TOOLS["gh"]="gh"
+            TOOLS["trash"]="trash-cli"
+        fi
+        ;;
+    windows)
+        if [[ "$PACKAGE_MANAGER" == "winget" ]]; then
+            TOOLS["bat"]="sharkdp.bat"
+            TOOLS["eza"]="eza-community.eza"
+            TOOLS["fd"]="sharkdp.fd"
+            TOOLS["ripgrep"]="BurntSushi.ripgrep"
+            TOOLS["fzf"]="junegunn.fzf"
+            TOOLS["lazygit"]="jesseduffield.lazygit"
+            TOOLS["git-delta"]="dandavison.delta"
+            TOOLS["gh"]="GitHub.cli"
+        elif [[ "$PACKAGE_MANAGER" == "pacman" ]]; then
+            TOOLS["bat"]="bat"
+            TOOLS["eza"]="eza"
+            TOOLS["fd"]="fd"
+            TOOLS["ripgrep"]="ripgrep"
+            TOOLS["fzf"]="fzf"
+            TOOLS["lazygit"]="lazygit"
+            TOOLS["git-delta"]="git-delta"
+            TOOLS["gh"]="github-cli"
+        fi
+        ;;
+esac
+
+# 安装工具
+INSTALLED=0
+FAILED=0
+
+for tool in "${!TOOLS[@]}"; do
+    pkg="${TOOLS[$tool]}"
+
+    # 检查工具是否已安装
+    if command -v "$tool" &> /dev/null; then
+        echo "[INFO] $tool 已安装: $(command -v "$tool")"
+        continue
+    fi
+
+    echo "[INFO] 安装 $tool ($pkg)..."
+    if install_package "$pkg"; then
+        echo "[SUCCESS] $tool 安装成功"
+        INSTALLED=$((INSTALLED + 1))
+    else
+        echo "[WARNING] $tool 安装失败"
+        FAILED=$((FAILED + 1))
+    fi
+done
+
+echo "[INFO] 安装完成: $INSTALLED 个工具安装成功, $FAILED 个工具安装失败"
+{{- end -}}
+

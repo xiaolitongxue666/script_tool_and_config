@@ -14,11 +14,35 @@
 # 参数: proxy_url (可选，默认 http://127.0.0.1:7890)
 setup_proxy() {
     local proxy_url="${1:-http://127.0.0.1:7890}"
+    # 如果设置了 NO_PROXY=1，则完全禁用代理
+    if [[ "${NO_PROXY:-0}" == "1" ]]; then
+        unset http_proxy https_proxy HTTP_PROXY HTTPS_PROXY
+        echo "[INFO] 代理已禁用 (NO_PROXY=1)"
+        return 0
+    fi
     export http_proxy="$proxy_url"
     export https_proxy="$proxy_url"
     export HTTP_PROXY="$proxy_url"
     export HTTPS_PROXY="$proxy_url"
     echo "[INFO] 代理已设置: $proxy_url"
+}
+
+# 启用代理（用于非 pacman/Homebrew 操作）
+enable_proxy() {
+    local proxy_url="${1:-${http_proxy:-${HTTP_PROXY:-http://127.0.0.1:7890}}}"
+    if [[ -n "${proxy_url:-}" ]] && [[ "${NO_PROXY:-0}" != "1" ]]; then
+        export http_proxy="${proxy_url}"
+        export https_proxy="${proxy_url}"
+        export HTTP_PROXY="${proxy_url}"
+        export HTTPS_PROXY="${proxy_url}"
+        echo "[INFO] 代理已启用: ${proxy_url}"
+    fi
+}
+
+# 禁用代理（用于 pacman/Homebrew 操作，使用国内源）
+disable_proxy() {
+    unset http_proxy https_proxy HTTP_PROXY HTTPS_PROXY
+    echo "[INFO] 代理已禁用（用于包管理器操作）"
 }
 
 # 检查代理是否可用
@@ -186,6 +210,183 @@ check_command_or_install() {
 
     echo "[INFO] 命令不存在，尝试安装: $package_name"
     install_package "$package_name"
+}
+
+# ============================================
+# 下载函数
+# ============================================
+
+# 带进度显示的下载函数（带超时和重试）
+# 参数: url dest [timeout] [max_retries]
+download_with_progress() {
+    local url="$1"
+    local dest="$2"
+    local timeout="${3:-60}"
+    local max_retries="${4:-3}"
+
+    log_info "开始下载: ${url}"
+
+    # 确保目标目录存在
+    local dest_dir=$(dirname "${dest}")
+    if [[ ! -d "${dest_dir}" ]]; then
+        mkdir -p "${dest_dir}" || {
+            log_error "无法创建目录: ${dest_dir}"
+            return 1
+        }
+    fi
+
+    local retry_count=0
+    while [[ "${retry_count}" -lt "${max_retries}" ]]; do
+        # 优先使用 curl（进度条更简洁），其次 wget，最后使用 aria2c
+        if command -v curl >/dev/null 2>&1; then
+            if timeout "${timeout}" curl -fL --progress-bar --max-time "${timeout}" \
+                -o "${dest}" "${url}" 2>&1; then
+                echo ""
+                log_success "下载完成: ${dest}"
+                return 0
+            fi
+        elif command -v wget >/dev/null 2>&1; then
+            if timeout "${timeout}" wget --show-progress --progress=bar:force:noscroll \
+                --timeout="${timeout}" -O "${dest}" "${url}" 2>&1; then
+                log_success "下载完成: ${dest}"
+                return 0
+            fi
+        elif command -v aria2c >/dev/null 2>&1; then
+            local aria2_output
+            aria2_output=$(aria2c --check-certificate=false \
+                --max-connection-per-server=8 \
+                --split=8 \
+                --dir="$(dirname "${dest}")" \
+                --out="$(basename "${dest}")" \
+                --summary-interval=5 \
+                --console-log-level=warn \
+                --timeout="${timeout}" \
+                --max-tries="${max_retries}" \
+                --quiet=false \
+                "${url}" 2>&1)
+
+            local aria2_exit=$?
+            echo "${aria2_output}" | grep -E "^\[#.*\]" | tail -n 1 | sed 's/^/\r/' >&2 || true
+
+            if [[ ${aria2_exit} -eq 0 ]] && [[ -f "${dest}" ]]; then
+                echo "" >&2
+                log_success "下载完成: ${dest}"
+                return 0
+            fi
+        else
+            log_error "没有可用的下载工具 (curl, wget, 或 aria2c)"
+            return 1
+        fi
+
+        retry_count=$((retry_count + 1))
+        if [[ "${retry_count}" -lt "${max_retries}" ]]; then
+            log_warning "下载失败，重试中 (${retry_count}/${max_retries})..."
+            sleep 2
+            rm -f "${dest}" 2>/dev/null || true
+        fi
+    done
+
+    log_error "下载失败，已重试 ${max_retries} 次: ${url}"
+    return 1
+}
+
+# ============================================
+# PATH 管理函数
+# ============================================
+
+# 备份 PATH 环境变量
+# 参数: backup_dir (可选，默认 ~/.local/share/system_basic_env)
+backup_path() {
+    local backup_dir="${1:-${HOME}/.local/share/system_basic_env}"
+    mkdir -p "${backup_dir}" || return 1
+    local backup_file="${backup_dir}/path_backup_$(date +%Y%m%d_%H%M%S).txt"
+    printf "%s\n" "${PATH}" > "${backup_file}"
+    log_info "PATH 已备份到: ${backup_file}"
+}
+
+# 添加 PATH 入口
+# 参数: path_entry path_env_file (可选，默认 ~/.config/system_basic_env/path.env)
+add_path_entry() {
+    local path_entry="$1"
+    local path_env_file="${2:-${HOME}/.config/system_basic_env/path.env}"
+
+    if [[ -z "${path_entry}" ]]; then
+        log_error "PATH 入口不能为空"
+        return 1
+    fi
+
+    # 确保文件存在
+    local path_env_dir=$(dirname "${path_env_file}")
+    if [[ ! -d "${path_env_dir}" ]]; then
+        mkdir -p "${path_env_dir}" || return 1
+    fi
+    touch "${path_env_file}" || return 1
+
+    # 检查路径是否已存在，避免重复添加
+    if grep -qxF "export PATH=\"${path_entry}:\$PATH\"" "${path_env_file}" 2>/dev/null; then
+        log_info "PATH 入口已存在: ${path_entry}"
+        return 0
+    fi
+
+    # 追加路径到文件
+    echo "export PATH=\"${path_entry}:\$PATH\"" >> "${path_env_file}"
+    log_info "PATH 入口已记录: ${path_entry}"
+}
+
+# 准备 PATH 管理
+# 参数: backup_dir (可选)
+prepare_path_management() {
+    local backup_dir="${1:-${HOME}/.local/share/system_basic_env}"
+    backup_path "${backup_dir}"
+    add_path_entry "/usr/local/bin"
+    add_path_entry "${HOME}/.local/bin"
+    add_path_entry "${HOME}/.cargo/bin"
+}
+
+# ============================================
+# 日志管理函数
+# ============================================
+
+# 确保必要的目录存在
+# 参数: log_dir state_dir config_dir
+ensure_directories() {
+    local log_dir="${1:-${HOME}/.local/share/system_basic_env/logs}"
+    local state_dir="${2:-${HOME}/.local/share/system_basic_env}"
+    local config_dir="${3:-${HOME}/.config/system_basic_env}"
+
+    mkdir -p "${log_dir}" "${state_dir}" "${config_dir}" || {
+        log_error "无法创建必要的目录"
+        return 1
+    }
+    log_info "目录已创建: ${log_dir}, ${state_dir}, ${config_dir}"
+}
+
+# ============================================
+# 权限检查函数
+# ============================================
+
+# 检查是否为 root 用户
+check_root() {
+    if [[ $EUID -ne 0 ]]; then
+        log_error "此脚本需要 root 权限，请使用 sudo 运行"
+        return 1
+    fi
+    return 0
+}
+
+# 检测安装用户（用于 AUR 构建）
+# 返回: INSTALL_USER 变量
+detect_install_user() {
+    if [[ -n "${SUDO_USER:-}" ]] && [[ "${SUDO_USER}" != "root" ]]; then
+        INSTALL_USER="${SUDO_USER}"
+    elif [[ -n "${PKEXEC_UID:-}" ]]; then
+        INSTALL_USER="$(id -un "${PKEXEC_UID}")"
+    else
+        log_error "请使用 sudo 运行此脚本，以便使用非特权用户进行 AUR 构建任务"
+        return 1
+    fi
+    log_info "非特权用户: ${INSTALL_USER}"
+    return 0
 }
 
 # ============================================

@@ -1,0 +1,333 @@
+{{- if or (eq .chezmoi.os "linux") (eq .chezmoi.os "darwin") (eq .chezmoi.os "windows") -}}
+#!/bin/bash
+
+# ============================================
+# Nerd Fonts 安装脚本（chezmoi run_once_）
+# 支持 Linux, macOS, Windows
+# 默认安装 FiraMono Nerd Font
+# ============================================
+
+# 获取 common_install.sh 路径
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd 2>/dev/null || echo "$HOME")"
+COMMON_INSTALL="${PROJECT_ROOT}/scripts/chezmoi/common_install.sh"
+
+if [ ! -f "$COMMON_INSTALL" ]; then
+    COMMON_INSTALL="$HOME/.local/share/chezmoi/scripts/chezmoi/common_install.sh"
+fi
+
+# 加载通用函数库
+if [ -f "$COMMON_INSTALL" ]; then
+    source "$COMMON_INSTALL"
+else
+    echo "[WARNING] 未找到 common_install.sh，使用基本函数"
+    function setup_proxy() { :; }
+    function detect_os_and_package_manager() {
+        OS="$(uname -s)"
+        if [[ "$OS" == "Darwin" ]]; then
+            PLATFORM="macos"
+            PACKAGE_MANAGER="brew"
+        elif [[ "$OS" == "Linux" ]]; then
+            PLATFORM="linux"
+            if command -v pacman &> /dev/null; then
+                PACKAGE_MANAGER="pacman"
+            elif command -v apt-get &> /dev/null; then
+                PACKAGE_MANAGER="apt"
+            elif command -v dnf &> /dev/null; then
+                PACKAGE_MANAGER="dnf"
+            elif command -v yum &> /dev/null; then
+                PACKAGE_MANAGER="yum"
+            fi
+        elif [[ "$OS" =~ ^(MINGW|MSYS|CYGWIN) ]]; then
+            PLATFORM="windows"
+            if command -v winget &> /dev/null; then
+                PACKAGE_MANAGER="winget"
+            elif command -v pacman.exe &> /dev/null; then
+                PACKAGE_MANAGER="pacman"
+            fi
+        fi
+    }
+fi
+
+# ============================================
+# 配置
+# ============================================
+FONT_VERSION="${FONT_VERSION:-3.4.0}"
+FONT_NAME="FiraMono"
+FONT_URL="https://github.com/ryanoasis/nerd-fonts/releases/download/v${FONT_VERSION}/${FONT_NAME}.zip"
+
+# ============================================
+# 设置代理
+# ============================================
+setup_proxy "${PROXY:-{{ .proxy }}}"
+
+# ============================================
+# 检测操作系统和包管理器
+# ============================================
+detect_os_and_package_manager || exit 1
+
+# ============================================
+# 字体安装函数
+# ============================================
+
+# 检查字体是否已安装（macOS）
+check_font_installed_macos() {
+    local font_name="$1"
+    local font_dirs=(
+        "/Library/Fonts"
+        "${HOME}/Library/Fonts"
+    )
+
+    for font_dir in "${font_dirs[@]}"; do
+        if [[ -d "${font_dir}" ]]; then
+            if find "${font_dir}" -name "*${font_name}*" -type f \( -name "*.ttf" -o -name "*.otf" \) 2>/dev/null | grep -q .; then
+                return 0
+            fi
+        fi
+    done
+    return 1
+}
+
+# 检查字体是否已安装（Linux）
+check_font_installed_linux() {
+    local font_dir="/usr/local/share/fonts/${FONT_NAME}-NerdFont"
+    if [[ -d "${font_dir}" ]]; then
+        local font_count=$(find "${font_dir}" -name "*.ttf" -o -name "*.otf" 2>/dev/null | wc -l)
+        if [[ ${font_count} -gt 0 ]]; then
+            return 0
+        fi
+    fi
+    return 1
+}
+
+# 检查字体是否已安装（Windows）
+check_font_installed_windows() {
+    local fonts_dir="/c/Windows/Fonts"
+    if [[ -d "${fonts_dir}" ]]; then
+        if find "${fonts_dir}" -name "*FiraMono*" -type f \( -name "*.ttf" -o -name "*.otf" \) 2>/dev/null | grep -q .; then
+            return 0
+        fi
+    fi
+    return 1
+}
+
+# 安装字体（macOS）
+install_font_macos() {
+    echo "[INFO] 检查 FiraMono Nerd Font 是否已安装..."
+
+    if check_font_installed_macos "FiraMonoNerdFont"; then
+        echo "[SUCCESS] FiraMono Nerd Font 已安装"
+        return 0
+    fi
+
+    echo "[INFO] 使用 Homebrew Cask 安装 FiraMono Nerd Font..."
+
+    # 检查是否已通过 Homebrew Cask 安装
+    if brew list --cask "font-fira-mono-nerd-font" &>/dev/null; then
+        echo "[INFO] font-fira-mono-nerd-font 已通过 Homebrew Cask 安装"
+        return 0
+    fi
+
+    # 安装字体
+    if brew install --cask "font-fira-mono-nerd-font"; then
+        echo "[SUCCESS] FiraMono Nerd Font 安装成功"
+        return 0
+    else
+        echo "[WARNING] 通过 Homebrew Cask 安装失败"
+        echo "[INFO] 可以稍后手动安装: https://github.com/ryanoasis/nerd-fonts"
+        return 1
+    fi
+}
+
+# 安装字体（Linux）
+install_font_linux() {
+    local font_dir="/usr/local/share/fonts/${FONT_NAME}-NerdFont"
+
+    echo "[INFO] 检查 FiraMono Nerd Font 是否已安装..."
+
+    if check_font_installed_linux; then
+        echo "[SUCCESS] FiraMono Nerd Font 已安装"
+        # 更新字体缓存
+        fc-cache -f >/dev/null 2>&1 || true
+        return 0
+    fi
+
+    # 创建字体目录
+    sudo mkdir -p "${font_dir}" || {
+        echo "[ERROR] 无法创建字体目录: ${font_dir}"
+        return 1
+    }
+
+    # 下载字体
+    local tmp_zip
+    tmp_zip="$(mktemp)"
+
+    echo "[INFO] 下载 FiraMono Nerd Font (可能需要一些时间，文件较大)..."
+    # 使用 download_with_progress 函数（如果可用），否则使用 curl
+    if type download_with_progress &>/dev/null; then
+        if download_with_progress "${FONT_URL}" "${tmp_zip}" 300 5; then
+            echo "[INFO] 解压字体文件..."
+            sudo unzip -o "${tmp_zip}" -d "${font_dir}" >/dev/null 2>&1 || {
+                echo "[WARNING] 部分字体文件解压可能有问题，但继续..."
+            }
+            rm -f "${tmp_zip}"
+
+            # 更新字体缓存
+            fc-cache -f >/dev/null 2>&1 || true
+            echo "[SUCCESS] FiraMono Nerd Font 安装成功"
+            return 0
+        else
+            echo "[WARNING] 下载 FiraMono Nerd Font 失败"
+            echo "[INFO] 可以稍后手动下载安装: ${FONT_URL}"
+            rm -f "${tmp_zip}"
+            return 1
+        fi
+    else
+        # 回退到使用 curl
+        if curl -fsSL --proxy "${http_proxy:-}" "${FONT_URL}" -o "${tmp_zip}"; then
+            echo "[INFO] 解压字体文件..."
+            sudo unzip -o "${tmp_zip}" -d "${font_dir}" >/dev/null 2>&1 || {
+                echo "[WARNING] 部分字体文件解压可能有问题，但继续..."
+            }
+            rm -f "${tmp_zip}"
+
+            # 更新字体缓存
+            fc-cache -f >/dev/null 2>&1 || true
+            echo "[SUCCESS] FiraMono Nerd Font 安装成功"
+            return 0
+        else
+            echo "[WARNING] 下载 FiraMono Nerd Font 失败"
+            echo "[INFO] 可以稍后手动下载安装: ${FONT_URL}"
+            rm -f "${tmp_zip}"
+            return 1
+        fi
+    fi
+}
+
+# 安装字体（Windows）
+install_font_windows() {
+    echo "[INFO] 检查 FiraMono Nerd Font 是否已安装..."
+
+    if check_font_installed_windows; then
+        echo "[SUCCESS] FiraMono Nerd Font 已安装"
+        return 0
+    fi
+
+    local fonts_dir="/c/Windows/Fonts"
+    local temp_dir="/tmp/NerdFonts"
+    local zip_file="${temp_dir}/${FONT_NAME}.zip"
+
+    # 创建临时目录
+    mkdir -p "${temp_dir}" || {
+        echo "[ERROR] 无法创建临时目录: ${temp_dir}"
+        return 1
+    }
+
+    echo "[INFO] 下载 FiraMono Nerd Font..."
+    # 使用 download_with_progress 函数（如果可用），否则使用 curl
+    if type download_with_progress &>/dev/null; then
+        if download_with_progress "${FONT_URL}" "${zip_file}" 300 5; then
+        echo "[INFO] 解压字体文件..."
+        unzip -o "${zip_file}" -d "${temp_dir}" >/dev/null 2>&1 || {
+            echo "[WARNING] 解压可能有问题，但继续..."
+        }
+
+        echo "[INFO] 安装字体到系统..."
+        local installed_count=0
+        for font_file in "${temp_dir}"/*.ttf "${temp_dir}"/*.otf; do
+            if [[ -f "${font_file}" ]]; then
+                local font_name=$(basename "${font_file}")
+                local dest_path="${fonts_dir}/${font_name}"
+
+                if [[ ! -f "${dest_path}" ]]; then
+                    cp "${font_file}" "${dest_path}" 2>/dev/null && {
+                        echo "[INFO] 字体已安装: ${font_name}"
+                        ((installed_count++))
+                    }
+                else
+                    echo "[INFO] 字体已存在: ${font_name}"
+                fi
+            fi
+        done
+
+            # 清理临时文件
+            rm -rf "${temp_dir}"
+
+            if [[ ${installed_count} -gt 0 ]]; then
+                echo "[SUCCESS] FiraMono Nerd Font 安装完成 (${installed_count} 个字体文件)"
+                return 0
+            else
+                echo "[INFO] FiraMono Nerd Font 已存在"
+                return 0
+            fi
+        else
+            echo "[WARNING] 下载 FiraMono Nerd Font 失败"
+            echo "[INFO] 可以稍后手动下载安装: ${FONT_URL}"
+            rm -rf "${temp_dir}"
+            return 1
+        fi
+    else
+        # 回退到使用 curl
+        if curl -fsSL --proxy "${http_proxy:-}" "${FONT_URL}" -o "${zip_file}"; then
+            echo "[INFO] 解压字体文件..."
+            unzip -o "${zip_file}" -d "${temp_dir}" >/dev/null 2>&1 || {
+                echo "[WARNING] 解压可能有问题，但继续..."
+            }
+
+            echo "[INFO] 安装字体到系统..."
+            local installed_count=0
+            for font_file in "${temp_dir}"/*.ttf "${temp_dir}"/*.otf; do
+                if [[ -f "${font_file}" ]]; then
+                    local font_name=$(basename "${font_file}")
+                    local dest_path="${fonts_dir}/${font_name}"
+
+                    if [[ ! -f "${dest_path}" ]]; then
+                        cp "${font_file}" "${dest_path}" 2>/dev/null && {
+                            echo "[INFO] 字体已安装: ${font_name}"
+                            ((installed_count++))
+                        }
+                    else
+                        echo "[INFO] 字体已存在: ${font_name}"
+                    fi
+                fi
+            done
+
+            # 清理临时文件
+            rm -rf "${temp_dir}"
+
+            if [[ ${installed_count} -gt 0 ]]; then
+                echo "[SUCCESS] FiraMono Nerd Font 安装完成 (${installed_count} 个字体文件)"
+                return 0
+            else
+                echo "[INFO] FiraMono Nerd Font 已存在"
+                return 0
+            fi
+        else
+            echo "[WARNING] 下载 FiraMono Nerd Font 失败"
+            echo "[INFO] 可以稍后手动下载安装: ${FONT_URL}"
+            rm -rf "${temp_dir}"
+            return 1
+        fi
+    fi
+}
+
+# ============================================
+# 主安装逻辑
+# ============================================
+case "$PLATFORM" in
+    macos)
+        install_font_macos
+        ;;
+    linux)
+        install_font_linux
+        ;;
+    windows)
+        install_font_windows
+        ;;
+    *)
+        echo "[ERROR] 不支持的平台: $PLATFORM"
+        exit 1
+        ;;
+esac
+{{- end -}}
+

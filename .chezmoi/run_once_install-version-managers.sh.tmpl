@@ -1,0 +1,167 @@
+{{- if or (eq .chezmoi.os "linux") (eq .chezmoi.os "darwin") (eq .chezmoi.os "windows") -}}
+#!/bin/bash
+
+# ============================================
+# 版本管理器安装脚本（chezmoi run_once_）
+# 安装 fnm, uv, rustup (可选)
+# 支持所有平台
+# ============================================
+
+# 获取 common_install.sh 路径
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd 2>/dev/null || echo "$HOME")"
+COMMON_INSTALL="${PROJECT_ROOT}/scripts/chezmoi/common_install.sh"
+
+if [ ! -f "$COMMON_INSTALL" ]; then
+    COMMON_INSTALL="$HOME/.local/share/chezmoi/scripts/chezmoi/common_install.sh"
+fi
+
+# 加载通用函数库
+if [ -f "$COMMON_INSTALL" ]; then
+    source "$COMMON_INSTALL"
+else
+    echo "[WARNING] 未找到 common_install.sh，使用基本函数"
+    function setup_proxy() { :; }
+    function detect_os_and_package_manager() {
+        OS="$(uname -s)"
+        if [[ "$OS" == "Darwin" ]]; then
+            PLATFORM="macos"
+            PACKAGE_MANAGER="brew"
+        elif [[ "$OS" == "Linux" ]]; then
+            PLATFORM="linux"
+            if command -v pacman &> /dev/null; then
+                PACKAGE_MANAGER="pacman"
+            elif command -v apt-get &> /dev/null; then
+                PACKAGE_MANAGER="apt"
+            fi
+        elif [[ "$OS" =~ ^(MINGW|MSYS|CYGWIN) ]]; then
+            PLATFORM="windows"
+            if command -v winget &> /dev/null; then
+                PACKAGE_MANAGER="winget"
+            elif command -v pacman.exe &> /dev/null; then
+                PACKAGE_MANAGER="pacman"
+            fi
+        fi
+    }
+    function install_package() {
+        local pkg="$1"
+        if [[ "$PACKAGE_MANAGER" == "brew" ]]; then
+            brew install "$pkg"
+        elif [[ "$PACKAGE_MANAGER" == "pacman" ]]; then
+            if [[ "$PLATFORM" == "windows" ]]; then
+                pacman.exe -S --noconfirm "$pkg"
+            else
+                sudo pacman -S --noconfirm "$pkg"
+            fi
+        elif [[ "$PACKAGE_MANAGER" == "apt" ]]; then
+            sudo apt-get update && sudo apt-get install -y "$pkg"
+        elif [[ "$PACKAGE_MANAGER" == "winget" ]]; then
+            winget install --id="$pkg" -e --accept-source-agreements --accept-package-agreements
+        fi
+    }
+fi
+
+# 设置代理
+setup_proxy "${PROXY:-{{ .proxy }}}"
+
+# 检测操作系统和包管理器
+detect_os_and_package_manager || exit 1
+
+echo "[INFO] 开始安装版本管理器..."
+
+# 安装 fnm (Fast Node Manager)
+if command -v fnm &> /dev/null; then
+    echo "[INFO] fnm 已安装: $(fnm --version)"
+else
+    echo "[INFO] 安装 fnm..."
+
+    # 优先尝试通过包管理器安装
+    case "$PLATFORM" in
+        macos)
+            if [[ "$PACKAGE_MANAGER" == "brew" ]]; then
+                if install_package "fnm"; then
+                    echo "[SUCCESS] fnm 安装成功"
+                else
+                    echo "[WARNING] 通过 Homebrew 安装失败，使用官方脚本..."
+                    curl -fsSL https://fnm.vercel.app/install | bash
+                fi
+            fi
+            ;;
+        linux)
+            if [[ "$PACKAGE_MANAGER" == "pacman" ]]; then
+                if install_package "fnm"; then
+                    echo "[SUCCESS] fnm 安装成功"
+                else
+                    echo "[WARNING] 通过 pacman 安装失败，使用官方脚本..."
+                    curl -fsSL https://fnm.vercel.app/install | bash
+                fi
+            else
+                curl -fsSL https://fnm.vercel.app/install | bash
+            fi
+            ;;
+        windows)
+            if [[ "$PACKAGE_MANAGER" == "winget" ]]; then
+                install_package "Schniz.fnm" || curl -fsSL https://fnm.vercel.app/install | bash
+            else
+                curl -fsSL https://fnm.vercel.app/install | bash
+            fi
+            ;;
+    esac
+fi
+
+# 安装 uv (Python 包管理器)
+if command -v uv &> /dev/null; then
+    echo "[INFO] uv 已安装: $(uv --version)"
+else
+    echo "[INFO] 安装 uv..."
+
+    # 优先尝试通过包管理器安装
+    case "$PLATFORM" in
+        macos)
+            if [[ "$PACKAGE_MANAGER" == "brew" ]]; then
+                if install_package "uv"; then
+                    echo "[SUCCESS] uv 安装成功"
+                else
+                    echo "[WARNING] 通过 Homebrew 安装失败，使用官方脚本..."
+                    curl -LsSf https://astral.sh/uv/install.sh | sh
+                fi
+            fi
+            ;;
+        linux)
+            if [[ "$PACKAGE_MANAGER" == "pacman" ]]; then
+                if install_package "uv"; then
+                    echo "[SUCCESS] uv 安装成功"
+                else
+                    echo "[WARNING] 通过 pacman 安装失败，使用官方脚本..."
+                    curl -LsSf https://astral.sh/uv/install.sh | sh
+                fi
+            else
+                curl -LsSf https://astral.sh/uv/install.sh | sh
+            fi
+            ;;
+        windows)
+            if [[ "$PACKAGE_MANAGER" == "winget" ]]; then
+                install_package "astral-sh.uv" || curl -LsSf https://astral.sh/uv/install.sh | sh
+            else
+                curl -LsSf https://astral.sh/uv/install.sh | sh
+            fi
+            ;;
+    esac
+fi
+
+# 安装 rustup (可选)
+if [ "${INSTALL_RUSTUP:-0}" == "1" ]; then
+    if command -v rustup &> /dev/null; then
+        echo "[INFO] rustup 已安装: $(rustup --version)"
+    else
+        echo "[INFO] 安装 rustup..."
+        curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+        echo "[SUCCESS] rustup 安装成功"
+    fi
+else
+    echo "[INFO] 跳过 rustup 安装（设置 INSTALL_RUSTUP=1 以启用）"
+fi
+
+echo "[SUCCESS] 版本管理器安装完成"
+{{- end -}}
+

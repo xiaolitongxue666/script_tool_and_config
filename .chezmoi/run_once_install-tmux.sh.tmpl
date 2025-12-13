@@ -1,7 +1,9 @@
+{{- if or (eq .chezmoi.os "linux") (eq .chezmoi.os "darwin") -}}
 #!/bin/bash
 
 # ============================================
 # Tmux 安装脚本（chezmoi run_once_）
+# 支持 Linux/macOS
 # ============================================
 
 # 获取 common_install.sh 路径
@@ -46,7 +48,7 @@ else
 fi
 
 # 设置代理
-setup_proxy "${PROXY:-http://127.0.0.1:7890}"
+setup_proxy "${PROXY:-{{ .proxy }}}"
 
 # 检测操作系统和包管理器
 detect_os_and_package_manager || exit 1
@@ -84,3 +86,5 @@ else
     echo "[ERROR] Tmux 安装失败"
     exit 1
 fi
+{{- end -}}
+

@@ -1,0 +1,157 @@
+{{- if or (eq .chezmoi.os "linux") (eq .chezmoi.os "darwin") (eq .chezmoi.os "windows") -}}
+#!/bin/bash
+
+# ============================================
+# 系统基础环境综合安装脚本（chezmoi run_once_）
+# 作为入口脚本，按顺序调用其他安装脚本
+# 提供统一的安装流程
+# ============================================
+
+# 获取 common_install.sh 路径
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd 2>/dev/null || echo "$HOME")"
+COMMON_INSTALL="${PROJECT_ROOT}/scripts/chezmoi/common_install.sh"
+
+if [ ! -f "$COMMON_INSTALL" ]; then
+    COMMON_INSTALL="$HOME/.local/share/chezmoi/scripts/chezmoi/common_install.sh"
+fi
+
+# 加载通用函数库
+if [ -f "$COMMON_INSTALL" ]; then
+    source "$COMMON_INSTALL"
+else
+    echo "[WARNING] 未找到 common_install.sh，使用基本函数"
+    function log_info() { echo "[INFO] $*"; }
+    function log_success() { echo "[SUCCESS] $*"; }
+    function log_warning() { echo "[WARNING] $*"; }
+    function log_error() { echo "[ERROR] $*" >&2; }
+    function setup_proxy() { :; }
+    function detect_os_and_package_manager() {
+        OS="$(uname -s)"
+        if [[ "$OS" == "Darwin" ]]; then
+            PLATFORM="macos"
+            PACKAGE_MANAGER="brew"
+        elif [[ "$OS" == "Linux" ]]; then
+            PLATFORM="linux"
+            if command -v pacman &> /dev/null; then
+                PACKAGE_MANAGER="pacman"
+            elif command -v apt-get &> /dev/null; then
+                PACKAGE_MANAGER="apt"
+            fi
+        elif [[ "$OS" =~ ^(MINGW|MSYS|CYGWIN) ]]; then
+            PLATFORM="windows"
+            if command -v winget &> /dev/null; then
+                PACKAGE_MANAGER="winget"
+            elif command -v pacman.exe &> /dev/null; then
+                PACKAGE_MANAGER="pacman"
+            fi
+        fi
+    }
+fi
+
+# 设置代理
+setup_proxy "${PROXY:-{{ .proxy }}}"
+
+# 检测操作系统和包管理器
+detect_os_and_package_manager || exit 1
+
+log_info "=========================================="
+log_info "开始系统基础环境安装"
+log_info "平台: $PLATFORM, 包管理器: $PACKAGE_MANAGER"
+log_info "=========================================="
+
+# ============================================
+# 平台特定配置
+# ============================================
+case "$PLATFORM" in
+    linux)
+        log_info "----------------------------------------"
+        log_info "阶段 1: 配置 Arch Linux Pacman"
+        log_info "----------------------------------------"
+        # 注意：此脚本需要 root 权限，chezmoi 会自动处理
+        # 如果用户没有 root 权限，脚本会提示并跳过
+        if [[ $EUID -eq 0 ]] || sudo -n true 2>/dev/null; then
+            log_info "检测到 root 权限或 sudo 可用，将配置 Pacman"
+        else
+            log_warning "需要 root 权限来配置 Pacman"
+            log_warning "请使用 sudo 运行: sudo chezmoi apply"
+            log_warning "或手动运行: sudo .chezmoi/run_on_linux/run_once_configure-pacman.sh"
+        fi
+
+        log_info "----------------------------------------"
+        log_info "阶段 2: 安装 AUR 助手"
+        log_info "----------------------------------------"
+        # 注意：此脚本需要 root 权限
+        if [[ $EUID -eq 0 ]] || sudo -n true 2>/dev/null; then
+            log_info "检测到 root 权限或 sudo 可用，将安装 AUR 助手"
+        else
+            log_warning "需要 root 权限来安装 AUR 助手"
+            log_warning "请使用 sudo 运行: sudo chezmoi apply"
+        fi
+        ;;
+
+    macos)
+        log_info "----------------------------------------"
+        log_info "阶段 1: 配置 Homebrew"
+        log_info "----------------------------------------"
+        # Homebrew 配置脚本不需要 root 权限
+        ;;
+
+    windows)
+        log_info "----------------------------------------"
+        log_info "Windows 平台特定配置"
+        log_info "----------------------------------------"
+        # Windows 平台的特殊配置可以在这里添加
+        ;;
+esac
+
+# ============================================
+# 通用工具安装
+# ============================================
+log_info "----------------------------------------"
+log_info "阶段 3: 安装通用工具"
+log_info "----------------------------------------"
+log_info "此阶段将安装: bat, eza, fd, ripgrep, fzf, lazygit, git-delta, gh 等"
+log_info "（由 run_once_install-common-tools.sh 处理）"
+
+log_info "----------------------------------------"
+log_info "阶段 4: 安装版本管理器"
+log_info "----------------------------------------"
+log_info "此阶段将安装: fnm, uv 等"
+log_info "（由 run_once_install-version-managers.sh 处理）"
+
+log_info "----------------------------------------"
+log_info "阶段 5: 安装 Zsh 和 Oh My Zsh"
+log_info "----------------------------------------"
+log_info "（由 run_once_install-zsh.sh 处理）"
+
+log_info "----------------------------------------"
+log_info "阶段 6: 安装 Neovim"
+log_info "----------------------------------------"
+log_info "（由 run_once_install-neovim.sh 处理）"
+
+log_info "----------------------------------------"
+log_info "阶段 7: 安装 Nerd Fonts"
+log_info "----------------------------------------"
+log_info "（由 run_once_install-nerd-fonts.sh 处理）"
+
+# ============================================
+# 完成
+# ============================================
+log_success "=========================================="
+log_success "系统基础环境安装脚本执行完成"
+log_success "=========================================="
+log_info ""
+log_info "注意：此脚本仅作为入口脚本，实际的安装工作由各个 run_once_install-*.sh 脚本完成"
+log_info "chezmoi 会在首次应用配置时自动执行这些脚本"
+log_info ""
+log_info "如果某些脚本需要 root 权限，请使用:"
+log_info "  sudo chezmoi apply"
+log_info ""
+log_info "查看安装状态:"
+log_info "  chezmoi status"
+log_info ""
+log_info "查看日志:"
+log_info "  ~/.local/share/system_basic_env/logs/"
+{{- end -}}
+

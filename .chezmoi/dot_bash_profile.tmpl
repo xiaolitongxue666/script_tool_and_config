@@ -1,17 +1,13 @@
-{{- if ne .chezmoi.os "darwin" -}}
-# Bash 统一配置文件
-# 自动检测操作系统并加载对应配置
-# 注意：macOS 使用 .bash_profile，此文件不适用于 macOS
+{{- if eq .chezmoi.os "darwin" -}}
+# Bash Profile 配置文件（macOS）
+# macOS 的 Terminal.app 在登录 shell 中只读取 .bash_profile
+# 注意：此文件仅适用于 macOS，Linux 和 Windows 使用 .bashrc
 
 # ============================================
 # 系统检测
 # ============================================
 if [[ "$OSTYPE" == "darwin"* ]]; then
     OS="macos"
-elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
-    OS="linux"
-elif [[ "$OSTYPE" == "msys" ]] || [[ "$OSTYPE" == "cygwin" ]]; then
-    OS="windows"
 else
     OS="unknown"
 fi
@@ -41,10 +37,8 @@ if command -v bat &> /dev/null; then
 fi
 
 # ============================================
-# 平台特定配置
-# ============================================
-
 # macOS 特定配置
+# ============================================
 if [[ "$OS" == "macos" ]]; then
     # 添加用户私有 shell 路径
     export PATH=$PATH:/Users/liyong/Code/Tools/Shells/BashTools
@@ -73,59 +67,15 @@ if [[ "$OS" == "macos" ]]; then
     if [ -f "$HOME/.cargo/env" ]; then
         . "$HOME/.cargo/env"
     fi
+fi
 
-# Windows 特定配置（Git Bash/MSYS2）
-elif [[ "$OS" == "windows" ]]; then
-    # History
-    PROMPT_COMMAND='history -a'
-
-    # 代理配置（Windows 使用完整配置，参考 Git Bash）
-    # 注意：Windows Git Bash 的详细代理配置在 .bash_profile 中
-    # 这里只设置基本变量，.bash_profile 中有完整的 curl 包装函数
-    PROXY_URL="${PROXY:-{{ .proxy }}}"
-    export http_proxy="$PROXY_URL"
-    export https_proxy="$PROXY_URL"
-    export HTTP_PROXY="$PROXY_URL"
-    export HTTPS_PROXY="$PROXY_URL"
-    export all_proxy="$PROXY_URL"
-    export ALL_PROXY="$PROXY_URL"
-
-    # 网络检查别名
-    alias check_network='curl -IL https://www.google.com 2>/dev/null | grep -q -E "200 OK|Connection established" && echo "Network is OK" || echo "Network is down"'
-
-    # Explorer
-    alias open='explorer'
-
-    # Docker 工作区（Windows Git Bash）
-    docker() {
-        (export MSYS_NO_PATHCONV=1; "docker.exe" "$@")
-    }
-
-    # Docker Compose 工作区（Windows Git Bash）
-    docker-compose() {
-        (export MSYS_NO_PATHCONV=1; "docker-compose.exe" "$@")
-    }
-
-    # Windows Terminal Theme（必须在最后一行）
-    if command -v oh-my-posh &> /dev/null; then
-        eval "$(oh-my-posh --init --shell bash --config /c/Users/Administrator/AppData/Local/Programs/oh-my-posh/themes/montys.omp.json)"
-    fi
-
-    # 打开默认路径
-    cd /d/Code 2>/dev/null || cd ~
-
-    # 启动时显示欢迎信息
-    echo "Welcome! 😊"
-
-    # Starship
-    if command -v starship &> /dev/null; then
-        eval "$(starship init bash)"
-    fi
-
-# Linux 特定配置
-elif [[ "$OS" == "linux" ]]; then
-    # Linux 特定配置可以在这里添加
-    :
+# ============================================
+# 加载 .bashrc（如果存在）
+# ============================================
+# macOS 的 Terminal.app 在非登录 shell 中会读取 .bashrc
+# 但为了保持一致性，我们在这里也加载它（如果存在）
+if [ -f ~/.bashrc ]; then
+    source ~/.bashrc
 fi
 {{- end -}}
 

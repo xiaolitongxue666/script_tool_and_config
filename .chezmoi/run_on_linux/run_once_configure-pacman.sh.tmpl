@@ -1,0 +1,342 @@
+{{- if eq .chezmoi.os "linux" -}}
+#!/bin/bash
+
+# ============================================
+# Arch Linux Pacman 配置脚本（chezmoi run_once_）
+# 配置中国镜像源、优化 pacman 配置、安装 archlinuxcn-keyring、更新系统
+# 需要 root 权限
+# ============================================
+
+# 获取 common_install.sh 路径
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../../.." && pwd 2>/dev/null || echo "$HOME")"
+COMMON_INSTALL="${PROJECT_ROOT}/scripts/chezmoi/common_install.sh"
+
+if [ ! -f "$COMMON_INSTALL" ]; then
+    COMMON_INSTALL="$HOME/.local/share/chezmoi/scripts/chezmoi/common_install.sh"
+fi
+
+# 加载通用函数库
+if [ -f "$COMMON_INSTALL" ]; then
+    source "$COMMON_INSTALL"
+else
+    echo "[WARNING] 未找到 common_install.sh，使用基本函数"
+    function log_info() { echo "[INFO] $*"; }
+    function log_success() { echo "[SUCCESS] $*"; }
+    function log_warning() { echo "[WARNING] $*"; }
+    function log_error() { echo "[ERROR] $*" >&2; }
+    function check_root() {
+        if [[ $EUID -ne 0 ]]; then
+            log_error "此脚本需要 root 权限，请使用 sudo 运行"
+            return 1
+        fi
+        return 0
+    }
+fi
+
+# 检查 root 权限
+if ! check_root; then
+    exit 1
+fi
+
+# 检查是否为 Arch Linux
+if [[ ! -f /etc/os-release ]]; then
+    log_error "无法检测系统版本"
+    exit 1
+fi
+
+source /etc/os-release
+if [[ "${ID:-}" != "arch" ]]; then
+    log_error "此脚本仅支持 Arch Linux"
+    exit 1
+fi
+
+log_info "检测到 Arch Linux"
+
+# ============================================
+# 配置变量
+# ============================================
+readonly PACMAN_CONF="/etc/pacman.conf"
+readonly MIRRORLIST="/etc/pacman.d/mirrorlist"
+readonly DEFAULT_PROXY_URL="${DEFAULT_PROXY_URL:-http://127.0.0.1:7890}"
+
+# ============================================
+# 备份文件
+# ============================================
+backup_file() {
+    local file="$1"
+    if [[ -f "$file" ]]; then
+        local backup="${file}.backup.$(date +%Y%m%d_%H%M%S)"
+        cp "$file" "$backup"
+        log_info "文件已备份: $backup"
+        echo "$backup"
+    fi
+}
+
+# ============================================
+# 配置中国镜像源
+# ============================================
+configure_mirrors() {
+    backup_file "${MIRRORLIST}"
+    cat > "${MIRRORLIST}" <<'EOF'
+## Aliyun (HTTPS, primary)
+Server = https://mirrors.aliyun.com/archlinux/$repo/os/$arch
+## USTC (HTTPS, secondary)
+Server = https://mirrors.ustc.edu.cn/archlinux/$repo/os/$arch
+## Tencent Cloud (HTTPS, tertiary)
+Server = https://mirrors.cloud.tencent.com/archlinux/$repo/os/$arch
+## Huawei Cloud (HTTPS)
+Server = https://mirrors.huaweicloud.com/repository/archlinux/$repo/os/$arch
+## Nanjing University (HTTPS)
+Server = https://mirrors.nju.edu.cn/archlinux/$repo/os/$arch
+## Chongqing University (HTTPS)
+Server = https://mirrors.cqu.edu.cn/archlinux/$repo/os/$arch
+## Neusoft (HTTPS)
+Server = https://mirrors.neusoft.edu.cn/archlinux/$repo/os/$arch
+## Lanzhou University (HTTPS)
+Server = https://mirror.lzu.edu.cn/archlinux/$repo/os/$arch
+## Southern University of Science and Technology (HTTPS)
+Server = https://mirrors.sustech.edu.cn/archlinux/$repo/os/$arch
+EOF
+    log_success "中国镜像源已配置（9 个可用镜像，测试于 2025-11）"
+}
+
+# ============================================
+# 配置 pacman 代理（始终移除代理配置，pacman 使用国内源直连）
+# ============================================
+configure_pacman_proxy() {
+    local tmp_file
+    tmp_file="$(mktemp)"
+    local has_xfercommand=0
+
+    # 检查是否存在 XferCommand
+    while IFS= read -r line; do
+        if [[ "${line}" =~ ^XferCommand ]]; then
+            has_xfercommand=1
+            break
+        fi
+    done < "${PACMAN_CONF}"
+
+    # 始终移除 XferCommand 配置，pacman 使用国内源直连
+    if [[ "${has_xfercommand}" -eq 1 ]]; then
+        log_info "移除 XferCommand 配置，pacman 将使用直连（中国镜像）"
+        while IFS= read -r line; do
+            if [[ "${line}" =~ ^XferCommand ]]; then
+                continue
+            fi
+            echo "${line}" >> "${tmp_file}"
+        done < "${PACMAN_CONF}"
+        mv "${tmp_file}" "${PACMAN_CONF}"
+        log_info "XferCommand 已移除，pacman 将使用直连"
+    else
+        log_info "Pacman 已配置为使用直连（中国镜像）"
+    fi
+}
+
+# ============================================
+# 优化 pacman 配置
+# ============================================
+tune_pacman() {
+    backup_file "${PACMAN_CONF}"
+
+    # 如果配置文件中没有 [options] 部分的关键配置，则添加
+    if ! grep -q "^HoldPkg" "${PACMAN_CONF}"; then
+        sed -i '/^\[options\]/a\
+HoldPkg     = pacman glibc\
+Architecture = auto\
+CheckSpace\
+SigLevel    = Required DatabaseOptional\
+LocalFileSigLevel = Optional' "${PACMAN_CONF}"
+    fi
+
+    # 确保 ParallelDownloads 已启用并设置合理值
+    if ! grep -q "^ParallelDownloads" "${PACMAN_CONF}"; then
+        sed -i 's/^#ParallelDownloads/ParallelDownloads/' "${PACMAN_CONF}"
+        if ! grep -q "^ParallelDownloads" "${PACMAN_CONF}"; then
+            sed -i '/^\[options\]/a\
+ParallelDownloads = 5' "${PACMAN_CONF}"
+        fi
+    fi
+    sed -i 's/^ParallelDownloads[[:space:]]*=[[:space:]]*[0-9]*/ParallelDownloads = 5/' "${PACMAN_CONF}"
+
+    # 确保 core, extra 仓库使用镜像列表
+    if ! grep -q "^Include = /etc/pacman.d/mirrorlist" "${PACMAN_CONF}"; then
+        sed -i '/^\[core\]/,/^\[/ { /^\[core\]/a\
+Include = /etc/pacman.d/mirrorlist
+}' "${PACMAN_CONF}"
+        sed -i '/^\[extra\]/,/^\[/ { /^\[extra\]/a\
+Include = /etc/pacman.d/mirrorlist
+}' "${PACMAN_CONF}"
+    fi
+
+    # 移除已废弃的 [community] 配置（如果存在）
+    if grep -q "^\[community\]" "${PACMAN_CONF}"; then
+        sed -i '/^\[community\]/,/^\[/ { /^\[community\]/d; /^SigLevel/d; /^Include/d; }' "${PACMAN_CONF}"
+        log_info "已移除废弃的 [community] 配置（已合并到 [extra]）"
+    fi
+
+    # 添加 archlinuxcn 源（8 个可用镜像）
+    if ! grep -q "archlinuxcn" "${PACMAN_CONF}"; then
+        cat <<'EOF' >> "${PACMAN_CONF}"
+[archlinuxcn]
+Server = https://mirrors.ustc.edu.cn/archlinuxcn/$arch
+Server = https://mirrors.aliyun.com/archlinuxcn/$arch
+Server = https://mirrors.cloud.tencent.com/archlinuxcn/$arch
+Server = https://mirrors.huaweicloud.com/repository/archlinuxcn/$arch
+Server = https://mirrors.nju.edu.cn/archlinuxcn/$arch
+Server = https://mirrors.cqu.edu.cn/archlinuxcn/$arch
+Server = https://mirror.lzu.edu.cn/archlinuxcn/$arch
+Server = https://mirrors.sustech.edu.cn/archlinuxcn/$arch
+EOF
+    else
+        # 如果已存在 archlinuxcn 配置，移除 SigLevel 行（如果存在）
+        if grep -q "^\[archlinuxcn\]" "${PACMAN_CONF}"; then
+            sed -i '/^\[archlinuxcn\]/,/^\[/ { /^SigLevel/d; }' "${PACMAN_CONF}"
+            log_info "已从 [archlinuxcn] 部分移除 SigLevel（archlinuxcn-keyring 要求）"
+        fi
+    fi
+
+    configure_pacman_proxy
+    log_success "Pacman 配置已优化"
+}
+
+# ============================================
+# 安装 archlinuxcn-keyring
+# ============================================
+install_archlinuxcn_keyring() {
+    # 检查是否配置了 archlinuxcn 源
+    if ! grep -q "^\[archlinuxcn\]" "${PACMAN_CONF}"; then
+        log_info "未配置 archlinuxcn 仓库，跳过 keyring 安装"
+        return 0
+    fi
+
+    # 检查是否已安装
+    if pacman -Qi archlinuxcn-keyring >/dev/null 2>&1; then
+        log_info "archlinuxcn-keyring 已安装"
+        return 0
+    fi
+
+    log_info "安装 archlinuxcn-keyring 以配置 GPG 密钥..."
+
+    # 先同步数据库（只同步，不更新系统）
+    log_info "同步软件包数据库（包括 archlinuxcn）"
+    local retry_count=0
+    local max_retries=3
+    local sync_success=0
+
+    while [[ "${retry_count}" -lt "${max_retries}" ]]; do
+        if pacman -Sy --noconfirm 2>&1; then
+            sync_success=1
+            break
+        fi
+        retry_count=$((retry_count + 1))
+        if [[ "${retry_count}" -lt "${max_retries}" ]]; then
+            log_warning "数据库同步失败，重试中 (${retry_count}/${max_retries})..."
+            sleep 2
+        fi
+    done
+
+    if [[ "${sync_success}" -eq 0 ]]; then
+        log_warning "数据库同步失败，archlinuxcn-keyring 安装可能失败"
+    fi
+
+    # 尝试安装 archlinuxcn-keyring
+    retry_count=0
+    while [[ "${retry_count}" -lt "${max_retries}" ]]; do
+        if pacman -S --noconfirm archlinuxcn-keyring 2>&1; then
+            log_success "archlinuxcn-keyring 安装成功"
+            return 0
+        fi
+        retry_count=$((retry_count + 1))
+        if [[ "${retry_count}" -lt "${max_retries}" ]]; then
+            log_warning "安装失败，重试中 (${retry_count}/${max_retries})..."
+            sleep 2
+            pacman -Sy --noconfirm >/dev/null 2>&1 || true
+        fi
+    done
+
+    log_warning "archlinuxcn-keyring 安装失败，已重试 ${max_retries} 次"
+    log_warning "archlinuxcn 仓库可能无法正常工作，直到 keyring 安装完成"
+    log_warning "可以稍后手动安装: sudo pacman -Sy archlinuxcn-keyring"
+}
+
+# ============================================
+# 更新系统
+# ============================================
+update_system() {
+    # pacman 操作前禁用代理（使用国内源）
+    if type disable_proxy &>/dev/null; then
+        disable_proxy
+    fi
+
+    log_info "开始系统更新流程"
+
+    # 步骤 1: 更新 archlinux-keyring（官方仓库的密钥环）
+    log_info "更新 archlinux-keyring"
+    local retry_count=0
+    local max_retries=3
+    while [[ "${retry_count}" -lt "${max_retries}" ]]; do
+        if pacman -Sy --noconfirm archlinux-keyring 2>&1; then
+            log_success "archlinux-keyring 已更新"
+            break
+        fi
+        retry_count=$((retry_count + 1))
+        if [[ "${retry_count}" -lt "${max_retries}" ]]; then
+            log_warning "密钥环同步失败，重试中 (${retry_count}/${max_retries})..."
+            sleep 2
+        else
+            log_warning "archlinux-keyring 更新失败，但继续..."
+        fi
+    done
+
+    # 步骤 2: 安装 archlinuxcn-keyring（如果配置了 archlinuxcn 源）
+    install_archlinuxcn_keyring
+
+    # 步骤 3: 更新系统（包括所有仓库）
+    log_info "更新系统软件包"
+    retry_count=0
+    while [[ "${retry_count}" -lt "${max_retries}" ]]; do
+        if pacman -Syu --noconfirm 2>&1; then
+            log_success "系统更新完成"
+            break
+        fi
+        retry_count=$((retry_count + 1))
+        if [[ "${retry_count}" -lt "${max_retries}" ]]; then
+            log_warning "系统更新失败，重试中 (${retry_count}/${max_retries})..."
+            sleep 3
+        else
+            log_warning "系统更新失败，但继续..."
+            log_warning "可能需要手动运行: sudo pacman -Syu"
+        fi
+    done
+
+    # pacman 操作完成后启用代理（用于后续操作）
+    if type enable_proxy &>/dev/null; then
+        enable_proxy "${DEFAULT_PROXY_URL}"
+    fi
+}
+
+# ============================================
+# 主函数
+# ============================================
+main() {
+    log_info "=========================================="
+    log_info "开始配置 Arch Linux Pacman"
+    log_info "=========================================="
+
+    # 配置镜像源和 pacman（这些操作不使用代理）
+    configure_mirrors
+    tune_pacman
+
+    # pacman 相关操作（会自动禁用代理）
+    update_system
+
+    log_success "=========================================="
+    log_success "Arch Linux Pacman 配置完成"
+    log_success "=========================================="
+}
+
+# 执行主函数
+main "$@"
+{{- end -}}
+

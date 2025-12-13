@@ -1,3 +1,4 @@
+{{- if eq .chezmoi.os "darwin" -}}
 #!/bin/bash
 
 # ============================================
@@ -7,7 +8,7 @@
 
 # 获取 common_install.sh 路径
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../../.." && pwd 2>/dev/null || echo "$HOME")"
+PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd 2>/dev/null || echo "$HOME")"
 COMMON_INSTALL="${PROJECT_ROOT}/scripts/chezmoi/common_install.sh"
 
 if [ ! -f "$COMMON_INSTALL" ]; then
@@ -40,7 +41,7 @@ else
 fi
 
 # 设置代理
-setup_proxy "${PROXY:-http://127.0.0.1:7890}"
+setup_proxy "${PROXY:-{{ .proxy }}}"
 
 # 检测操作系统和包管理器
 detect_os_and_package_manager || exit 1
@@ -70,3 +71,5 @@ else
     echo "[ERROR] Yabai 安装失败"
     exit 1
 fi
+{{- end -}}
+

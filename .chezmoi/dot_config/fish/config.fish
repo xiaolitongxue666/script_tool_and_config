@@ -32,9 +32,41 @@ end
 # 将 unset 替换为 Fish 兼容的语法
 alias unset 'set --erase'
 
-# 代理设置（通用，平台特定配置会覆盖）
-alias h_proxy='set -gx http_proxy http://127.0.0.1:7890; set -gx https_proxy http://127.0.0.1:7890; set -gx all_proxy socks5://127.0.0.1:7890'
-alias unset_h='set -e http_proxy; set -e https_proxy; set -e all_proxy'
+# ============================================
+# 代理配置（统一配置，参考 Git Bash）
+# ============================================
+# 默认代理地址（从 .chezmoi.toml 读取，可通过环境变量 PROXY 覆盖）
+# 注意：chezmoi 会在应用配置时解析模板变量 {{ .proxy }}
+# Fish 中需要使用 set -gx 设置全局环境变量
+# 使用 Fish 的条件判断，如果 PROXY 环境变量未设置则使用模板变量解析后的值
+set -gx PROXY_URL "{{ .proxy }}"
+# 如果设置了 PROXY 环境变量，则使用它（chezmoi 应用后可以通过环境变量覆盖）
+if set -q PROXY
+    set -gx PROXY_URL $PROXY
+end
+
+# 代理控制函数（同时设置大小写环境变量，确保所有工具都能识别）
+# h_proxy: 快速启用代理
+function h_proxy
+    set -gx http_proxy $PROXY_URL
+    set -gx https_proxy $PROXY_URL
+    set -gx HTTP_PROXY $PROXY_URL
+    set -gx HTTPS_PROXY $PROXY_URL
+    set -gx all_proxy $PROXY_URL
+    set -gx ALL_PROXY $PROXY_URL
+    echo "代理已启用: $PROXY_URL"
+end
+
+# unset_h: 关闭代理（清除所有代理环境变量）
+function unset_h
+    set -e http_proxy
+    set -e https_proxy
+    set -e HTTP_PROXY
+    set -e HTTPS_PROXY
+    set -e all_proxy
+    set -e ALL_PROXY
+    echo "代理已关闭"
+end
 
 # 网络检查别名
 alias c_google='curl cip.cc'
@@ -103,7 +135,7 @@ else if test "$OS" = "Linux"
         fish_add_path ~/.pyenv/shims
     end
 
-    # 代理配置（Linux 默认端口可能不同）
-    alias h_proxy='set -gx http_proxy http://127.0.0.1:1087; set -gx https_proxy http://127.0.0.1:1087; set -gx all_proxy socks5://127.0.0.1:1087'
-    alias unset_h='set -e http_proxy; set -e https_proxy; set -e all_proxy'
+    # 代理配置（统一配置，使用通用 PROXY_URL）
+    # Linux 平台使用统一的代理配置，通过 PROXY_URL 变量
+    # 如果需要 Linux 特定的代理地址，可以在平台特定部分覆盖 PROXY_URL
 end
