@@ -105,15 +105,24 @@ zstyle ':omz:update' mode disabled
 # ============================================
 # 插件配置
 # ============================================
-# 注意：zsh-autosuggestions 和 zsh-syntax-highlighting 需要单独安装
-# 如果未安装，这些插件会被忽略，不会影响其他功能
+# Fish-like 体验插件（自动安装，如果未安装会被忽略）
+# 注意：zsh-syntax-highlighting 必须放在最后
 plugins=(
   git
   docker
   kubectl
   z
-  # zsh-autosuggestions  # 需要安装: git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
-  # zsh-syntax-highlighting  # 需要安装: git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting
+  colored-man-pages
+  command-not-found
+  extract
+  web-search
+  copypath
+  copyfile
+  dirhistory
+  zsh-autosuggestions
+  zsh-history-substring-search
+  zsh-completions
+  zsh-syntax-highlighting  # 必须放最后
 )
 
 # ============================================
@@ -133,6 +142,42 @@ if [ -d "$ZSH" ]; then
     # 验证 Oh My Zsh 是否正确加载
     if [ -z "$ZSH_VERSION" ]; then
         echo "警告: Oh My Zsh 可能未正确加载"
+    fi
+
+    # ============================================
+    # Fish-like 插件配置
+    # ============================================
+
+    # zsh-autosuggestions 配置（实时历史建议）
+    if [ -f "$ZSH_CUSTOM/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh" ]; then
+        # 建议文字颜色（灰色）
+        ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=#999"
+        # 建议策略：先历史，再补全建议
+        ZSH_AUTOSUGGEST_STRATEGY=(history completion)
+    fi
+
+    # zsh-history-substring-search 配置（子字符串历史搜索）
+    if [ -f "$ZSH_CUSTOM/plugins/zsh-history-substring-search/zsh-history-substring-search.zsh" ]; then
+        # 匹配高亮
+        HISTORY_SUBSTRING_SEARCH_HIGHLIGHT_FOUND="bg=magenta,fg=white,bold"
+        # 未匹配高亮
+        HISTORY_SUBSTRING_SEARCH_HIGHLIGHT_NOT_FOUND="bg=red,fg=white,bold"
+        # 加载插件
+        source "$ZSH_CUSTOM/plugins/zsh-history-substring-search/zsh-history-substring-search.zsh"
+
+        # 键绑定（与 autosuggestions 兼容）
+        # 向上搜索
+        bindkey '^[[A' history-substring-search-up
+        bindkey '^[OA' history-substring-search-up
+        # 向下搜索
+        bindkey '^[[B' history-substring-search-down
+        bindkey '^[OB' history-substring-search-down
+
+        # 清除 autosuggestions 建议（当使用 history-substring-search 时）
+        if [ -f "$ZSH_CUSTOM/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh" ]; then
+            # 绑定清除建议的快捷键
+            bindkey '^ ' autosuggest-clear
+        fi
     fi
 else
     echo "警告: Oh My Zsh 未安装，请运行: sh -c \"\$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)\""
