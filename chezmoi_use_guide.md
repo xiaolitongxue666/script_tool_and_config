@@ -515,6 +515,140 @@ chezmoi source-path
 chezmoi target-path ~/.zshrc
 ```
 
+## Zsh 和 Oh My Zsh 插件配置
+
+### 插件列表
+
+项目配置了以下 Zsh 和 Oh My Zsh 插件，提供类似 Fish Shell 的使用体验。
+
+#### 内置插件（Oh My Zsh 自带）
+
+- **git** - Git 命令别名和补全
+- **docker** - Docker 命令补全
+- **kubectl** - Kubernetes 命令补全
+- **z** - 智能目录跳转
+- **colored-man-pages** - 彩色 man 页面
+- **extract** - 解压各种格式文件（tar, zip, rar 等）
+- **web-search** - 网络搜索快捷命令（google, github, bing 等）
+- **copydir** - 复制路径到剪贴板
+- **copyfile** - 复制文件内容到剪贴板
+- **dirhistory** - 目录历史导航（Alt+←/→，需要终端支持）
+
+#### 外部插件（自动安装）
+
+- **zsh-autosuggestions** - 实时历史建议（灰色提示）
+- **zsh-history-substring-search** - 子字符串历史搜索（上下箭头）
+- **zsh-completions** - 更多补全选项
+- **zsh-syntax-highlighting** - 语法高亮（必须最后加载）
+
+### 插件功能说明
+
+#### colored-man-pages
+为 man 页面添加颜色，提升可读性。
+```bash
+man ls  # 显示彩色输出
+```
+
+#### web-search
+提供快捷命令在浏览器中搜索。
+```bash
+google "search term"
+github "oh-my-zsh"
+bing "search term"
+duckduckgo "search term"
+baidu "搜索词"
+```
+
+#### copydir / copyfile
+快速复制路径或文件内容。
+```bash
+copydir              # 复制当前目录路径
+copyfile ~/.zshrc    # 复制文件内容到剪贴板
+```
+
+#### extract
+统一解压命令，自动识别压缩格式。
+```bash
+extract file.zip
+extract file.tar.gz
+extract file.rar
+```
+
+#### dirhistory
+目录历史导航（类似浏览器前进/后退）。
+- `Alt + ←` - 返回上一个访问的目录
+- `Alt + →` - 前进到下一个目录
+
+**注意**：某些终端（如 VS Code/Cursor 集成终端）可能不支持 Alt 键绑定。可以使用：
+- `Esc` + `Left/Right` 作为替代
+- 或使用独立终端应用（如 Alacritty）
+
+#### zsh-autosuggestions
+根据历史记录实时显示命令建议（灰色文字）。
+- `→` 或 `End` - 接受建议
+- `Ctrl + →` - 接受建议的一个词
+- `Esc` - 忽略建议
+
+#### zsh-history-substring-search
+使用上下箭头搜索包含输入字符串的历史命令。
+- `↑` - 向上搜索匹配的历史命令
+- `↓` - 向下搜索匹配的历史命令
+
+#### zsh-syntax-highlighting
+实时高亮命令语法，错误命令显示为红色。
+- 正确命令：绿色/蓝色
+- 错误命令：红色
+- 字符串：引号内特殊颜色
+
+### 插件测试
+
+可以通过以下方式测试插件功能：
+
+```bash
+# 1. 测试 colored-man-pages
+man ls  # 应该看到彩色输出
+
+# 2. 测试 web-search
+google test  # 应该打开浏览器搜索
+
+# 3. 测试 copydir
+copydir  # 复制当前目录路径
+
+# 4. 测试 copyfile
+copyfile ~/.zshrc  # 复制文件内容
+
+# 5. 测试 extract
+extract file.zip  # 解压文件
+
+# 6. 测试 dirhistory
+# 使用 Alt+←/→ 导航（需要终端支持）
+
+# 7. 测试 zsh-autosuggestions
+# 输入命令后应该看到灰色建议
+
+# 8. 测试 zsh-syntax-highlighting
+# 输入命令应该看到颜色高亮
+
+# 9. 测试 zsh-history-substring-search
+# 输入部分命令后按 ↑ 搜索历史
+```
+
+### 配置位置
+
+- 配置文件: `~/.zshrc`
+- 源文件: `.chezmoi/dot_zshrc`
+- 插件目录: `~/.oh-my-zsh/custom/plugins/`
+- 内置插件: `~/.oh-my-zsh/plugins/`
+
+### 更新插件配置
+
+```bash
+cd ~/Code/DotfilesAndScript/script_tool_and_config
+export CHEZMOI_SOURCE_DIR="$(pwd)/.chezmoi"
+chezmoi apply ~/.zshrc
+source ~/.zshrc
+```
+
 ## 更多资源
 
 - [chezmoi 官方文档](https://www.chezmoi.io/docs/)

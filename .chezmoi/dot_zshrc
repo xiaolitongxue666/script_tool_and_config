@@ -113,16 +113,14 @@ plugins=(
   kubectl
   z
   colored-man-pages
-  command-not-found
   extract
   web-search
-  copypath
+  copydir
   copyfile
   dirhistory
-  zsh-autosuggestions
-  zsh-history-substring-search
   zsh-completions
-  zsh-syntax-highlighting  # 必须放最后
+  zsh-history-substring-search
+  # zsh-autosuggestions 和 zsh-syntax-highlighting 需要在 oh-my-zsh.sh 之后手动加载
 )
 
 # ============================================
@@ -145,11 +143,13 @@ if [ -d "$ZSH" ]; then
     fi
 
     # ============================================
-    # Fish-like 插件配置
+    # Fish-like 插件配置（必须在 oh-my-zsh.sh 之后加载）
     # ============================================
 
     # zsh-autosuggestions 配置（实时历史建议）
+    # 注意：必须在 oh-my-zsh.sh 之后加载
     if [ -f "$ZSH_CUSTOM/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh" ]; then
+        source "$ZSH_CUSTOM/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh"
         # 建议文字颜色（灰色）
         ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=#999"
         # 建议策略：先历史，再补全建议
@@ -178,6 +178,29 @@ if [ -d "$ZSH" ]; then
             # 绑定清除建议的快捷键
             bindkey '^ ' autosuggest-clear
         fi
+    fi
+
+    # zsh-syntax-highlighting 配置（语法高亮）
+    # 注意：必须在所有插件之后最后加载
+    if [ -f "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ]; then
+        source "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
+    fi
+
+    # ============================================
+    # dirhistory 额外键绑定（增强兼容性）
+    # ============================================
+    # 如果 dirhistory 插件已加载，添加额外的键绑定以支持更多终端
+    if [ -f "$ZSH/plugins/dirhistory/dirhistory.plugin.zsh" ]; then
+        # 尝试绑定更多可能的 Alt 键序列
+        # 这些绑定会在 dirhistory 插件加载后执行，不会冲突
+        # Alt+Left (向后)
+        bindkey "^[b" dirhistory_zle_dirhistory_back 2>/dev/null || true
+        bindkey "\e[1;3D" dirhistory_zle_dirhistory_back 2>/dev/null || true
+        bindkey "\e\e[D" dirhistory_zle_dirhistory_back 2>/dev/null || true
+        # Alt+Right (向前)
+        bindkey "^[f" dirhistory_zle_dirhistory_future 2>/dev/null || true
+        bindkey "\e[1;3C" dirhistory_zle_dirhistory_future 2>/dev/null || true
+        bindkey "\e\e[C" dirhistory_zle_dirhistory_future 2>/dev/null || true
     fi
 else
     echo "警告: Oh My Zsh 未安装，请运行: sh -c \"\$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)\""
@@ -362,3 +385,23 @@ fi
 # ============================================
 # 注意：macOS 特定的环境变量配置在平台特定部分
 # 这里可以添加跨平台的环境变量配置
+
+# ============================================
+# 插件测试说明
+# ============================================
+# 以下命令可用于测试各个插件功能：
+#
+# 1. colored-man-pages: man ls (应该看到彩色输出)
+# 2. web-search: google test (应该打开浏览器搜索)
+# 3. copydir: copydir (复制当前目录路径)
+# 4. copyfile: copyfile ~/.zshrc (复制文件内容)
+# 5. extract: extract file.zip (解压文件)
+# 6. dirhistory: Alt+←/→ 导航（需要终端支持，或使用 Esc+方向键）
+# 7. zsh-autosuggestions: 输入命令后应该看到灰色建议
+# 8. zsh-syntax-highlighting: 输入命令应该看到颜色高亮
+# 9. zsh-history-substring-search: 输入部分命令后按 ↑ 搜索历史
+#
+# 注意：
+# - dirhistory 在集成终端中可能不工作，建议使用独立终端应用
+# - 某些功能需要重新加载配置: source ~/.zshrc
+# - 详细说明见 chezmoi_use_guide.md
