@@ -769,6 +769,10 @@ script_tool_and_config/
   - `install.sh`: 自动安装脚本，包含 Zsh 和 Oh My Zsh 安装，以及配置同步功能
   - **主要特性**:
     - Oh My Zsh 集成（主题、插件）
+    - Fish-like 体验插件（自动安装）：
+      - `zsh-autosuggestions`：实时历史建议
+      - `zsh-history-substring-search`：子字符串历史搜索
+      - `zsh-syntax-highlighting`：实时语法高亮
     - fnm 自动检测和加载
     - Pyenv 集成
     - 智能工具别名（lsd/bat/trash）

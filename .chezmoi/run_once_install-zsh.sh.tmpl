@@ -125,6 +125,36 @@ if [[ "$PLATFORM" != "windows" ]]; then
     else
         echo "[INFO] Oh My Zsh 已安装"
     fi
+
+    # 安装 Oh My Zsh 插件（Fish-like 体验）
+    if [ -d "$HOME/.oh-my-zsh" ]; then
+        echo "[INFO] 安装 Oh My Zsh 插件..."
+        ZSH_CUSTOM="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins"
+        mkdir -p "$ZSH_CUSTOM"
+
+        # 插件列表
+        declare -A PLUGINS=(
+            ["zsh-autosuggestions"]="https://github.com/zsh-users/zsh-autosuggestions"
+            ["zsh-history-substring-search"]="https://github.com/zsh-users/zsh-history-substring-search"
+            ["zsh-syntax-highlighting"]="https://github.com/zsh-users/zsh-syntax-highlighting"
+        )
+
+        for plugin_name in "${!PLUGINS[@]}"; do
+            plugin_url="${PLUGINS[$plugin_name]}"
+            plugin_path="$ZSH_CUSTOM/$plugin_name"
+
+            if [ -d "$plugin_path" ]; then
+                echo "[INFO] 插件 $plugin_name 已安装，跳过"
+            else
+                echo "[INFO] 安装插件 $plugin_name..."
+                if git clone "$plugin_url" "$plugin_path" 2>/dev/null; then
+                    echo "[INFO] 插件 $plugin_name 安装成功"
+                else
+                    echo "[WARNING] 插件 $plugin_name 安装失败，但继续..."
+                fi
+            fi
+        done
+    fi
 else
     echo "[INFO] Windows 上跳过 Oh My Zsh 安装（可选）"
 fi

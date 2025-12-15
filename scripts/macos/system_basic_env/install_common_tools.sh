@@ -520,6 +520,43 @@ install_oh_my_zsh() {
     log_success "Oh My Zsh installation completed (user configuration not changed)"
 }
 
+# 安装 Oh My Zsh 插件（Fish-like 体验）
+install_omz_plugins() {
+    if [[ ! -d "${HOME}/.oh-my-zsh" ]]; then
+        log_warning "Oh My Zsh not installed, skipping plugin installation"
+        return 0
+    fi
+
+    log_info "Installing Oh My Zsh plugins (Fish-like experience)"
+    local zsh_custom="${ZSH_CUSTOM:-${HOME}/.oh-my-zsh/custom}/plugins"
+    mkdir -p "${zsh_custom}"
+
+    # 插件列表
+    declare -A plugins=(
+        ["zsh-autosuggestions"]="https://github.com/zsh-users/zsh-autosuggestions"
+        ["zsh-history-substring-search"]="https://github.com/zsh-users/zsh-history-substring-search"
+        ["zsh-syntax-highlighting"]="https://github.com/zsh-users/zsh-syntax-highlighting"
+    )
+
+    for plugin_name in "${!plugins[@]}"; do
+        local plugin_url="${plugins[$plugin_name]}"
+        local plugin_path="${zsh_custom}/${plugin_name}"
+
+        if [[ -d "${plugin_path}" ]]; then
+            log_info "Plugin ${plugin_name} already installed, skipping"
+        else
+            log_info "Installing plugin ${plugin_name}..."
+            if git clone "${plugin_url}" "${plugin_path}" 2>/dev/null; then
+                log_success "Plugin ${plugin_name} installed successfully"
+            else
+                log_warning "Failed to install plugin ${plugin_name}, continuing..."
+            fi
+        fi
+    done
+
+    log_success "Oh My Zsh plugins installation completed"
+}
+
 # 安装 shell 工具
 install_shell_tools() {
     # zsh 通常已经预装在 macOS 上
@@ -535,6 +572,7 @@ install_shell_tools() {
     fi
 
     install_oh_my_zsh
+    install_omz_plugins
 }
 
 # 安装 Neovim
