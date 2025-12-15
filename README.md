@@ -130,6 +130,16 @@
 
 本项目使用 [chezmoi](https://www.chezmoi.io/) 统一管理所有 dotfiles 配置。chezmoi 是一个强大的 dotfiles 管理工具，支持跨平台配置管理、模板变量、加密等功能。
 
+### 新系统安装
+
+**如果是全新的系统，请参考：**
+- 📖 [OS_SETUP_GUIDE.md](OS_SETUP_GUIDE.md) - Windows/macOS 新系统完整安装指南
+- 🚀 Windows 快速执行：双击 `scripts/windows/install_with_chezmoi.bat`（需要管理员权限）
+
+该指南包含完整的安装流程：
+- **Windows**: 5 步流程（安装 chezmoi → 初始化 → 安装软件 → 配置软件 → 纳入管理）
+- **macOS**: 6 步流程（前置条件 → 安装 chezmoi → 初始化 → 安装软件 → 配置软件 → 后续配置）
+
 ### 一键安装
 
 ```bash
@@ -196,9 +206,10 @@ git push
 ### 详细文档
 
 更多使用说明请参考：
-- [software_list.md](software_list.md) - 完整的软件清单和分类
-- [chezmoi_guide.md](chezmoi_guide.md) - 完整的 chezmoi 使用指南
-- [project_structure.md](project_structure.md) - 项目结构说明
+- [OS_SETUP_GUIDE.md](OS_SETUP_GUIDE.md) - Windows/macOS 新系统完整安装指南
+- [CHEZMOI_GUIDE.md](CHEZMOI_GUIDE.md) - 完整的 chezmoi 使用指南
+- [SOFTWARE_LIST.md](SOFTWARE_LIST.md) - 完整的软件清单和分类
+- [project_structure.md](project_structure.md) - 详细的项目结构说明
 - [chezmoi 官方文档](https://www.chezmoi.io/docs/)
 
 ## 详细使用说明
@@ -639,7 +650,7 @@ script_tool_and_config/
 ├── .chezmoiignore                  # chezmoi 忽略文件
 ├── install.sh                      # 一键安装脚本
 ├── dotfiles/                       # 配置文件（Legacy，仅保留配置文件）
-│   ├── legacy.md                   # Legacy 说明文档
+│   ├── LEGACY.md                   # Legacy 说明文档
 │   ├── alacritty/                  # Alacritty 配置（仅配置文件）
 │   ├── bash/                       # Bash 配置（仅配置文件）
 │   ├── fish/                       # Fish Shell 配置（仅配置文件）
@@ -653,16 +664,24 @@ script_tool_and_config/
 └── scripts/                        # 脚本工具集合（按系统分类）
     ├── common.sh                    # 通用函数库（所有脚本共享）
     ├── chezmoi/                     # chezmoi 相关脚本
+    │   ├── README.md                # chezmoi 脚本说明
     │   ├── common_install.sh        # 通用安装函数库
     │   ├── install_chezmoi.sh      # chezmoi 安装脚本
     │   └── helpers.sh              # 辅助函数
     ├── manage_dotfiles.sh           # dotfiles 管理脚本
+    ├── README.md                    # scripts 目录说明
     ├── windows/                     # Windows 专用脚本
+    │   ├── install_with_chezmoi.sh  # Windows 完整安装脚本
+    │   ├── install_with_chezmoi.bat # Windows 安装批处理
     │   └── system_basic_env/        # Windows 基础环境安装
+    │       └── README.md            # Windows 工具安装说明
     ├── macos/                       # macOS 专用脚本
     │   └── system_basic_env/        # macOS 基础环境安装
+    │       └── README.md            # macOS 工具安装说明
     └── linux/                       # Linux 专用脚本和跨平台脚本
         ├── system_basic_env/        # 系统基础环境安装脚本（ArchLinux）
+        │   ├── USAGE.md             # 使用说明
+        │   └── TEST_MIRRORS_README.md # 镜像测试说明
         ├── network/                 # 网络配置脚本
         ├── hardware/                # 硬件安装脚本
         ├── utils/                   # 通用工具脚本（跨平台）
@@ -670,6 +689,7 @@ script_tool_and_config/
         ├── media_tools/             # 媒体处理工具（跨平台）
         ├── git_templates/           # Git 相关模板（跨平台）
         ├── patch_examples/          # 补丁使用示例（跨平台）
+        │   └── README.md            # 补丁使用说明
         ├── shc/                     # Shell 脚本编译器示例（跨平台）
         └── auto_edit_redis_config/  # Redis 配置编辑（跨平台）
 ```
@@ -679,6 +699,23 @@ script_tool_and_config/
 - **`.chezmoi/`**: 所有配置文件和管理脚本，使用 chezmoi 模板系统
 - **`dotfiles/`**: Legacy 目录，仅保留配置文件作为参考（已迁移到 `.chezmoi/`）
 - **`scripts/`**: 功能性脚本，按平台分类组织
+
+### 文档结构
+
+**根目录文档：**
+- `README.md` - 项目主文档（本文件）
+- `OS_SETUP_GUIDE.md` - Windows/macOS 新系统完整安装指南
+- `CHEZMOI_GUIDE.md` - chezmoi 使用指南
+- `SOFTWARE_LIST.md` - 软件清单和分类
+- `project_structure.md` - 详细的项目结构说明
+
+**子目录文档：**
+- `scripts/README.md` - scripts 目录说明
+- `scripts/chezmoi/README.md` - chezmoi 脚本说明
+- `scripts/linux/system_basic_env/USAGE.md` - ArchLinux 系统配置使用说明
+- `scripts/windows/system_basic_env/README.md` - Windows 工具安装说明
+- `scripts/macos/system_basic_env/README.md` - macOS 工具安装说明
+- `dotfiles/LEGACY.md` - Legacy 配置说明
 
 ## 主要功能分类
 
@@ -1189,6 +1226,14 @@ chmod +x install.sh
 详见 [LICENSE](LICENSE) 文件
 
 ## 更新日志
+
+### 2024-12 项目整理
+- ✅ 删除冗余文档（md_files_structure.md）
+- ✅ 整合项目结构说明到 README.md
+- ✅ 更新文档引用和索引
+- ✅ 更新 .gitignore（添加项目特定临时文件）
+- ✅ 合并 Windows 和 macOS 安装指南为 OS_SETUP_GUIDE.md
+- ✅ 创建 Windows 完整安装脚本（install_with_chezmoi.sh/bat）
 
 ### 2024 整理
 - ✅ 重新分析整个项目结构

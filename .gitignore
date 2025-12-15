@@ -301,3 +301,16 @@ scripts/**/*_test_*.sh
 # Claude Code 本地配置文件（用户特定设置，不应推送到版本控制）
 .claude/
 .claude/settings.local.json
+
+# ============================================
+# 项目特定临时文件
+# ============================================
+# Windows 安装脚本生成的临时文件
+scripts/windows/system_basic_env/path.bak
+scripts/windows/system_basic_env/InstallationLog.txt
+scripts/windows/system_basic_env/*.backup
+
+# 项目生成的文件
+*.bak
+*.backup
+*.tmp
