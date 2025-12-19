@@ -654,7 +654,7 @@ chezmoi apply -v
 ## 参考文档
 
 - [README.md](README.md) - 项目主文档
-- [CHEZMOI_GUIDE.md](CHEZMOI_GUIDE.md) - chezmoi 使用指南
+- [chezmoi_use_guide.md](chezmoi_use_guide.md) - chezmoi 使用指南
 - [SOFTWARE_LIST.md](SOFTWARE_LIST.md) - 软件清单
 - [project_structure.md](project_structure.md) - 项目结构说明
 - [scripts/windows/system_basic_env/README.md](scripts/windows/system_basic_env/README.md) - Windows 工具安装脚本说明

@@ -20,9 +20,6 @@ dotfiles/
 # 文档和配置文件
 README.md
 LICENSE
-MULTI_OS_COMMON_TOOLS.md
-PROJECT_HISTORY.md
-star_repos.md
 settings.json
 settings.local.json
 

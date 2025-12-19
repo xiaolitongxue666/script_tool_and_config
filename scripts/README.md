@@ -7,8 +7,7 @@
 ```
 scripts/
 ├── common.sh                    # 通用函数库（所有脚本共享）
-├── PROJECT_HISTORY.md           # 项目优化历史记录
-├── readme.md                    # 本文件
+├── README.md                    # 本文件
 │
 ├── windows/                     # Windows 专用脚本
 │   └── windows_scripts/         # Windows 批处理脚本
@@ -17,7 +16,45 @@ scripts/
 │
 ├── macos/                       # macOS 专用脚本（预留）
 │
-└── linux/                       # Linux 专用脚本和跨平台脚本
+├── common/                       # 跨平台脚本
+    ├── utils/                    # 通用工具脚本
+    │   ├── append_text_to_file.sh
+    │   ├── append_lines_to_file.sh
+    │   ├── replace_text_in_files.sh
+    │   ├── list_all_directories.sh
+    │   ├── get_directory_name.sh
+    │   └── [其他工具脚本]
+    │
+    ├── project_tools/            # 项目生成和管理工具
+    │   ├── create_c_source_file.sh
+    │   ├── generate_cmake_lists.sh
+    │   ├── generate_log4c_config.sh
+    │   ├── merge_static_libraries.sh
+    │   └── cpp_project_generator/
+    │
+    ├── media_tools/             # 媒体处理工具
+    │   ├── open_multiple_ffmpeg_srt.sh
+    │   ├── open_multiple_ffmpeg_udp.sh
+    │   ├── concat_audio/
+    │   └── mix_audio/
+    │
+    ├── git_templates/           # Git 模板
+    │   ├── github_common_config.sh
+    │   └── default_gitignore_files/
+    │
+    ├── patch_examples/          # 补丁示例
+    │   ├── create_patch.sh
+    │   └── use_patch.sh
+    │
+    ├── shc/                     # Shell 脚本编译器示例
+    │   ├── echo_hello_world.sh
+    │   ├── shc_test.sh
+    │   └── source_shc.sh
+    │
+    └── auto_edit_redis_config/  # Redis 配置编辑
+        └── auto_edit_redis_config.sh
+│
+└── linux/                       # Linux 专用脚本
     ├── system_basic_env/        # 系统基础环境安装脚本（ArchLinux）
     │   ├── configure_china_mirrors.sh
     │   ├── install_environment.sh
@@ -31,45 +68,8 @@ scripts/
     │   ├── deploy_openresty.sh
     │   └── send_srt_stream.sh
     │
-    ├── hardware/                # 硬件安装脚本
-    │   └── install_netint_t4xx.sh
-    │
-    ├── utils/                    # 通用工具脚本（跨平台）
-    │   ├── append_text_to_file.sh
-    │   ├── append_lines_to_file.sh
-    │   ├── replace_text_in_files.sh
-    │   ├── list_all_directories.sh
-    │   ├── get_directory_name.sh
-    │   └── [其他工具脚本]
-    │
-    ├── project_tools/            # 项目生成和管理工具（跨平台）
-    │   ├── create_c_source_file.sh
-    │   ├── generate_cmake_lists.sh
-    │   ├── generate_log4c_config.sh
-    │   ├── merge_static_libraries.sh
-    │   └── cpp_project_generator/
-    │
-    ├── media_tools/             # 媒体处理工具（跨平台）
-    │   ├── open_multiple_ffmpeg_srt.sh
-    │   ├── open_multiple_ffmpeg_udp.sh
-    │   ├── concat_audio/
-    │   └── mix_audio/
-    │
-    ├── git_templates/           # Git 模板（跨平台）
-    │   ├── github_common_config.sh
-    │   └── default_gitignore_files/
-    │
-    ├── patch_examples/          # 补丁示例（跨平台）
-    │   ├── create_patch.sh
-    │   └── use_patch.sh
-    │
-    ├── shc/                     # Shell 脚本编译器示例（跨平台）
-    │   ├── echo_hello_world.sh
-    │   ├── shc_test.sh
-    │   └── source_shc.sh
-    │
-    └── auto_edit_redis_config/  # Redis 配置编辑（跨平台）
-        └── auto_edit_redis_config.sh
+    └── hardware/                # 硬件安装脚本
+        └── install_netint_t4xx.sh
 ```
 
 ## 脚本分类说明
@@ -91,8 +91,8 @@ scripts/
 
 ### 跨平台脚本
 
-跨平台脚本默认放在 `linux/` 目录下，包括：
-- **utils/**: 通用工具脚本（可在多个系统使用）
+跨平台脚本位于 `common/` 目录下，可在多个系统使用：
+- **utils/**: 通用工具脚本
 - **project_tools/**: 项目生成和管理工具
 - **media_tools/**: 媒体处理工具
 - **git_templates/**: Git 模板和配置
@@ -121,7 +121,9 @@ log_error "这是一条错误"
 end_script
 ```
 
-**注意**: 从 `linux/` 子目录引用时，路径为 `../../common.sh`（向上两级到 scripts 根目录）。
+**注意**:
+- 从 `common/` 子目录引用时，路径为 `../../../common.sh`（向上三级到 scripts 根目录）
+- 从 `linux/` 子目录引用时，路径为 `../../common.sh`（向上两级到 scripts 根目录）
 
 ## 命名规范
 
@@ -137,5 +139,5 @@ end_script
 - 所有脚本遵循统一的命名规范
 - 优化后的脚本使用 `common.sh` 中的函数
 - `common.sh` 放在 `scripts/` 根目录，便于所有子目录引用
-- 脚本按操作系统分类组织，跨平台脚本默认放在 `linux/` 目录
+- 脚本按操作系统分类组织，跨平台脚本位于 `common/` 目录，平台特定脚本位于对应平台目录
 

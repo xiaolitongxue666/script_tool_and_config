@@ -8,7 +8,7 @@
 
 # 加载通用函数库
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source "$SCRIPT_DIR/../../common.sh" 2>/dev/null || {
+source "$SCRIPT_DIR/../../../common.sh" 2>/dev/null || {
     echo "错误: 无法加载 common.sh"
     exit 1
 }

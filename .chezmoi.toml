@@ -1,17 +1,31 @@
 [source]
+    # 源状态目录：使用项目内目录模式
+    # 配置文件存储在项目根目录的 .chezmoi/ 目录中
     sourceDir = ".chezmoi"
 
 [data]
+    # 系统信息（自动检测，由 chezmoi 提供）
     os = "{{ .chezmoi.os }}"
     arch = "{{ .chezmoi.arch }}"
     hostname = "{{ .chezmoi.hostname }}"
-    # 代理配置（默认 127.0.0.1:7890，可通过环境变量覆盖）
+
+    # 代理配置
+    # 优先级：环境变量 PROXY > http_proxy > 默认值
+    # 默认代理地址：http://127.0.0.1:7890
+    # 使用方式：export PROXY="http://127.0.0.1:7890" 或在 .chezmoi.toml 中修改
     proxy = "{{ envOrDefault \"PROXY\" (envOrDefault \"http_proxy\" \"http://127.0.0.1:7890\") }}"
     proxy_host = "127.0.0.1"
     proxy_port = "7890"
-    # 平台特定的包管理器
+
+    # 包管理器自动检测
+    # Linux: pacman > apt-get > dnf > yum
+    # macOS: brew
+    # Windows: winget
     package_manager = "{{ if eq .chezmoi.os \"linux\" }}{{ if exec \"pacman\" }}{{ \"pacman\" }}{{ else if exec \"apt-get\" }}{{ \"apt\" }}{{ else if exec \"dnf\" }}{{ \"dnf\" }}{{ else if exec \"yum\" }}{{ \"yum\" }}{{ end }}{{ else if eq .chezmoi.os \"darwin\" }}{{ \"brew\" }}{{ else if eq .chezmoi.os \"windows\" }}{{ \"winget\" }}{{ end }}"
 
 [git]
+    # Git 自动提交和推送（建议保持 false，手动控制）
+    # autoCommit: 自动提交更改到 Git
+    # autoPush: 自动推送到远程仓库
     autoCommit = false
     autoPush = false

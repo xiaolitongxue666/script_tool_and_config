@@ -165,10 +165,10 @@ obj/
 # ============================================
 
 # 项目生成器生成的文件（cpp_project_generator）
-scripts/linux/project_tools/cpp_project_generator/src/
-scripts/linux/project_tools/cpp_project_generator/build/
-scripts/linux/project_tools/cpp_project_generator/CMakeLists.txt
-scripts/linux/project_tools/cpp_project_generator/.gitignore
+scripts/common/project_tools/cpp_project_generator/src/
+scripts/common/project_tools/cpp_project_generator/build/
+scripts/common/project_tools/cpp_project_generator/CMakeLists.txt
+scripts/common/project_tools/cpp_project_generator/.gitignore
 
 # 补丁示例的备份文件
 scripts/linux/patch_examples/*.bak

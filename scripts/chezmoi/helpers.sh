@@ -54,6 +54,37 @@ check_chezmoi_initialized() {
     fi
 }
 
+# 初始化 chezmoi 环境（Windows 特定）
+init_chezmoi_env() {
+    # 检测是否为 Windows 环境
+    if [[ "$OSTYPE" =~ ^(msys|mingw|cygwin) ]]; then
+        # Windows Git Bash 环境
+        # 创建 chezmoi 状态目录（chezmoi 需要此目录存储状态信息）
+        local chezmoi_state_dir="$HOME/.local/share/chezmoi"
+        if [ ! -d "$chezmoi_state_dir" ]; then
+            echo "[INFO] 创建 chezmoi 状态目录: $chezmoi_state_dir"
+            mkdir -p "$chezmoi_state_dir"
+        fi
+    fi
+}
+
+# 设置 chezmoi 源状态目录
+setup_chezmoi_source_dir() {
+    # 先初始化环境（Windows 需要）
+    init_chezmoi_env
+
+    local source_dir="$(get_chezmoi_source_dir)"
+    if [ -d "$source_dir" ]; then
+        export CHEZMOI_SOURCE_DIR="$source_dir"
+        echo "[INFO] 使用源状态目录: $source_dir"
+        return 0
+    else
+        echo "[WARNING] 源状态目录不存在: $source_dir"
+        echo "[INFO] 将使用默认源状态目录"
+        return 1
+    fi
+}
+
 # 初始化 chezmoi 仓库
 init_chezmoi_repo() {
     local source_dir="$(get_chezmoi_source_dir)"

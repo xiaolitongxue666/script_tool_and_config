@@ -10,6 +10,7 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 COMMON_SH="${PROJECT_ROOT}/scripts/common.sh"
+HELPERS_SH="${SCRIPT_DIR}/chezmoi/helpers.sh"
 
 # 加载通用函数库
 if [ -f "$COMMON_SH" ]; then
@@ -20,6 +21,11 @@ else
     function log_warning() { echo "[WARNING] $*"; }
     function log_error() { echo "[ERROR] $*" >&2; }
     function error_exit() { log_error "$1"; exit "${2:-1}"; }
+fi
+
+# 加载 chezmoi 辅助函数库
+if [ -f "$HELPERS_SH" ]; then
+    source "$HELPERS_SH"
 fi
 
 # ============================================
@@ -34,35 +40,24 @@ check_chezmoi() {
 }
 
 # ============================================
-# 初始化 chezmoi 环境（Windows 特定）
-# ============================================
-init_chezmoi_env() {
-    # 检测是否为 Windows 环境
-    if [[ "$OSTYPE" =~ ^(msys|mingw|cygwin) ]]; then
-        # Windows Git Bash 环境
-        # 创建 chezmoi 状态目录（chezmoi 需要此目录存储状态信息）
-        local chezmoi_state_dir="$HOME/.local/share/chezmoi"
-        if [ ! -d "$chezmoi_state_dir" ]; then
-            log_info "创建 chezmoi 状态目录: $chezmoi_state_dir"
-            mkdir -p "$chezmoi_state_dir"
-        fi
-    fi
-}
-
-# ============================================
 # 设置 chezmoi 源状态目录
+# 使用 helpers.sh 中的函数
 # ============================================
 setup_chezmoi_source() {
-    # 先初始化环境（Windows 需要）
-    init_chezmoi_env
-
-    local source_dir="${PROJECT_ROOT}/.chezmoi"
-    if [ -d "$source_dir" ]; then
-        export CHEZMOI_SOURCE_DIR="$source_dir"
-        log_info "使用源状态目录: $source_dir"
+    if command -v setup_chezmoi_source_dir &> /dev/null; then
+        # 使用 helpers.sh 中的函数
+        setup_chezmoi_source_dir
     else
-        log_warning "源状态目录不存在: $source_dir"
-        log_info "将使用默认源状态目录"
+        # 回退到本地实现
+        init_chezmoi_env
+        local source_dir="${PROJECT_ROOT}/.chezmoi"
+        if [ -d "$source_dir" ]; then
+            export CHEZMOI_SOURCE_DIR="$source_dir"
+            log_info "使用源状态目录: $source_dir"
+        else
+            log_warning "源状态目录不存在: $source_dir"
+            log_info "将使用默认源状态目录"
+        fi
     fi
 }
 
@@ -77,7 +72,10 @@ cmd_install() {
     log_info "初始化 chezmoi 仓库..."
     setup_chezmoi_source
 
-    if [ -n "$CHEZMOI_SOURCE_DIR" ] && [ ! -d "${CHEZMOI_SOURCE_DIR}/.git" ]; then
+    # 使用 helpers.sh 中的函数初始化仓库
+    if command -v init_chezmoi_repo &> /dev/null; then
+        init_chezmoi_repo
+    elif [ -n "$CHEZMOI_SOURCE_DIR" ] && [ ! -d "${CHEZMOI_SOURCE_DIR}/.git" ]; then
         log_info "初始化 Git 仓库..."
         cd "$CHEZMOI_SOURCE_DIR"
         git init

@@ -207,7 +207,7 @@ git push
 
 更多使用说明请参考：
 - [OS_SETUP_GUIDE.md](OS_SETUP_GUIDE.md) - Windows/macOS 新系统完整安装指南
-- [CHEZMOI_GUIDE.md](CHEZMOI_GUIDE.md) - 完整的 chezmoi 使用指南
+- [chezmoi_use_guide.md](chezmoi_use_guide.md) - 完整的 chezmoi 使用指南
 - [SOFTWARE_LIST.md](SOFTWARE_LIST.md) - 完整的软件清单和分类
 - [project_structure.md](project_structure.md) - 详细的项目结构说明
 - [chezmoi 官方文档](https://www.chezmoi.io/docs/)
@@ -678,20 +678,21 @@ script_tool_and_config/
     ├── macos/                       # macOS 专用脚本
     │   └── system_basic_env/        # macOS 基础环境安装
     │       └── README.md            # macOS 工具安装说明
-    └── linux/                       # Linux 专用脚本和跨平台脚本
-        ├── system_basic_env/        # 系统基础环境安装脚本（ArchLinux）
-        │   ├── USAGE.md             # 使用说明
-        │   └── TEST_MIRRORS_README.md # 镜像测试说明
-        ├── network/                 # 网络配置脚本
-        ├── hardware/                # 硬件安装脚本
-        ├── utils/                   # 通用工具脚本（跨平台）
-        ├── project_tools/           # 项目生成和管理工具（跨平台）
-        ├── media_tools/             # 媒体处理工具（跨平台）
-        ├── git_templates/           # Git 相关模板（跨平台）
-        ├── patch_examples/          # 补丁使用示例（跨平台）
+    ├── common/                      # 跨平台脚本
+        ├── utils/                   # 通用工具脚本
+        ├── project_tools/           # 项目生成和管理工具
+        ├── media_tools/             # 媒体处理工具
+        ├── git_templates/           # Git 相关模板
+        ├── patch_examples/          # 补丁使用示例
         │   └── README.md            # 补丁使用说明
-        ├── shc/                     # Shell 脚本编译器示例（跨平台）
-        └── auto_edit_redis_config/  # Redis 配置编辑（跨平台）
+        ├── shc/                     # Shell 脚本编译器示例
+        └── auto_edit_redis_config/  # Redis 配置编辑
+    └── linux/                       # Linux 专用脚本
+        ├── system_basic_env/        # 系统基础环境安装脚本（ArchLinux）
+        │   ├── README.md            # 使用说明
+        │   └── TEST_README.md       # 镜像测试说明
+        ├── network/                 # 网络配置脚本
+        └── hardware/                # 硬件安装脚本
 ```
 
 ### 关键目录说明
@@ -705,7 +706,7 @@ script_tool_and_config/
 **根目录文档：**
 - `README.md` - 项目主文档（本文件）
 - `OS_SETUP_GUIDE.md` - Windows/macOS 新系统完整安装指南
-- `CHEZMOI_GUIDE.md` - chezmoi 使用指南
+- `chezmoi_use_guide.md` - chezmoi 使用指南
 - `SOFTWARE_LIST.md` - 软件清单和分类
 - `project_structure.md` - 详细的项目结构说明
 

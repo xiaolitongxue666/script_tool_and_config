@@ -11,7 +11,7 @@ script_tool_and_config/
 ├── readme.md                         # 项目主文档
 ├── project_structure.md              # 项目结构说明（本文件）
 ├── software_list.md                 # 软件清单
-├── chezmoi_guide.md                  # chezmoi 使用指南
+├── chezmoi_use_guide.md              # chezmoi 使用指南
 │
 ├── dotfiles/                         # 配置文件（Legacy，已迁移到 .chezmoi/）
 │   ├── legacy.md                     # Legacy 说明文档
@@ -43,26 +43,8 @@ script_tool_and_config/
 │   ├── migration/                    # 迁移脚本
 │   │   └── migrate_to_chezmoi.sh    # 迁移到 chezmoi
 │   │
-│   ├── linux/                        # Linux 专用脚本和跨平台脚本
-│   │   ├── system_basic_env/        # 系统基础环境安装（ArchLinux）
-│   │   │   ├── usage.md              # 使用说明
-│   │   │   ├── configure_china_mirrors.sh
-│   │   │   ├── install_common_tools.sh
-│   │   │   ├── install_environment.sh
-│   │   │   ├── install_neovim.sh
-│   │   │   ├── install_common_software.sh
-│   │   │   ├── install_gnome.sh
-│   │   │   └── install_network_manager.sh
-│   │   │
-│   │   ├── network/                  # 网络配置脚本
-│   │   │   ├── configure_ethernet_mac.sh
-│   │   │   ├── deploy_openresty.sh
-│   │   │   └── send_srt_stream.sh
-│   │   │
-│   │   ├── hardware/                 # 硬件安装脚本
-│   │   │   └── install_netint_t4xx.sh
-│   │   │
-│   │   ├── utils/                    # 通用工具脚本（跨平台）
+│   ├── common/                       # 跨平台脚本
+│   │   ├── utils/                    # 通用工具脚本
 │   │   │   ├── append_text_to_file.sh
 │   │   │   ├── append_lines_to_file.sh
 │   │   │   ├── replace_text_in_files.sh
@@ -79,7 +61,7 @@ script_tool_and_config/
 │   │   │   ├── demo_heredoc.sh
 │   │   │   └── extract_text_between_markers.sh
 │   │   │
-│   │   ├── project_tools/            # 项目生成和管理工具（跨平台）
+│   │   ├── project_tools/            # 项目生成和管理工具
 │   │   │   ├── create_c_source_file.sh
 │   │   │   ├── generate_cmake_lists.sh
 │   │   │   ├── generate_log4c_config.sh
@@ -87,30 +69,48 @@ script_tool_and_config/
 │   │   │   └── cpp_project_generator/
 │   │   │       ├── generate_project.sh
 │   │   │       ├── cmake_all_project.sh
-│   │   │       ├── CMakeLists.txt
 │   │   │       ├── ls_dirs_name.sh
 │   │   │       └── src/
 │   │   │
-│   │   ├── media_tools/              # 媒体处理工具（跨平台）
+│   │   ├── media_tools/              # 媒体处理工具
 │   │   │   ├── open_multiple_ffmpeg_srt.sh
 │   │   │   ├── open_multiple_ffmpeg_udp.sh
 │   │   │   ├── concat_audio/
 │   │   │   └── mix_audio/
 │   │   │
-│   │   ├── git_templates/            # Git 模板（跨平台）
+│   │   ├── git_templates/            # Git 模板
 │   │   │   ├── github_common_config.sh
 │   │   │   └── default_gitignore_files/
 │   │   │
-│   │   ├── patch_examples/           # 补丁使用示例（跨平台）
+│   │   ├── patch_examples/           # 补丁使用示例
 │   │   │   ├── readme.md
 │   │   │   ├── create_patch.sh
 │   │   │   └── use_patch.sh
 │   │   │
-│   │   ├── shc/                      # Shell 脚本编译器示例（跨平台）
+│   │   ├── shc/                      # Shell 脚本编译器示例
 │   │   │   └── [示例脚本和编译产物]
 │   │   │
-│   │   └── auto_edit_redis_config/   # Redis 配置编辑（跨平台）
+│   │   └── auto_edit_redis_config/   # Redis 配置编辑
 │   │       └── auto_edit_redis_config.sh
+│   │
+│   ├── linux/                        # Linux 专用脚本
+│   │   ├── system_basic_env/        # 系统基础环境安装（ArchLinux）
+│   │   │   ├── README.md             # 使用说明
+│   │   │   ├── configure_china_mirrors.sh
+│   │   │   ├── install_common_tools.sh
+│   │   │   ├── install_environment.sh
+│   │   │   ├── install_neovim.sh
+│   │   │   ├── install_common_software.sh
+│   │   │   ├── install_gnome.sh
+│   │   │   └── install_network_manager.sh
+│   │   │
+│   │   ├── network/                  # 网络配置脚本
+│   │   │   ├── configure_ethernet_mac.sh
+│   │   │   ├── deploy_openresty.sh
+│   │   │   └── send_srt_stream.sh
+│   │   │
+│   │   └── hardware/                 # 硬件安装脚本
+│   │       └── install_netint_t4xx.sh
 │   │
 │   ├── macos/                        # macOS 专用脚本
 │   │   └── system_basic_env/
@@ -138,7 +138,7 @@ script_tool_and_config/
 - **readme.md**: 项目主文档，包含快速开始、使用说明等
 - **project_structure.md**: 项目结构说明（本文件）
 - **software_list.md**: 完整的软件清单和安装说明
-- **chezmoi_guide.md**: chezmoi 使用指南
+- **chezmoi_use_guide.md**: chezmoi 使用指南
 - **install.sh**: 一键安装脚本
 
 ### dotfiles/ 目录
@@ -167,7 +167,7 @@ Legacy 目录，所有配置已迁移到 `.chezmoi/` 目录。保留作为参考
 
 #### 跨平台工具脚本
 
-位于 `scripts/linux/` 目录下，但可在多个平台使用：
+位于 `scripts/common/` 目录下，可在多个平台使用：
 
 - **utils/**: 通用工具脚本
 - **project_tools/**: 项目生成和管理工具
@@ -175,6 +175,7 @@ Legacy 目录，所有配置已迁移到 `.chezmoi/` 目录。保留作为参考
 - **git_templates/**: Git 模板
 - **patch_examples/**: 补丁使用示例
 - **shc/**: Shell 脚本编译器示例
+- **auto_edit_redis_config/**: Redis 配置编辑工具
 
 #### 平台特定脚本
 
@@ -201,7 +202,7 @@ Legacy 配置文件位于 `dotfiles/` 目录，仅作为参考。
 
 1. `.chezmoi/` 目录不在版本控制中，由 chezmoi 管理
 2. `dotfiles/` 目录已标记为 Legacy，仅保留作为参考
-3. 跨平台脚本默认放在 `scripts/linux/` 目录下
+3. 跨平台脚本位于 `scripts/common/` 目录下
 4. 所有脚本注释已翻译为中文
 5. 脚本遵循统一的命名规范
 

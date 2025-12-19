@@ -7,7 +7,7 @@
 
 # 加载通用函数库
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-COMMON_SH="$SCRIPT_DIR/../../common.sh"
+COMMON_SH="$SCRIPT_DIR/../../../common.sh"
 if [[ -f "$COMMON_SH" ]]; then
     source "$COMMON_SH"
 else
