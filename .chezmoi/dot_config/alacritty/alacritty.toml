@@ -23,10 +23,11 @@
   # 实时配置重载（某些更改需要重启）
   live_config_reload = true
 
-  # 导入 falcon 主题
-  # 更多主题: https://github.com/alacritty/alacritty-theme
+  # 导入 catppuccin 主题
+  # 更多主题: https://github.com/catppuccin/alacritty
+  # 可选主题: catppuccin-latte, catppuccin-frappe, catppuccin-macchiato, catppuccin-mocha
   import = [
-    "~/.config/alacritty/themes/falcon.toml",
+    "~/.config/alacritty/themes/catppuccin-mocha.toml",
   ]
 
 # Environment variables
@@ -239,15 +240,16 @@
 
 # Colors configuration
 # 颜色配置
-# 注意：falcon 主题通过 import 导入，以下颜色配置会被主题文件覆盖
+# 注意：catppuccin 主题通过 import 导入，以下颜色配置会被主题文件覆盖
 # 如果需要自定义颜色，可以在主题文件之后添加覆盖配置
 #
-# falcon 主题颜色说明：
-# - 背景: #020221 (深蓝黑)
-# - 前景: #b4b4b9 (浅灰)
-# - 特点: 深色主题，文件夹背景色和文字颜色对比度较低
+# catppuccin 主题说明：
+# - Latte: 浅色主题
+# - Frappé: 深色主题（中等对比度）
+# - Macchiato: 深色主题（高对比度）
+# - Mocha: 深色主题（最高对比度，默认使用）
 #
-# 更多信息: https://github.com/alacritty/alacritty-theme
+# 更多信息: https://github.com/catppuccin/alacritty
 
 # Bell configuration # 声音提示配置
 #
