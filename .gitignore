@@ -164,6 +164,11 @@ obj/
 # 项目特定文件
 # ============================================
 
+# dotfiles 目录说明
+# 注意：dotfiles/ 目录现在仅用于 Git Submodule（nvim 配置）
+# 所有其他配置文件已迁移到 .chezmoi/ 目录，由 chezmoi 统一管理
+# dotfiles/nvim/ 是 Git Submodule，不应被忽略
+
 # 项目生成器生成的文件（cpp_project_generator）
 scripts/common/project_tools/cpp_project_generator/src/
 scripts/common/project_tools/cpp_project_generator/build/

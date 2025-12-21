@@ -631,10 +631,6 @@ chezmoi init <repo-url>
 
 **注意**：本项目使用项目内源状态目录模式（`.chezmoi/`），因此需要设置 `CHEZMOI_SOURCE_DIR` 环境变量，并确保状态目录存在。
 
-### 传统方式（Legacy）
-
-原有的 `dotfiles/` 目录已标记为 legacy，仅保留配置文件作为参考。所有安装脚本已迁移到 `.chezmoi/` 目录并使用模板系统管理。详情请参考：[dotfiles/legacy.md](dotfiles/legacy.md)
-
 ## 项目结构
 
 ```
@@ -649,17 +645,8 @@ script_tool_and_config/
 ├── .chezmoi.toml                   # chezmoi 配置文件
 ├── .chezmoiignore                  # chezmoi 忽略文件
 ├── install.sh                      # 一键安装脚本
-├── dotfiles/                       # 配置文件（Legacy，仅保留配置文件）
-│   ├── LEGACY.md                   # Legacy 说明文档
-│   ├── alacritty/                  # Alacritty 配置（仅配置文件）
-│   ├── bash/                       # Bash 配置（仅配置文件）
-│   ├── fish/                       # Fish Shell 配置（仅配置文件）
-│   ├── i3wm/                       # i3 窗口管理器配置（仅配置文件）
-│   ├── skhd/                       # skhd 配置（仅配置文件）
-│   ├── starship/                   # Starship 配置（仅配置文件）
-│   ├── tmux/                       # Tmux 配置（仅配置文件）
-│   ├── yabai/                      # Yabai 配置（仅配置文件）
-│   └── zsh/                        # Zsh 配置（仅配置文件）
+├── dotfiles/                       # Git Submodule（仅 nvim 配置）
+│   └── nvim/                       # Neovim 配置（Git Submodule）
 │
 └── scripts/                        # 脚本工具集合（按系统分类）
     ├── common.sh                    # 通用函数库（所有脚本共享）
@@ -697,8 +684,9 @@ script_tool_and_config/
 
 ### 关键目录说明
 
-- **`.chezmoi/`**: 所有配置文件和管理脚本，使用 chezmoi 模板系统
-- **`dotfiles/`**: Legacy 目录，仅保留配置文件作为参考（已迁移到 `.chezmoi/`）
+- **`.chezmoi/`**: 所有配置文件和管理脚本，使用 chezmoi 模板系统统一管理
+  - 所有配置通过 `.chezmoi/*.tmpl` → `chezmoi apply` → `~/.` 流程部署
+- **`dotfiles/`**: 仅用于 Git Submodule（nvim 配置）
 - **`scripts/`**: 功能性脚本，按平台分类组织
 
 ### 文档结构
@@ -716,7 +704,6 @@ script_tool_and_config/
 - `scripts/linux/system_basic_env/USAGE.md` - ArchLinux 系统配置使用说明
 - `scripts/windows/system_basic_env/README.md` - Windows 工具安装说明
 - `scripts/macos/system_basic_env/README.md` - macOS 工具安装说明
-- `dotfiles/LEGACY.md` - Legacy 配置说明
 
 ## 主要功能分类
 
@@ -822,6 +809,7 @@ script_tool_and_config/
   - **Submodule 使用**:
     - 首次克隆后需要初始化: `git submodule update --init dotfiles/nvim`
     - 更新配置: `git submodule update --remote dotfiles/nvim`
+  - **注意**: `dotfiles/` 目录现在仅用于 nvim Git Submodule，所有其他配置已迁移到 `.chezmoi/` 目录
   - **原始仓库**: https://github.com/xiaolitongxue666/nvim
 
 - **IdeaVim** (`nvim/ideavimrc/`): IntelliJ IDEA 系列 IDE 的 Vim 模拟插件配置
@@ -840,9 +828,10 @@ script_tool_and_config/
     - 更新配置: `git submodule update --remote dotfiles/nvim`
   - **注意**: 配置位于 `dotfiles/nvim/ideavimrc/`，通过 nvim submodule 管理
 
-- **SecureCRT** (`secure_crt/`): SSH 客户端配置和自动化脚本
+- **SecureCRT**: SSH 客户端配置和自动化脚本
+  - **配置位置**: `.chezmoi/run_on_windows/secure_crt/`（由 chezmoi 统一管理）
   - `SecureCRTV8_VM_Login_TOP.vbs`: VBScript 自动化脚本
-  - `install.sh`: 自动安装脚本（Windows）
+  - 通过 `chezmoi apply` 部署到系统
 
 ### 3. 脚本工具 (scripts)
 
@@ -1030,16 +1019,16 @@ sudo -E USE_SYSTEM_NVIM_VENV=1 NO_PROXY=1 ./install_common_tools.sh
 
 **Fish Shell**
 ```bash
-cd dotfiles/fish
-chmod +x install.sh
-./install.sh
+# 配置已迁移到 .chezmoi/dot_config/fish/config.fish
+# 使用 chezmoi 管理: chezmoi edit ~/.config/fish/config.fish
+# 应用配置: chezmoi apply
 ```
 
 **Bash**
 ```bash
-cd dotfiles/bash
-chmod +x install.sh
-./install.sh
+# 配置已迁移到 .chezmoi/dot_bashrc.tmpl
+# 使用 chezmoi 管理: chezmoi edit ~/.bashrc
+# 应用配置: chezmoi apply
 ```
 
 **Neovim（使用 Git Submodule）**
@@ -1088,7 +1077,8 @@ cd dotfiles/nvim/ideavimrc
 brew install --cask alacritty
 
 # 方法 2: 使用安装脚本
-cd dotfiles/alacritty
+# Alacritty 配置已迁移到 .chezmoi/dot_config/alacritty/alacritty.toml
+# 使用 chezmoi 管理: chezmoi edit ~/.config/alacritty/alacritty.toml
 chmod +x install.sh
 ./install.sh
 
@@ -1099,14 +1089,16 @@ cp alacritty.toml ~/.config/alacritty/
 
 **Tmux**
 ```bash
-cd dotfiles/tmux
+# Tmux 配置已迁移到 .chezmoi/dot_tmux.conf
+# 使用 chezmoi 管理: chezmoi edit ~/.tmux.conf
 chmod +x install.sh
 ./install.sh
 ```
 
 **dwm (Dynamic Window Manager)**
 ```bash
-cd dotfiles/dwm
+# dwm 配置已迁移到 .chezmoi/run_on_linux/dot_config/dwm/
+# 使用 chezmoi 管理: chezmoi edit ~/.config/dwm/config.h
 chmod +x install.sh
 ./install.sh
 ```
@@ -1117,27 +1109,23 @@ chmod +x install.sh
 - 可选安装 st (Simple Terminal)
 - 创建 XSession 桌面文件
 
-**注意**: dwm 的配置通过编辑源代码（`config.h`）完成，需要重新编译。详见 `dotfiles/dwm/readme.md`。
+**注意**: dwm 的配置通过编辑源代码（`config.h`）完成，需要重新编译。配置位于 `.chezmoi/run_on_linux/dot_config/dwm/`，由 chezmoi 管理。
 
 **同步配置**
 
-对于支持多系统的工具，可以使用配置同步脚本将配置文件同步到用户目录：
+所有配置现在通过 chezmoi 统一管理，使用以下方式同步：
 
 ```bash
-# Fish Shell（配置同步已集成到 install.sh 中）
-cd dotfiles/fish
-chmod +x install.sh
-./install.sh  # 安装脚本会自动同步配置（包含自动备份）
+# 编辑配置
+chezmoi edit ~/.config/fish/config.fish  # Fish Shell
+chezmoi edit ~/.bashrc                    # Bash
+chezmoi edit ~/.zshrc                    # Zsh
 
-# Bash（配置同步已集成到 install.sh 中）
-cd dotfiles/bash
-chmod +x install.sh
-./install.sh  # 安装脚本会自动同步配置（包含自动备份）
+# 应用配置到系统
+chezmoi apply
 
-# Zsh（配置同步已集成到 install.sh 中）
-cd dotfiles/zsh
-chmod +x install.sh
-./install.sh  # 安装脚本会自动同步配置
+# 查看配置差异
+chezmoi diff
 ```
 
 **注意**:

@@ -309,6 +309,7 @@ git clone <your-repo-url> ~/script_tool_and_config
 cd ~/script_tool_and_config
 
 # 如果项目包含 Git Submodule（如 Neovim 配置），需要初始化
+# 注意：dotfiles/ 目录现在仅用于 nvim Git Submodule
 git submodule update --init --recursive
 ```
 
@@ -538,7 +539,9 @@ brew services start skhd
 # 确保 submodule 已初始化
 git submodule update --init dotfiles/nvim
 
-# Neovim 配置会自动通过 chezmoi 管理
+# 注意：dotfiles/ 目录现在仅用于 nvim Git Submodule
+# 所有其他配置已迁移到 .chezmoi/ 目录，由 chezmoi 统一管理
+# Neovim 配置会自动通过 chezmoi 管理（创建符号链接到 ~/.config/nvim）
 ```
 
 #### 3. 配置 Git

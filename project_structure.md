@@ -13,21 +13,8 @@ script_tool_and_config/
 ├── software_list.md                 # 软件清单
 ├── chezmoi_use_guide.md              # chezmoi 使用指南
 │
-├── dotfiles/                         # 配置文件（Legacy，已迁移到 .chezmoi/）
-│   ├── legacy.md                     # Legacy 说明文档
-│   ├── alacritty/                    # Alacritty 终端配置
-│   ├── bash/                         # Bash 配置
-│   ├── fish/                         # Fish Shell 配置
-│   ├── zsh/                          # Zsh 配置
-│   ├── tmux/                         # Tmux 配置
-│   ├── starship/                     # Starship 提示符配置
-│   ├── i3wm/                         # i3wm 窗口管理器配置（Linux）
-│   ├── yabai/                        # Yabai 窗口管理器配置（macOS）
-│   ├── skhd/                         # skhd 快捷键配置（macOS）
-│   ├── dwm/                          # dwm 窗口管理器配置（Linux）
-│   ├── git_bash/                     # Git Bash 配置（Windows）
-│   ├── nvim/                         # Neovim 配置（Git Submodule）
-│   └── secure_crt/                   # SecureCRT 配置（Windows）
+├── dotfiles/                         # Git Submodule（仅 nvim 配置）
+│   └── nvim/                         # Neovim 配置（Git Submodule）
 │
 ├── scripts/                          # 脚本工具集合
 │   ├── common.sh                     # 通用函数库
@@ -200,9 +187,10 @@ Legacy 配置文件位于 `dotfiles/` 目录，仅作为参考。
 
 ## 注意事项
 
-1. `.chezmoi/` 目录不在版本控制中，由 chezmoi 管理
-2. `dotfiles/` 目录已标记为 Legacy，仅保留作为参考
-3. 跨平台脚本位于 `scripts/common/` 目录下
-4. 所有脚本注释已翻译为中文
-5. 脚本遵循统一的命名规范
+1. `.chezmoi/` 目录包含所有配置文件模板，由 chezmoi 统一管理
+2. `dotfiles/` 目录仅用于 Git Submodule（nvim 配置）
+3. 所有配置统一通过 `.chezmoi/*.tmpl` → `chezmoi apply` → `~/.` 流程部署
+4. 跨平台脚本位于 `scripts/common/` 目录下
+5. 所有脚本注释已翻译为中文
+6. 脚本遵循统一的命名规范
 
