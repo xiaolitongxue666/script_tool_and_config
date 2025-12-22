@@ -106,7 +106,14 @@
   # Window opacity as a floating point number from `0.0` to `1.0`.
   # The value `0.0` is completely transparent and `1.0` is opaque.
   # 值 `0.0` 是完全透明的，`1.0` 是不透明的。
-  # opacity = 0.9  # 在新版本中已废弃，但保留以兼容旧配置
+  # 设置85%不透明度，即15%透明
+  opacity = 0.85
+
+  # Background blur # 背景模糊效果
+  #
+  # Enable background blur effect (supported on some systems).
+  # 启用背景模糊效果（部分系统支持）
+  blur = true
 
   # Startup Mode (changes require restart)
   # 启动模式（更改需要重启）
