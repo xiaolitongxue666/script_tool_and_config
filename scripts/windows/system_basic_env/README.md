@@ -29,7 +29,7 @@
 - **注意**：tmux 在 Windows 上不支持，使用 Windows Terminal 或 WSL
 
 ### 系统监控工具
-- **bottom** - 跨平台系统监控工具（btop 的 Windows 替代）
+- **btop4win** - btop++ for Windows（从 GitHub Releases 下载安装）
 - **fastfetch** - 系统信息展示工具（neofetch 替代）
 - **eza** - ls 替代工具
 
@@ -56,7 +56,6 @@
 ### 其他工具
 - **dust** - du 替代工具（磁盘使用分析）
 - **procs** - ps 替代工具（进程查看增强）
-- **bottom** - 系统监控工具
 
 ### 字体
 - **Nerd Fonts FiraMono** - 编程字体（支持图标）
@@ -165,7 +164,7 @@ powershell -ExecutionPolicy Bypass -File .\install_common_tools.ps1
 # 单独操作某个工具（会显示详细菜单）
 .\install_common_tools.ps1 -ToolName fnm
 .\install_common_tools.ps1 -ToolName alacritty
-.\install_common_tools.ps1 -ToolName bottom
+.\install_common_tools.ps1 -ToolName btop4win
 
 # 结合操作类型
 .\install_common_tools.ps1 -Action Update -ToolName fnm
@@ -582,6 +581,64 @@ winget uninstall --id mingw-w64.mingw-w64
 - 脚本会自动检测并添加到 PATH 环境变量
 - MinGW-w64 的 GCC 与 Linux GCC 行为一致，生成零依赖的 exe 文件
 - 支持 C/C++ 开发，跨平台源码零改动
+
+### Q: btop4win 安装后如何在 PowerShell 和 Git Bash 中使用？
+
+btop4win 安装后需要配置 PATH 才能在 PowerShell 和 Git Bash 中使用。
+
+**配置系统 PATH（PowerShell 和 Git Bash 通用）**：
+
+```powershell
+# 以管理员身份运行 PowerShell
+cd scripts\windows\system_basic_env
+.\configure_btop4win_path.ps1
+```
+
+这个脚本会：
+- 将 `C:\Program Files\btop4win` 添加到系统 PATH（永久生效）
+- 刷新当前会话的 PATH
+- 验证配置是否成功
+
+**配置 Git Bash（如果系统 PATH 不生效）**：
+
+如果重启 Git Bash 后 btop4win 仍然不可用，可以手动添加到 Git Bash 配置：
+
+```bash
+# 在 Git Bash 中运行
+bash scripts/windows/system_basic_env/add_btop4win_to_git_bash.sh
+```
+
+或者手动添加到 `~/.bash_profile`：
+
+```bash
+# 添加到 ~/.bash_profile
+cat >> ~/.bash_profile << 'EOF'
+
+# btop4win 配置（系统监控工具）
+# 如果 btop4win 已安装，添加到 PATH
+if [ -d "/c/Program Files/btop4win" ]; then
+    export PATH="/c/Program Files/btop4win:$PATH"
+fi
+EOF
+
+# 重新加载配置
+source ~/.bash_profile
+```
+
+**验证安装**：
+
+```powershell
+# 在 PowerShell 中验证
+btop4win --version
+
+# 在 Git Bash 中验证
+btop4win --version
+```
+
+**注意**：
+- 系统 PATH 配置后，PowerShell 和 Git Bash 都会自动继承
+- 如果 Git Bash 重启后仍然不可用，需要手动添加到 `.bash_profile`
+- 配置脚本位置：`scripts\windows\system_basic_env\configure_btop4win_path.ps1`
 
 ### Q: Make 和 CMake 安装后如何使用？
 

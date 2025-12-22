@@ -4,38 +4,38 @@
 <#
 .SYNOPSIS
     Windows 基础工具安装脚本
-    
+
 .DESCRIPTION
     用于在新装 Windows 系统上安装基础开发工具，支持 winget 和 chocolatey 两种包管理器。
     参考 winutil 的安装方式实现。
-    
+
 .PARAMETER Interactive
     启用交互式模式，让用户选择要安装的工具
-    
+
 .PARAMETER PackageManager
     指定包管理器：winget 或 chocolatey（默认：自动选择，优先使用 winget）
-    
+
 .PARAMETER SkipFonts
     跳过字体安装
-    
+
 .PARAMETER Action
     操作类型：Install（安装）、Update（更新）、Uninstall（卸载）。默认：Install
-    
+
 .PARAMETER ToolName
     指定要操作的工具名称（用于单独操作某个工具）
-    
+
 .EXAMPLE
     .\install_common_tools.ps1
-    
+
 .EXAMPLE
     .\install_common_tools.ps1 -Interactive
-    
+
 .EXAMPLE
     .\install_common_tools.ps1 -PackageManager winget
-    
+
 .EXAMPLE
     .\install_common_tools.ps1 -Action Update
-    
+
 .EXAMPLE
     .\install_common_tools.ps1 -Action Update -ToolName fnm
 #>
@@ -94,7 +94,7 @@ function Write-Log {
         [string]$LogFile = $Script:LogFile,
         [switch]$NoNewline
     )
-    
+
     # 追加到日志文件（不带时间戳，与控制台输出一致）
     try {
         if ($NoNewline) {
@@ -151,13 +151,13 @@ function Write-Host-Log {
         [switch]$NoNewline,
         [string]$ForegroundColor
     )
-    
+
     # 构建 Write-Host 的参数（排除 NoNewline，因为要单独处理）
     $hostParams = @{}
     if ($ForegroundColor) {
         $hostParams['ForegroundColor'] = $ForegroundColor
     }
-    
+
     # 输出到控制台
     if ($NoNewline) {
         Write-Host $Message -NoNewline @hostParams
@@ -175,30 +175,30 @@ function Test-IsMainlandChina {
     <#
     .SYNOPSIS
         检测是否在中国大陆
-        
+
     .DESCRIPTION
         通过检查系统区域设置、时区和语言来判断是否在中国大陆
     #>
-    
+
     try {
         # 方法1: 检查系统区域设置
         $region = [System.Globalization.RegionInfo]::CurrentRegion
         if ($region.TwoLetterISORegionName -eq "CN") {
             return $true
         }
-        
+
         # 方法2: 检查时区（中国标准时间 UTC+8）
         $timeZone = [System.TimeZoneInfo]::Local
         if ($timeZone.Id -like "*China*" -or $timeZone.Id -like "*Beijing*" -or $timeZone.Id -like "*Shanghai*") {
             return $true
         }
-        
+
         # 方法3: 检查系统语言
         $culture = [System.Globalization.CultureInfo]::CurrentCulture
         if ($culture.Name -eq "zh-CN") {
             return $true
         }
-        
+
         return $false
     } catch {
         return $false
@@ -213,12 +213,12 @@ function Set-ProxySettings {
     param(
         [string]$ProxyUrl = "http://127.0.0.1:7890"
     )
-    
+
     $env:http_proxy = $ProxyUrl
     $env:https_proxy = $ProxyUrl
     $env:HTTP_PROXY = $ProxyUrl
     $env:HTTPS_PROXY = $ProxyUrl
-    
+
     Write-Info "Proxy set to: $ProxyUrl"
 }
 
@@ -230,11 +230,11 @@ function Get-WebRequestParams {
     param(
         [string]$ProxyUrl = "http://127.0.0.1:7890"
     )
-    
+
     $params = @{
         UseBasicParsing = $true
     }
-    
+
     # 如果设置了代理环境变量，使用代理
     if ($env:http_proxy) {
         try {
@@ -244,7 +244,7 @@ function Get-WebRequestParams {
             # 代理 URL 格式错误，忽略
         }
     }
-    
+
     return $params
 }
 
@@ -256,17 +256,17 @@ function Invoke-WebRequestWithProgress {
     param(
         [Parameter(Mandatory)]
         [string]$Uri,
-        
+
         [Parameter(Mandatory)]
         [string]$OutFile,
-        
+
         [string]$ProxyUrl = ""
     )
-    
+
     try {
         # 创建 WebClient 对象
         $webClient = New-Object System.Net.WebClient
-        
+
         # 设置代理
         if ($env:http_proxy) {
             try {
@@ -276,7 +276,7 @@ function Invoke-WebRequestWithProgress {
                 # 代理设置失败，继续
             }
         }
-        
+
         # 获取文件大小（使用 script 作用域变量，以便在事件处理程序中访问）
         $webClient.Headers.Add("User-Agent", "Mozilla/5.0")
         $script:totalBytes = 0
@@ -287,21 +287,21 @@ function Invoke-WebRequestWithProgress {
         } catch {
             # 无法获取文件大小，继续下载
         }
-        
+
         # 下载进度跟踪（使用 script 作用域变量，以便在事件处理程序中访问）
         $script:downloadedBytes = 0
         $script:lastUpdateTime = Get-Date
         $script:lastDownloadedBytes = 0
         $script:speed = 0
-        
+
         # 注册进度事件
         $webClient.add_DownloadProgressChanged({
             param($sender, $e)
-            
+
             $script:downloadedBytes = $e.BytesReceived
             $currentTime = Get-Date
             $timeElapsed = ($currentTime - $script:lastUpdateTime).TotalSeconds
-            
+
             # 计算下载速度（每秒更新一次）
             if ($timeElapsed -ge 1.0) {
                 $bytesDownloaded = $script:downloadedBytes - $script:lastDownloadedBytes
@@ -309,7 +309,7 @@ function Invoke-WebRequestWithProgress {
                 $script:lastUpdateTime = $currentTime
                 $script:lastDownloadedBytes = $script:downloadedBytes
             }
-            
+
             # 格式化速度
             $speedFormatted = if ($script:speed -gt 1MB) {
                 "{0:N2} MB/s" -f ($script:speed / 1MB)
@@ -318,7 +318,7 @@ function Invoke-WebRequestWithProgress {
             } else {
                 "{0:N0} B/s" -f $script:speed
             }
-            
+
             # 格式化已下载大小
             $downloadedFormatted = if ($script:downloadedBytes -gt 1MB) {
                 "{0:N2} MB" -f ($script:downloadedBytes / 1MB)
@@ -327,7 +327,7 @@ function Invoke-WebRequestWithProgress {
             } else {
                 "{0:N0} B" -f $script:downloadedBytes
             }
-            
+
             # 格式化总大小
             $totalFormatted = if ($script:totalBytes -gt 1MB) {
                 "{0:N2} MB" -f ($script:totalBytes / 1MB)
@@ -336,40 +336,40 @@ function Invoke-WebRequestWithProgress {
             } else {
                 "{0:N0} B" -f $script:totalBytes
             }
-            
+
             # 计算百分比
             $percent = if ($script:totalBytes -gt 0) {
                 [Math]::Min(100, [int](($script:downloadedBytes / $script:totalBytes) * 100))
             } else {
                 0
             }
-            
+
             # 显示进度条
             $progressBarLength = 50
             $filledLength = [Math]::Floor($percent / 100 * $progressBarLength)
             $bar = "█" * $filledLength + "▒" * ($progressBarLength - $filledLength)
-            
+
             # 更新进度显示（在同一行）
             $progressText = "`r  [$bar] $percent% - $downloadedFormatted / $totalFormatted - $speedFormatted"
             Write-Host -NoNewline $progressText
             # 注意：日志中不记录每行的进度更新，只记录最终完成状态
         })
-        
+
         # 开始下载
         Write-Info "Downloading from: $Uri"
         if ($script:totalBytes -gt 0) {
             Write-Info "File size: $([Math]::Round($script:totalBytes / 1MB, 2)) MB"
         }
-        
+
         $webClient.DownloadFile($Uri, $OutFile)
-        
+
         # 下载完成，换行
         Write-Host ""
         Write-Log ""
-        
+
         Write-Success "Download completed: $OutFile"
         return $true
-        
+
     } catch {
         Write-Host ""
         Write-Log ""
@@ -390,7 +390,7 @@ function Test-PackageManager {
     <#
     .SYNOPSIS
         检测包管理器是否已安装
-        
+
     .PARAMETER Manager
         包管理器名称：winget 或 chocolatey
     #>
@@ -399,9 +399,9 @@ function Test-PackageManager {
         [ValidateSet("winget", "chocolatey")]
         [string]$Manager
     )
-    
+
     $status = "not-installed"
-    
+
     if ($Manager -eq "winget") {
         try {
             $wingetInfo = winget --info 2>&1
@@ -412,12 +412,12 @@ function Test-PackageManager {
             $status = "not-installed"
         }
     } elseif ($Manager -eq "chocolatey") {
-        if ((Get-Command -Name choco -ErrorAction SilentlyContinue) -and 
+        if ((Get-Command -Name choco -ErrorAction SilentlyContinue) -and
             (Test-Path "$env:ChocolateyInstall\choco.exe")) {
             $status = "installed"
         }
     }
-    
+
     return $status
 }
 
@@ -430,16 +430,16 @@ function Install-Winget {
         安装或更新 Winget
     #>
     Write-Info "Checking Winget installation status..."
-    
+
     $wingetStatus = Test-PackageManager -Manager "winget"
-    
+
     if ($wingetStatus -eq "installed") {
         Write-Success "Winget is already installed"
         return $true
     }
-    
+
     Write-Info "Installing Winget..."
-    
+
     try {
         # 尝试通过 Microsoft Store 安装
         $wingetCmd = Get-Command winget -ErrorAction SilentlyContinue
@@ -451,13 +451,13 @@ function Install-Winget {
                 return $true
             }
         }
-        
+
         # 尝试从 Microsoft Store 安装
         Write-Info "Attempting to install App Installer from Microsoft Store..."
         Start-Process "ms-windows-store://pdp/?ProductId=9NBLGGH4NNS1" -ErrorAction SilentlyContinue
         Write-Warning "Please install App Installer from Microsoft Store, then run this script again"
         return $false
-        
+
     } catch {
         Write-Error "Failed to install Winget: $_"
         return $false
@@ -470,20 +470,20 @@ function Install-Chocolatey {
         安装 Chocolatey
     #>
     Write-Info "Checking Chocolatey installation status..."
-    
+
     $chocoStatus = Test-PackageManager -Manager "chocolatey"
-    
+
     if ($chocoStatus -eq "installed") {
         Write-Success "Chocolatey is already installed"
         return $true
     }
-    
+
     Write-Info "Installing Chocolatey..."
-    
+
     try {
         Set-ExecutionPolicy Bypass -Scope Process -Force
         [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
-        
+
         # 如果在中国大陆，设置代理
         if (Test-IsMainlandChina) {
             Set-ProxySettings
@@ -496,10 +496,10 @@ function Install-Chocolatey {
         } else {
             Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
         }
-        
+
         # 刷新环境变量
         $env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
-        
+
         if (Test-PackageManager -Manager "chocolatey" -eq "installed") {
             Write-Success "Chocolatey installed successfully"
             return $true
@@ -520,28 +520,28 @@ function Test-ProgramInstalled {
     <#
     .SYNOPSIS
         检测程序是否已安装
-        
+
     .PARAMETER PackageId
         包 ID（winget 或 chocolatey）
-        
+
     .PARAMETER PackageName
         包名称
-        
+
     .PARAMETER Manager
         包管理器类型
     #>
     param(
         [Parameter(Mandatory)]
         [string]$PackageId,
-        
+
         [Parameter(Mandatory)]
         [string]$PackageName,
-        
+
         [Parameter(Mandatory)]
         [ValidateSet("winget", "chocolatey")]
         [string]$Manager
     )
-    
+
     # 特殊处理：gcc 使用 MSYS2 检测方式
     if ($PackageName -eq "gcc") {
         $msys2Check = Test-MSYS2Installed
@@ -557,7 +557,7 @@ function Test-ProgramInstalled {
         }
         return @{ Installed = $false; Version = $null }
     }
-    
+
     try {
         if ($Manager -eq "winget") {
             $guid = [System.Guid]::NewGuid().ToString('N').Substring(0,8)
@@ -633,7 +633,7 @@ function Test-ProgramInstalled {
     } catch {
         # 检测失败，假设未安装
     }
-    
+
     return @{ Installed = $false; Version = $null }
 }
 
@@ -641,20 +641,20 @@ function Get-ProgramVersion {
     <#
     .SYNOPSIS
         获取已安装程序的版本号
-        
+
     .PARAMETER PackageName
         程序名称
-        
+
     .PARAMETER PackageId
         包ID（用于从 winget 获取版本）
     #>
     param(
         [Parameter(Mandatory)]
         [string]$PackageName,
-        
+
         [string]$PackageId = ""
     )
-    
+
     # 首先尝试从 winget list 获取版本（最可靠）
     if ($PackageId) {
         try {
@@ -708,14 +708,14 @@ function Get-ProgramVersion {
             # 忽略错误，回退其他方式
         }
     }
-    
+
     # 刷新 PATH 环境变量（从注册表重新加载）
     try {
         $env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
     } catch {
         # 忽略错误
     }
-    
+
     # 尝试通过命令获取版本
     try {
         $commands = @(
@@ -724,7 +724,7 @@ function Get-ProgramVersion {
             "$PackageName -V",
             "$PackageName version"
         )
-        
+
         foreach ($cmd in $commands) {
             try {
                 $result = & cmd /c $cmd 2>&1
@@ -741,7 +741,7 @@ function Get-ProgramVersion {
     } catch {
         # 忽略错误
     }
-    
+
     return "Unknown"
 }
 
@@ -756,14 +756,14 @@ function Install-ProgramWinget {
     param(
         [Parameter(Mandatory)]
         [string]$PackageId,
-        
+
         [Parameter(Mandatory)]
         [string]$PackageName
     )
-    
+
     # 检测是否已安装
     $checkResult = Test-ProgramInstalled -PackageId $PackageId -PackageName $PackageName -Manager "winget"
-    
+
     if ($checkResult.Installed) {
         Write-Info "$PackageName is already installed (version: $($checkResult.Version))"
         $version = Get-ProgramVersion -PackageName $PackageName -PackageId $PackageId
@@ -775,19 +775,19 @@ function Install-ProgramWinget {
         }
         return $true
     }
-    
+
     Write-Info "Installing $PackageName..."
-    
+
     try {
         # 构建参数（添加 --source winget 以避免 msstore 源问题）
         $arguments = "install --id $PackageId --source winget --silent --accept-source-agreements --accept-package-agreements"
-        
+
         # 捕获 winget 的输出（包括中文输出）
         # 注意：RedirectStandardOutput 和 RedirectStandardError 不能指向同一个文件
         $guid = [System.Guid]::NewGuid().ToString('N').Substring(0,8)
         $stdoutFile = Join-Path $env:TEMP "winget_stdout_$guid.txt"
         $stderrFile = Join-Path $env:TEMP "winget_stderr_$guid.txt"
-        
+
         try {
             $process = Start-Process -FilePath "winget" -ArgumentList $arguments -Wait -NoNewWindow -PassThru -RedirectStandardOutput $stdoutFile -RedirectStandardError $stderrFile
         } catch {
@@ -796,7 +796,7 @@ function Install-ProgramWinget {
             $process = Start-Process -FilePath "winget" -ArgumentList $arguments -Wait -NoNewWindow -PassThru
             $process = @{ ExitCode = $process.ExitCode }
         }
-        
+
         # 读取并记录 winget 的输出（合并 stdout 和 stderr）
         $allOutput = @()
         if (Test-Path $stdoutFile) {
@@ -813,14 +813,14 @@ function Install-ProgramWinget {
             }
             Remove-Item -Path $stderrFile -Force -ErrorAction SilentlyContinue
         }
-        
+
         # 记录所有输出到日志
         foreach ($line in $allOutput) {
             if ($line -and $line.Trim()) {
                 Write-Log $line
             }
         }
-        
+
         # 获取退出代码（处理不同的返回类型）
         $exitCode = if ($process -is [System.Diagnostics.Process]) {
             $process.ExitCode
@@ -829,13 +829,13 @@ function Install-ProgramWinget {
         } else {
             $LASTEXITCODE
         }
-        
+
         if ($exitCode -eq 0 -or $exitCode -eq -1978335189) {
             # 0 = 成功, -1978335189 = 已安装或无需更新
             Write-Success "$PackageName installed successfully"
             Write-Log "True"  # 记录返回值
             $Script:InstalledCount++
-            
+
             # 备份 PATH（首次安装时，如果尚未备份）
             if (-not $Script:PathBackedUp) {
                 Write-Info "Backing up current PATH to path.bak..."
@@ -843,7 +843,7 @@ function Install-ProgramWinget {
                     $Script:PathBackedUp = $true
                 }
             }
-            
+
             # 刷新 PATH 环境变量（使用 winutil 风格的多重刷新）
             Write-Info "Refreshing PATH environment variable..."
             $refreshResult = Refresh-EnvironmentPath -SkipBackup
@@ -852,10 +852,10 @@ function Install-ProgramWinget {
             } else {
                 Write-Warning "PATH refresh had issues, but continuing..."
             }
-            
+
             # 等待系统更新 PATH
             Start-Sleep -Milliseconds 1000  # 给系统更多时间更新
-            
+
             # 验证工具是否在 PATH 中（使用改进的检测方法）
             $pathCheck = Test-ProgramInPath -ProgramName $PackageName
             if ($pathCheck.Available) {
@@ -867,7 +867,7 @@ function Install-ProgramWinget {
                 Write-Warning "$PackageName may not be in PATH yet. You may need to restart your terminal (PowerShell/Git Bash)."
                 Write-Info "  Note: Some tools may require a system restart or new terminal session to be available."
             }
-            
+
             # 获取版本号
             $version = Get-ProgramVersion -PackageName $PackageName -PackageId $PackageId
             $Script:InstallationReport += @{
@@ -918,25 +918,25 @@ function Update-ProgramWinget {
     param(
         [Parameter(Mandatory)]
         [string]$PackageId,
-        
+
         [Parameter(Mandatory)]
         [string]$PackageName
     )
-    
+
     # 检测是否已安装
     $checkResult = Test-ProgramInstalled -PackageId $PackageId -PackageName $PackageName -Manager "winget"
-    
+
     if (-not $checkResult.Installed) {
         Write-Warning "$PackageName is not installed, cannot update"
         return $false
     }
-    
+
     Write-Info "Updating $PackageName (current version: $($checkResult.Version))..."
-    
+
     try {
         $arguments = "upgrade --id $PackageId --silent --accept-source-agreements --accept-package-agreements"
         $process = Start-Process -FilePath "winget" -ArgumentList $arguments -Wait -NoNewWindow -PassThru
-        
+
         if ($process.ExitCode -eq 0 -or $process.ExitCode -eq -1978335189) {
             # 0 = 成功, -1978335189 = 已是最新版本
             if ($process.ExitCode -eq -1978335189) {
@@ -944,7 +944,7 @@ function Update-ProgramWinget {
             } else {
                 Write-Success "$PackageName updated successfully"
             }
-            
+
             Start-Sleep -Milliseconds 500  # 等待 PATH 更新
             $version = Get-ProgramVersion -PackageName $PackageName -PackageId $PackageId
             $Script:InstallationReport += @{
@@ -976,28 +976,28 @@ function Update-ProgramChoco {
     param(
         [Parameter(Mandatory)]
         [string]$PackageId,
-        
+
         [Parameter(Mandatory)]
         [string]$PackageName
     )
-    
+
     # 检测是否已安装
     $checkResult = Test-ProgramInstalled -PackageId $PackageId -PackageName $PackageName -Manager "chocolatey"
-    
+
     if (-not $checkResult.Installed) {
         Write-Warning "$PackageName is not installed, cannot update"
         return $false
     }
-    
+
     Write-Info "Updating $PackageName (current version: $($checkResult.Version))..."
-    
+
     try {
         $arguments = "upgrade $PackageId -y"
         $process = Start-Process -FilePath "choco" -ArgumentList $arguments -Wait -NoNewWindow -PassThru
-        
+
         if ($process.ExitCode -eq 0) {
             Write-Success "$PackageName updated successfully"
-            
+
             Start-Sleep -Milliseconds 500  # 等待 PATH 更新
             $version = Get-ProgramVersion -PackageName $PackageName
             $Script:InstallationReport += @{
@@ -1029,25 +1029,25 @@ function Uninstall-ProgramWinget {
     param(
         [Parameter(Mandatory)]
         [string]$PackageId,
-        
+
         [Parameter(Mandatory)]
         [string]$PackageName
     )
-    
+
     # 检测是否已安装
     $checkResult = Test-ProgramInstalled -PackageId $PackageId -PackageName $PackageName -Manager "winget"
-    
+
     if (-not $checkResult.Installed) {
         Write-Warning "$PackageName is not installed, cannot uninstall"
         return $false
     }
-    
+
     Write-Info "Uninstalling $PackageName..."
-    
+
     try {
         $arguments = "uninstall --id $PackageId --silent --accept-source-agreements"
         $process = Start-Process -FilePath "winget" -ArgumentList $arguments -Wait -NoNewWindow -PassThru
-        
+
         if ($process.ExitCode -eq 0) {
             Write-Success "$PackageName uninstalled successfully"
             $Script:InstallationReport += @{
@@ -1079,25 +1079,25 @@ function Uninstall-ProgramChoco {
     param(
         [Parameter(Mandatory)]
         [string]$PackageId,
-        
+
         [Parameter(Mandatory)]
         [string]$PackageName
     )
-    
+
     # 检测是否已安装
     $checkResult = Test-ProgramInstalled -PackageId $PackageId -PackageName $PackageName -Manager "chocolatey"
-    
+
     if (-not $checkResult.Installed) {
         Write-Warning "$PackageName is not installed, cannot uninstall"
         return $false
     }
-    
+
     Write-Info "Uninstalling $PackageName..."
-    
+
     try {
         $arguments = "uninstall $PackageId -y"
         $process = Start-Process -FilePath "choco" -ArgumentList $arguments -Wait -NoNewWindow -PassThru
-        
+
         if ($process.ExitCode -eq 0) {
             Write-Success "$PackageName uninstalled successfully"
             $Script:InstallationReport += @{
@@ -1129,14 +1129,14 @@ function Install-ProgramChoco {
     param(
         [Parameter(Mandatory)]
         [string]$PackageId,
-        
+
         [Parameter(Mandatory)]
         [string]$PackageName
     )
-    
+
     # 检测是否已安装
     $checkResult = Test-ProgramInstalled -PackageId $PackageId -PackageName $PackageName -Manager "chocolatey"
-    
+
     if ($checkResult.Installed) {
         Write-Info "$PackageName is already installed (version: $($checkResult.Version))"
         $version = Get-ProgramVersion -PackageName $PackageName
@@ -1148,17 +1148,17 @@ function Install-ProgramChoco {
         }
         return $true
     }
-    
+
     Write-Info "Installing $PackageName..."
-    
+
     try {
         $arguments = "install $PackageId -y"
         $process = Start-Process -FilePath "choco" -ArgumentList $arguments -Wait -NoNewWindow -PassThru
-        
+
         if ($process.ExitCode -eq 0) {
             Write-Success "$PackageName installed successfully"
             $Script:InstalledCount++
-            
+
             # 备份 PATH（首次安装时，如果尚未备份）
             if (-not $Script:PathBackedUp) {
                 Write-Info "Backing up current PATH to path.bak..."
@@ -1166,7 +1166,7 @@ function Install-ProgramChoco {
                     $Script:PathBackedUp = $true
                 }
             }
-            
+
             # 刷新 PATH 环境变量（使用 winutil 风格的多重刷新）
             Write-Info "Refreshing PATH environment variable..."
             $refreshResult = Refresh-EnvironmentPath -SkipBackup
@@ -1175,10 +1175,10 @@ function Install-ProgramChoco {
             } else {
                 Write-Warning "PATH refresh had issues, but continuing..."
             }
-            
+
             # 等待系统更新 PATH
             Start-Sleep -Milliseconds 1000  # 给系统更多时间更新
-            
+
             # 验证工具是否在 PATH 中（使用改进的检测方法）
             $pathCheck = Test-ProgramInPath -ProgramName $PackageName
             if ($pathCheck.Available) {
@@ -1190,7 +1190,7 @@ function Install-ProgramChoco {
                 Write-Warning "$PackageName may not be in PATH yet. You may need to restart your terminal (PowerShell/Git Bash)."
                 Write-Info "  Note: Some tools may require a system restart or new terminal session to be available."
             }
-            
+
             # 获取版本号
             $version = Get-ProgramVersion -PackageName $PackageName
             $Script:InstallationReport += @{
@@ -1235,20 +1235,25 @@ function Install-Program {
         [Parameter(Mandatory)]
         [hashtable]$Package
     )
-    
+
     $packageName = $Package.Name
     $wingetId = $Package.WingetId
     $chocoId = $Package.ChocoId
-    
+
     # 特殊处理：gcc 使用 MSYS2 安装方式
     if ($packageName -eq "gcc") {
         return Install-MSYS2AndGCC -PackageName $packageName
     }
-    
+
+    # 特殊处理：btop4win 从 GitHub Releases 下载安装
+    if ($packageName -eq "btop4win") {
+        return Install-Btop4win -PackageName $packageName
+    }
+
     # 确定使用的包管理器
     $useWinget = $false
     $useChoco = $false
-    
+
     if ($Script:PackageManager -eq "winget") {
         $useWinget = $true
     } elseif ($Script:PackageManager -eq "chocolatey") {
@@ -1264,7 +1269,7 @@ function Install-Program {
             return $false
         }
     }
-    
+
     # 执行安装
     if ($useWinget -and $wingetId) {
         return Install-ProgramWinget -PackageId $wingetId -PackageName $packageName
@@ -1285,20 +1290,20 @@ function Update-Program {
         [Parameter(Mandatory)]
         [hashtable]$Package
     )
-    
+
     $packageName = $Package.Name
     $wingetId = $Package.WingetId
     $chocoId = $Package.ChocoId
-    
+
     # 特殊处理：gcc 使用 MSYS2 更新方式
     if ($packageName -eq "gcc") {
         return Update-MSYS2AndGCC -PackageName $packageName
     }
-    
+
     # 确定使用的包管理器
     $useWinget = $false
     $useChoco = $false
-    
+
     if ($Script:PackageManager -eq "winget") {
         $useWinget = $true
     } elseif ($Script:PackageManager -eq "chocolatey") {
@@ -1314,7 +1319,7 @@ function Update-Program {
             return $false
         }
     }
-    
+
     # 执行更新
     if ($useWinget -and $wingetId) {
         return Update-ProgramWinget -PackageId $wingetId -PackageName $packageName
@@ -1335,20 +1340,20 @@ function Uninstall-Program {
         [Parameter(Mandatory)]
         [hashtable]$Package
     )
-    
+
     $packageName = $Package.Name
     $wingetId = $Package.WingetId
     $chocoId = $Package.ChocoId
-    
+
     # 特殊处理：gcc 使用 MSYS2 卸载方式
     if ($packageName -eq "gcc") {
         return Uninstall-MSYS2AndGCC -PackageName $packageName
     }
-    
+
     # 确定使用的包管理器
     $useWinget = $false
     $useChoco = $false
-    
+
     if ($Script:PackageManager -eq "winget") {
         $useWinget = $true
     } elseif ($Script:PackageManager -eq "chocolatey") {
@@ -1364,7 +1369,7 @@ function Uninstall-Program {
             return $false
         }
     }
-    
+
     # 执行卸载
     if ($useWinget -and $wingetId) {
         return Uninstall-ProgramWinget -PackageId $wingetId -PackageName $packageName
@@ -1421,20 +1426,20 @@ function Backup-EnvironmentPath {
             # 最后的备用方案：使用当前工作目录
             $scriptDir = (Get-Location).Path
         }
-        
+
         # 确保路径存在
         if (-not (Test-Path $scriptDir)) {
             Write-Warning "Script directory not found, using current directory"
             $scriptDir = (Get-Location).Path
         }
-        
+
         $backupFile = Join-Path $scriptDir "path.bak"
-        
+
         # 获取当前 PATH
         $machinePath = [System.Environment]::GetEnvironmentVariable("Path", "Machine")
         $userPath = [System.Environment]::GetEnvironmentVariable("Path", "User")
         $currentPath = $env:Path
-        
+
         # 构建备份内容
         $backupContent = @"
 # PATH Environment Variable Backup
@@ -1455,10 +1460,10 @@ $currentPath
 
 # Backup completed successfully
 "@
-        
+
         # 写入备份文件
         $backupContent | Out-File -FilePath $backupFile -Encoding UTF8 -Force
-        
+
         Write-Info "PATH backed up to: $backupFile"
         return $true
     } catch {
@@ -1476,17 +1481,17 @@ function Refresh-EnvironmentPath {
     param(
         [switch]$SkipBackup  # 是否跳过备份（用于避免重复备份）
     )
-    
+
     # 备份 PATH（如果尚未备份）
     if (-not $SkipBackup) {
         Backup-EnvironmentPath | Out-Null
     }
-    
+
     try {
         # 方法 1: 从注册表重新加载 PATH（最可靠）
         $machinePath = [System.Environment]::GetEnvironmentVariable("Path", "Machine")
         $userPath = [System.Environment]::GetEnvironmentVariable("Path", "User")
-        
+
         # 清理 PATH（移除重复项和空项）
         $allPaths = @()
         if ($machinePath) {
@@ -1495,7 +1500,7 @@ function Refresh-EnvironmentPath {
         if ($userPath) {
             $allPaths += $userPath -split ';' | Where-Object { $_ -and $_.Trim() }
         }
-        
+
         # 去重并保持顺序
         $uniquePaths = @()
         $seenPaths = @{}
@@ -1506,10 +1511,10 @@ function Refresh-EnvironmentPath {
                 $uniquePaths += $path
             }
         }
-        
+
         # 更新当前进程的 PATH
         $env:Path = $uniquePaths -join ';'
-        
+
         # 方法 2: 通知系统环境变量已更改（广播 WM_SETTINGCHANGE）
         # 这会让其他程序（如 Git Bash、新打开的 PowerShell）知道 PATH 已更新
         try {
@@ -1529,14 +1534,14 @@ function Refresh-EnvironmentPath {
         } catch {
             # Win32 API 调用失败，继续使用基本方法
         }
-        
+
         # 方法 3: 使用 .NET 方法刷新环境变量（备用）
         try {
             [System.Environment]::SetEnvironmentVariable("Path", $env:Path, "Process")
         } catch {
             # 忽略错误
         }
-        
+
         return $true
     } catch {
         # 如果出错，至少刷新当前进程的 PATH
@@ -1558,10 +1563,10 @@ function Test-ProgramInPath {
     .SYNOPSIS
         检查程序是否在 PATH 中可用
         参考 winutil 的实现，使用多种方法检测
-        
+
     .PARAMETER ProgramName
         程序名称
-        
+
     .OUTPUTS
         返回哈希表：@{Available = bool; Path = string; Method = string}
     #>
@@ -1569,10 +1574,10 @@ function Test-ProgramInPath {
         [Parameter(Mandatory)]
         [string]$ProgramName
     )
-    
+
     # 刷新 PATH（跳过备份，避免重复备份）
     Refresh-EnvironmentPath -SkipBackup | Out-Null
-    
+
     # 方法 1: 使用 Get-Command（PowerShell 原生方法）
     try {
         $programPath = Get-Command -Name $ProgramName -ErrorAction SilentlyContinue
@@ -1586,7 +1591,7 @@ function Test-ProgramInPath {
     } catch {
         # 继续尝试其他方法
     }
-    
+
     # 方法 2: 使用 where.exe（Windows 标准方法，Git Bash 也支持）
     try {
         $result = & cmd /c "where $ProgramName" 2>&1
@@ -1603,7 +1608,7 @@ function Test-ProgramInPath {
     } catch {
         # 继续尝试其他方法
     }
-    
+
     # 方法 3: 检查常见安装位置
     $commonPaths = @(
         "$env:ProgramFiles\$ProgramName",
@@ -1613,7 +1618,7 @@ function Test-ProgramInPath {
         "$env:USERPROFILE\.local\bin\$ProgramName.exe",
         "$env:USERPROFILE\AppData\Local\Microsoft\WindowsApps\$ProgramName.exe"
     )
-    
+
     foreach ($commonPath in $commonPaths) {
         if (Test-Path $commonPath) {
             return @{
@@ -1623,7 +1628,7 @@ function Test-ProgramInPath {
             }
         }
     }
-    
+
     # 方法 4: 检查 PATH 中的每个目录
     try {
         $pathDirs = $env:Path -split ';' | Where-Object { $_ -and $_.Trim() }
@@ -1640,7 +1645,7 @@ function Test-ProgramInPath {
     } catch {
         # 忽略错误
     }
-    
+
     return @{
         Available = $false
         Path = $null
@@ -1659,11 +1664,11 @@ function Invoke-Msys2Pacman {
     param(
         [Parameter(Mandatory)]
         [string]$BashPath,
-        
+
         [Parameter(Mandatory)]
         [string]$Command
     )
-    
+
     return Invoke-Msys2CommandStreaming -BashPath $BashPath -Command $Command -DisplayName "pacman command" -DisableProxy
 }
 
@@ -1838,17 +1843,17 @@ function Invoke-Msys2FirstTimeSetup {
     param(
         [string]$Msys2Root = "C:\msys64"
     )
-    
+
     $bash = Join-Path $Msys2Root "usr\bin\bash.exe"
     if (-not (Test-Path $bash)) {
         Write-Error "MSYS2 bash not found at $bash"
         Write-Log "MSYS2 bash not found at $bash"
         return $false
     }
-    
+
     Write-Info "Running official MSYS2 first-time initialization (this may take 3-8 minutes)..."
     Write-Log "Running official MSYS2 first-time initialization (this may take 3-8 minutes)..."
-    
+
     # Step 1: pacman -Syuu --noconfirm
     $step1Cmd = "yes | pacman -Syuu"
     $step1Exit = Invoke-Msys2CommandStreaming -BashPath $bash -Command $step1Cmd -DisplayName "pacman -Syuu" -DisableProxy
@@ -1859,11 +1864,11 @@ function Invoke-Msys2FirstTimeSetup {
     if ($step1Exit -ne 0) {
         Write-Warning "Step 1 still failed (pacman -Syuu). Continuing, but MSYS2 may already be up to date."
     }
-    
+
     # Step 2: pacman -Su --noconfirm
     Write-Info "Waiting for pacman update to take effect (restarting bash process)..."
     Start-Sleep -Seconds 5
-    
+
     $step2Cmd = "yes | pacman -Su"
     $step2Exit = Invoke-Msys2CommandStreaming -BashPath $bash -Command $step2Cmd -DisplayName "pacman -Su" -DisableProxy
     if ($step2Exit -ne 0 -and (Apply-MSYS2Mirror -Msys2Root $Msys2Root)) {
@@ -1873,7 +1878,7 @@ function Invoke-Msys2FirstTimeSetup {
     if ($step2Exit -ne 0) {
         Write-Warning "Step 2 still failed (pacman -Su). Continuing, but packages may already be up to date."
     }
-    
+
     Write-Success "MSYS2 first-time setup completed (proxy first, mirror fallback if needed)"
     Write-Log "MSYS2 first-time setup completed (proxy first, mirror fallback if needed)"
     return $true
@@ -1891,7 +1896,7 @@ function Test-MSYS2Installed {
         "${env:ProgramFiles}\msys64",
         "${env:ProgramFiles(x86)}\msys64"
     )
-    
+
     foreach ($path in $msys2Paths) {
         if (Test-Path $path) {
             # 检查 MSYS2 目录是否存在关键文件（确认是有效的 MSYS2 安装）
@@ -1900,8 +1905,8 @@ function Test-MSYS2Installed {
                 # MSYS2 已安装，检查 GCC 是否已安装
                 $gccPath = Join-Path $path "mingw64\bin\gcc.exe"
                 $gccInstalled = Test-Path $gccPath
-                
-                return @{ 
+
+                return @{
                     Installed = $true
                     Path = $path
                     GccInstalled = $gccInstalled
@@ -1910,7 +1915,7 @@ function Test-MSYS2Installed {
             }
         }
     }
-    
+
     return @{ Installed = $false; Path = $null; GccInstalled = $false; GccPath = $null }
 }
 
@@ -1924,16 +1929,16 @@ function Install-MSYS2AndGCC {
         [Parameter(Mandatory)]
         [string]$PackageName
     )
-    
+
     # 检查是否已安装
     $msys2Check = Test-MSYS2Installed
-    
+
     # 如果 MSYS2 已安装且 GCC 已安装，直接返回
     if ($msys2Check.Installed -and $msys2Check.GccInstalled) {
         Write-Info "$PackageName (MSYS2 GCC) is already installed"
         Write-Info "  MSYS2 Path: $($msys2Check.Path)"
         Write-Info "  GCC Path: $($msys2Check.GccPath)"
-        
+
         # 检查 GCC 版本
         try {
             $gccVersion = & $msys2Check.GccPath --version 2>&1 | Select-Object -First 1
@@ -1943,7 +1948,7 @@ function Install-MSYS2AndGCC {
         } catch {
             # 忽略错误
         }
-        
+
         # 确保 PATH 中包含 MSYS2 的 mingw64\bin
         $mingw64Bin = Join-Path $msys2Check.Path "mingw64\bin"
         $userPath = [System.Environment]::GetEnvironmentVariable("Path", "User")
@@ -1953,7 +1958,7 @@ function Install-MSYS2AndGCC {
             $env:Path += ";$mingw64Bin"
             Write-Success "MSYS2 GCC added to PATH"
         }
-        
+
         $version = Get-ProgramVersion -PackageName "gcc"
         $Script:InstallationReport += @{
             Name = $PackageName
@@ -1964,19 +1969,19 @@ function Install-MSYS2AndGCC {
         Write-Log "True"
         return $true
     }
-    
+
     # 确定 MSYS2 根目录
     $msys2Root = if ($msys2Check.Installed) { $msys2Check.Path } else { "C:\msys64" }
     $bashPath = Join-Path $msys2Root "usr\bin\bash.exe"
-    
+
     # 如果 MSYS2 未安装，需要完整安装
     if (-not $msys2Check.Installed) {
         Write-Info "Installing MSYS2 and GCC..."
         Write-Info "This will install MSYS2 (a software distribution and building platform for Windows) and GCC compiler."
-        
+
         $msys2InstallerUrl = "https://github.com/msys2/msys2-installer/releases/latest/download/msys2-x86_64-latest.exe"
         $installerPath = "$env:TEMP\msys2-installer.exe"
-        
+
         try {
             # 下载 MSYS2 安装程序（带进度条）
             if (-not (Invoke-WebRequestWithProgress -Uri $msys2InstallerUrl -OutFile $installerPath)) {
@@ -1984,22 +1989,22 @@ function Install-MSYS2AndGCC {
                 Write-Log "Failed to download MSYS2 installer"
                 return $false
             }
-            
+
             # 安装 MSYS2（静默安装）
             Write-Info "Installing MSYS2 (this may take a few minutes)..."
             $installArgs = "install --root `"$msys2Root`" --confirm-command"
             $installProcess = Start-Process -FilePath $installerPath -ArgumentList $installArgs -Wait -NoNewWindow -PassThru
-            
+
             if ($installProcess.ExitCode -ne 0 -and $installProcess.ExitCode -ne 3010) {
                 Write-Error "MSYS2 installation failed (exit code: $($installProcess.ExitCode))"
                 Write-Log "MSYS2 installation failed (exit code: $($installProcess.ExitCode))"
                 Remove-Item -Path $installerPath -Force -ErrorAction SilentlyContinue
                 return $false
             }
-            
+
             # 等待 MSYS2 安装完成
             Start-Sleep -Seconds 5
-            
+
             # 检查 MSYS2 是否安装成功
             if (-not (Test-Path $msys2Root)) {
                 Write-Error "MSYS2 installation directory not found: $msys2Root"
@@ -2007,7 +2012,7 @@ function Install-MSYS2AndGCC {
                 Remove-Item -Path $installerPath -Force -ErrorAction SilentlyContinue
                 return $false
             }
-            
+
             # 清理安装程序
             Remove-Item -Path $installerPath -Force -ErrorAction SilentlyContinue
         } catch {
@@ -2018,21 +2023,21 @@ function Install-MSYS2AndGCC {
             return $false
         }
     }
-    
+
     # 检查 bash 是否存在
     if (-not (Test-Path $bashPath)) {
         Write-Error "MSYS2 bash not found: $bashPath"
         Write-Log "MSYS2 bash not found: $bashPath"
         return $false
     }
-    
+
     # 关键修复：无论是否已安装 GCC，都先强制执行一次「首次初始化流程」
     if (-not (Invoke-Msys2FirstTimeSetup -Msys2Root $msys2Root)) {
         Write-Error "MSYS2 initialization failed"
         Write-Log "MSYS2 initialization failed"
         return $false
     }
-    
+
     # 第3步：安装 GCC 工具链（现在 pacman 应该正常工作了）
     if ($Script:GccPreset -eq "minimal") {
         $minimalPackages = @(
@@ -2059,7 +2064,7 @@ function Install-MSYS2AndGCC {
         Write-Log "GCC toolchain installation failed (exit code: $gccExit)"
         return $false
     }
-    
+
     # 验证 GCC 是否真的装好了
     $gccPath = Join-Path $msys2Root "mingw64\bin\gcc.exe"
     if (-not (Test-Path $gccPath)) {
@@ -2067,7 +2072,7 @@ function Install-MSYS2AndGCC {
         Write-Log "GCC installation completed but gcc.exe not found at $gccPath"
         return $false
     }
-    
+
     # 添加到 PATH（保持你原来的逻辑）
     $mingwBin = Join-Path $msys2Root "mingw64\bin"
     $userPath = [System.Environment]::GetEnvironmentVariable("Path", "User")
@@ -2077,14 +2082,14 @@ function Install-MSYS2AndGCC {
         $env:Path += ";$mingwBin"
         Write-Success "MSYS2 GCC added to PATH"
     }
-    
+
     Write-Success "$PackageName (MSYS2 GCC) installed successfully"
     Write-Info "  MSYS2 Path: $msys2Root"
     Write-Info "  GCC Path: $mingwBin"
     Write-Log "True"
-    
+
     $Script:InstalledCount++
-    
+
     # 备份 PATH（首次安装时，如果尚未备份）
     if (-not $Script:PathBackedUp) {
         Write-Info "Backing up current PATH to path.bak..."
@@ -2092,7 +2097,7 @@ function Install-MSYS2AndGCC {
             $Script:PathBackedUp = $true
         }
     }
-    
+
     # 刷新 PATH 环境变量
     Write-Info "Refreshing PATH environment variable..."
     $refreshResult = Refresh-EnvironmentPath -SkipBackup
@@ -2101,10 +2106,10 @@ function Install-MSYS2AndGCC {
     } else {
         Write-Warning "PATH refresh had issues, but continuing..."
     }
-    
+
     # 等待系统更新 PATH
     Start-Sleep -Milliseconds 1000
-    
+
     # 验证工具是否在 PATH 中
     $pathCheck = Test-ProgramInPath -ProgramName "gcc"
     if ($pathCheck.Available) {
@@ -2116,7 +2121,7 @@ function Install-MSYS2AndGCC {
         Write-Warning "$PackageName may not be in PATH yet. You may need to restart your terminal (PowerShell/Git Bash)."
         Write-Info "  Note: Some tools may require a system restart or new terminal session to be available."
     }
-    
+
     # 获取版本号
     $version = Get-ProgramVersion -PackageName "gcc"
     $Script:InstallationReport += @{
@@ -2129,6 +2134,191 @@ function Install-MSYS2AndGCC {
     return $true
 }
 
+function Install-Btop4win {
+    <#
+    .SYNOPSIS
+        安装 btop4win（从 GitHub Releases 下载）
+        参考：https://github.com/aristocratos/btop4win
+    #>
+    param(
+        [Parameter(Mandatory)]
+        [string]$PackageName
+    )
+
+    # 检查是否已安装
+    $pathCheck = Test-ProgramInPath -ProgramName "btop4win"
+    if ($pathCheck.Available) {
+        Write-Info "$PackageName is already installed"
+        if ($pathCheck.Path) {
+            Write-Info "  Location: $($pathCheck.Path)"
+        }
+
+        # 尝试获取版本号
+        try {
+            $versionOutput = & "btop4win" --version 2>&1 | Select-Object -First 1
+            $versionMatch = $versionOutput | Select-String -Pattern "(\d+\.\d+\.\d+[^\s]*)" -AllMatches
+            $version = if ($versionMatch) { $versionMatch.Matches[0].Groups[1].Value } else { "Unknown" }
+        } catch {
+            $version = "Unknown"
+        }
+
+        $Script:InstallationReport += @{
+            Name = $PackageName
+            Version = $version
+            Status = "AlreadyExists"
+            InstallMethod = "GitHub"
+        }
+        Write-Log "True"
+        return $true
+    }
+
+    # 设置代理（如果需要）
+    if (Test-IsMainlandChina) {
+        Set-ProxyEnvironment -ProxyUrl "http://127.0.0.1:7890"
+    }
+
+    # 确定安装目录
+    $installDir = if (Test-Path $env:ProgramFiles) {
+        Join-Path $env:ProgramFiles "btop4win"
+    } else {
+        Join-Path $env:LOCALAPPDATA "btop4win"
+    }
+
+    # 下载 URL
+    $downloadUrl = "https://github.com/aristocratos/btop4win/releases/latest/download/btop4win-x64.zip"
+    $zipFile = Join-Path $env:TEMP "btop4win-x64.zip"
+    $extractDir = Join-Path $env:TEMP "btop4win-extract"
+
+    try {
+        # 下载 ZIP 文件
+        Write-Info "Downloading btop4win from GitHub Releases..."
+        Write-Info "  URL: $downloadUrl"
+
+        if (-not (Invoke-WebRequestWithProgress -Uri $downloadUrl -OutFile $zipFile)) {
+            Write-Error "Failed to download btop4win"
+            Write-Log "Failed to download btop4win"
+            return $false
+        }
+
+        # 确保提取目录存在
+        if (Test-Path $extractDir) {
+            Remove-Item -Path $extractDir -Recurse -Force -ErrorAction SilentlyContinue
+        }
+        New-Item -ItemType Directory -Path $extractDir -Force | Out-Null
+
+        # 解压 ZIP 文件
+        Write-Info "Extracting btop4win..."
+        Expand-Archive -Path $zipFile -DestinationPath $extractDir -Force
+
+        # 查找 btop4win.exe
+        $btopExe = Get-ChildItem -Path $extractDir -Filter "btop4win.exe" -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1
+
+        if (-not $btopExe) {
+            Write-Error "btop4win.exe not found in downloaded archive"
+            Write-Log "btop4win.exe not found in downloaded archive"
+            Remove-Item -Path $zipFile -Force -ErrorAction SilentlyContinue
+            Remove-Item -Path $extractDir -Recurse -Force -ErrorAction SilentlyContinue
+            return $false
+        }
+
+        # 确定 btop4win 的实际目录（可能是解压后的子目录）
+        $btopDir = $btopExe.DirectoryName
+
+        # 确保安装目录存在
+        if (Test-Path $installDir) {
+            Remove-Item -Path $installDir -Recurse -Force -ErrorAction SilentlyContinue
+        }
+        New-Item -ItemType Directory -Path $installDir -Force | Out-Null
+
+        # 复制文件到安装目录
+        Write-Info "Installing btop4win to $installDir..."
+        Copy-Item -Path "$btopDir\*" -Destination $installDir -Recurse -Force
+
+        # 添加到系统 PATH（永久生效，所有用户可用）
+        $machinePath = [System.Environment]::GetEnvironmentVariable("Path", "Machine")
+        if ($machinePath -notlike "*$installDir*") {
+            Write-Info "Adding btop4win to System PATH (requires administrator privileges)..."
+            try {
+                $newMachinePath = $machinePath + ";" + $installDir
+                [System.Environment]::SetEnvironmentVariable("Path", $newMachinePath, "Machine")
+                $env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
+                Write-Success "btop4win added to System PATH (permanent, available for all users)"
+            } catch {
+                Write-Warning "Failed to add to System PATH (may need administrator privileges), trying User PATH..."
+                # 回退到用户 PATH
+                $userPath = [System.Environment]::GetEnvironmentVariable("Path", "User")
+                if ($userPath -notlike "*$installDir*") {
+                    [System.Environment]::SetEnvironmentVariable("Path", "$userPath;$installDir", "User")
+                    $env:Path += ";$installDir"
+                    Write-Success "btop4win added to User PATH"
+                }
+            }
+        } else {
+            Write-Info "btop4win is already in System PATH"
+            $env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
+        }
+
+        # 清理临时文件
+        Write-Info "Cleaning up temporary files..."
+        Remove-Item -Path $zipFile -Force -ErrorAction SilentlyContinue
+        Remove-Item -Path $extractDir -Recurse -Force -ErrorAction SilentlyContinue
+
+        # 刷新 PATH 环境变量
+        Write-Info "Refreshing PATH environment variable..."
+        $refreshResult = Refresh-EnvironmentPath -SkipBackup
+        if ($refreshResult) {
+            Write-Info "PATH refreshed successfully"
+        } else {
+            Write-Warning "PATH refresh had issues, but continuing..."
+        }
+
+        # 等待系统更新 PATH
+        Start-Sleep -Milliseconds 1000
+
+        # 验证安装
+        $pathCheck = Test-ProgramInPath -ProgramName "btop4win"
+        if ($pathCheck.Available) {
+            Write-Success "$PackageName is available in PATH (found via $($pathCheck.Method))"
+            if ($pathCheck.Path) {
+                Write-Info "  Location: $($pathCheck.Path)"
+            }
+        } else {
+            Write-Warning "$PackageName may not be in PATH yet. You may need to restart your terminal (PowerShell/Git Bash)."
+            Write-Info "  Note: Some tools may require a system restart or new terminal session to be available."
+        }
+
+        # 获取版本号
+        $version = "Unknown"
+        try {
+            $versionOutput = & "$installDir\btop4win.exe" --version 2>&1 | Select-Object -First 1
+            $versionMatch = $versionOutput | Select-String -Pattern "(\d+\.\d+\.\d+[^\s]*)" -AllMatches
+            $version = if ($versionMatch) { $versionMatch.Matches[0].Groups[1].Value } else { "Unknown" }
+        } catch {
+            # 忽略错误
+        }
+
+        $Script:InstallationReport += @{
+            Name = $PackageName
+            Version = $version
+            Status = "NewInstalled"
+            InstallMethod = "GitHub"
+        }
+        Write-Log "True"
+        return $true
+
+    } catch {
+        $errorMsg = "btop4win installation failed: $_"
+        Write-Error $errorMsg
+        Write-Log $errorMsg
+
+        # 清理临时文件（即使失败也要清理）
+        Remove-Item -Path $zipFile -Force -ErrorAction SilentlyContinue
+        Remove-Item -Path $extractDir -Recurse -Force -ErrorAction SilentlyContinue
+
+        return $false
+    }
+}
+
 function Update-MSYS2AndGCC {
     <#
     .SYNOPSIS
@@ -2138,20 +2328,20 @@ function Update-MSYS2AndGCC {
         [Parameter(Mandatory)]
         [string]$PackageName
     )
-    
+
     # 检查是否已安装
     $msys2Check = Test-MSYS2Installed
     if (-not $msys2Check.Installed) {
         Write-Warning "$PackageName (MSYS2 GCC) is not installed, cannot update"
         return $false
     }
-    
+
     Write-Info "Updating MSYS2 and GCC..."
     Write-Info "This will update MSYS2 system and GCC toolchain."
-    
+
     $msys2Root = $msys2Check.Path
     $bashPath = Join-Path $msys2Root "usr\bin\bash.exe"
-    
+
     if (-not (Test-Path $bashPath)) {
         Write-Error "MSYS2 bash not found: $bashPath"
         return $false
@@ -2160,22 +2350,22 @@ function Update-MSYS2AndGCC {
     try {
         # 先初始化 MSYS2（确保 pacman 支持 --noconfirm）
         Initialize-MSYS2 -BashPath $bashPath
-        
+
         # 更新 MSYS2 系统和 GCC 工具链（使用 --noconfirm 参数实现非交互式更新）
         Write-Info "Updating MSYS2 system and GCC toolchain (this may take several minutes)..."
         $exitCode = Invoke-Msys2Pacman -BashPath $bashPath -Command "pacman --noconfirm -S --needed base-devel mingw-w64-x86_64-toolchain"
         Write-Log "MSYS2 & GCC update process exited with code: $exitCode"
-        
+
         if ($exitCode -eq 0) {
             Write-Success "$PackageName (MSYS2 GCC) updated successfully"
-            
+
             # 刷新 PATH 环境变量
             Write-Info "Refreshing PATH environment variable..."
             $refreshResult = Refresh-EnvironmentPath -SkipBackup
             if ($refreshResult) {
                 Write-Info "PATH refreshed successfully"
             }
-            
+
             Start-Sleep -Milliseconds 500
             $version = Get-ProgramVersion -PackageName "gcc"
             $Script:InstallationReport += @{
@@ -2214,24 +2404,24 @@ function Uninstall-MSYS2AndGCC {
         [Parameter(Mandatory)]
         [string]$PackageName
     )
-    
+
     # 检查是否已安装
     $msys2Check = Test-MSYS2Installed
     if (-not $msys2Check.Installed) {
         Write-Warning "$PackageName (MSYS2 GCC) is not installed, cannot uninstall"
         return $false
     }
-    
+
     Write-Warning "Uninstalling MSYS2 will remove the entire MSYS2 installation, including GCC and all other MSYS2 packages."
     $confirm = Read-Host "Are you sure you want to uninstall MSYS2? (Y/N)"
-    
+
     if ($confirm -ne "Y" -and $confirm -ne "y") {
         Write-Info "Uninstallation cancelled"
         return $false
     }
-    
+
     $msys2Root = $msys2Check.Path
-    
+
     try {
         # 从 PATH 中移除 MSYS2 GCC
         $mingw64Bin = Join-Path $msys2Root "mingw64\bin"
@@ -2243,11 +2433,11 @@ function Uninstall-MSYS2AndGCC {
             $env:Path = ($env:Path -split ';' | Where-Object { $_ -ne $mingw64Bin }) -join ';'
             Write-Success "MSYS2 GCC removed from PATH"
         }
-        
+
         # 删除 MSYS2 目录
         Write-Info "Removing MSYS2 installation directory..."
         Remove-Item -Path $msys2Root -Recurse -Force -ErrorAction SilentlyContinue
-        
+
         if (-not (Test-Path $msys2Root)) {
             Write-Success "$PackageName (MSYS2 GCC) uninstalled successfully"
             $Script:InstallationReport += @{
@@ -2285,7 +2475,7 @@ function Test-NerdFontsInstalled {
     #>
     $fontsDir = "$env:WINDIR\Fonts"
     $patterns = @("FiraMono Nerd", "Fira Mono Nerd", "FiraMono NF", "FiraMono-Regular")
-    
+
     try {
         $fontFiles = Get-ChildItem -Path $fontsDir -Filter "*.ttf" -Force -ErrorAction SilentlyContinue
         if ($fontFiles) {
@@ -2298,7 +2488,7 @@ function Test-NerdFontsInstalled {
     } catch {
         # 忽略，继续检查注册表
     }
-    
+
     try {
         $fontReg = Get-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Fonts" -ErrorAction Stop
         foreach ($property in $fontReg.PSObject.Properties) {
@@ -2311,7 +2501,7 @@ function Test-NerdFontsInstalled {
     } catch {
         # 忽略
     }
-    
+
     return $false
 }
 
@@ -2320,47 +2510,47 @@ function Install-NerdFonts {
     .SYNOPSIS
         安装 Nerd Fonts FiraMono（如果未安装）
     #>
-    
+
     # 检查是否已安装
     if (Test-NerdFontsInstalled) {
         Write-Info "Nerd Fonts FiraMono is already installed, skipping..."
         Write-Log "True"  # 记录返回值
         return $true
     }
-    
+
     Write-Info "Installing Nerd Fonts FiraMono..."
-    
+
     $fontUrl = "https://github.com/ryanoasis/nerd-fonts/releases/download/v3.4.0/FiraMono.zip"
     $tempDir = "$env:TEMP\NerdFonts"
     $zipFile = "$tempDir\FiraMono.zip"
     $fontsDir = "$env:WINDIR\Fonts"
-    
+
     try {
         # 创建临时目录
         if (-not (Test-Path $tempDir)) {
             New-Item -ItemType Directory -Path $tempDir -Force | Out-Null
         }
-        
+
         # 下载字体文件（带进度条）
         if (-not (Invoke-WebRequestWithProgress -Uri $fontUrl -OutFile $zipFile)) {
             Write-Error "Failed to download font files"
             Write-Log "Failed to download font files"
             return $false
         }
-        
+
         # 解压字体文件
         Write-Info "Extracting font files..."
         Expand-Archive -Path $zipFile -DestinationPath $tempDir -Force
-        
+
         # 安装字体
         Write-Info "Installing fonts to system..."
         $fontFiles = Get-ChildItem -Path $tempDir -Filter "*.ttf" -Recurse
         $installedCount = 0
-        
+
         foreach ($fontFile in $fontFiles) {
             $fontName = $fontFile.Name
             $destPath = Join-Path $fontsDir $fontName
-            
+
             if (-not (Test-Path $destPath)) {
                 Copy-Item -Path $fontFile.FullName -Destination $destPath -Force
                 Write-Success "Font installed: $fontName"
@@ -2369,10 +2559,10 @@ function Install-NerdFonts {
                 Write-Info "Font already exists: $fontName"
             }
         }
-        
+
         # 清理临时文件
         Remove-Item -Path $tempDir -Recurse -Force -ErrorAction SilentlyContinue
-        
+
         if ($installedCount -gt 0) {
             Write-Success "Nerd Fonts FiraMono installation completed ($installedCount fonts installed)"
         } else {
@@ -2380,7 +2570,7 @@ function Install-NerdFonts {
         }
         Write-Log "True"  # 记录返回值
         return $true
-        
+
     } catch {
         Write-Error "Font installation failed: $_"
         Write-Log "False"  # 记录返回值
@@ -2403,8 +2593,8 @@ $Script:Tools = @{
         # @{ Name = "tmux"; WingetId = "tmux.tmux"; ChocoId = "tmux"; Description = "Terminal multiplexer" }
     )
     "System Monitoring" = @(
-        # btop 在 Windows 上不支持，使用 bottom 作为替代（跨平台系统监控工具）
-        @{ Name = "bottom"; WingetId = "Clement.bottom"; ChocoId = "bottom"; Description = "Cross-platform system monitor (btop alternative for Windows)" }
+        # btop4win - btop++ for Windows (从 GitHub Releases 下载安装)
+        @{ Name = "btop4win"; WingetId = ""; ChocoId = ""; Description = "btop++ for Windows (system monitor)" }
         @{ Name = "fastfetch"; WingetId = "fastfetch-cli.fastfetch"; ChocoId = "fastfetch"; Description = "System information display" }
         @{ Name = "eza"; WingetId = "eza-community.eza"; ChocoId = "eza"; Description = "Modern ls replacement" }
     )
@@ -2445,26 +2635,26 @@ function Show-InteractiveMenu {
     Write-Host "    Windows Common Tools Manager - Interactive Mode" -ForegroundColor Cyan
     Write-Host "===========================================" -ForegroundColor Cyan
     Write-Host ""
-    
+
     $actionText = switch ($Script:CurrentAction) {
         "Install" { "Install" }
         "Update" { "Update" }
         "Uninstall" { "Uninstall" }
         default { "Manage" }
     }
-    
+
     Write-Host "Current Action: $actionText" -ForegroundColor Yellow
     Write-Host ""
-    
+
     $Script:SelectedPackages = @()
-    
+
     foreach ($category in $Script:Tools.Keys) {
         Write-Host "`n[$category]" -ForegroundColor Yellow
         $tools = $Script:Tools[$category]
-        
+
         for ($i = 0; $i -lt $tools.Count; $i++) {
             $tool = $tools[$i]
-            
+
             # 检测工具状态
             $status = ""
             $statusColor = "White"
@@ -2472,7 +2662,7 @@ function Show-InteractiveMenu {
                 $wingetId = $tool.WingetId
                 $chocoId = $tool.ChocoId
                 $checkResult = $null
-                
+
                 # 特殊处理：gcc 使用 MSYS2 检测方式
                 if ($tool.Name -eq "gcc") {
                     $msys2Check = Test-MSYS2Installed
@@ -2493,7 +2683,7 @@ function Show-InteractiveMenu {
                 } elseif ($chocoId -and (Test-PackageManager -Manager "chocolatey") -eq "installed") {
                     $checkResult = Test-ProgramInstalled -PackageId $chocoId -PackageName $tool.Name -Manager "chocolatey"
                 }
-                
+
                 if ($checkResult -and $checkResult.Installed) {
                     $status = " [Installed: $($checkResult.Version)]"
                     $statusColor = "Green"
@@ -2502,15 +2692,15 @@ function Show-InteractiveMenu {
                     $statusColor = "Gray"
                 }
             }
-            
+
             Write-Host "  [$($i + 1)] $($tool.Name) - $($tool.Description)$status" -ForegroundColor $statusColor
         }
-        
+
         Write-Host "  [A] $actionText all tools in this category" -ForegroundColor Green
         Write-Host "  [N] Skip this category" -ForegroundColor Gray
-        
+
         $choice = Read-Host "`nPlease select (1-$($tools.Count)/A/N)"
-        
+
         if ($choice -eq "A" -or $choice -eq "a") {
             # 选择所有工具
             $Script:SelectedPackages += $tools
@@ -2525,7 +2715,7 @@ function Show-InteractiveMenu {
             }
         }
     }
-    
+
     Write-Host "`nSelected $($Script:SelectedPackages.Count) tools for $actionText" -ForegroundColor Green
 }
 
@@ -2538,7 +2728,7 @@ function Show-SingleToolMenu {
         [Parameter(Mandatory)]
         [string]$ToolName
     )
-    
+
     # 查找工具
     $foundTool = $null
     foreach ($category in $Script:Tools.Keys) {
@@ -2550,24 +2740,24 @@ function Show-SingleToolMenu {
         }
         if ($foundTool) { break }
     }
-    
+
     if (-not $foundTool) {
         Write-Error "Tool not found: $ToolName"
         return
     }
-    
+
     Write-Host "`n===========================================" -ForegroundColor Cyan
     Write-Host "    Tool: $($foundTool.Name)" -ForegroundColor Cyan
     Write-Host "===========================================" -ForegroundColor Cyan
     Write-Host "Description: $($foundTool.Description)" -ForegroundColor White
     Write-Host ""
-    
+
     # 检测安装状态
     $wingetId = $foundTool.WingetId
     $chocoId = $foundTool.ChocoId
     $installed = $false
     $version = "Unknown"
-    
+
     # 特殊处理：gcc 使用 MSYS2 检测方式
     if ($foundTool.Name -eq "gcc") {
         $msys2Check = Test-MSYS2Installed
@@ -2594,10 +2784,10 @@ function Show-SingleToolMenu {
             $version = $checkResult.Version
         }
     }
-    
+
     Write-Host "Status: $(if ($installed) { "Installed (version: $version)" } else { "Not Installed" })" -ForegroundColor $(if ($installed) { "Green" } else { "Yellow" })
     Write-Host ""
-    
+
     # 显示操作选项
     Write-Host "Please select an action:" -ForegroundColor Yellow
     if (-not $installed) {
@@ -2607,9 +2797,9 @@ function Show-SingleToolMenu {
         Write-Host "  [2] Uninstall" -ForegroundColor Red
     }
     Write-Host "  [0] Cancel" -ForegroundColor Gray
-    
+
     $choice = Read-Host "`nPlease select"
-    
+
     if ($choice -eq "1") {
         if (-not $installed) {
             Install-Program -Package $foundTool
@@ -2629,7 +2819,7 @@ function Start-Installation {
     .SYNOPSIS
         开始安装流程
     #>
-    
+
     # 初始化日志文件（清空旧日志，开始新会话）
     try {
         # 清空日志文件，准备记录新会话（不写入空行）
@@ -2637,19 +2827,19 @@ function Start-Installation {
     } catch {
         # 如果无法创建日志文件，继续执行（不影响主流程）
     }
-    
+
     $actionText = switch ($Action) {
         "Install" { "Installation" }
         "Update" { "Update" }
         "Uninstall" { "Uninstallation" }
         default { "Management" }
     }
-    
+
     Write-Host-Log "`n===========================================" -ForegroundColor Cyan
     Write-Host-Log "    Windows Common Tools $actionText Script" -ForegroundColor Cyan
     Write-Host-Log "===========================================" -ForegroundColor Cyan
     Write-Host-Log ""
-    
+
     # 默认代理：优先尝试本地 127.0.0.1:7890
     if (-not $env:http_proxy -and -not $env:https_proxy) {
         Write-Info "Applying default proxy http://127.0.0.1:7890"
@@ -2657,7 +2847,7 @@ function Start-Installation {
     } else {
         Write-Info "Using existing proxy configuration"
     }
-    
+
     # 备份 PATH（在开始操作前，参考 winutil 的实现）
     if ($Action -eq "Install" -and -not $Script:PathBackedUp) {
         Write-Info "Backing up current PATH to path.bak..."
@@ -2669,20 +2859,20 @@ function Start-Installation {
         }
         Write-Host ""
     }
-    
+
     # 检测是否在中国大陆，如果是则设置代理
     if (Test-IsMainlandChina) {
         Write-Info "Mainland China detected, setting up proxy..."
         Set-ProxySettings
     }
-    
+
     # 确定包管理器
     if ($PackageManager -eq "auto") {
         Write-Info "Auto-detecting package manager..."
-        
+
         $wingetStatus = Test-PackageManager -Manager "winget"
         $chocoStatus = Test-PackageManager -Manager "chocolatey"
-        
+
         if ($wingetStatus -eq "installed") {
             $Script:PackageManager = "winget"
             Write-Success "Using Winget as package manager"
@@ -2705,7 +2895,7 @@ function Start-Installation {
         }
     } else {
         $Script:PackageManager = $PackageManager
-        
+
         # 确保指定的包管理器已安装
         if ($PackageManager -eq "winget") {
             if ((Test-PackageManager -Manager "winget") -ne "installed") {
@@ -2723,16 +2913,16 @@ function Start-Installation {
             }
         }
     }
-    
+
     # 设置当前操作类型
     $Script:CurrentAction = $Action
-    
+
     # 如果指定了单个工具，显示单独操作菜单
     if ($ToolName) {
         Show-SingleToolMenu -ToolName $ToolName
         return
     }
-    
+
     # 确定要操作的工具列表
     if ($Interactive) {
         Show-InteractiveMenu
@@ -2747,7 +2937,7 @@ function Start-Installation {
                     $wingetId = $tool.WingetId
                     $chocoId = $tool.ChocoId
                     $installed = $false
-                    
+
                     # 特殊处理：gcc 使用 MSYS2 检测方式
                     if ($tool.Name -eq "gcc") {
                         $msys2Check = Test-MSYS2Installed
@@ -2759,7 +2949,7 @@ function Start-Installation {
                         $checkResult = Test-ProgramInstalled -PackageId $chocoId -PackageName $tool.Name -Manager "chocolatey"
                         $installed = $checkResult.Installed
                     }
-                    
+
                     if ($installed) {
                         $packagesToOperate += $tool
                     }
@@ -2773,7 +2963,7 @@ function Start-Installation {
                     $wingetId = $tool.WingetId
                     $chocoId = $tool.ChocoId
                     $installed = $false
-                    
+
                     # 特殊处理：gcc 使用 MSYS2 检测方式
                     if ($tool.Name -eq "gcc") {
                         $msys2Check = Test-MSYS2Installed
@@ -2785,7 +2975,7 @@ function Start-Installation {
                         $checkResult = Test-ProgramInstalled -PackageId $chocoId -PackageName $tool.Name -Manager "chocolatey"
                         $installed = $checkResult.Installed
                     }
-                    
+
                     if ($installed) {
                         $packagesToOperate += $tool
                     }
@@ -2799,7 +2989,7 @@ function Start-Installation {
             }
         }
     }
-    
+
     if ($packagesToOperate.Count -eq 0) {
         $actionText = switch ($Action) {
             "Install" { "install" }
@@ -2810,7 +3000,7 @@ function Start-Installation {
         Write-Warning "No tools selected to $actionText"
         exit 0
     }
-    
+
     # 开始操作
     $actionText = switch ($Action) {
         "Install" { "install" }
@@ -2818,19 +3008,19 @@ function Start-Installation {
         "Uninstall" { "uninstall" }
         default { "operate" }
     }
-    
+
     $startMsg = "Starting to $actionText $($packagesToOperate.Count) tools..."
     Write-Host-Log "`n$startMsg" -ForegroundColor Cyan
     Write-Host-Log ""
-    
+
     $total = $packagesToOperate.Count
     $current = 0
-    
+
     foreach ($package in $packagesToOperate) {
         $current++
         $progressMsg = "[$current/$total] "
         Write-Host-Log $progressMsg -NoNewline -ForegroundColor Gray
-        
+
         switch ($Action) {
             "Install" {
                 Install-Program -Package $package
@@ -2843,20 +3033,20 @@ function Start-Installation {
             }
         }
     }
-    
+
     # 安装字体
     if (-not $SkipFonts) {
         Write-Host "`n"
         Write-Log ""
         Install-NerdFonts
     }
-    
+
     # 最后刷新一次 PATH，确保所有工具都可用（包括 Git Bash）
     # 参考 winutil 的实现，进行多重刷新确保生效
     Write-Host "`n"
     Write-Log ""
     Write-Info "Performing final PATH refresh (winutil-style multiple refresh methods)..."
-    
+
     # 备份 PATH（在最终刷新前，如果尚未备份）
     if (-not $Script:PathBackedUp) {
         Write-Info "Backing up current PATH to path.bak..."
@@ -2864,7 +3054,7 @@ function Start-Installation {
             $Script:PathBackedUp = $true
         }
     }
-    
+
     # 多次刷新以提高成功率（跳过备份，避免重复）
     $refreshSuccess = $false
     for ($i = 1; $i -le 3; $i++) {
@@ -2874,19 +3064,19 @@ function Start-Installation {
         }
         Start-Sleep -Milliseconds 300
     }
-    
+
     if ($refreshSuccess) {
         Write-Success "PATH refreshed successfully using multiple methods."
     } else {
         Write-Warning "PATH refresh completed with warnings. Some tools may require a terminal restart."
     }
-    
+
     Write-Info "All installed tools should be available in:"
     Write-Info "  - PowerShell (new sessions will have updated PATH)"
     Write-Info "  - Git Bash (new sessions will inherit updated PATH from Windows)"
     Write-Info "  - Command Prompt (new sessions will have updated PATH)"
     Write-Warning "Note: Currently open terminals may need to be restarted to see PATH changes."
-    
+
     # 显示详细报告
     $actionText = switch ($Action) {
         "Install" { "Installation" }
@@ -2894,12 +3084,12 @@ function Start-Installation {
         "Uninstall" { "Uninstallation" }
         default { "Operation" }
     }
-    
+
     Write-Host-Log "`n===========================================" -ForegroundColor Cyan
     Write-Host-Log "    $actionText Completed - Detailed Report" -ForegroundColor Cyan
     Write-Host-Log "===========================================" -ForegroundColor Cyan
     Write-Host-Log ""
-    
+
     # 统计信息
     $newInstalled = ($Script:InstallationReport | Where-Object { $_.Status -eq "NewInstalled" }).Count
     $alreadyExists = ($Script:InstallationReport | Where-Object { $_.Status -eq "AlreadyExists" }).Count
@@ -2907,9 +3097,9 @@ function Start-Installation {
     $latest = ($Script:InstallationReport | Where-Object { $_.Status -eq "AlreadyLatest" }).Count
     $uninstalled = ($Script:InstallationReport | Where-Object { $_.Status -eq "Uninstalled" }).Count
     $failed = ($Script:InstallationReport | Where-Object { $_.Status -eq "Failed" }).Count
-    
+
     Write-Host-Log "Statistics:" -ForegroundColor Yellow
-    
+
     if ($Action -eq "Install") {
         Write-Host-Log "  New Installed: $newInstalled" -ForegroundColor Green
         Write-Host-Log "  Already Exists: $alreadyExists" -ForegroundColor Cyan
@@ -2919,17 +3109,17 @@ function Start-Installation {
     } elseif ($Action -eq "Uninstall") {
         Write-Host-Log "  Uninstalled: $uninstalled" -ForegroundColor Green
     }
-    
+
     Write-Host-Log "  Failed: $failed" -ForegroundColor $(if ($failed -gt 0) { "Red" } else { "Green" })
     Write-Host-Log ""
-    
+
     # 详细列表
     Write-Host-Log "Detailed List:" -ForegroundColor Yellow
     Write-Host-Log ""
-    
+
     # 按状态分组显示
     $grouped = $Script:InstallationReport | Group-Object -Property Status
-    
+
     foreach ($group in $grouped) {
         $statusColor = switch ($group.Name) {
             "NewInstalled" { "Green" }
@@ -2940,7 +3130,7 @@ function Start-Installation {
             "Failed" { "Red" }
             default { "White" }
         }
-        
+
         Write-Host-Log "[$($group.Name)]" -ForegroundColor $statusColor
         foreach ($item in $group.Group) {
             $statusIcon = switch ($item.Status) {
@@ -2952,25 +3142,25 @@ function Start-Installation {
                 "Failed" { "✗" }
                 default { " " }
             }
-            
+
             $methodInfo = if ($item.InstallMethod -ne "Detected" -and $item.Status -ne "Uninstalled") {
                 " (via $($item.InstallMethod))"
             } else {
                 ""
             }
-            
+
             Write-Host-Log "  $statusIcon $($item.Name) - Version: $($item.Version)$methodInfo" -ForegroundColor White
         }
         Write-Host-Log ""
     }
-    
+
     # 字体安装状态
     if (-not $SkipFonts) {
         Write-Host-Log "[Fonts]" -ForegroundColor Yellow
         Write-Host-Log "  ○ Nerd Fonts FiraMono - Installed to system fonts directory" -ForegroundColor White
         Write-Host-Log ""
     }
-    
+
     # 失败工具列表（如果有）
     if ($Script:FailedPackages.Count -gt 0) {
         Write-Host-Log "Failed Tools:" -ForegroundColor Red
@@ -2979,14 +3169,14 @@ function Start-Installation {
         }
         Write-Host-Log ""
     }
-    
+
     Write-Host-Log "===========================================" -ForegroundColor Cyan
     Write-Host-Log ""
-    
+
     # 询问是否关闭窗口
     Write-Host "Operation completed!" -ForegroundColor Green
     $closeWindow = Read-Host "Close this window? (Y/N, default: N)"
-    
+
     if ($closeWindow -eq "Y" -or $closeWindow -eq "y") {
         Write-Host "Closing window..." -ForegroundColor Cyan
         Start-Sleep -Seconds 1

@@ -144,6 +144,12 @@ export C_INCLUDE_PATH="/d/Program Files/PostgreSQL/17/include"
 # Python 环境配置（uv）
 export PATH="/c/Users/Administrator/.local/bin:/c/Users/Administrator/AppData/Roaming/uv/python/cpython-3.10.16-windows-x86_64-none:$PATH"
 
+# btop4win 配置（系统监控工具）
+# 如果 btop4win 已安装，添加到 PATH
+if [ -d "/c/Program Files/btop4win" ]; then
+    export PATH="/c/Program Files/btop4win:$PATH"
+fi
+
 # 字符编码设置
 export LANG=zh_CN.UTF-8
 export LC_ALL=zh_CN.UTF-8
