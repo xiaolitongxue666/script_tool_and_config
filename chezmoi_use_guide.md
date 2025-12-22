@@ -374,6 +374,254 @@ Windows 特定的配置和脚本位于 `run_on_windows/` 目录：
 - `dot_bashrc` - Git Bash 配置
 - `run_once_install-zsh.sh` - Zsh 安装脚本（通过 MSYS2）
 
+## SSH 配置管理
+
+SSH 配置文件（`~/.ssh/config`）已纳入 chezmoi 管理，可以通过 lazyssh 或直接编辑进行管理。
+
+### 安全性说明
+
+**相对安全的原因：**
+- `~/.ssh/config` 文件本身**不包含私钥**，只包含连接配置信息
+- 文件内容主要是：主机别名、用户名、端口、端口转发规则、代理配置等
+- 私钥文件（`id_rsa`, `id_ed25519` 等）已在 `.gitignore` 和 `.chezmoiignore` 中被排除，不会被纳入管理
+
+**需要注意的敏感信息：**
+- 主机名和 IP 地址
+- 用户名
+- 端口转发规则（可能暴露内部网络结构）
+- 代理配置
+
+**建议：**
+- ✅ 私有仓库：可以安全地纳入管理
+- ⚠️ 如果未来需要公开仓库，考虑使用 chezmoi 加密功能或模板变量
+
+### 首次纳入管理
+
+如果当前系统已有 SSH 配置，需要先备份再纳入管理：
+
+```bash
+# 1. 备份现有配置
+./scripts/common/utils/backup_ssh_config.sh
+
+# 2. 将配置纳入 chezmoi 管理
+export CHEZMOI_SOURCE_DIR="$(pwd)/.chezmoi"
+chezmoi add ~/.ssh/config
+
+# 3. 验证配置
+chezmoi diff ~/.ssh/config
+
+# 4. 应用配置（确保权限正确）
+chezmoi apply ~/.ssh/config
+chmod 600 ~/.ssh/config
+
+# 5. 提交到 Git
+git add .chezmoi/dot_ssh/
+git commit -m "Add SSH config to chezmoi management"
+git push
+```
+
+### 新系统部署
+
+在新系统上部署 SSH 配置：
+
+```bash
+# 方法一：使用部署脚本（推荐）
+./scripts/common/utils/setup_ssh_config.sh
+
+# 方法二：手动部署
+# 1. 确保 ~/.ssh 目录存在
+mkdir -p ~/.ssh
+chmod 700 ~/.ssh
+
+# 2. 应用配置
+export CHEZMOI_SOURCE_DIR="$(pwd)/.chezmoi"
+chezmoi apply ~/.ssh/config
+chmod 600 ~/.ssh/config
+```
+
+### 日常使用
+
+#### 编辑 SSH 配置
+
+```bash
+# 方法一：使用 chezmoi 编辑
+chezmoi edit ~/.ssh/config
+
+# 方法二：使用 lazyssh 编辑（推荐）
+lazyssh
+# 在 lazyssh 中编辑配置后，需要同步到 chezmoi
+```
+
+#### 同步 lazyssh 的更改
+
+如果使用 lazyssh 修改了配置，需要同步到 chezmoi：
+
+```bash
+# lazyssh 修改了 ~/.ssh/config 后
+chezmoi re-add ~/.ssh/config
+git add .chezmoi/dot_ssh/config
+git commit -m "Update SSH config"
+git push
+```
+
+#### 查看配置差异
+
+```bash
+# 查看源状态和系统配置的差异
+chezmoi diff ~/.ssh/config
+
+# 查看配置状态
+chezmoi status ~/.ssh/config
+```
+
+### 备份和恢复
+
+#### 手动备份
+
+```bash
+# 使用备份脚本
+./scripts/common/utils/backup_ssh_config.sh
+
+# 或手动备份
+cp ~/.ssh/config ~/.ssh/config.backup.$(date +%Y%m%d_%H%M%S)
+```
+
+#### 恢复备份
+
+```bash
+# 查看所有备份
+ls -lh ~/.ssh/config.backup.*
+
+# 恢复指定备份
+cp ~/.ssh/config.backup.YYYYMMDD_HHMMSS ~/.ssh/config
+chmod 600 ~/.ssh/config
+```
+
+### 安全注意事项
+
+1. **文件权限**：确保 `~/.ssh/config` 权限为 600
+2. **目录权限**：确保 `~/.ssh` 目录权限为 700
+3. **私钥保护**：确保所有私钥文件（`id_*`）不被纳入管理
+4. **仓库访问**：保持仓库私有，不要公开包含 SSH 配置的仓库
+5. **敏感信息**：如果配置包含高度敏感信息，考虑使用 chezmoi 加密功能
+
+### 使用 lazyssh 管理
+
+lazyssh 是一个终端 SSH 管理器，可以方便地管理 SSH 配置：
+
+```bash
+# 启动 lazyssh
+lazyssh
+
+# 在 lazyssh 中可以：
+# - 查看所有服务器配置
+# - 添加新服务器
+# - 编辑现有服务器
+# - 删除服务器
+# - 测试连接
+# - 管理端口转发
+```
+
+修改后记得同步到 chezmoi：
+
+```bash
+chezmoi re-add ~/.ssh/config
+```
+
+### 使用 lazyssh 配置的 Host
+
+通过 lazyssh 配置的 Host 是标准的 OpenSSH 别名，**可以直接在终端使用 `ssh 主机名` 命令执行**，无需打开 lazyssh 的 TUI 界面。
+
+#### 基本用法
+
+配置好的 Host 可以直接使用：
+
+```bash
+# 连接到服务器（进入 shell + 开启端口转发）
+ssh alchemy-studio-tunnel
+
+# 只开启端口转发，不进入 shell（推荐后台运行）
+ssh -f -N alchemy-studio-tunnel
+```
+
+**参数说明：**
+- `-f`：后台运行
+- `-N`：不执行远程命令，只用于端口转发
+
+#### 常见场景示例
+
+**1. 跳板隧道（单层转发）**
+
+```bash
+# alchemy-studio-tunnel: 本地 10001 → 远程 localhost:10001
+ssh -f -N alchemy-studio-tunnel    # 只开启隧道
+ssh alchemy-studio-tunnel          # 进入 shell + 开启隧道
+```
+
+**2. 双层隧道（通过跳板转发）**
+
+```bash
+# mini-server-container-vnc: 通过跳板转发内层容器 VNC
+ssh -f -N mini-server-container-vnc    # 只开启完整双层隧道
+ssh mini-server-container-vnc          # 进入 shell + 开启所有隧道
+```
+
+执行后，本地 5903 端口直通内层容器的 5909 VNC 服务，可用 VNC 客户端连接 `localhost:5903`。
+
+**3. VNC 端口转发（单层）**
+
+```bash
+# alchemy-studio-vnc: 本地 5901 → 远程 5901
+ssh -f -N alchemy-studio-vnc
+
+# moicen-vnc: 本地 5904 → 远程 5901
+ssh -f -N moicen-vnc
+```
+
+#### 简化命令（推荐使用别名）
+
+为了更方便使用，可以在 `~/.zshrc` 或 `~/.bashrc` 中添加别名：
+
+```bash
+# 双层 VNC 隧道一键开启
+alias vnc-mini='ssh -f -N mini-server-container-vnc'
+
+# alchemy-studio 主机 VNC
+alias vnc-alchemy='ssh -f -N alchemy-studio-vnc'
+
+# moicen 主机 VNC
+alias vnc-moicen='ssh -f -N moicen-vnc'
+
+# 只开跳板隧道（如果单独需要）
+alias tunnel-jump='ssh -f -N alchemy-studio-tunnel'
+```
+
+保存后执行 `source ~/.zshrc`（或重启终端），以后直接使用：
+
+```bash
+vnc-mini        # 一键开启最常用的双层 VNC 隧道
+vnc-alchemy     # 开启 alchemy-studio VNC
+vnc-moicen      # 开启 moicen VNC
+```
+
+#### 检查隧道状态
+
+```bash
+# 检查端口是否在监听
+netstat -an | grep 5903
+# 或
+lsof -i:5903
+
+# 查看所有 SSH 连接
+ps aux | grep ssh
+```
+
+#### 使用建议
+
+- **日常使用**：99% 的情况直接使用 `ssh 主机名` 或自定义别名，无需打开 lazyssh
+- **配置管理**：只在需要新增/修改主机配置时才打开 lazyssh
+- **后台运行**：使用 `ssh -f -N 主机名` 只开启隧道，不占用终端
+
 ## 代理配置
 
 ### 环境变量

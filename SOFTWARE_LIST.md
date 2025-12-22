@@ -40,6 +40,7 @@
 | **lazygit** | Git TUI 工具 | `run_once_install-common-tools.sh.tmpl` |
 | **git-delta** | Git diff 增强工具 | `run_once_install-common-tools.sh.tmpl` |
 | **gh** | GitHub CLI | `run_once_install-common-tools.sh.tmpl` |
+| **lazyssh** | 终端 SSH 管理器 | `install_common_tools.sh` (macOS/Linux) |
 
 ### 系统工具
 
@@ -133,6 +134,7 @@
 | **Starship 配置** | `~/.config/starship/starship.toml` | `.chezmoi/dot_config/starship/starship.toml` |
 | **Alacritty 配置** | `~/.config/alacritty/alacritty.toml` | `.chezmoi/dot_config/alacritty/alacritty.toml` |
 | **Fish 配置** | `~/.config/fish/config.fish` | `.chezmoi/dot_config/fish/config.fish` |
+| **SSH 配置** | `~/.ssh/config` | `.chezmoi/dot_ssh/config` |
 
 ### Linux 特定配置
 
@@ -207,6 +209,48 @@ chezmoi apply -v
 | winget | `winget install --id=package.id` |
 | MSYS2 pacman | `pacman.exe -S package` |
 
+## SSH 配置管理
+
+### lazyssh
+
+**lazyssh** 是一个终端 SSH 管理器，可以方便地管理 SSH 配置：
+
+- **功能**：查看、添加、编辑、删除 SSH 服务器配置
+- **安装**：通过 `install_common_tools.sh` 脚本自动安装（macOS/Linux）
+- **使用**：运行 `lazyssh` 启动交互式界面
+- **配置同步**：修改后使用 `chezmoi re-add ~/.ssh/config` 同步到 chezmoi
+
+### SSH 配置文件管理
+
+SSH 配置文件（`~/.ssh/config`）已纳入 chezmoi 管理：
+
+- **源文件**：`.chezmoi/dot_ssh/config`
+- **目标位置**：`~/.ssh/config`
+- **权限**：自动设置为 600
+- **备份**：使用 `scripts/common/utils/backup_ssh_config.sh` 备份
+- **部署**：使用 `scripts/common/utils/setup_ssh_config.sh` 部署
+
+**首次纳入管理：**
+```bash
+# 1. 备份现有配置
+./scripts/common/utils/backup_ssh_config.sh
+
+# 2. 纳入 chezmoi 管理
+export CHEZMOI_SOURCE_DIR="$(pwd)/.chezmoi"
+chezmoi add ~/.ssh/config
+
+# 3. 应用配置
+chezmoi apply ~/.ssh/config
+chmod 600 ~/.ssh/config
+```
+
+**安全注意事项：**
+- SSH 配置文件不包含私钥，相对安全
+- 私钥文件（`id_*`）已在 `.gitignore` 和 `.chezmoiignore` 中排除
+- 保持仓库私有，不要公开包含 SSH 配置的仓库
+
+详细说明请参考：[chezmoi_use_guide.md](chezmoi_use_guide.md#ssh-配置管理)
+
 ## 注意事项
 
 1. **首次安装**：所有 `run_once_` 脚本只会在首次 `chezmoi apply` 时执行一次
@@ -214,6 +258,7 @@ chezmoi apply -v
 3. **平台检测**：脚本会自动检测操作系统和包管理器
 4. **错误处理**：如果某个软件安装失败，脚本会继续安装其他软件
 5. **已安装检查**：脚本会检查软件是否已安装，避免重复安装
+6. **SSH 配置**：SSH 配置文件通过 chezmoi 管理，私钥文件不会被纳入管理
 
 ## 更新日志
 

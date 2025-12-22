@@ -509,6 +509,7 @@ chezmoi diff
 - `~/.config/alacritty/alacritty.toml` - Alacritty 终端配置
 - `~/.tmux.conf` - Tmux 配置
 - `~/.config/starship/starship.toml` - Starship 提示符配置
+- `~/.ssh/config` - SSH 客户端配置（通过 lazyssh 管理）
 
 **窗口管理器配置（平台特定）**
 - `~/.config/i3/config` - i3wm 配置（Linux）

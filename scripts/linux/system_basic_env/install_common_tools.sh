@@ -853,6 +853,157 @@ After configuration, Neovim configuration file path will be:
 EOF
 }
 
+# 安装 lazyssh (SSH 管理器)
+install_lazyssh() {
+    if command -v lazyssh >/dev/null 2>&1; then
+        log_info "lazyssh already installed: $(lazyssh --version 2>/dev/null || echo 'unknown version')"
+        return 0
+    fi
+
+    log_info "Installing lazyssh (SSH manager)"
+
+    # 尝试通过 AUR 安装
+    if [[ -n "${AUR_HELPER:-}" ]]; then
+        log_info "Trying to install lazyssh via ${AUR_HELPER}..."
+        # 临时给普通用户读取 pacman.conf 的权限（yay 需要读取配置）
+        chmod 644 "${PACMAN_CONF}" 2>/dev/null || true
+        if sudo -u "${INSTALL_USER}" "${AUR_HELPER}" -S --noconfirm lazyssh-bin 2>&1 || \
+           sudo -u "${INSTALL_USER}" "${AUR_HELPER}" -S --noconfirm lazyssh 2>&1; then
+            # 恢复权限
+            chmod 644 "${PACMAN_CONF}" 2>/dev/null || true
+            if command -v lazyssh >/dev/null 2>&1; then
+                log_success "lazyssh installation completed: $(lazyssh --version 2>/dev/null || echo 'unknown version')"
+                return 0
+            fi
+        fi
+        # 恢复权限
+        chmod 644 "${PACMAN_CONF}" 2>/dev/null || true
+    fi
+
+    # AUR 安装失败，尝试下载二进制文件
+    log_warning "AUR installation failed, trying to download binary from GitHub Releases"
+    install_lazyssh_binary
+}
+
+# 从 GitHub Releases 下载 lazyssh 二进制文件
+install_lazyssh_binary() {
+    local user_home
+    user_home="$(eval echo ~"${INSTALL_USER}")"
+    local install_dir="${user_home}/.local/bin"
+    local binary_path="${install_dir}/lazyssh"
+    local tmp_dir
+    tmp_dir="$(mktemp -d)"
+    local tar_file="${tmp_dir}/lazyssh.tar.gz"
+
+    # 确保安装目录存在
+    sudo -u "${INSTALL_USER}" mkdir -p "${install_dir}"
+
+    # 检测系统架构
+    local os_name
+    local arch_name
+    os_name="$(uname)"
+    arch_name="$(uname -m)"
+
+    # 转换为 GitHub Releases 使用的格式
+    case "${os_name}" in
+        Linux)
+            os_name="Linux"
+            ;;
+        *)
+            log_error "Unsupported OS: ${os_name}"
+            rm -rf "${tmp_dir}"
+            return 1
+            ;;
+    esac
+
+    case "${arch_name}" in
+        x86_64)
+            arch_name="amd64"
+            ;;
+        arm64|aarch64)
+            arch_name="arm64"
+            ;;
+        *)
+            log_error "Unsupported architecture: ${arch_name}"
+            rm -rf "${tmp_dir}"
+            return 1
+            ;;
+    esac
+
+    # 获取最新版本标签
+    log_info "Fetching latest lazyssh version..."
+    local latest_tag
+    if [[ -n "${PROXY_URL:-}" ]]; then
+        latest_tag=$(curl -fsSL --proxy "${PROXY_URL}" "https://api.github.com/repos/Adembc/lazyssh/releases/latest" | grep -o '"tag_name": "[^"]*' | grep -o '[^"]*$' || echo "")
+    else
+        latest_tag=$(curl -fsSL "https://api.github.com/repos/Adembc/lazyssh/releases/latest" | grep -o '"tag_name": "[^"]*' | grep -o '[^"]*$' || echo "")
+    fi
+
+    if [[ -z "${latest_tag}" ]]; then
+        log_error "Failed to fetch latest version tag"
+        rm -rf "${tmp_dir}"
+        return 1
+    fi
+
+    log_info "Latest version: ${latest_tag}"
+
+    # 构建下载 URL
+    local download_url="https://github.com/Adembc/lazyssh/releases/download/${latest_tag}/lazyssh_${os_name}_${arch_name}.tar.gz"
+
+    log_info "Downloading lazyssh from: ${download_url}"
+
+    # 下载文件
+    if [[ -n "${PROXY_URL:-}" ]]; then
+        if ! download_with_progress "${download_url}" "${tar_file}" 120 3; then
+            log_error "Failed to download lazyssh"
+            rm -rf "${tmp_dir}"
+            return 1
+        fi
+    else
+        if ! download_with_progress "${download_url}" "${tar_file}" 120 3; then
+            log_error "Failed to download lazyssh"
+            rm -rf "${tmp_dir}"
+            return 1
+        fi
+    fi
+
+    # 解压文件
+    log_info "Extracting lazyssh..."
+    if ! tar -xzf "${tar_file}" -C "${tmp_dir}"; then
+        log_error "Failed to extract lazyssh"
+        rm -rf "${tmp_dir}"
+        return 1
+    fi
+
+    # 查找二进制文件
+    local extracted_binary
+    extracted_binary=$(find "${tmp_dir}" -name "lazyssh" -type f | head -n 1)
+
+    if [[ -z "${extracted_binary}" ]] || [[ ! -f "${extracted_binary}" ]]; then
+        log_error "lazyssh binary not found in downloaded archive"
+        rm -rf "${tmp_dir}"
+        return 1
+    fi
+
+    # 复制二进制文件到安装目录（使用普通用户权限）
+    log_info "Installing lazyssh to ${binary_path}..."
+    sudo -u "${INSTALL_USER}" cp "${extracted_binary}" "${binary_path}"
+    sudo -u "${INSTALL_USER}" chmod +x "${binary_path}"
+
+    # 清理临时文件
+    rm -rf "${tmp_dir}"
+
+    # 确保安装目录在 PATH 中
+    add_path_entry "${install_dir}"
+
+    if command -v lazyssh >/dev/null 2>&1; then
+        log_success "lazyssh installation completed: $(lazyssh --version 2>/dev/null || echo 'unknown version')"
+    else
+        log_warning "lazyssh installation completed but command not found in PATH"
+        log_info "Please ensure ${install_dir} is in your PATH"
+    fi
+}
+
 # 安装可选工具
 install_optional_tools() {
     log_info "Installing optional tools"
@@ -937,6 +1088,9 @@ main() {
 
     # Neovim 配置（包括 Python 环境，由 nvim/install.sh 处理）
     install_neovim
+
+    # 安装 lazyssh
+    install_lazyssh
 
     # 其他操作（使用代理）
     install_optional_tools

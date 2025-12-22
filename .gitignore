@@ -214,6 +214,16 @@ scripts/windows/system_basic_env/*.backup
 *.p12
 *.pfx
 
+# SSH 私钥和公钥（确保不会被纳入版本控制）
+.ssh/id_*
+.ssh/*_rsa
+.ssh/*_ed25519
+.ssh/*_ecdsa
+.ssh/*_dsa
+.ssh/*.pub
+.ssh/known_hosts
+.ssh/authorized_keys
+
 # 配置文件中的敏感信息（如果包含密码等）
 # config.local.*
 # *.secret

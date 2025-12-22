@@ -641,6 +641,113 @@ git commit -m "Add new config"
 git push
 ```
 
+#### SSH 配置管理
+
+SSH 配置文件（`~/.ssh/config`）已纳入 chezmoi 管理，可以通过 lazyssh 或直接编辑进行管理。
+
+**首次纳入管理（当前系统）：**
+
+```bash
+# 1. 备份现有配置
+./scripts/common/utils/backup_ssh_config.sh
+
+# 2. 将配置纳入 chezmoi 管理
+export CHEZMOI_SOURCE_DIR="$(pwd)/.chezmoi"
+chezmoi add ~/.ssh/config
+
+# 3. 验证配置
+chezmoi diff ~/.ssh/config
+
+# 4. 应用配置（确保权限正确）
+chezmoi apply ~/.ssh/config
+chmod 600 ~/.ssh/config
+
+# 5. 提交到 Git
+git add .chezmoi/dot_ssh/
+git commit -m "Add SSH config to chezmoi management"
+git push
+```
+
+**新系统部署：**
+
+```bash
+# 1. 确保 ~/.ssh 目录存在
+mkdir -p ~/.ssh
+chmod 700 ~/.ssh
+
+# 2. 使用部署脚本（推荐）
+./scripts/common/utils/setup_ssh_config.sh
+
+# 或手动应用配置
+export CHEZMOI_SOURCE_DIR="$(pwd)/.chezmoi"
+chezmoi apply ~/.ssh/config
+chmod 600 ~/.ssh/config
+```
+
+**日常使用：**
+
+```bash
+# 编辑 SSH 配置（使用 lazyssh 或直接编辑）
+chezmoi edit ~/.ssh/config
+
+# 如果使用 lazyssh 修改了配置，需要同步
+chezmoi re-add ~/.ssh/config
+git add .chezmoi/dot_ssh/config
+git commit -m "Update SSH config"
+git push
+
+# 查看配置差异
+chezmoi diff ~/.ssh/config
+```
+
+**使用 lazyssh 配置的 Host：**
+
+通过 lazyssh 配置的 Host 可以直接在终端使用，无需打开 lazyssh 界面：
+
+```bash
+# 连接到服务器（进入 shell + 开启端口转发）
+ssh alchemy-studio-tunnel
+
+# 只开启端口转发，不进入 shell（推荐后台运行）
+ssh -f -N alchemy-studio-tunnel
+
+# 双层隧道示例（通过跳板转发）
+ssh -f -N mini-server-container-vnc    # 本地 5903 → 内层容器 5909
+```
+
+**简化使用（推荐添加别名）：**
+
+在 `~/.zshrc` 或 `~/.bashrc` 中添加：
+
+```bash
+# 双层 VNC 隧道一键开启
+alias vnc-mini='ssh -f -N mini-server-container-vnc'
+
+# alchemy-studio 主机 VNC
+alias vnc-alchemy='ssh -f -N alchemy-studio-vnc'
+
+# moicen 主机 VNC
+alias vnc-moicen='ssh -f -N moicen-vnc'
+```
+
+保存后执行 `source ~/.zshrc`，以后直接使用 `vnc-mini` 等别名即可。
+
+**检查隧道状态：**
+
+```bash
+# 检查端口是否在监听
+lsof -i:5903
+# 或
+netstat -an | grep 5903
+```
+
+详细说明请参考：[chezmoi_use_guide.md](chezmoi_use_guide.md#使用-lazyssh-配置的-host)
+
+**安全注意事项：**
+- SSH 配置文件权限必须为 600
+- 私钥文件（`id_*`）不会被纳入管理，已在 `.gitignore` 和 `.chezmoiignore` 中排除
+- 保持仓库私有，不要公开包含 SSH 配置的仓库
+
 ### 代理配置
 
 如果需要使用代理，可以设置环境变量：
