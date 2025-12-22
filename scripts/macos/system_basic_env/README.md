@@ -66,6 +66,13 @@
 
 - **FiraMono Nerd Font** - 编程字体（支持图标，通过 Homebrew Cask 安装）
 
+### GUI 应用（Homebrew Cask）
+
+- **Maccy** - 轻量级剪贴板管理器（通过 Homebrew Cask 安装）
+  - 快捷键：`Shift+Command+C` 打开
+  - 功能：保存剪贴板历史，快速搜索和粘贴
+  - 官网：https://maccy.app
+
 ## 使用方法
 
 ### 基本用法

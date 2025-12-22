@@ -160,6 +160,35 @@ install_package() {
     echo "[SUCCESS] 包安装成功: $package_name"
 }
 
+# 跨平台 Cask 包安装函数（主要用于 macOS Homebrew Cask）
+# 参数: package_name
+install_cask_package() {
+    local package_name="$1"
+    if [ -z "$package_name" ]; then
+        echo "[ERROR] 包名不能为空"
+        return 1
+    fi
+
+    # 确保已检测操作系统
+    if [ -z "$PACKAGE_MANAGER" ]; then
+        detect_os_and_package_manager || return 1
+    fi
+
+    echo "[INFO] 安装 Cask 包: $package_name"
+
+    case "$PACKAGE_MANAGER" in
+        brew)
+            brew install --cask "$package_name" || return 1
+            ;;
+        *)
+            echo "[ERROR] Cask 包仅支持 Homebrew (macOS)"
+            return 1
+            ;;
+    esac
+
+    echo "[SUCCESS] Cask 包安装成功: $package_name"
+}
+
 # ============================================
 # 依赖安装函数
 # ============================================

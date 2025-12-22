@@ -380,6 +380,12 @@ export https_proxy="$PROXY"
 **系统监控工具**
 - btop, fastfetch
 
+**GUI 应用（macOS 特有）**
+- Maccy (轻量级剪贴板管理器)
+  - 快捷键：`Shift+Command+C` 打开
+  - 功能：保存剪贴板历史，快速搜索和粘贴
+  - 官网：https://maccy.app
+
 #### 步骤 5: 验证安装
 
 安装完成后，验证关键工具：

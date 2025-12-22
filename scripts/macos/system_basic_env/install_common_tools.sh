@@ -43,7 +43,7 @@ readonly BREW_FORMULA_PACKAGES=(
 
 # Homebrew Cask 工具（GUI 应用）列表
 readonly BREW_CASK_PACKAGES=(
-    # 如果需要 GUI 应用，可以在这里添加
+    maccy  # 轻量级剪贴板管理器
 )
 
 # 全局变量
