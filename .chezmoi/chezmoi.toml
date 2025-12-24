@@ -9,8 +9,10 @@
     proxy = "{{ envOrDefault \"PROXY\" (envOrDefault \"http_proxy\" \"http://127.0.0.1:7890\") }}"
     proxy_host = "127.0.0.1"
     proxy_port = "7890"
-    # 平台特定的包管理器
-    package_manager = "{{ if eq .chezmoi.os \"linux\" }}{{ if exec \"pacman\" }}{{ \"pacman\" }}{{ else if exec \"apt-get\" }}{{ \"apt\" }}{{ else if exec \"dnf\" }}{{ \"dnf\" }}{{ else if exec \"yum\" }}{{ \"yum\" }}{{ end }}{{ else if eq .chezmoi.os \"darwin\" }}{{ \"brew\" }}{{ else if eq .chezmoi.os \"windows\" }}{{ \"winget\" }}{{ end }}"
+    # 平台特定的包管理器（使用静态检测，避免 exec 导致卡住）
+    # 注意：exec 函数在模板解析时执行外部命令，可能导致卡住
+    # 改为在运行时通过脚本检测，这里只设置默认值
+    package_manager = "{{ if eq .chezmoi.os \"linux\" }}pacman{{ else if eq .chezmoi.os \"darwin\" }}brew{{ else if eq .chezmoi.os \"windows\" }}winget{{ else }}unknown{{ end }}"
 
 [git]
     autoCommit = false

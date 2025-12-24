@@ -36,10 +36,10 @@ alias unset 'set --erase'
 # 代理配置（统一配置，参考 Git Bash）
 # ============================================
 # 默认代理地址（从 .chezmoi.toml 读取，可通过环境变量 PROXY 覆盖）
-# 注意：chezmoi 会在应用配置时解析模板变量 {{ .proxy }}
+# 注意：chezmoi 会在应用配置时解析模板变量
 # Fish 中需要使用 set -gx 设置全局环境变量
-# 使用 Fish 的条件判断，如果 PROXY 环境变量未设置则使用模板变量解析后的值
-set -gx PROXY_URL "{{ .proxy }}"
+# 使用 .data.proxy 获取代理地址，优先级：PROXY 环境变量 > http_proxy 环境变量 > 默认值
+set -gx PROXY_URL "{{ if .data.proxy }}{{ .data.proxy }}{{ else }}http://127.0.0.1:7890{{ end }}"
 # 如果设置了 PROXY 环境变量，则使用它（chezmoi 应用后可以通过环境变量覆盖）
 if set -q PROXY
     set -gx PROXY_URL $PROXY

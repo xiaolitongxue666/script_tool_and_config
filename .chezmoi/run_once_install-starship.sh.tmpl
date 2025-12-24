@@ -62,7 +62,7 @@ else
 fi
 
 # 设置代理（默认 127.0.0.1:7890）
-setup_proxy "${PROXY:-{{ .proxy }}}"
+setup_proxy "${PROXY:-{{ if .data.proxy }}{{ .data.proxy }}{{ else }}http://127.0.0.1:7890{{ end }}}"
 
 # 检测操作系统和包管理器
 detect_os_and_package_manager || exit 1

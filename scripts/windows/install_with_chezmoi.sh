@@ -56,13 +56,22 @@ else
     log_info "开始安装 chezmoi..."
     bash "${PROJECT_ROOT}/scripts/chezmoi/install_chezmoi.sh"
 
-    # 验证安装
-    if command -v chezmoi &> /dev/null; then
-        CHEZMOI_VERSION=$(chezmoi --version | head -n 1)
-        log_success "chezmoi 安装成功: $CHEZMOI_VERSION"
-    else
-        error_exit "chezmoi 安装失败，请手动安装"
+    # 安装后验证
+    hash -r 2>/dev/null || true
+
+    # 如果使用官方安装脚本，确保 PATH 已更新
+    if [ -f "$HOME/.local/bin/chezmoi" ] && ! command -v chezmoi &> /dev/null; then
+        export PATH="$HOME/.local/bin:$PATH"
+        log_info "已将 ~/.local/bin 添加到当前会话的 PATH"
     fi
+
+    # 最终验证
+    if ! command -v chezmoi &> /dev/null; then
+        error_exit "chezmoi 安装后仍不可用，请检查安装过程或手动安装"
+    fi
+
+    CHEZMOI_VERSION=$(chezmoi --version | head -n 1)
+    log_success "chezmoi 安装成功: $CHEZMOI_VERSION"
 fi
 
 # ============================================

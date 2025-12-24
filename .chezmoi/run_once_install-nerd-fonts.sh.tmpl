@@ -59,7 +59,7 @@ FONT_URL="https://github.com/ryanoasis/nerd-fonts/releases/download/v${FONT_VERS
 # ============================================
 # 设置代理
 # ============================================
-setup_proxy "${PROXY:-{{ .proxy }}}"
+setup_proxy "${PROXY:-{{ if .data.proxy }}{{ .data.proxy }}{{ else }}http://127.0.0.1:7890{{ end }}}"
 
 # ============================================
 # 检测操作系统和包管理器

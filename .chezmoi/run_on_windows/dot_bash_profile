@@ -45,7 +45,7 @@ shopt -s histappend
 # 代理配置（统一配置，使用模板变量）
 # ============================================
 # 默认代理地址（从 .chezmoi.toml 读取，可通过环境变量 PROXY 覆盖）
-PROXY_URL="${PROXY:-{{ .proxy }}}"
+PROXY_URL="${PROXY:-{{ if .data.proxy }}{{ .data.proxy }}{{ else }}http://127.0.0.1:7890{{ end }}}"
 
 # 默认代理设置（自动启用）
 # 同时设置大小写环境变量，确保不同工具都能识别

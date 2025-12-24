@@ -157,7 +157,7 @@ main() {
     log_info "=========================================="
 
     # 设置代理（用于下载 Homebrew 安装脚本）
-    setup_proxy "${PROXY:-{{ .proxy }}}"
+    setup_proxy "${PROXY:-{{ if .data.proxy }}{{ .data.proxy }}{{ else }}http://127.0.0.1:7890{{ end }}}"
 
     # 检查并安装 Homebrew
     check_homebrew

@@ -24,7 +24,7 @@ fi
 # 代理配置（统一配置，参考 Git Bash）
 # ============================================
 # 默认代理地址（可通过环境变量 PROXY 覆盖）
-PROXY_URL="${PROXY:-{{ .proxy }}}"
+PROXY_URL="${PROXY:-{{ if .data.proxy }}{{ .data.proxy }}{{ else }}http://127.0.0.1:7890{{ end }}}"
 
 # 代理控制别名（同时设置大小写环境变量，确保所有工具都能识别）
 # h_proxy: 快速启用代理
@@ -82,7 +82,7 @@ elif [[ "$OS" == "windows" ]]; then
     # 代理配置（Windows 使用完整配置，参考 Git Bash）
     # 注意：Windows Git Bash 的详细代理配置在 .bash_profile 中
     # 这里只设置基本变量，.bash_profile 中有完整的 curl 包装函数
-    PROXY_URL="${PROXY:-{{ .proxy }}}"
+    PROXY_URL="${PROXY:-{{ if .data.proxy }}{{ .data.proxy }}{{ else }}http://127.0.0.1:7890{{ end }}}"
     export http_proxy="$PROXY_URL"
     export https_proxy="$PROXY_URL"
     export HTTP_PROXY="$PROXY_URL"
