@@ -690,6 +690,53 @@ winget uninstall --id Kitware.CMake
 - CMake 支持跨平台构建，CMakeLists.txt 可在 Windows 和 Linux 之间无缝共享
 - 配合 GCC，可实现完整的 C/C++ 开发环境，与 Linux 端命令 100% 对齐
 
+### Q: 如何设置 XDG_CONFIG_HOME 环境变量？
+
+XDG_CONFIG_HOME 环境变量用于 Neovim 等工具在 Windows 上的配置路径。
+
+**方法 1：使用 PowerShell 脚本（推荐）**
+
+```powershell
+# 以管理员身份运行 PowerShell（可选，用户级变量不需要）
+cd scripts\windows\system_basic_env
+.\set_xdg_config_home.ps1
+```
+
+或者使用批处理文件：
+```cmd
+# 双击运行或右键"以管理员身份运行"
+scripts\windows\system_basic_env\set_xdg_config_home.bat
+```
+
+**方法 2：手动设置**
+
+1. 右键"此电脑" → "属性" → "高级系统设置" → "环境变量"
+2. 在"用户变量"中点击"新建"
+3. 变量名：`XDG_CONFIG_HOME`
+4. 变量值：`C:\Users\<用户名>\.config\`
+   - 例如：`C:\Users\Administrator\.config\`
+5. 点击"确定"保存
+
+**验证设置**：
+
+在 PowerShell 中：
+```powershell
+$env:XDG_CONFIG_HOME
+# 或
+[Environment]::GetEnvironmentVariable('XDG_CONFIG_HOME', 'User')
+```
+
+在 Git Bash 中：
+```bash
+echo $XDG_CONFIG_HOME
+```
+
+**注意**：
+- 环境变量设置为用户级（永久生效）
+- 设置后需要**重新打开终端**才能在新会话中看到变量
+- 当前会话可以通过脚本立即生效
+- 此变量在 PowerShell 和 Git Bash 中都可以使用
+
 ## 参考
 
 - [winutil 项目](https://github.com/ChrisTitusTech/winutil) - 参考了 winutil 的安装方式
