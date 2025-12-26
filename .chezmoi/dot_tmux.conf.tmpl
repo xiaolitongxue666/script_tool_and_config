@@ -1,5 +1,7 @@
+{{- if or (eq .chezmoi.os "linux") (eq .chezmoi.os "darwin") -}}
 # Tmux 统一配置文件
 # 配置文件位置: ~/.config/tmux/tmux.conf 或 ~/.tmux.conf
+# 使用 Catppuccin Mocha 主题
 
 # ============================================
 # 基础配置
@@ -58,9 +60,9 @@ bind-key J resize-pane -L 10
 bind-key L resize-pane -R 10
 
 # 选择面板（使用 i/k/j/l，小写字母）
-bind-key i select-pane -U 
-bind-key k select-pane -D 
-bind-key j select-pane -L 
+bind-key i select-pane -U
+bind-key k select-pane -D
+bind-key j select-pane -L
 bind-key l select-pane -R
 
 # 设置窗口切换快捷键
@@ -85,22 +87,40 @@ set -g default-terminal "screen-256color"
 set -ga terminal-overrides ",xterm-256color:Tc"
 
 # ============================================
-# 状态栏配置
+# Catppuccin 主题配置
+# ============================================
+
+# 设置 Catppuccin 主题 flavor 为 Mocha
+set -g @catppuccin_flavor 'mocha'
+
+# 窗口状态样式（可选，使用圆角样式）
+set -g @catppuccin_window_status_style "rounded"
+
+# 加载 Catppuccin 主题（手动安装方式）
+# 主题路径: ~/.config/tmux/plugins/catppuccin/tmux/catppuccin.tmux
+run '~/.config/tmux/plugins/catppuccin/tmux/catppuccin.tmux'
+
+# ============================================
+# 状态栏配置（Catppuccin 主题会覆盖这些设置，但保留作为备用）
 # ============================================
 
 # 设置状态栏位置
 set -g status-position bottom
-set -g status-justify left
-set -g status-style 'bg=#333333 fg=#ffffff'
-set -g status-left-length 20
-set -g status-right-length 50
 
-# 设置窗口状态
-setw -g window-status-style 'fg=#888888 bg=#333333'
-setw -g window-status-current-style 'fg=#ffffff bg=#005577 bold'
+# 状态栏长度配置（Catppuccin 主题会使用这些设置）
+set -g status-right-length 100
+set -g status-left-length 100
 
-# 设置消息样式
-set -g message-style 'fg=#ffffff bg=#333333'
+# 状态栏左侧（可选，Catppuccin 主题默认为空）
+set -g status-left ""
+
+# 状态栏右侧（可选，添加一些模块）
+# 注意：这些模块需要安装对应的插件，如果不需要可以注释掉
+# set -g status-right "#{E:@catppuccin_status_application}"
+# set -agF status-right "#{E:@catppuccin_status_cpu}"
+# set -ag status-right "#{E:@catppuccin_status_session}"
+# set -ag status-right "#{E:@catppuccin_status_uptime}"
+# set -agF status-right "#{E:@catppuccin_status_battery}"
 
 # ============================================
 # 剪贴板集成（Linux，需要 xclip）
@@ -109,44 +129,36 @@ set -g message-style 'fg=#ffffff bg=#333333'
 # 安装 xclip: sudo apt-get install xclip 或 sudo pacman -S xclip
 
 # Ctrl+c 复制到剪贴板
-bind C-c run "tmux save-buffer - | xclip -i -sel clipboard 2>/dev/null || tmux save-buffer - | pbcopy 2>/dev/null || true"
+bind C-c run-shell "tmux save-buffer - | xclip -i -sel clipboard 2>/dev/null || tmux save-buffer - | pbcopy 2>/dev/null || true"
 
 # Ctrl+v 从剪贴板粘贴
-bind C-v run "tmux set-buffer \"$(xclip -o -sel clipboard 2>/dev/null || pbpaste 2>/dev/null || echo '')\"; tmux paste-buffer"
+bind C-v run-shell "tmux set-buffer \"$(xclip -o -sel clipboard 2>/dev/null || pbpaste 2>/dev/null || echo '')\"; tmux paste-buffer"
 
 # 鼠标选择后自动复制到剪贴板
 unbind -n -Tcopy-mode-vi MouseDragEnd1Pane
-bind -Tcopy-mode-vi MouseDragEnd1Pane send -X copy-selection-and-cancel\; run "tmux save-buffer - | xclip -i -sel clipboard > /dev/null 2>&1 || tmux save-buffer - | pbcopy > /dev/null 2>&1 || true"
+bind -Tcopy-mode-vi MouseDragEnd1Pane send -X copy-selection-and-cancel\; run-shell "tmux save-buffer - | xclip -i -sel clipboard 2>/dev/null || tmux save-buffer - | pbcopy 2>/dev/null || true"
 
 # 中键点击从剪贴板粘贴
 unbind-key MouseDown2Pane
-bind-key -n MouseDown2Pane run " \
-  X=$(xclip -o -sel clipboard 2>/dev/null || pbpaste 2>/dev/null || echo ''); \
-  tmux set-buffer \"$X\"; \
-  tmux paste-buffer -p; \
-  tmux display-message 'pasted!' \
-"
+bind-key -n MouseDown2Pane run-shell "X=\$(xclip -o -sel clipboard 2>/dev/null || pbpaste 2>/dev/null || echo ''); tmux set-buffer \"\$X\"; tmux paste-buffer -p; tmux display-message 'pasted!'"
 
 # ============================================
-# TPM (Tmux Plugin Manager) 插件
+# TPM (Tmux Plugin Manager) 插件（可选，保留兼容性）
 # ============================================
 # 安装 TPM: git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
 
-# 插件列表
-set -g @plugin 'tmux-plugins/tpm'
-set -g @plugin 'tmux-plugins/tmux-sensible'
-set -g @plugin 'tmux-plugins/tmux-resurrect'
-set -g @plugin 'tmux-plugins/tmux-yank'
+# 插件列表（如果需要使用 TPM 管理其他插件）
+# set -g @plugin 'tmux-plugins/tpm'
+# set -g @plugin 'tmux-plugins/tmux-sensible'
+# set -g @plugin 'tmux-plugins/tmux-resurrect'
+# set -g @plugin 'tmux-plugins/tmux-yank'
 
 # tmux-resurrect 设置
-set -g @resurrect-strategy-vim 'session'
+# set -g @resurrect-strategy-vim 'session'
 
-# 其他插件示例（按需取消注释）:
-# set -g @plugin 'github_username/plugin_name'
-# set -g @plugin 'github_username/plugin_name#branch'
-# set -g @plugin 'git@github.com:user/plugin'
-# set -g @plugin 'git@bitbucket.com:user/plugin'
+# 初始化 TMUX 插件管理器（如果使用 TPM）
+# 注意：由于使用 Catppuccin 手动安装方式，TPM 是可选的
+# 如果需要使用 TPM，取消注释下面一行（修复后的语法）：
+# run '~/.tmux/plugins/tpm/tpm'
+{{- end -}}
 
-# 初始化 TMUX 插件管理器（必须放在配置文件最后）
-# 如果未安装 TPM，此行会被忽略
-run '~/.tmux/plugins/tpm/tpm' 2>/dev/null || true

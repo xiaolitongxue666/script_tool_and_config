@@ -1,0 +1,464 @@
+# Configuration for Alacritty, the GPU enhanced terminal emulator.
+# Alacritty 配置，一款使用 GPU 加速的终端模拟器
+#
+# 参考: https://github.com/alacritty/alacritty
+# 配置文件格式: TOML (从 0.13.0 版本开始使用 TOML，替代了之前的 YAML)
+
+# Import additional configuration files
+# 导入额外的配置文件
+#
+# Imports are loaded in order, skipping all missing files, with the importing
+# file being loaded last. If a field is already present in a previous import, it
+# will be replaced.
+# 按书写顺序导入文件，如果文件不存在，直接略过，如果有相同的配置字段，采用最后一次的值
+#
+# All imports must either be absolute paths starting with `/`, or paths relative
+# to the user's home directory starting with `~/`.
+# 所有导入文件的路径必须采用绝对路径或者 home 路径下的相对路径
+#
+# General configuration
+# 通用配置
+[general]
+  # Live config reload (changes require restart)
+  # 实时配置重载（某些更改需要重启）
+  live_config_reload = true
+
+  # 导入 catppuccin 主题
+  # 更多主题: https://github.com/catppuccin/alacritty
+  # 可选主题: catppuccin-latte, catppuccin-frappe, catppuccin-macchiato, catppuccin-mocha
+  import = [
+    "~/.config/alacritty/themes/catppuccin-mocha.toml",
+  ]
+
+# Environment variables
+# 环境变量
+[env]
+  # TERM variable
+  # 环境变量 TERM
+  #
+  # This value is used to set the `$TERM` environment variable for
+  # each instance of Alacritty. If it is not present, alacritty will
+  # check the local terminfo database and use `alacritty` if it is
+  # available, otherwise `xterm-256color` is used.
+  # 该值用于设置 `$TERM` 环境变量 Alacritty 的每个实例。如果它不存在，alacritty 将
+  # 检查本地 terminfo 数据库，如果可用则使用 `alacritty`，否则使用 `xterm-256color`。
+  # Windows 上通常没有 alacritty terminfo，使用 xterm-256color 作为后备以确保兼容性
+  TERM = "xterm-256color"
+
+# Window configuration
+# 窗口配置
+[window]
+  # Window dimensions (changes require restart)
+  # 窗口尺寸（更改需要重新启动）
+  #
+  # Number of lines/columns (not pixels) in the terminal. The number of columns
+  # must be at least `2`, while using a value of `0` for columns and lines will
+  # fall back to the window manager's recommended size.
+  # 终端中的行数/列数（不是像素）。列数必须至少为 `2`，而对列和行使用 `0` 的值将
+  # 回退到窗口管理器的推荐大小。
+  # [window.dimensions]
+  #   columns = 0
+  #   lines = 0
+
+  # Window position (changes require restart)
+  # 窗口位置（更改需要重新启动）
+  #
+  # Specified in number of pixels.
+  # If the position is not set, the window manager will handle the placement.
+  # 以像素数指定。
+  # 如果没有设置位置，窗口管理器将处理放置。
+  # [window.position]
+  #   x = 0
+  #   y = 0
+
+  # Window padding (changes require restart)
+  # 窗口填充（更改需要重新启动）
+  #
+  # Blank space added around the window in pixels. This padding is scaled
+  # by DPI and the specified value is always added at both opposing sides.
+  # 在窗口周围添加的空白区域（以像素为单位）。此填充已缩放
+  # 通过 DPI 并且指定的值总是在相对的两边相加。
+  #
+  # Windows 特定：增加水平填充可以部分掩盖 Powerline 符号溢出问题
+  # 但这不是根本解决方案，主要依赖 glyph_offset 修复
+  [window.padding]
+    x = 5
+    y = 5
+
+  # Spread additional padding evenly around the terminal content.
+  # 在终端内容周围均匀分布额外的填充。
+  # dynamic_padding = false
+
+  # Window decorations
+  # 窗口装饰
+  #
+  # Values for `decorations`:
+  #     - "Full": Borders and title bar # 边框和标题栏
+  #     - "None": Neither borders nor title bar # 既没有边框也没有标题栏
+  #
+  # Values for `decorations` (macOS only): # (仅限 macOS)
+  #     - "Transparent": Title bar, transparent background and title bar buttons # 标题栏、透明背景和标题栏按钮
+  #     - "Buttonless": Title bar, transparent background and no title bar buttons # 标题栏、透明背景和无标题栏按钮
+  # decorations = "Full"  # 在新版本中已废弃，但保留以兼容旧配置
+
+  # Background opacity # 背景不透明度
+  #
+  # Window opacity as a floating point number from `0.0` to `1.0`.
+  # The value `0.0` is completely transparent and `1.0` is opaque.
+  # 值 `0.0` 是完全透明的，`1.0` 是不透明的。
+  # 设置85%不透明度，即15%透明
+  opacity = 0.85
+
+  # Background blur # 背景模糊效果
+  #
+  # Enable background blur effect (supported on some systems).
+  # 启用背景模糊效果（部分系统支持）
+  blur = true
+
+  # Startup Mode (changes require restart)
+  # 启动模式（更改需要重启）
+  #
+  # Values for `startup_mode`:
+  #   - "Windowed" # 窗口化
+  #   - "Maximized" # 最大化
+  #   - "Fullscreen" # 全屏
+  #
+  # Values for `startup_mode` (macOS only): #（仅限 macOS）
+  #   - "SimpleFullscreen" # 简单全屏
+  # startup_mode = "Windowed"  # 在新版本中已废弃，但保留以兼容旧配置
+
+  # Window title # 窗口标题
+  # title = "Alacritty"  # 在新版本中已废弃，但保留以兼容旧配置
+
+  # Allow terminal applications to change Alacritty's window title.
+  # 允许终端应用程序更改 Alacritty 的窗口标题（例如：tmux）
+  # dynamic_title = true  # 在新版本中已废弃，新版本默认启用
+
+  # GTK theme variant (Linux/BSD only) # GTK 主题变体（仅限 Linux/BSD）
+  #
+  # Override the variant of the GTK theme. Commonly supported values are `dark`
+  # and `light`. Set this to `None` to use the default theme variant.
+  # 覆盖 GTK 主题的变体。通常支持的值是 `dark`
+  # 和 `light`。将此设置为 "None" 以使用默认主题变体。
+  # gtk_theme_variant = "None"
+
+# Scrolling configuration
+# 滚动配置
+[scrolling]
+  # Maximum number of lines in the scrollback buffer. # 回滚缓冲区中的最大行数
+  # Specifying '0' will disable scrolling. # 指定 '0' 将禁用滚动。
+  history = 100000
+
+  # Scrolling distance multiplier. # 滚动距离乘数
+  multiplier = 3
+
+# Font configuration # 字体配置
+[font]
+  # Point size
+  size = 14.0
+
+  # Normal (roman) font face # 普通（罗马）字体
+  [font.normal]
+    # Font family
+    #
+    # Default:
+    #   - (macOS) Menlo
+    #   - (Linux/BSD) monospace
+    #   - (Windows) Consolas
+    #
+    # 推荐使用 Nerd Fonts 以支持图标显示（如 lsd、exa 等工具）
+    # 如果未安装 Nerd Fonts，可以改回 "Menlo"
+    # 可用的 Nerd Fonts: "CaskaydiaCove Nerd Font Mono", "FiraCode Nerd Font Mono", "Hack Nerd Font Mono"
+    family = "CaskaydiaCove Nerd Font Mono"
+    # The `style` can be specified to pick a specific face.
+    style = "Regular"
+
+  # Bold font face # 粗体字
+  [font.bold]
+    # Font family
+    #
+    # If the bold family is not specified, it will fall back to the
+    # value specified for the normal font.
+    family = "CaskaydiaCove Nerd Font Mono"
+    # The `style` can be specified to pick a specific face.
+    style = "Bold"
+
+  # Italic font face # 斜体字
+  [font.italic]
+    # Font family
+    #
+    # If the italic family is not specified, it will fall back to the
+    # value specified for the normal font.
+    family = "CaskaydiaCove Nerd Font Mono"
+    # The `style` can be specified to pick a specific face.
+    style = "Italic"
+
+  # Bold italic font face # 粗斜体字
+  [font.bold_italic]
+    # Font family
+    #
+    # If the bold italic family is not specified, it will fall back to the
+    # value specified for the normal font.
+    family = "CaskaydiaCove Nerd Font Mono"
+    # The `style` can be specified to pick a specific face.
+    style = "Bold Italic"
+
+  # Offset is the extra space around each character. `offset.y` can be thought
+  # of as modifying the line spacing, and `offset.x` as modifying the letter spacing.
+  # 偏移量是每个字符周围的额外空间。`offset.y` 可以认为
+  # 作为修改行距，`offset.x` 作为修改字母间距。
+  [font.offset]
+    x = 0
+    # macOS/Linux: 通常使用较大的 y 值（如 7）以获得更好的行距
+    # Windows: 使用较小的值（如 2-4）以避免 Powerline 符号溢出
+    # 如果使用 Powerline/Oh My Posh 主题，建议从 2 开始调整
+    y = 2
+
+  # Glyph offset determines the locations of the glyphs within their cells with
+  # the default being at the bottom. Increasing `x` moves the glyph to the
+  # right, increasing `y` moves the glyph upward.
+  # 字形偏移确定字形在其单元格内的位置
+  # 默认在底部。增加 `x` 将字形移动到
+  # 右边，增加 `y` 会使字形向上移动。
+  #
+  # Windows 特定修复：Powerline 符号溢出问题
+  # 在 Windows + Git Bash + Powerline/Oh My Posh 主题下，Powerline 字符（如箭头、块）
+  # 可能被渲染为"双宽"或宽度计算错误，导致背景色溢出到行尾，形成多余的"尾巴"。
+  # 调整 glyph_offset.y 可以修复这个问题：
+  #   - 从 0 开始，如果还有溢出，逐渐增加到 1-2
+  #   - 常见有效值：0, 1, 2
+  #   - macOS/Linux 通常不需要此修复，可以保持 0
+  [font.glyph_offset]
+    x = 0
+    # Windows: 修复 Powerline 符号溢出（常见值：0-2）
+    # macOS/Linux: 通常保持 0 即可
+    y = 1
+
+  # Thin stroke font rendering (macOS only)
+  # 细笔画字体渲染（仅限 macOS）
+  #
+  # Thin strokes are suitable for retina displays, but for non-retina screens
+  # it is recommended to set `use_thin_strokes` to `false`.
+  # use_thin_strokes = true  # 已废弃，不再支持
+
+# If `true`, bold text is drawn using the bright color variants.
+# 如果为 `true`，粗体文本使用明亮颜色变体绘制。
+# draw_bold_text_with_bright_colors = false
+
+# Colors configuration
+# 颜色配置
+# 注意：catppuccin 主题通过 import 导入，以下颜色配置会被主题文件覆盖
+# 如果需要自定义颜色，可以在主题文件之后添加覆盖配置
+#
+# catppuccin 主题说明：
+# - Latte: 浅色主题
+# - Frappé: 深色主题（中等对比度）
+# - Macchiato: 深色主题（高对比度）
+# - Mocha: 深色主题（最高对比度，默认使用）
+#
+# 更多信息: https://github.com/catppuccin/alacritty
+
+# Bell configuration # 声音提示配置
+#
+# The bell is rung every time the BEL control character is received.
+# 每次收到 BEL 控制字符时都会响铃
+# [bell]
+  # Visual Bell Animation # 视觉钟动画
+  #
+  # Animation effect for flashing the screen when the visual bell is rung.
+  # 视觉铃响时屏幕闪烁的动画效果。
+  #
+  # Values for `animation`:
+  #   - "Ease"
+  #   - "EaseOut"
+  #   - "EaseOutSine"
+  #   - "EaseOutQuad"
+  #   - "EaseOutCubic"
+  #   - "EaseOutQuart"
+  #   - "EaseOutQuint"
+  #   - "EaseOutExpo"
+  #   - "EaseOutCirc"
+  #   - "Linear"
+  # animation = "EaseOutExpo"
+
+  # Duration of the visual bell flash in milliseconds. A `duration` of `0` will
+  # disable the visual bell animation.
+  # 可视铃铛闪烁的持续时间（以毫秒为单位）
+  # duration = 0
+
+  # Visual bell animation color.
+  # color = "#ffffff"
+
+# Selection configuration
+# 选择配置
+[selection]
+  # This string contains all characters that are used as separators for
+  # "semantic words" in Alacritty.
+  # 此字符串包含所有用作分隔符的字符
+  # semantic_escape_chars = ",│`|:\\\"' ()[]{}<>\\t"
+
+  # When set to `true`, selected text will be copied to the primary clipboard.
+  # 当设置为 `true` 时，选中的文本将被复制到主剪贴板。
+  # 启用后，鼠标选中文本会自动复制到剪贴板
+  save_to_clipboard = true
+
+# Cursor configuration # 光标配置
+# [cursor]
+  # Cursor style # 光标样式
+  # [cursor.style]
+    # Cursor shape # 光标形状
+    #
+    # Values for `shape`:
+    #   - "Block" # ▇
+    #   - "Underline" # _
+    #   - "Beam" # |
+    # shape = "Block"
+
+    # Cursor blinking  # 光标闪烁状态
+    #
+    # Values for `blinking`:
+    #   - "Never": Prevent the cursor from ever blinking
+    #   - "Off": Disable blinking by default
+    #   - "On": Enable blinking by default
+    #   - "Always": Force the cursor to always blink
+    # blinking = "Off"
+
+  # Vi mode cursor style
+  #
+  # If the vi mode cursor style is `None` or not specified, it will fall back to
+  # the style of the active value of the normal cursor.
+  #
+  # See `cursor.style` for available options.
+  # vi_mode_style = "None"
+
+  # Cursor blinking interval in milliseconds.
+  # blink_interval = 750
+
+  # If this is `true`, the cursor will be rendered as a hollow box when the
+  # window is not focused.
+  # unfocused_hollow = true
+
+  # Thickness of the cursor relative to the cell width as floating point number
+  # from `0.0` to `1.0`.
+  # thickness = 0.15
+
+# Terminal shell configuration # 终端 Shell 设置
+#
+# You can set `terminal.shell.program` to the path of your favorite shell, e.g.
+# `/bin/fish`. Entries in `terminal.shell.args` are passed unmodified as arguments to the
+# shell.
+#
+# Default:
+#   - (macOS) /bin/bash --login
+#   - (Linux/BSD) user login shell
+#   - (Windows) powershell
+#
+# 配置文件自动适配不同系统：
+#   - macOS: 配置使用 zsh（优先使用 Homebrew 安装的版本）
+#   - Linux: 不配置，使用系统默认 shell
+#   - Windows: 配置使用 Git Bash（如果存在）
+#
+# 注意：Alacritty 会根据运行平台自动应用相应的配置
+# 注意：Alacritty 0.16.1 使用 [terminal.shell] 配置（推荐格式，无警告）
+#
+# macOS: 配置使用 zsh + Oh My Zsh
+# 优先使用 Homebrew 安装的 zsh（Apple Silicon: /opt/homebrew/bin/zsh）
+# 如果不存在，则使用系统默认的 zsh（/bin/zsh）
+# 注意：此配置仅在 macOS 上生效，Windows 和 Linux 会忽略此配置
+[terminal.shell]
+  # macOS zsh 路径（按优先级）
+  # 1. Homebrew 安装的 zsh（Apple Silicon）
+  # 2. 系统默认的 zsh
+  # 如果路径不存在，Alacritty 会回退到系统默认 shell
+  program = "/opt/homebrew/bin/zsh"
+  args = ["-l"]
+
+  # 如果上面的路径不存在（Intel Mac 或未通过 Homebrew 安装 zsh），
+  # 取消注释下面的配置并注释掉上面的：
+  # program = "/bin/zsh"
+  # args = ["-l"]
+
+# Windows: 配置 Git Bash（如果存在）
+# 注意：此配置仅在 Windows 上生效，macOS 和 Linux 会忽略此配置
+# 如果需要使用 Windows 配置，请取消注释下面的配置并注释掉上面的 macOS 配置
+# [terminal.shell]
+#   # Windows Git Bash 路径（自动检测，按常见安装位置顺序）
+#   # 如果路径不存在，Alacritty 会回退到默认的 PowerShell
+#   program = "D:\\Program Files\\Git\\usr\\bin\\bash.exe"
+#   args = ["--login"]
+#
+#   # 如果上面的路径不存在，可以尝试以下路径（取消注释并注释掉上面的）：
+#   # program = "D:\\Program Files\\Git\\bin\\bash.exe"
+#   # program = "C:\\Program Files\\Git\\usr\\bin\\bash.exe"
+#   # program = "C:\\Program Files\\Git\\bin\\bash.exe"
+#   # program = "C:\\msys64\\usr\\bin\\bash.exe"
+#   # program = "D:\\msys64\\usr\\bin\\bash.exe"
+
+# Startup directory # 启动目录
+#
+# Directory the shell is started in. If this is unset, or `None`, the working
+# directory of the parent process will be used.
+# working_directory = "None"
+
+# Send ESC (\\x1b) before characters when alt is pressed.
+# 按下 alt 键时，在字符前发送 ESC (\\x1b)。
+# alt_send_esc = true
+
+# Offer IPC using `alacritty msg` (unix only)
+# 使用 `alacritty msg` 提供 IPC（仅限 Unix）
+# ipc_socket = true
+
+# Mouse configuration
+# 鼠标配置
+# [mouse]
+  # Click settings
+  #
+  # The `double_click` and `triple_click` settings control the time
+  # alacritty should wait for accepting multiple clicks as one double
+  # or triple click.
+  # [mouse.double_click]
+  #   threshold = 300
+  # [mouse.triple_click]
+  #   threshold = 300
+
+  # If this is `true`, the cursor is temporarily hidden when typing.
+  # 如果为 `true`，在输入时临时隐藏光标。
+  # hide_when_typing = false
+
+# Key bindings
+# 键盘绑定
+#
+# Key bindings are specified as a list of objects. For example, this is the
+# default paste binding:
+#
+# `[[key_bindings]]
+#   key = "V"
+#   mods = "Control|Shift"
+#   action = "Paste"`
+#
+# 更多键盘绑定配置请参考官方文档或取消注释下面的示例
+# 详细说明请查看: https://github.com/alacritty/alacritty/blob/master/alacritty.toml
+
+# Debug configuration
+# 调试配置
+# [debug]
+  # Display the time it takes to redraw each frame.
+  # render_timer = false
+
+  # Keep the log file after quitting Alacritty.
+  # persistent_logging = false
+
+  # Log level
+  #
+  # Values for `log_level`:
+  #   - "Off"
+  #   - "Error"
+  #   - "Warn"
+  #   - "Info"
+  #   - "Debug"
+  #   - "Trace"
+  # log_level = "Warn"
+
+  # Print all received window events.
+  # print_events = false
+

@@ -26,17 +26,30 @@ start_script "一键安装脚本"
 # ============================================
 # 解析命令行参数
 # ============================================
+TEST_REMOTE=false
+AUTO_COMMIT=false
+
 while [[ $# -gt 0 ]]; do
     case $1 in
         --proxy|-p)
             PROXY="$2"
             shift 2
             ;;
+        --test-remote)
+            TEST_REMOTE=true
+            shift
+            ;;
+        --commit)
+            AUTO_COMMIT=true
+            shift
+            ;;
         --help|-h)
             echo "用法: $0 [选项]"
             echo ""
             echo "选项:"
             echo "  --proxy, -p <地址>    指定代理地址（例如: http://192.168.1.76:7890）"
+            echo "  --test-remote         执行远程测试（测试远端 tmux 配置）"
+            echo "  --commit              测试成功后自动提交并推送到 Git"
             echo "  --help, -h            显示此帮助信息"
             echo ""
             echo "环境变量:"
@@ -45,6 +58,8 @@ while [[ $# -gt 0 ]]; do
             echo ""
             echo "示例:"
             echo "  $0 --proxy http://192.168.1.76:7890"
+            echo "  $0 --test-remote"
+            echo "  $0 --test-remote --commit"
             echo "  PROXY=http://192.168.1.76:7890 $0"
             exit 0
             ;;
@@ -180,15 +195,109 @@ if [ -d "$CHEZMOI_DIR" ] && [ "$(ls -A $CHEZMOI_DIR 2>/dev/null)" ]; then
     # 设置源状态目录
     export CHEZMOI_SOURCE_DIR="$CHEZMOI_DIR"
 
-    # 应用配置
-    log_info "运行: chezmoi apply -v"
-    chezmoi apply -v
+    # 使用统一配置管理脚本
+    MANAGE_CONFIGS_SCRIPT="${SCRIPT_DIR}/scripts/chezmoi/manage_configs.sh"
+    if [ -f "$MANAGE_CONFIGS_SCRIPT" ] && [ -x "$MANAGE_CONFIGS_SCRIPT" ]; then
+        log_info "使用统一配置管理脚本: $MANAGE_CONFIGS_SCRIPT"
+        bash "$MANAGE_CONFIGS_SCRIPT"
+    else
+        # 回退到直接调用 chezmoi apply
+        log_info "配置管理脚本不可用，直接运行: chezmoi apply -v"
+        chezmoi apply -v
+    fi
 
     log_success "配置应用完成！"
 else
     log_warning "chezmoi 源状态目录为空"
     log_info "请先运行迁移脚本: ./scripts/migration/migrate_to_chezmoi.sh"
     log_info "或手动添加配置: chezmoi add ~/.zshrc"
+fi
+
+# ============================================
+# 远程测试（如果指定）
+# ============================================
+REMOTE_TEST_PASSED=true
+
+if [ "$TEST_REMOTE" = true ]; then
+    log_info ""
+    log_info "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    log_info "执行远程测试"
+    log_info "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+    TEST_SCRIPT="${SCRIPT_DIR}/scripts/common/utils/test_tmux_remote.sh"
+
+    if [ ! -f "$TEST_SCRIPT" ]; then
+        log_error "远程测试脚本不存在: $TEST_SCRIPT"
+        REMOTE_TEST_PASSED=false
+    elif [ ! -x "$TEST_SCRIPT" ]; then
+        log_warning "远程测试脚本没有执行权限，正在设置..."
+        chmod +x "$TEST_SCRIPT"
+    fi
+
+    if [ -f "$TEST_SCRIPT" ] && [ -x "$TEST_SCRIPT" ]; then
+        log_info "运行远程测试脚本..."
+        if bash "$TEST_SCRIPT"; then
+            log_success "远程测试通过"
+            REMOTE_TEST_PASSED=true
+        else
+            log_error "远程测试失败"
+            REMOTE_TEST_PASSED=false
+        fi
+    fi
+fi
+
+# ============================================
+# 自动提交和推送（如果指定且测试通过）
+# ============================================
+if [ "$AUTO_COMMIT" = true ]; then
+    if [ "$REMOTE_TEST_PASSED" != true ]; then
+        log_warning "远程测试未通过，跳过自动提交"
+    else
+        log_info ""
+        log_info "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        log_info "自动提交和推送"
+        log_info "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+        # 检查是否在 Git 仓库中
+        if [ ! -d "${SCRIPT_DIR}/.git" ]; then
+            log_warning "当前目录不是 Git 仓库，跳过提交"
+        else
+            cd "$SCRIPT_DIR"
+
+            # 检查是否有更改
+            if [ -z "$(git status --porcelain)" ]; then
+                log_info "没有更改需要提交"
+            else
+                # 添加所有更改
+                log_info "添加更改到 Git..."
+                git add -A
+
+                # 生成提交信息
+                COMMIT_MSG="feat: 添加 Catppuccin Tmux 主题配置 (Mocha)"
+                if [ "$TEST_REMOTE" = true ]; then
+                    COMMIT_MSG="${COMMIT_MSG} - 远程测试通过"
+                fi
+
+                # 提交
+                log_info "提交更改: $COMMIT_MSG"
+                if git commit -m "$COMMIT_MSG"; then
+                    log_success "提交成功"
+
+                    # 推送到远程
+                    log_info "推送到远程仓库..."
+                    if git push; then
+                        log_success "推送成功"
+                    else
+                        log_warning "推送失败，请手动推送"
+                    fi
+                else
+                    log_warning "提交失败，可能没有需要提交的更改"
+                fi
+            fi
+
+            cd - > /dev/null
+        fi
+    fi
 fi
 
 # ============================================

@@ -1,0 +1,187 @@
+{{- if or (eq .chezmoi.os "linux") (eq .chezmoi.os "darwin") (eq .chezmoi.os "windows") -}}
+#!/bin/bash
+
+# ============================================
+# Neovim 配置安装脚本（通过 Git Submodule 管理）
+# ============================================
+# 此脚本负责：
+# 1. 初始化 Git Submodule（如果未初始化）
+# 2. 运行 Neovim 配置的安装脚本
+# 3. 确保前置依赖（uv, fnm）已安装
+# ============================================
+
+set -e
+
+# 获取脚本所在目录
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
+NVIM_SUBMODULE_DIR="${PROJECT_ROOT}/dotfiles/nvim"
+NVIM_INSTALL_SCRIPT="${NVIM_SUBMODULE_DIR}/install.sh"
+NVIM_CONFIG_DIR="{{ .chezmoi.homeDir }}/.config/nvim"
+
+# 日志函数
+log_info() {
+    echo "[INFO] $*"
+}
+
+log_success() {
+    echo "[SUCCESS] $*"
+}
+
+log_warning() {
+    echo "[WARNING] $*"
+}
+
+log_error() {
+    echo "[ERROR] $*" >&2
+}
+
+# ============================================
+# 检查前置依赖
+# ============================================
+check_prerequisites() {
+    log_info "检查前置依赖..."
+
+    # 检查 uv
+    if ! command -v uv >/dev/null 2>&1; then
+        log_warning "uv 未安装，Neovim Python 环境可能无法正常工作"
+        log_info "请先运行 run_once_install-version-managers.sh.tmpl 安装 uv"
+    else
+        log_success "uv 已安装: $(uv --version | head -n 1)"
+    fi
+
+    # 检查 fnm
+    if ! command -v fnm >/dev/null 2>&1; then
+        log_warning "fnm 未安装，Neovim Node.js 环境可能无法正常工作"
+        log_info "请先运行 run_once_install-version-managers.sh.tmpl 安装 fnm"
+    else
+        log_success "fnm 已安装: $(fnm --version)"
+    fi
+
+    # 检查 Neovim
+    if ! command -v nvim >/dev/null 2>&1; then
+        log_warning "Neovim 未安装，请先安装 Neovim"
+        {{ if eq .chezmoi.os "linux" }}
+        log_info "Linux: sudo pacman -S neovim 或 sudo apt-get install neovim"
+        {{ else if eq .chezmoi.os "darwin" }}
+        log_info "macOS: brew install neovim"
+        {{ else if eq .chezmoi.os "windows" }}
+        log_info "Windows: 从 https://github.com/neovim/neovim/releases 下载安装"
+        {{ end }}
+    else
+        log_success "Neovim 已安装: $(nvim --version | head -n 1)"
+    fi
+}
+
+# ============================================
+# 初始化 Git Submodule
+# ============================================
+init_submodule() {
+    log_info "检查 Git Submodule..."
+
+    if [ ! -f "${NVIM_SUBMODULE_DIR}/init.lua" ] && [ ! -d "${NVIM_SUBMODULE_DIR}/lua" ]; then
+        log_info "Neovim Submodule 未初始化，开始初始化..."
+        cd "${PROJECT_ROOT}" || exit 1
+
+        # 设置代理（如果需要）
+        {{ if .data.proxy }}
+        export http_proxy="{{ .data.proxy }}"
+        export https_proxy="{{ .data.proxy }}"
+        export HTTP_PROXY="{{ .data.proxy }}"
+        export HTTPS_PROXY="{{ .data.proxy }}"
+        log_info "使用代理: {{ .data.proxy }}"
+        {{ else if env "PROXY" }}
+        export http_proxy="{{ env "PROXY" }}"
+        export https_proxy="{{ env "PROXY" }}"
+        export HTTP_PROXY="{{ env "PROXY" }}"
+        export HTTPS_PROXY="{{ env "PROXY" }}"
+        log_info "使用环境变量代理: {{ env "PROXY" }}"
+        {{ end }}
+
+        # 初始化 submodule
+        if git submodule update --init --recursive dotfiles/nvim 2>&1; then
+            log_success "Neovim Submodule 初始化成功"
+        else
+            log_error "Neovim Submodule 初始化失败"
+            exit 1
+        fi
+    else
+        log_success "Neovim Submodule 已初始化"
+    fi
+}
+
+# ============================================
+# 运行 Neovim 安装脚本
+# ============================================
+run_nvim_install() {
+    if [ ! -f "${NVIM_INSTALL_SCRIPT}" ]; then
+        log_error "Neovim 安装脚本不存在: ${NVIM_INSTALL_SCRIPT}"
+        exit 1
+    fi
+
+    log_info "运行 Neovim 配置安装脚本..."
+    chmod +x "${NVIM_INSTALL_SCRIPT}"
+
+    # 设置代理环境变量（如果需要）
+    {{ if .data.proxy }}
+    export http_proxy="{{ .data.proxy }}"
+    export https_proxy="{{ .data.proxy }}"
+    export HTTP_PROXY="{{ .data.proxy }}"
+    export HTTPS_PROXY="{{ .data.proxy }}"
+    {{ else if env "PROXY" }}
+    export http_proxy="{{ env "PROXY" }}"
+    export https_proxy="{{ env "PROXY" }}"
+    export HTTP_PROXY="{{ env "PROXY" }}"
+    export HTTPS_PROXY="{{ env "PROXY" }}"
+    {{ end }}
+
+    # 运行安装脚本
+    if bash "${NVIM_INSTALL_SCRIPT}" 2>&1; then
+        log_success "Neovim 配置安装成功"
+    else
+        log_error "Neovim 配置安装失败"
+        exit 1
+    fi
+}
+
+# ============================================
+# 验证安装
+# ============================================
+verify_installation() {
+    log_info "验证 Neovim 配置安装..."
+
+    if [ -d "${NVIM_CONFIG_DIR}" ] && [ -f "${NVIM_CONFIG_DIR}/init.lua" ]; then
+        log_success "Neovim 配置目录已创建: ${NVIM_CONFIG_DIR}"
+    else
+        log_warning "Neovim 配置目录不存在或配置不完整: ${NVIM_CONFIG_DIR}"
+    fi
+}
+
+# ============================================
+# 主函数
+# ============================================
+main() {
+    log_info ""
+    log_info "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    log_info "开始安装 Neovim 配置"
+    log_info "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+    check_prerequisites
+    init_submodule
+    run_nvim_install
+    verify_installation
+
+    log_info ""
+    log_success "Neovim 配置安装完成！"
+    log_info ""
+    log_info "使用说明："
+    log_info "  1. 运行 nvim 启动 Neovim"
+    log_info "  2. 首次启动时会自动安装插件（可能需要一些时间）"
+    log_info "  3. 更新配置: cd ${NVIM_SUBMODULE_DIR} && git pull && ./install.sh"
+    log_info ""
+}
+
+# 执行主函数
+main
+{{- end -}}
+

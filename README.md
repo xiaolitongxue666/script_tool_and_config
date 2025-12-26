@@ -212,6 +212,13 @@ git push
 - [project_structure.md](project_structure.md) - 详细的项目结构说明
 - [chezmoi 官方文档](https://www.chezmoi.io/docs/)
 
+### 相关指南文档
+
+- [部署流程指南](scripts/common/utils/DEPLOYMENT_GUIDE.md) - Windows 和 Arch Linux 之间的配置部署流程
+- [SFTP 同步指南](scripts/common/utils/SFTP_SYNC_GUIDE.md) - 使用 SFTP 同步项目到远端系统
+- [SSH 配置设置](scripts/common/utils/SSH_CONFIG_SETUP.md) - SSH 配置文件管理说明
+- [Zsh 手动安装指南](scripts/common/utils/MANUAL_ZSH_SETUP_GUIDE.md) - Zsh + Oh My Zsh 手动安装和配置
+
 ## 详细使用说明
 
 ### 1. 如何下载安装 chezmoi
@@ -1220,6 +1227,16 @@ chezmoi diff
 详见 [LICENSE](LICENSE) 文件
 
 ## 更新日志
+
+### 2024-12 项目重构
+- ✅ 统一配置管理：所有配置文件转换为 Chezmoi 模板格式
+- ✅ 创建配置审计脚本：`scripts/chezmoi/audit_configs.sh`
+- ✅ 创建统一配置管理脚本：`scripts/chezmoi/manage_configs.sh`
+- ✅ 改进 `install.sh`：集成新的配置管理机制
+- ✅ 创建 Neovim 配置的 Chezmoi 管理模板
+- ✅ 删除临时测试脚本和修复脚本
+- ✅ 更新文档：添加相关指南文档引用
+- ✅ 清理冗余文件：删除已转换为模板格式的原配置文件
 
 ### 2024-12 项目整理
 - ✅ 删除冗余文档（md_files_structure.md）
