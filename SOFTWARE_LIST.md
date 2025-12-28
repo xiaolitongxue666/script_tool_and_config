@@ -18,6 +18,7 @@
 |------|------|----------|----------|
 | **starship** | 跨 shell 提示符 | Linux, macOS, Windows | `run_once_install-starship.sh.tmpl` |
 | **tmux** | 终端复用器 | Linux, macOS | `run_once_install-tmux.sh.tmpl` |
+| **TPM** | Tmux Plugin Manager（tmux 插件管理器） | Linux, macOS | `run_once_install-tmux.sh.tmpl` |
 | **alacritty** | GPU 加速终端模拟器 | Linux, macOS | `run_once_install-alacritty.sh.tmpl` |
 
 ### 文件工具
@@ -132,6 +133,24 @@
 | **Zsh Profile** | `~/.zprofile` | `.chezmoi/dot_zprofile` |
 | **Tmux 配置** | `~/.tmux.conf` | `.chezmoi/dot_tmux.conf` |
 | **Starship 配置** | `~/.config/starship/starship.toml` | `.chezmoi/dot_config/starship/starship.toml` |
+
+#### Tmux 插件（通过 TPM 管理）
+
+所有 tmux 插件通过 TPM (Tmux Plugin Manager) 管理，配置在 `~/.tmux.conf` 中声明。
+
+| 插件 | 描述 | 基本用法 |
+|------|------|----------|
+| **tmux-plugins/tpm** | TPM 插件管理器本身 | 必须第一个安装 |
+| **tmux-plugins/tmux-sensible** | 基础 tmux 设置，提供合理的默认配置 | 安装后自动生效 |
+| **catppuccin/tmux** | Catppuccin Mocha 主题 | 通过 `@catppuccin_flavor` 配置 |
+| **tmux-plugins/tmux-yank** | 改进复制粘贴功能，支持系统剪贴板集成 | 复制模式中按 `y` 复制到剪贴板 |
+| **tmux-plugins/tmux-resurrect** | 保存和恢复 tmux 会话状态 | `prefix + Ctrl-s` 保存，`prefix + Ctrl-r` 恢复 |
+| **tmux-plugins/tmux-continuum** | 自动保存和恢复会话 | 自动定期保存，tmux 启动时自动恢复 |
+
+**插件管理快捷键**：
+- 安装插件：`prefix + I`（大写 I）
+- 更新插件：`prefix + U`（大写 U）
+- 卸载插件：`prefix + alt + u`（小写 u）
 | **Alacritty 配置** | `~/.config/alacritty/alacritty.toml` | `.chezmoi/dot_config/alacritty/alacritty.toml` |
 | **Fish 配置** | `~/.config/fish/config.fish` | `.chezmoi/dot_config/fish/config.fish` |
 | **SSH 配置** | `~/.ssh/config` | `.chezmoi/dot_ssh/config` |

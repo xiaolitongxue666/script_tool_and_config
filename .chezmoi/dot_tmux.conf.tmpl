@@ -93,7 +93,7 @@ set -g default-terminal "screen-256color"
 set -ga terminal-overrides ",xterm-256color:Tc"
 
 # ============================================
-# Catppuccin 主题配置
+# Catppuccin 主题配置（通过 TPM 管理）
 # ============================================
 
 # 设置 Catppuccin 主题 flavor 为 Mocha
@@ -101,10 +101,6 @@ set -g @catppuccin_flavor 'mocha'
 
 # 窗口状态样式（可选，使用圆角样式）
 set -g @catppuccin_window_status_style "rounded"
-
-# 加载 Catppuccin 主题（手动安装方式）
-# 主题路径: ~/.config/tmux/plugins/catppuccin/tmux/catppuccin.tmux
-run '~/.config/tmux/plugins/catppuccin/tmux/catppuccin.tmux'
 
 # ============================================
 # 状态栏配置（Catppuccin 主题会覆盖这些设置，但保留作为备用）
@@ -149,22 +145,67 @@ unbind-key MouseDown2Pane
 bind-key -n MouseDown2Pane run-shell "X=\$(xclip -o -sel clipboard 2>/dev/null || pbpaste 2>/dev/null || echo ''); tmux set-buffer \"\$X\"; tmux paste-buffer -p; tmux display-message 'pasted!'"
 
 # ============================================
-# TPM (Tmux Plugin Manager) 插件（可选，保留兼容性）
+# TPM (Tmux Plugin Manager) 插件配置
 # ============================================
-# 安装 TPM: git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
+# 所有 tmux 插件通过 TPM 管理
+# 安装插件：在 tmux 中按 prefix + I（大写 I）
+# 更新插件：在 tmux 中按 prefix + U（大写 U）
+# 卸载插件：在 tmux 中按 prefix + alt + u（小写 u）
 
-# 插件列表（如果需要使用 TPM 管理其他插件）
-# set -g @plugin 'tmux-plugins/tpm'
-# set -g @plugin 'tmux-plugins/tmux-sensible'
-# set -g @plugin 'tmux-plugins/tmux-resurrect'
-# set -g @plugin 'tmux-plugins/tmux-yank'
+# TPM 插件管理器本身（必须第一个）
+set -g @plugin 'tmux-plugins/tpm'
 
-# tmux-resurrect 设置
-# set -g @resurrect-strategy-vim 'session'
+# tmux-sensible: 基础 tmux 设置
+# 作用：提供合理的默认配置，包括：
+#   - 启用 UTF-8 支持
+#   - 设置合理的窗口和面板选项
+#   - 改进复制模式行为
+#   - 优化终端兼容性
+# 用法：安装后自动生效，无需额外配置
+set -g @plugin 'tmux-plugins/tmux-sensible'
 
-# 初始化 TMUX 插件管理器（如果使用 TPM）
-# 注意：由于使用 Catppuccin 手动安装方式，TPM 是可选的
-# 如果需要使用 TPM，取消注释下面一行（修复后的语法）：
-# run '~/.tmux/plugins/tpm/tpm'
+# catppuccin/tmux: Catppuccin 主题
+# 作用：提供美观的 Catppuccin Mocha 主题
+# 用法：通过 @catppuccin_flavor 设置主题风格（已在上面配置为 'mocha'）
+# 注意：此插件通过 TPM 管理，替代之前的手动安装方式
+set -g @plugin 'catppuccin/tmux'
+
+# tmux-yank: 改进复制粘贴功能
+# 作用：增强 tmux 的复制粘贴功能，支持系统剪贴板集成
+# 用法：
+#   - 在复制模式下，按 y 复制选中内容到系统剪贴板
+#   - 按 Y 复制整行到系统剪贴板
+#   - 按 prefix + y 复制最后一个命令的输出
+# 注意：macOS 使用 pbcopy/pbpaste，Linux 需要安装 xclip 或 xsel
+set -g @plugin 'tmux-plugins/tmux-yank'
+
+# tmux-resurrect: 保存和恢复 tmux 会话
+# 作用：保存 tmux 会话状态（窗口、面板布局、工作目录等），重启后可恢复
+# 用法：
+#   - 保存会话：prefix + Ctrl-s
+#   - 恢复会话：prefix + Ctrl-r
+# 配置：可以设置保存策略（如 vim 会话、程序状态等）
+set -g @plugin 'tmux-plugins/tmux-resurrect'
+
+# tmux-resurrect 配置
+# 设置 vim 会话恢复策略
+set -g @resurrect-strategy-vim 'session'
+
+# tmux-continuum: 自动保存和恢复会话
+# 作用：自动定期保存 tmux 会话，并在 tmux 启动时自动恢复
+# 用法：安装后自动生效，无需手动操作
+# 配置：
+#   - @continuum-restore: 是否在 tmux 启动时自动恢复（默认开启）
+#   - @continuum-save-interval: 自动保存间隔（分钟，默认 15）
+set -g @plugin 'tmux-plugins/tmux-continuum'
+
+# tmux-continuum 配置
+# 启用自动恢复（tmux 启动时自动恢复上次会话）
+set -g @continuum-restore 'on'
+# 设置自动保存间隔为 15 分钟
+set -g @continuum-save-interval '15'
+
+# 初始化 TPM（必须放在配置文件最后）
+run '~/.tmux/plugins/tpm/tpm'
 {{- end -}}
 
