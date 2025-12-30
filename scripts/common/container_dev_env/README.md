@@ -149,15 +149,21 @@ export PROXY=192.168.1.76:7890
 
 ## 配置文件
 
-容器包含以下配置文件（从项目的 `.chezmoi/` 目录复制）：
+容器包含以下配置文件（使用 chezmoi 从项目的 `.chezmoi/` 目录应用）：
 
-- `~/.zshrc` - Zsh 配置
-- `~/.zprofile` - Zsh 启动配置
-- `~/.bashrc` - Bash 配置
-- `~/.tmux.conf` - Tmux 配置
+- `~/.zshrc` - Zsh 配置（通过 chezmoi 模板生成）
+- `~/.zprofile` - Zsh 启动配置（通过 chezmoi 模板生成）
+- `~/.bashrc` - Bash 配置（通过 chezmoi 模板生成）
+- `~/.tmux.conf` - Tmux 配置（通过 chezmoi 模板生成）
 - `~/.config/starship/starship.toml` - Starship 提示符配置
 - `~/.config/alacritty/alacritty.toml` - Alacritty 终端配置
-- `~/.config/i3/config` - i3wm 配置（可选）
+- `~/.config/i3/config` - i3wm 配置（可选，Linux 特定）
+
+**配置应用方式**：
+- 使用 `chezmoi apply` 命令应用所有配置文件
+- 自动解析模板变量（如 `{{ .chezmoi.homeDir }}`、`{{ .chezmoi.os }}` 等）
+- 正确处理条件逻辑（如 `{{- if eq .chezmoi.os "linux" -}}`）
+- 确保配置的正确性和完整性
 
 ## Neovim 配置
 
@@ -199,7 +205,7 @@ git submodule update --init --recursive dotfiles/nvim
 ## 注意事项
 
 1. **Neovim Submodule**: 需要确保 `dotfiles/nvim` submodule 已初始化
-2. **配置文件模板**: 模板文件会进行简单处理（移除模板标记），可能不完全匹配 chezmoi 模板
+2. **chezmoi 配置**: 使用 chezmoi 正确解析和应用所有模板文件，确保配置的正确性
 3. **字体安装**: 字体文件较大，构建时从网络下载
 4. **AUR 包**: 在容器中构建 AUR 包需要 base-devel 组（已包含）
 5. **权限**: 容器使用 root 用户，简化权限管理
@@ -229,6 +235,66 @@ git submodule update --init --recursive dotfiles/nvim
 
 - 已在 Dockerfile 中清除 btop 的 capabilities，应该可以正常执行
 - 如果仍有问题，检查容器是否缺少必要的权限
+
+### Zsh 配置未生效
+
+如果 zsh 配置（主题、插件）没有生效，可能的原因：
+
+1. **.zshrc 文件太小（只有 26 字节）**
+   ```bash
+   # 在容器内检查
+   ls -lh ~/.zshrc
+   # 如果只有 26 字节，说明 chezmoi 没有正确应用配置
+   ```
+
+2. **chezmoi 配置未正确应用**
+   ```bash
+   # 检查构建日志中的 chezmoi apply 输出
+   # 或者手动在容器内执行
+   export CHEZMOI_SOURCE_DIR=/tmp/project/.chezmoi
+   export HOME=/root
+   export CHEZMOI_PAGER=""
+   chezmoi apply --force --verbose
+   ```
+
+3. **手动应用配置（如果 chezmoi apply 失败）**
+   ```bash
+   # 在容器内执行
+   export CHEZMOI_SOURCE_DIR=/tmp/project/.chezmoi
+   export HOME=/root
+   export CHEZMOI_PAGER=""
+   # 手动解析模板
+   chezmoi execute-template < /tmp/project/.chezmoi/dot_zshrc.tmpl > ~/.zshrc
+   # 检查文件大小
+   ls -lh ~/.zshrc
+   ```
+
+4. **Oh My Zsh 未正确安装**
+   ```bash
+   # 在容器内检查
+   ls -la ~/.oh-my-zsh
+   ```
+
+5. **插件未安装**
+   ```bash
+   # 检查插件目录
+   ls -la ~/.oh-my-zsh/custom/plugins/
+   ```
+
+6. **重新加载配置**
+   ```bash
+   # 在容器内执行
+   source ~/.zshrc
+   # 或重新启动 shell
+   exec zsh
+   ```
+
+7. **检查 Oh My Zsh 路径**
+   ```bash
+   # 确认 ZSH 变量
+   echo $ZSH
+   # 应该是 /root/.oh-my-zsh
+   ```
 
 ## 后续优化
 

@@ -129,71 +129,256 @@ EOF
     fi
 }
 
-# 复制配置文件
-copy_config_files() {
-    log_info "复制配置文件..."
+# 使用 chezmoi 应用配置文件
+apply_config_with_chezmoi() {
+    log_info "使用 chezmoi 应用配置文件..."
 
     PROJECT_ROOT="/tmp/project"
+    CHEZMOI_SOURCE_DIR="$PROJECT_ROOT/.chezmoi"
+    CHEZMOI_DEST_DIR="/root"
 
-    # 创建配置目录
-    mkdir -p /root/.config/starship
-    mkdir -p /root/.config/alacritty
-    mkdir -p /root/.config/i3
-    mkdir -p /root/.config/fish/completions
-    mkdir -p /root/.config/fish/conf.d
-
-    # 复制配置文件（简化版，不处理模板变量）
-    # 注意：模板文件需要手动处理或使用简化配置
-
-    # Starship 配置
-    if [ -f "$PROJECT_ROOT/.chezmoi/dot_config/starship/starship.toml" ]; then
-        cp "$PROJECT_ROOT/.chezmoi/dot_config/starship/starship.toml" /root/.config/starship/starship.toml
-        log_info "已复制 Starship 配置"
+    # 检查 chezmoi 是否已安装
+    if ! command -v chezmoi &> /dev/null; then
+        log_error "chezmoi 未安装，无法应用配置"
+        return 1
     fi
 
-    # Alacritty 配置
-    if [ -f "$PROJECT_ROOT/.chezmoi/dot_config/alacritty/alacritty.toml" ]; then
-        cp "$PROJECT_ROOT/.chezmoi/dot_config/alacritty/alacritty.toml" /root/.config/alacritty/alacritty.toml
-        log_info "已复制 Alacritty 配置"
+    # 检查源目录是否存在
+    if [ ! -d "$CHEZMOI_SOURCE_DIR" ]; then
+        log_error "chezmoi 源目录不存在: $CHEZMOI_SOURCE_DIR"
+        return 1
     fi
 
-    # i3 配置
-    if [ -f "$PROJECT_ROOT/.chezmoi/run_on_linux/dot_config/i3/config" ]; then
-        cp "$PROJECT_ROOT/.chezmoi/run_on_linux/dot_config/i3/config" /root/.config/i3/config
-        log_info "已复制 i3 配置"
+    log_info "chezmoi 源目录: $CHEZMOI_SOURCE_DIR"
+    log_info "chezmoi 目标目录: $CHEZMOI_DEST_DIR"
+
+    # 创建必要的目录
+    # 1. chezmoi 状态目录（chezmoi 需要此目录存储状态信息）
+    CHEZMOI_STATE_DIR="$CHEZMOI_DEST_DIR/.local/share/chezmoi"
+    if [ ! -d "$CHEZMOI_STATE_DIR" ]; then
+        log_info "创建 chezmoi 状态目录: $CHEZMOI_STATE_DIR"
+        mkdir -p "$CHEZMOI_STATE_DIR"
+    else
+        log_info "chezmoi 状态目录已存在: $CHEZMOI_STATE_DIR"
     fi
 
-    # Tmux 配置（需要处理模板，这里使用简化版）
-    if [ -f "$PROJECT_ROOT/.chezmoi/dot_tmux.conf.tmpl" ]; then
-        # 简单处理：移除模板标记（如果有）
-        sed 's/{{.*}}//g' "$PROJECT_ROOT/.chezmoi/dot_tmux.conf.tmpl" > /root/.tmux.conf || \
-        cp "$PROJECT_ROOT/.chezmoi/dot_tmux.conf.tmpl" /root/.tmux.conf
-        log_info "已复制 Tmux 配置"
+    # 2. 确保 .local/bin 目录存在（chezmoi 可能需要）
+    if [ ! -d "$CHEZMOI_DEST_DIR/.local/bin" ]; then
+        log_info "创建目录: $CHEZMOI_DEST_DIR/.local/bin"
+        mkdir -p "$CHEZMOI_DEST_DIR/.local/bin"
     fi
 
-    # Zsh 配置（需要处理模板）
-    if [ -f "$PROJECT_ROOT/.chezmoi/dot_zshrc.tmpl" ]; then
-        # 简单处理：移除模板标记
-        sed 's/{{.*}}//g' "$PROJECT_ROOT/.chezmoi/dot_zshrc.tmpl" > /root/.zshrc || \
-        cp "$PROJECT_ROOT/.chezmoi/dot_zshrc.tmpl" /root/.zshrc
-        log_info "已复制 Zsh 配置"
+    # 设置 chezmoi 环境变量
+    # CHEZMOI_SOURCE_DIR: 指定源状态目录
+    export CHEZMOI_SOURCE_DIR="$CHEZMOI_SOURCE_DIR"
+
+    # 设置 HOME 环境变量，chezmoi 会将配置应用到 $HOME
+    # 这样我们可以将配置应用到 /root 而不是默认的 $HOME
+    export HOME="$CHEZMOI_DEST_DIR"
+
+    # 禁用 chezmoi pager（避免进入交互模式）
+    export CHEZMOI_PAGER=""
+    export PAGER="cat"
+
+    # 设置代理环境变量（如果提供）
+    if [ -n "$PROXY_URL" ]; then
+        export PROXY="$PROXY_URL"
+        export http_proxy="$PROXY_URL"
+        export https_proxy="$PROXY_URL"
+        export HTTP_PROXY="$PROXY_URL"
+        export HTTPS_PROXY="$PROXY_URL"
     fi
 
-    # Zsh profile
-    if [ -f "$PROJECT_ROOT/.chezmoi/dot_zprofile.tmpl" ]; then
-        sed 's/{{.*}}//g' "$PROJECT_ROOT/.chezmoi/dot_zprofile.tmpl" > /root/.zprofile || \
-        cp "$PROJECT_ROOT/.chezmoi/dot_zprofile.tmpl" /root/.zprofile
-        log_info "已复制 Zsh profile"
+    # 切换到项目目录
+    cd "$PROJECT_ROOT"
+
+    # 验证 chezmoi 配置
+    log_info "验证 chezmoi 配置..."
+    log_info "CHEZMOI_SOURCE_DIR: $CHEZMOI_SOURCE_DIR"
+    log_info "HOME: $HOME"
+    log_info "当前目录: $(pwd)"
+
+    # 检查 chezmoi 是否能识别源目录
+    if chezmoi source-path >/dev/null 2>&1; then
+        CHEZMOI_SOURCE_PATH=$(chezmoi source-path)
+        log_info "chezmoi 识别的源路径: $CHEZMOI_SOURCE_PATH"
+    else
+        log_warning "chezmoi source-path 命令失败"
     fi
 
-    # Bash 配置
-    if [ -f "$PROJECT_ROOT/.chezmoi/dot_bashrc.tmpl" ]; then
-        sed 's/{{.*}}//g' "$PROJECT_ROOT/.chezmoi/dot_bashrc.tmpl" > /root/.bashrc || \
-        cp "$PROJECT_ROOT/.chezmoi/dot_bashrc.tmpl" /root/.bashrc
-        log_info "已复制 Bash 配置"
+    # 使用 chezmoi apply 应用配置
+    # --force: 强制覆盖已存在的文件（容器环境需要）
+    # --verbose: 显示详细输出
+    # 注意：chezmoi 会自动使用 CHEZMOI_SOURCE_DIR 环境变量
+    # 目标目录由 $HOME 环境变量决定
+    log_info "执行 chezmoi apply..."
+    log_info "源目录: $CHEZMOI_SOURCE_DIR"
+    log_info "目标目录: $HOME"
+
+    # 先检查源目录内容
+    if [ -d "$CHEZMOI_SOURCE_DIR" ]; then
+        log_info "chezmoi 源目录内容:"
+        ls -la "$CHEZMOI_SOURCE_DIR" | head -10 || true
     fi
 
-    log_success "配置文件复制完成"
+    # 执行 chezmoi apply，捕获详细输出
+    log_info "开始执行 chezmoi apply..."
+
+    # 先测试 chezmoi 是否能正常工作
+    log_info "测试 chezmoi 命令..."
+    if ! chezmoi --version >/dev/null 2>&1; then
+        log_error "chezmoi 命令不可用"
+        return 1
+    fi
+
+    # 检查源目录中的模板文件
+    if [ -f "$CHEZMOI_SOURCE_DIR/dot_zshrc.tmpl" ]; then
+        log_info "找到 .zshrc 模板文件"
+        log_info "模板文件大小: $(stat -c%s "$CHEZMOI_SOURCE_DIR/dot_zshrc.tmpl" 2>/dev/null || echo "unknown") 字节"
+    else
+        log_warning "未找到 .zshrc 模板文件: $CHEZMOI_SOURCE_DIR/dot_zshrc.tmpl"
+        log_info "源目录中的文件:"
+        ls -la "$CHEZMOI_SOURCE_DIR" | grep -E "zshrc|bashrc|tmux" || true
+    fi
+
+    # 执行 chezmoi apply
+    log_info "执行: chezmoi apply --force --verbose"
+    CHEZMOI_EXIT_CODE=0
+    if chezmoi apply --force --verbose 2>&1 | tee /tmp/chezmoi_output.log; then
+        CHEZMOI_EXIT_CODE=0
+        log_success "chezmoi 配置应用成功"
+    else
+        CHEZMOI_EXIT_CODE=$?
+        log_error "chezmoi 配置应用失败，退出码: $CHEZMOI_EXIT_CODE"
+    fi
+
+    # 显示 chezmoi 输出（如果有）
+    if [ -f /tmp/chezmoi_output.log ]; then
+        log_info "chezmoi 输出（最后 50 行）:"
+        tail -50 /tmp/chezmoi_output.log || true
+    fi
+
+    # 如果失败，尝试诊断
+    if [ $CHEZMOI_EXIT_CODE -ne 0 ]; then
+        log_warning "chezmoi apply 失败，尝试诊断..."
+        log_info "检查 chezmoi 状态:"
+        chezmoi status 2>&1 | head -20 || true
+        log_warning "继续执行，但配置可能不完整"
+    fi
+
+    # 验证 .zshrc 文件
+    if [ -f "$CHEZMOI_DEST_DIR/.zshrc" ]; then
+        ZSHRC_SIZE=$(stat -f%z "$CHEZMOI_DEST_DIR/.zshrc" 2>/dev/null || stat -c%s "$CHEZMOI_DEST_DIR/.zshrc" 2>/dev/null || echo "0")
+        log_info ".zshrc 文件大小: $ZSHRC_SIZE 字节"
+
+        if [ "$ZSHRC_SIZE" -lt 1000 ]; then
+            log_error ".zshrc 文件太小 ($ZSHRC_SIZE 字节)，配置可能未正确应用！"
+            log_info ".zshrc 文件内容:"
+            cat "$CHEZMOI_DEST_DIR/.zshrc" || true
+
+            # 尝试手动应用 .zshrc
+            log_warning "尝试手动应用 .zshrc 配置..."
+            if [ -f "$CHEZMOI_SOURCE_DIR/dot_zshrc.tmpl" ]; then
+                log_info "使用 chezmoi execute-template 手动解析 .zshrc 模板..."
+                if chezmoi execute-template < "$CHEZMOI_SOURCE_DIR/dot_zshrc.tmpl" > "$CHEZMOI_DEST_DIR/.zshrc.new" 2>/dev/null; then
+                    NEW_SIZE=$(stat -c%s "$CHEZMOI_DEST_DIR/.zshrc.new" 2>/dev/null || stat -f%z "$CHEZMOI_DEST_DIR/.zshrc.new" 2>/dev/null || echo "0")
+                    if [ "$NEW_SIZE" -gt 1000 ]; then
+                        log_success "手动解析成功，新文件大小: $NEW_SIZE 字节"
+                        mv "$CHEZMOI_DEST_DIR/.zshrc.new" "$CHEZMOI_DEST_DIR/.zshrc"
+                        log_success "已替换 .zshrc 文件"
+                    else
+                        log_warning "手动解析的文件仍然太小: $NEW_SIZE 字节"
+                        rm -f "$CHEZMOI_DEST_DIR/.zshrc.new"
+                    fi
+                else
+                    log_warning "手动解析失败，检查错误..."
+                    if [ -f "$CHEZMOI_DEST_DIR/.zshrc.new" ]; then
+                        log_info "部分生成的文件内容:"
+                        head -10 "$CHEZMOI_DEST_DIR/.zshrc.new" || true
+                        rm -f "$CHEZMOI_DEST_DIR/.zshrc.new"
+                    fi
+                fi
+            else
+                log_warning "模板文件不存在: $CHEZMOI_SOURCE_DIR/dot_zshrc.tmpl"
+            fi
+        else
+            log_success ".zshrc 文件大小正常: $ZSHRC_SIZE 字节"
+        fi
+    else
+        log_error ".zshrc 文件不存在！"
+        # 尝试手动创建
+        if [ -f "$CHEZMOI_SOURCE_DIR/dot_zshrc.tmpl" ]; then
+            log_info "尝试手动创建 .zshrc..."
+            if chezmoi execute-template < "$CHEZMOI_SOURCE_DIR/dot_zshrc.tmpl" > "$CHEZMOI_DEST_DIR/.zshrc" 2>/dev/null; then
+                NEW_SIZE=$(stat -c%s "$CHEZMOI_DEST_DIR/.zshrc" 2>/dev/null || stat -f%z "$CHEZMOI_DEST_DIR/.zshrc" 2>/dev/null || echo "0")
+                if [ "$NEW_SIZE" -gt 1000 ]; then
+                    log_success "手动创建 .zshrc 成功，大小: $NEW_SIZE 字节"
+                else
+                    log_warning "手动创建的 .zshrc 太小: $NEW_SIZE 字节"
+                fi
+            else
+                log_error "手动创建 .zshrc 失败"
+            fi
+        fi
+    fi
+
+    # 验证关键配置文件是否已创建
+    local config_files=(
+        "$CHEZMOI_DEST_DIR/.zshrc"
+        "$CHEZMOI_DEST_DIR/.bashrc"
+        "$CHEZMOI_DEST_DIR/.tmux.conf"
+    )
+
+    local success_count=0
+    for config_file in "${config_files[@]}"; do
+        if [ -f "$config_file" ]; then
+            log_success "配置文件已创建: $config_file"
+            success_count=$((success_count + 1))
+        else
+            log_warning "配置文件未创建: $config_file"
+        fi
+    done
+
+    # 验证 Oh My Zsh 配置
+    if [ -f "$CHEZMOI_DEST_DIR/.zshrc" ]; then
+        log_info "检查 Oh My Zsh 配置..."
+        if [ -d "$CHEZMOI_DEST_DIR/.oh-my-zsh" ]; then
+            log_success "Oh My Zsh 已安装: $CHEZMOI_DEST_DIR/.oh-my-zsh"
+
+            # 检查插件目录
+            ZSH_CUSTOM_PLUGINS="$CHEZMOI_DEST_DIR/.oh-my-zsh/custom/plugins"
+            if [ -d "$ZSH_CUSTOM_PLUGINS" ]; then
+                log_info "检查自定义插件..."
+                local plugins=(
+                    "zsh-autosuggestions"
+                    "zsh-syntax-highlighting"
+                    "zsh-history-substring-search"
+                    "zsh-completions"
+                )
+                for plugin in "${plugins[@]}"; do
+                    if [ -d "$ZSH_CUSTOM_PLUGINS/$plugin" ]; then
+                        log_success "  插件已安装: $plugin"
+                    else
+                        log_warning "  插件未安装: $plugin"
+                    fi
+                done
+            fi
+        else
+            log_warning "Oh My Zsh 未安装: $CHEZMOI_DEST_DIR/.oh-my-zsh"
+        fi
+
+        # 检查 .zshrc 中的关键配置
+        if grep -q "ZSH_THEME" "$CHEZMOI_DEST_DIR/.zshrc"; then
+            THEME=$(grep "^ZSH_THEME=" "$CHEZMOI_DEST_DIR/.zshrc" | cut -d'"' -f2 || echo "未找到")
+            log_info "Zsh 主题: $THEME"
+        fi
+    fi
+
+    if [ $success_count -gt 0 ]; then
+        log_success "已成功应用 $success_count 个配置文件"
+    else
+        log_warning "未成功应用任何配置文件"
+    fi
 }
 
 # 安装 Neovim 配置
@@ -226,7 +411,8 @@ install_neovim_config() {
             INSTALL_USER=root \
             bash "$NVIM_INSTALL_SCRIPT" || log_warning "Neovim 配置安装失败"
         fi
-        log_success "Neovim 配置安装完成"
+        # 即使安装失败也继续，不阻止容器构建
+        log_success "Neovim 配置安装流程完成"
     else
         log_warning "Neovim 安装脚本未找到: $NVIM_INSTALL_SCRIPT"
     fi
@@ -242,8 +428,8 @@ main() {
     # 条件配置镜像源
     configure_mirrors_conditional
 
-    # 复制配置文件
-    copy_config_files
+    # 使用 chezmoi 应用配置文件
+    apply_config_with_chezmoi
 
     # 安装 Neovim 配置
     install_neovim_config

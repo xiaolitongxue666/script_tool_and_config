@@ -116,6 +116,18 @@ RUN if [ -n "$PROXY" ]; then \
     echo 'export PATH="$HOME/.cargo/bin:$HOME/.local/share/fnm:$HOME/.local/bin:$PATH"' >> /root/.bashrc && \
     echo 'eval "$(fnm env --use-on-cd)"' >> /root/.bashrc
 
+# 安装 chezmoi
+RUN if [ -n "$PROXY" ]; then \
+        export http_proxy="http://$PROXY"; \
+        export https_proxy="http://$PROXY"; \
+        export HTTP_PROXY="http://$PROXY"; \
+        export HTTPS_PROXY="http://$PROXY"; \
+    fi && \
+    # 使用官方安装脚本安装 chezmoi \
+    sh -c "$(curl -fsLS get.chezmoi.io)" -- -b /usr/local/bin && \
+    # 验证安装 \
+    chezmoi --version
+
 # 安装 Oh My Zsh
 RUN if [ -n "$PROXY" ]; then \
         export http_proxy="http://$PROXY"; \
@@ -225,8 +237,12 @@ FROM config AS final
 ARG PROXY=""
 
 # 清理缓存和临时文件
+# 注意：不要删除 /root/.zshrc 等配置文件
 RUN pacman -Scc --noconfirm && \
-    rm -rf /tmp/* /var/tmp/* /root/.cache/*
+    rm -rf /tmp/* /var/tmp/* /root/.cache/* && \
+    # 验证配置文件是否仍然存在 \
+    (test -f /root/.zshrc && echo "[INFO] .zshrc 文件存在" || echo "[WARNING] .zshrc 文件不存在") && \
+    (test -f /root/.bashrc && echo "[INFO] .bashrc 文件存在" || echo "[WARNING] .bashrc 文件不存在")
 
 # 设置工作目录
 WORKDIR /workspace
@@ -238,9 +254,28 @@ ENV SHELL=/bin/zsh
 # 设置默认 shell
 RUN chsh -s /bin/zsh root || true
 
-# 确保 zsh 配置文件也包含 PATH（如果 .zshrc 不存在或未设置）
-RUN if [ ! -f /root/.zshrc ] || ! grep -q "\.local/bin" /root/.zshrc 2>/dev/null; then \
-        echo 'export PATH="$HOME/.cargo/bin:$HOME/.local/share/fnm:$HOME/.local/bin:$PATH"' >> /root/.zshrc; \
+# 验证并补充 zsh 配置文件
+# 注意：chezmoi 应该在 config stage 中已经应用了配置
+# 这里只做验证和补充 PATH（如果需要）
+RUN if [ ! -f /root/.zshrc ]; then \
+        echo "[WARNING] .zshrc 文件不存在，创建基本配置" && \
+        echo 'export PATH="$HOME/.cargo/bin:$HOME/.local/share/fnm:$HOME/.local/bin:$PATH"' >> /root/.zshrc && \
+        echo '# 基本 zsh 配置（chezmoi 配置未应用时使用）' >> /root/.zshrc; \
+    else \
+        ZSHRC_SIZE=$(stat -c%s /root/.zshrc 2>/dev/null || echo "0") && \
+        if [ "$ZSHRC_SIZE" -lt 1000 ]; then \
+            echo "[WARNING] .zshrc 文件太小 ($ZSHRC_SIZE 字节)，可能配置未正确应用" && \
+            echo "[INFO] .zshrc 文件内容:" && \
+            head -10 /root/.zshrc || true; \
+        else \
+            echo "[INFO] .zshrc 文件大小正常: $ZSHRC_SIZE 字节"; \
+        fi && \
+        # 如果 .zshrc 存在但没有 .local/bin，在文件末尾追加（不破坏现有配置） \
+        if ! grep -q "\.local/bin" /root/.zshrc 2>/dev/null; then \
+            echo '' >> /root/.zshrc && \
+            echo '# 补充 PATH（由 Dockerfile 添加）' >> /root/.zshrc && \
+            echo 'export PATH="$HOME/.cargo/bin:$HOME/.local/share/fnm:$HOME/.local/bin:$PATH"' >> /root/.zshrc; \
+        fi; \
     fi
 
 # 设置代理环境变量（如果提供，用于运行时）

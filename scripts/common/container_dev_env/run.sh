@@ -127,22 +127,107 @@ if ! docker image inspect "$FULL_IMAGE_NAME" >/dev/null 2>&1; then
 fi
 
 # 检查容器是否已存在
-if docker ps -a --format '{{.Names}}' | grep -q "^${CONTAINER_NAME}$"; then
-    echo "[INFO] 容器已存在: $CONTAINER_NAME"
-    read -p "是否删除现有容器并创建新容器? (y/N): " -n 1 -r
-    echo
-    if [[ $REPLY =~ ^[Yy]$ ]]; then
-        echo "[INFO] 删除现有容器..."
-        docker rm -f "$CONTAINER_NAME" >/dev/null 2>&1 || true
-    else
-        echo "[INFO] 启动现有容器..."
-        docker start "$CONTAINER_NAME" >/dev/null 2>&1
-        if [ -n "$COMMAND" ]; then
-            docker exec -it "$CONTAINER_NAME" /bin/zsh -c "$COMMAND"
+CONTAINER_EXISTS=false
+CONTAINER_RUNNING=false
+
+# 检查容器是否存在（包括已停止的）
+# 使用 docker inspect 更可靠
+if docker inspect "$CONTAINER_NAME" >/dev/null 2>&1; then
+    CONTAINER_EXISTS=true
+    # 检查容器是否正在运行
+    CONTAINER_STATUS=$(docker inspect --format='{{.State.Status}}' "$CONTAINER_NAME" 2>/dev/null || echo "unknown")
+    if [ "$CONTAINER_STATUS" = "running" ]; then
+        CONTAINER_RUNNING=true
+    fi
+fi
+
+# 处理已存在的容器
+if [ "$CONTAINER_EXISTS" = true ]; then
+    if [ "$CONTAINER_RUNNING" = true ]; then
+        echo "[WARNING] 容器正在运行: $CONTAINER_NAME"
+        echo "[INFO] 选项："
+        echo "  y - 停止并删除现有容器，然后启动新容器"
+        echo "  n - 使用现有运行中的容器（执行命令或进入 shell）"
+        echo "  q - 退出"
+        # 检查是否是交互式终端
+        if [ -t 0 ]; then
+            read -p "请选择 (y/n/q): " -n 1 -r
+            echo
         else
-            docker exec -it "$CONTAINER_NAME" /bin/zsh
+            # 非交互模式，默认删除并重新创建
+            echo "[INFO] 非交互模式，自动选择: y (停止并删除现有容器)"
+            REPLY="y"
         fi
-        exit 0
+        case $REPLY in
+            [Yy]*)
+                echo "[INFO] 停止并删除现有容器..."
+                docker stop "$CONTAINER_NAME" >/dev/null 2>&1 || true
+                docker rm -f "$CONTAINER_NAME" >/dev/null 2>&1 || true
+                echo "[SUCCESS] 容器已删除"
+                ;;
+            [Nn]*)
+                echo "[INFO] 使用现有运行中的容器..."
+                if [ -n "$COMMAND" ]; then
+                    echo "[INFO] 执行命令: $COMMAND"
+                    docker exec -it "$CONTAINER_NAME" /bin/zsh -c "cd ${WORK_DIR} && $COMMAND"
+                else
+                    echo "[INFO] 进入交互式 shell"
+                    docker exec -it "$CONTAINER_NAME" /bin/zsh -c "cd ${WORK_DIR} && exec /bin/zsh"
+                fi
+                exit 0
+                ;;
+            [Qq]*)
+                echo "[INFO] 已取消"
+                exit 0
+                ;;
+            *)
+                echo "[INFO] 无效选择，已取消"
+                exit 0
+                ;;
+        esac
+    else
+        # 容器存在但未运行
+        echo "[INFO] 发现已停止的容器: $CONTAINER_NAME"
+        echo "[INFO] 选项："
+        echo "  y - 删除现有容器并创建新容器"
+        echo "  n - 启动现有容器"
+        echo "  q - 退出"
+        # 检查是否是交互式终端
+        if [ -t 0 ]; then
+            read -p "请选择 (y/n/q): " -n 1 -r
+            echo
+        else
+            # 非交互模式，默认删除并重新创建
+            echo "[INFO] 非交互模式，自动选择: y (删除现有容器)"
+            REPLY="y"
+        fi
+        case $REPLY in
+            [Yy]*)
+                echo "[INFO] 删除现有容器..."
+                docker rm -f "$CONTAINER_NAME" >/dev/null 2>&1 || true
+                echo "[SUCCESS] 容器已删除"
+                ;;
+            [Nn]*)
+                echo "[INFO] 启动现有容器..."
+                docker start "$CONTAINER_NAME" >/dev/null 2>&1
+                if [ -n "$COMMAND" ]; then
+                    echo "[INFO] 执行命令: $COMMAND"
+                    docker exec -it "$CONTAINER_NAME" /bin/zsh -c "cd ${WORK_DIR} && $COMMAND"
+                else
+                    echo "[INFO] 进入交互式 shell"
+                    docker exec -it "$CONTAINER_NAME" /bin/zsh -c "cd ${WORK_DIR} && exec /bin/zsh"
+                fi
+                exit 0
+                ;;
+            [Qq]*)
+                echo "[INFO] 已取消"
+                exit 0
+                ;;
+            *)
+                echo "[INFO] 无效选择，已取消"
+                exit 0
+                ;;
+        esac
     fi
 fi
 
