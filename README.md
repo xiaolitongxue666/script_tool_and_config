@@ -1223,6 +1223,26 @@ chezmoi diff
    find scripts -name "*.sh" -type f -exec dos2unix {} \;
    ```
 
+## 文件编码和换行符规范
+
+本项目要求所有文件使用 **UTF-8 编码**和 **LF 换行符**（Windows 脚本除外）。
+
+### 规范要求
+- **所有文本文件**: UTF-8（无 BOM）
+- **换行符**: LF (`\n`)，Windows 脚本（`.bat`, `.ps1`, `.cmd`）使用 CRLF
+- **配置文件**: 已配置 `.gitattributes`、`.editorconfig` 和 `.vscode/settings.json`
+
+### 检查和修复工具
+```bash
+# 检查所有文件的编码和换行符
+./scripts/common/utils/check_and_fix_encoding.sh
+
+# 规范化换行符为 LF
+./scripts/common/utils/ensure_lf_line_endings.sh
+```
+
+详细说明请参考：[ENCODING_AND_LINE_ENDINGS.md](ENCODING_AND_LINE_ENDINGS.md)
+
 ## 注意事项
 
 1. **统一结构**: 所有工具配置遵循统一的结构，便于管理和使用
@@ -1230,7 +1250,8 @@ chezmoi diff
 3. **权限要求**: 某些脚本需要 root 权限（使用 `sudo`）
 4. **平台特定**: 部分脚本仅适用于特定操作系统，请根据实际情况使用
 5. **备份**: 修改系统配置文件前，建议先备份原文件
-6. **换行符**: 确保使用正确的换行符格式（Windows 脚本用 CRLF，Linux 脚本用 LF）
+6. **文件编码**: 所有文件使用 UTF-8 编码和 LF 换行符（Windows 脚本除外），详见 [ENCODING_AND_LINE_ENDINGS.md](ENCODING_AND_LINE_ENDINGS.md)
+7. **临时文件**: 项目已配置 `.gitignore` 忽略临时文件、备份文件和测试脚本
 
 ## 许可证
 

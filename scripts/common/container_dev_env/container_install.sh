@@ -218,8 +218,12 @@ install_neovim_config() {
         if [ -n "$PROXY_URL" ]; then
             http_proxy="$PROXY_URL" https_proxy="$PROXY_URL" \
             HTTP_PROXY="$PROXY_URL" HTTPS_PROXY="$PROXY_URL" \
+            USE_SYSTEM_NVIM_VENV=1 \
+            INSTALL_USER=root \
             bash "$NVIM_INSTALL_SCRIPT" || log_warning "Neovim 配置安装失败"
         else
+            USE_SYSTEM_NVIM_VENV=1 \
+            INSTALL_USER=root \
             bash "$NVIM_INSTALL_SCRIPT" || log_warning "Neovim 配置安装失败"
         fi
         log_success "Neovim 配置安装完成"

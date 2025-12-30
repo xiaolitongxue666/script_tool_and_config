@@ -12,6 +12,16 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # 项目根目录
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../../.." && pwd)"
 
+# Windows 环境下，将 Git Bash 路径转换为 Windows 路径（如果需要）
+# Docker Desktop for Windows 可以直接使用 Git Bash 路径格式
+# 但如果遇到路径问题，可以尝试转换
+if [[ "$OSTYPE" == "msys" ]] || [[ "$MSYSTEM" == "MINGW"* ]]; then
+    # Git Bash 路径格式（如 /e/Code/...）在 Docker Desktop 中通常可以直接使用
+    # 但如果 Docker 报错，可能需要转换为 Windows 路径
+    # 这里先保持原样，如果遇到问题再转换
+    :
+fi
+
 # 默认值
 PROXY=""
 IMAGE_NAME="archlinux-dev-env"
@@ -136,13 +146,31 @@ if docker ps -a --format '{{.Names}}' | grep -q "^${CONTAINER_NAME}$"; then
     fi
 fi
 
+# 检测是否支持 TTY（Windows Git Bash 需要特殊处理）
+USE_TTY=""
+if [ -t 0 ] && [ -t 1 ]; then
+    # 检查是否是 Windows Git Bash (mintty)
+    if [[ "$MSYSTEM" == "MINGW"* ]] || [[ "$OSTYPE" == "msys" ]] || command -v winpty >/dev/null 2>&1; then
+        # Windows 环境下，如果 winpty 可用，使用它；否则不使用 -it
+        if command -v winpty >/dev/null 2>&1; then
+            USE_TTY="-it"
+        else
+            USE_TTY=""
+        fi
+    else
+        USE_TTY="-it"
+    fi
+else
+    USE_TTY=""
+fi
+
 # 准备 Docker 运行参数
+# 注意：Windows 环境下，-w 参数可能导致路径问题，我们在容器内切换目录
 DOCKER_RUN_ARGS=(
-    -it
+    $USE_TTY
     --name "$CONTAINER_NAME"
     --hostname archlinux-dev
     -v "${PROJECT_ROOT}:${WORK_DIR}"
-    -w "$WORK_DIR"
 )
 
 # 如果设置了代理，添加到环境变量
@@ -164,13 +192,31 @@ echo "[INFO] 启动容器: $CONTAINER_NAME"
 echo "[INFO] 镜像: $FULL_IMAGE_NAME"
 echo "[INFO] 项目目录: $PROJECT_ROOT -> $WORK_DIR"
 
+# 确定 zsh 路径（避免 Windows Git Bash 路径转换问题）
+ZSH_CMD="/bin/zsh"
+# 在 Windows Git Bash 中，直接使用命令名而不是路径
+if [[ "$MSYSTEM" == "MINGW"* ]] || [[ "$OSTYPE" == "msys" ]]; then
+    ZSH_CMD="zsh"
+fi
+
 # 启动容器
 if [ -n "$COMMAND" ]; then
     echo "[INFO] 执行命令: $COMMAND"
-    docker run "${DOCKER_RUN_ARGS[@]}" --rm "$FULL_IMAGE_NAME" /bin/zsh -c "$COMMAND"
+    # 在命令前添加 cd 到工作目录
+    docker run "${DOCKER_RUN_ARGS[@]}" --rm "$FULL_IMAGE_NAME" $ZSH_CMD -c "cd ${WORK_DIR} && $COMMAND"
 else
     echo "[INFO] 启动交互式 shell"
     # 交互式模式：覆盖默认的 sleep infinity，启动 zsh
-    docker run "${DOCKER_RUN_ARGS[@]}" "$FULL_IMAGE_NAME" /bin/zsh
+    # Windows Git Bash 环境下，如果 winpty 可用，使用它包装命令
+    if [[ "$MSYSTEM" == "MINGW"* ]] || [[ "$OSTYPE" == "msys" ]]; then
+        if command -v winpty >/dev/null 2>&1; then
+            winpty docker run "${DOCKER_RUN_ARGS[@]}" "$FULL_IMAGE_NAME" $ZSH_CMD -c "cd ${WORK_DIR} && exec $ZSH_CMD"
+        else
+            # 不使用 -it，直接运行
+            docker run "${DOCKER_RUN_ARGS[@]}" "$FULL_IMAGE_NAME" $ZSH_CMD -c "cd ${WORK_DIR} && exec $ZSH_CMD"
+        fi
+    else
+        docker run "${DOCKER_RUN_ARGS[@]}" "$FULL_IMAGE_NAME" $ZSH_CMD -c "cd ${WORK_DIR} && exec $ZSH_CMD"
+    fi
 fi
 

@@ -8,10 +8,12 @@ script_tool_and_config/
 ├── LICENSE                           # 许可证
 ├── install.sh                        # 一键安装脚本
 │
-├── readme.md                         # 项目主文档
+├── README.md                         # 项目主文档
 ├── project_structure.md              # 项目结构说明（本文件）
-├── software_list.md                 # 软件清单
+├── SOFTWARE_LIST.md                  # 软件清单
+├── ENCODING_AND_LINE_ENDINGS.md      # 文件编码和换行符规范
 ├── chezmoi_use_guide.md              # chezmoi 使用指南
+├── os_setup_guide.md                 # 操作系统设置指南
 │
 ├── dotfiles/                         # Git Submodule（仅 nvim 配置）
 │   └── nvim/                         # Neovim 配置（Git Submodule）
@@ -31,6 +33,14 @@ script_tool_and_config/
 │   │   └── migrate_to_chezmoi.sh    # 迁移到 chezmoi
 │   │
 │   ├── common/                       # 跨平台脚本
+│   │   ├── container_dev_env/        # Docker 容器开发环境
+│   │   │   ├── Dockerfile            # Docker 镜像定义
+│   │   │   ├── build.sh              # 构建脚本
+│   │   │   ├── run.sh                # 运行脚本
+│   │   │   ├── container_install.sh  # 容器内安装脚本
+│   │   │   ├── configure_mirrors.sh  # 镜像源配置脚本
+│   │   │   └── README.md             # 使用说明
+│   │   │
 │   │   ├── utils/                    # 通用工具脚本
 │   │   │   ├── append_text_to_file.sh
 │   │   │   ├── append_lines_to_file.sh
@@ -46,7 +56,9 @@ script_tool_and_config/
 │   │   │   ├── compare_static_lib_objects.sh
 │   │   │   ├── demo_printf_formatting.sh
 │   │   │   ├── demo_heredoc.sh
-│   │   │   └── extract_text_between_markers.sh
+│   │   │   ├── extract_text_between_markers.sh
+│   │   │   ├── check_and_fix_encoding.sh  # 检查文件编码和换行符
+│   │   │   └── ensure_lf_line_endings.sh  # 规范化换行符
 │   │   │
 │   │   ├── project_tools/            # 项目生成和管理工具
 │   │   │   ├── create_c_source_file.sh

@@ -205,12 +205,38 @@ git submodule update --init --recursive dotfiles/nvim
 5. **权限**: 容器使用 root 用户，简化权限管理
 6. **持久化**: 容器删除后配置会丢失，项目文件通过挂载持久化
 
+## 故障排除
+
+### Neovim 配置安装失败
+
+如果 Neovim 配置安装失败，可能的原因：
+
+1. **换行符问题**: 文件包含 CRLF 换行符
+   - 解决：运行 `./scripts/common/utils/ensure_lf_line_endings.sh` 规范化换行符
+   - 或在 Dockerfile 中添加换行符转换
+
+2. **Git Submodule 未初始化**
+   ```bash
+   git submodule update --init --recursive dotfiles/nvim
+   ```
+
+3. **网络问题**: 安装 Python 包或 Node.js 包时网络超时
+   - 解决：使用代理构建镜像
+
+### btop 无法执行
+
+如果 btop 出现 "operation not permitted" 错误：
+
+- 已在 Dockerfile 中清除 btop 的 capabilities，应该可以正常执行
+- 如果仍有问题，检查容器是否缺少必要的权限
+
 ## 后续优化
 
 - 支持创建普通用户（dev）
 - 支持 Docker Compose
 - 支持持久化配置（volume）
 - 支持热重载配置
+- 在 Dockerfile 中添加换行符转换（dos2unix 或 sed）
 
 ## 许可证
 

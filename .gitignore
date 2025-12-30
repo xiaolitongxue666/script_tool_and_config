@@ -303,9 +303,14 @@ scripts/windows/system_basic_env/*.log
 tmp/
 temp/
 # 测试和临时脚本（开发用，不提交）
-scripts/**/test_*.sh
+# 注意：以下测试脚本是工具脚本，应保留：
+# - scripts/linux/system_basic_env/test_mirrors.sh (镜像源测试工具)
+# - scripts/common/shc/shc_test.sh (shc 示例脚本)
+# - dotfiles/nvim/test_dir/* (Neovim 测试文件)
+# 其他临时测试脚本应被忽略：
+scripts/common/container_dev_env/test_*.sh
+scripts/common/utils/test_*.sh
 scripts/**/TEST_*.md
-scripts/**/*_test.sh
 scripts/**/*_test_*.sh
 # VS Code SFTP 配置（可能包含敏感信息）
 .vscode/sftp.json
@@ -329,3 +334,12 @@ scripts/windows/system_basic_env/*.backup
 *.bak
 *.backup
 *.tmp
+
+# 容器开发环境临时文件
+scripts/common/container_dev_env/test_*.sh
+scripts/common/container_dev_env/*.tmp
+scripts/common/container_dev_env/*.log
+
+# 编码检查和修复脚本生成的临时文件
+scripts/common/utils/*.tmp
+scripts/common/utils/*.bak

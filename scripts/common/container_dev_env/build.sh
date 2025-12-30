@@ -130,7 +130,7 @@ if [ $BUILD_EXIT_CODE -eq 0 ]; then
     echo ""
     echo "使用以下命令启动容器:"
     echo "  cd $SCRIPT_DIR"
-    if [ -n "$PROXY_HOST_PORT" ]; then
+    if [ -n "${PROXY_HOST_PORT:-}" ]; then
         echo "  ./run.sh --proxy $PROXY_HOST_PORT"
     else
         echo "  ./run.sh"

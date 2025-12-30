@@ -76,7 +76,10 @@ RUN mkdir -p /var/cache/pacman/pkg && \
     pacman -S --needed --noconfirm \
         tmux starship github-cli lazygit git-delta \
         fzf ripgrep fd bat eza trash-cli fastfetch btop \
-        neovim gcc make tree cmake ctags zsh go
+        neovim gcc make tree cmake ctags zsh go \
+        lua ruby php composer julia xclip && \
+    # 清除 btop 的 capabilities，解决容器中 "operation not permitted" 问题
+    setcap -r /usr/sbin/btop 2>/dev/null || true
 
 # 安装 AUR 助手 (yay)
 # 注意：makepkg 不允许以 root 运行，创建临时用户并配置 sudo
