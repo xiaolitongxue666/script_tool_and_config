@@ -13,9 +13,11 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../../.." && pwd)"
 
 # 默认值
-PROXY=""
+# 默认使用宿主机 7890 端口作为代理
+PROXY="${PROXY:-127.0.0.1:7890}"
 IMAGE_NAME="archlinux-dev-env"
 IMAGE_TAG="latest"
+NO_CACHE=false
 
 # 解析参数
 while [[ $# -gt 0 ]]; do
@@ -49,17 +51,32 @@ while [[ $# -gt 0 ]]; do
             echo ""
             echo "选项:"
             echo "  --proxy ADDRESS           设置代理地址（例如: 192.168.1.76:7890）"
+            echo "                            默认: 127.0.0.1:7890（macOS/Windows 自动转换为 host.docker.internal:7890）"
+            echo "  --no-proxy                不使用代理（使用中国镜像源）"
+            echo "  --no-cache                不使用缓存构建（强制重新构建所有层）"
             echo "  --image-name NAME         镜像名称（默认: archlinux-dev-env）"
             echo "  --image-tag TAG           镜像标签（默认: latest）"
             echo "  -h, --help                 显示帮助信息"
             echo ""
             echo "环境变量:"
-            echo "  PROXY                     代理地址（如果未通过参数指定）"
+            echo "  PROXY                     代理地址（如果未通过参数指定，默认: 127.0.0.1:7890）"
             echo ""
             echo "示例:"
+            echo "  $0                        使用默认代理 127.0.0.1:7890"
             echo "  $0 --proxy 192.168.1.76:7890"
+            echo "  $0 --no-proxy             不使用代理"
+            echo "  $0 --no-cache             不使用缓存构建"
+            echo "  $0 --no-cache --proxy 192.168.1.76:7890  不使用缓存并使用指定代理"
             echo "  PROXY=192.168.1.76:7890 $0"
             exit 0
+            ;;
+        --no-proxy)
+            PROXY=""
+            shift
+            ;;
+        --no-cache)
+            NO_CACHE=true
+            shift
             ;;
         *)
             echo "错误: 未知参数 $1"
@@ -69,10 +86,8 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-# 如果未通过参数指定，尝试从环境变量获取
-if [ -z "$PROXY" ]; then
-    PROXY="${PROXY:-}"
-fi
+# 如果未通过参数指定，使用默认值（已在变量定义中设置）
+# 如果用户明确设置了 --no-proxy，PROXY 会被设置为空字符串
 
 # 构建参数
 BUILD_ARGS=()
@@ -86,8 +101,30 @@ if [ -n "$PROXY" ]; then
     # 提取主机和端口（移除 http:// 或 https://）
     PROXY_HOST_PORT="${PROXY#http://}"
     PROXY_HOST_PORT="${PROXY_HOST_PORT#https://}"
+
+    # 保存原始代理地址（用于 Docker daemon）
+    PROXY_FOR_DAEMON="$PROXY_HOST_PORT"
+
+    # 检测操作系统，如果是 macOS/Windows 且代理地址是 127.0.0.1，转换为 host.docker.internal
+    # 这样容器内可以访问宿主机的代理服务
+    # 注意：这个转换只用于容器内的代理，Docker daemon 需要使用原始地址
+    if [[ "$OSTYPE" == "darwin"* ]] || [[ "$OSTYPE" == "msys" ]] || [[ "$MSYSTEM" == "MINGW"* ]]; then
+        if [[ "$PROXY_HOST_PORT" =~ ^127\.0\.0\.1: ]]; then
+            PROXY_HOST_PORT="${PROXY_HOST_PORT/127.0.0.1:/host.docker.internal:}"
+            echo "[INFO] 检测到 macOS/Windows，容器内代理地址转换为: $PROXY_HOST_PORT"
+        fi
+    fi
+
     BUILD_ARGS+=(--build-arg "PROXY=$PROXY_HOST_PORT")
-    echo "[INFO] 使用代理: $PROXY_HOST_PORT"
+    echo "[INFO] 容器内使用代理: $PROXY_HOST_PORT"
+
+    # 设置环境变量，让 Docker daemon 也能使用代理（用于拉取基础镜像）
+    # Docker daemon 在宿主机上运行，需要使用原始地址（127.0.0.1:7890），而不是 host.docker.internal
+    export http_proxy="http://$PROXY_FOR_DAEMON"
+    export https_proxy="http://$PROXY_FOR_DAEMON"
+    export HTTP_PROXY="http://$PROXY_FOR_DAEMON"
+    export HTTPS_PROXY="http://$PROXY_FOR_DAEMON"
+    echo "[INFO] Docker daemon 使用代理: $PROXY_FOR_DAEMON"
 else
     echo "[INFO] 未设置代理，将使用中国镜像源"
 fi
@@ -103,24 +140,44 @@ echo "[INFO] Dockerfile 位置: $SCRIPT_DIR/Dockerfile"
 # 注意：构建上下文是项目根目录，Dockerfile 在 container_dev_env 目录
 cd "$PROJECT_ROOT"
 
+# 如果设置了 --no-cache，添加到构建参数
+if [ "$NO_CACHE" = true ]; then
+    BUILD_ARGS+=(--no-cache)
+    echo "[INFO] 使用 --no-cache 选项（不使用缓存）"
+fi
+
 # 构建镜像
 # 优先使用 docker buildx，如果失败则回退到 docker build
 BUILD_EXIT_CODE=1
 if docker buildx version >/dev/null 2>&1; then
     echo "[INFO] 使用 docker buildx 构建"
-    docker buildx build \
-        "${BUILD_ARGS[@]}" \
-        -f "${SCRIPT_DIR}/Dockerfile" \
-        -t "$FULL_IMAGE_NAME" \
-        .
+    if [ ${#BUILD_ARGS[@]} -gt 0 ]; then
+        docker buildx build \
+            "${BUILD_ARGS[@]}" \
+            -f "${SCRIPT_DIR}/Dockerfile" \
+            -t "$FULL_IMAGE_NAME" \
+            .
+    else
+        docker buildx build \
+            -f "${SCRIPT_DIR}/Dockerfile" \
+            -t "$FULL_IMAGE_NAME" \
+            .
+    fi
     BUILD_EXIT_CODE=$?
 else
     echo "[INFO] 使用 docker build 构建（buildx 不可用）"
-    docker build \
-        "${BUILD_ARGS[@]}" \
-        -f "${SCRIPT_DIR}/Dockerfile" \
-        -t "$FULL_IMAGE_NAME" \
-        .
+    if [ ${#BUILD_ARGS[@]} -gt 0 ]; then
+        docker build \
+            "${BUILD_ARGS[@]}" \
+            -f "${SCRIPT_DIR}/Dockerfile" \
+            -t "$FULL_IMAGE_NAME" \
+            .
+    else
+        docker build \
+            -f "${SCRIPT_DIR}/Dockerfile" \
+            -t "$FULL_IMAGE_NAME" \
+            .
+    fi
     BUILD_EXIT_CODE=$?
 fi
 

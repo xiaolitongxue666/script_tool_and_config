@@ -24,11 +24,14 @@
 ```bash
 cd scripts/common/container_dev_env
 
-# 使用代理构建
+# 使用默认代理构建（默认: 127.0.0.1:7890，macOS/Windows 自动转换为 host.docker.internal:7890）
+./build.sh
+
+# 使用指定代理构建
 ./build.sh --proxy 192.168.1.76:7890
 
 # 不使用代理构建（将使用中国镜像源）
-./build.sh
+./build.sh --no-proxy
 ```
 
 ### 2. 启动容器
@@ -52,17 +55,25 @@ cd scripts/common/container_dev_env
 
 **参数**:
 - `--proxy ADDRESS`: 设置代理地址（例如: `192.168.1.76:7890`）
+  - 默认: `127.0.0.1:7890`（macOS/Windows 自动转换为 `host.docker.internal:7890`）
+- `--no-proxy`: 不使用代理（使用中国镜像源）
 - `--image-name NAME`: 镜像名称（默认: `archlinux-dev-env`）
 - `--image-tag TAG`: 镜像标签（默认: `latest`）
 - `-h, --help`: 显示帮助信息
 
 **环境变量**:
-- `PROXY`: 代理地址（如果未通过参数指定）
+- `PROXY`: 代理地址（如果未通过参数指定，默认: `127.0.0.1:7890`）
 
 **示例**:
 ```bash
-# 使用参数
+# 使用默认代理（127.0.0.1:7890）
+./build.sh
+
+# 使用指定代理
 ./build.sh --proxy 192.168.1.76:7890
+
+# 不使用代理
+./build.sh --no-proxy
 
 # 使用环境变量
 export PROXY=192.168.1.76:7890

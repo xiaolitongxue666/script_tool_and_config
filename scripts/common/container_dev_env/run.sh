@@ -15,7 +15,7 @@ PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../../.." && pwd)"
 # Windows 环境下，将 Git Bash 路径转换为 Windows 路径（如果需要）
 # Docker Desktop for Windows 可以直接使用 Git Bash 路径格式
 # 但如果遇到路径问题，可以尝试转换
-if [[ "$OSTYPE" == "msys" ]] || [[ "$MSYSTEM" == "MINGW"* ]]; then
+if [[ "$OSTYPE" == "msys" ]] || [[ "${MSYSTEM:-}" == "MINGW"* ]]; then
     # Git Bash 路径格式（如 /e/Code/...）在 Docker Desktop 中通常可以直接使用
     # 但如果 Docker 报错，可能需要转换为 Windows 路径
     # 这里先保持原样，如果遇到问题再转换
@@ -235,7 +235,7 @@ fi
 USE_TTY=""
 if [ -t 0 ] && [ -t 1 ]; then
     # 检查是否是 Windows Git Bash (mintty)
-    if [[ "$MSYSTEM" == "MINGW"* ]] || [[ "$OSTYPE" == "msys" ]] || command -v winpty >/dev/null 2>&1; then
+    if [[ "${MSYSTEM:-}" == "MINGW"* ]] || [[ "$OSTYPE" == "msys" ]] || command -v winpty >/dev/null 2>&1; then
         # Windows 环境下，如果 winpty 可用，使用它；否则不使用 -it
         if command -v winpty >/dev/null 2>&1; then
             USE_TTY="-it"
@@ -280,7 +280,7 @@ echo "[INFO] 项目目录: $PROJECT_ROOT -> $WORK_DIR"
 # 确定 zsh 路径（避免 Windows Git Bash 路径转换问题）
 ZSH_CMD="/bin/zsh"
 # 在 Windows Git Bash 中，直接使用命令名而不是路径
-if [[ "$MSYSTEM" == "MINGW"* ]] || [[ "$OSTYPE" == "msys" ]]; then
+if [[ "${MSYSTEM:-}" == "MINGW"* ]] || [[ "$OSTYPE" == "msys" ]]; then
     ZSH_CMD="zsh"
 fi
 
@@ -293,7 +293,7 @@ else
     echo "[INFO] 启动交互式 shell"
     # 交互式模式：覆盖默认的 sleep infinity，启动 zsh
     # Windows Git Bash 环境下，如果 winpty 可用，使用它包装命令
-    if [[ "$MSYSTEM" == "MINGW"* ]] || [[ "$OSTYPE" == "msys" ]]; then
+    if [[ "${MSYSTEM:-}" == "MINGW"* ]] || [[ "$OSTYPE" == "msys" ]]; then
         if command -v winpty >/dev/null 2>&1; then
             winpty docker run "${DOCKER_RUN_ARGS[@]}" "$FULL_IMAGE_NAME" $ZSH_CMD -c "cd ${WORK_DIR} && exec $ZSH_CMD"
         else

@@ -108,10 +108,12 @@ RUN if [ -n "$PROXY" ]; then \
         export HTTP_PROXY="http://$PROXY"; \
         export HTTPS_PROXY="http://$PROXY"; \
     fi && \
-    # 安装 uv \
-    curl -LsSf https://astral.sh/uv/install.sh | sh && \
-    # 安装 fnm \
-    curl -fsSL https://fnm.vercel.app/install | sh -s -- --skip-shell && \
+    # 安装 uv（添加重试和超时参数） \
+    (curl --connect-timeout 30 --max-time 300 --retry 3 --retry-delay 5 -LsSf https://astral.sh/uv/install.sh | sh || \
+     (sleep 5 && curl --connect-timeout 30 --max-time 300 --retry 3 --retry-delay 5 -LsSf https://astral.sh/uv/install.sh | sh)) && \
+    # 安装 fnm（添加重试和超时参数） \
+    (curl --connect-timeout 30 --max-time 300 --retry 3 --retry-delay 5 -fsSL https://fnm.vercel.app/install | sh -s -- --skip-shell || \
+     (sleep 5 && curl --connect-timeout 30 --max-time 300 --retry 3 --retry-delay 5 -fsSL https://fnm.vercel.app/install | sh -s -- --skip-shell)) && \
     # 添加到 PATH \
     echo 'export PATH="$HOME/.cargo/bin:$HOME/.local/share/fnm:$HOME/.local/bin:$PATH"' >> /root/.bashrc && \
     echo 'eval "$(fnm env --use-on-cd)"' >> /root/.bashrc
@@ -123,8 +125,9 @@ RUN if [ -n "$PROXY" ]; then \
         export HTTP_PROXY="http://$PROXY"; \
         export HTTPS_PROXY="http://$PROXY"; \
     fi && \
-    # 使用官方安装脚本安装 chezmoi \
-    sh -c "$(curl -fsLS get.chezmoi.io)" -- -b /usr/local/bin && \
+    # 使用官方安装脚本安装 chezmoi（添加重试和超时参数） \
+    (sh -c "$(curl --connect-timeout 30 --max-time 300 --retry 3 --retry-delay 5 -fsLS get.chezmoi.io)" -- -b /usr/local/bin || \
+     (sleep 5 && sh -c "$(curl --connect-timeout 30 --max-time 300 --retry 3 --retry-delay 5 -fsLS get.chezmoi.io)" -- -b /usr/local/bin)) && \
     # 验证安装 \
     chezmoi --version
 
