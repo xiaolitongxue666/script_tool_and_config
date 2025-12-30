@@ -170,6 +170,7 @@ if [ -n "$COMMAND" ]; then
     docker run "${DOCKER_RUN_ARGS[@]}" --rm "$FULL_IMAGE_NAME" /bin/zsh -c "$COMMAND"
 else
     echo "[INFO] 启动交互式 shell"
-    docker run "${DOCKER_RUN_ARGS[@]}" "$FULL_IMAGE_NAME"
+    # 交互式模式：覆盖默认的 sleep infinity，启动 zsh
+    docker run "${DOCKER_RUN_ARGS[@]}" "$FULL_IMAGE_NAME" /bin/zsh
 fi
 

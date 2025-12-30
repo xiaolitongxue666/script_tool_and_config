@@ -83,6 +83,8 @@ RUN mkdir -p /var/cache/pacman/pkg && \
 RUN if [ -n "$PROXY" ]; then \
         export http_proxy="http://$PROXY"; \
         export https_proxy="http://$PROXY"; \
+        export HTTP_PROXY="http://$PROXY"; \
+        export HTTPS_PROXY="http://$PROXY"; \
     fi && \
     useradd -m -s /bin/bash builder && \
     echo "builder ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers && \
@@ -100,19 +102,23 @@ RUN if [ -n "$PROXY" ]; then \
 RUN if [ -n "$PROXY" ]; then \
         export http_proxy="http://$PROXY"; \
         export https_proxy="http://$PROXY"; \
+        export HTTP_PROXY="http://$PROXY"; \
+        export HTTPS_PROXY="http://$PROXY"; \
     fi && \
     # 安装 uv \
     curl -LsSf https://astral.sh/uv/install.sh | sh && \
     # 安装 fnm \
     curl -fsSL https://fnm.vercel.app/install | sh -s -- --skip-shell && \
     # 添加到 PATH \
-    echo 'export PATH="$HOME/.cargo/bin:$HOME/.local/share/fnm:$PATH"' >> /root/.bashrc && \
+    echo 'export PATH="$HOME/.cargo/bin:$HOME/.local/share/fnm:$HOME/.local/bin:$PATH"' >> /root/.bashrc && \
     echo 'eval "$(fnm env --use-on-cd)"' >> /root/.bashrc
 
 # 安装 Oh My Zsh
 RUN if [ -n "$PROXY" ]; then \
         export http_proxy="http://$PROXY"; \
         export https_proxy="http://$PROXY"; \
+        export HTTP_PROXY="http://$PROXY"; \
+        export HTTPS_PROXY="http://$PROXY"; \
     fi && \
     export RUNZSH=no && \
     export KEEP_ZSHRC=yes && \
@@ -123,6 +129,8 @@ RUN if [ -n "$PROXY" ]; then \
 RUN if [ -n "$PROXY" ]; then \
         export http_proxy="http://$PROXY"; \
         export https_proxy="http://$PROXY"; \
+        export HTTP_PROXY="http://$PROXY"; \
+        export HTTPS_PROXY="http://$PROXY"; \
     fi && \
     ZSH_CUSTOM="${ZSH_CUSTOM:-/root/.oh-my-zsh/custom}/plugins" && \
     mkdir -p "$ZSH_CUSTOM" && \
@@ -164,6 +172,8 @@ RUN if [ -n "$PROXY" ]; then \
 RUN if [ -n "$PROXY" ]; then \
         export http_proxy="http://$PROXY"; \
         export https_proxy="http://$PROXY"; \
+        export HTTP_PROXY="http://$PROXY"; \
+        export HTTPS_PROXY="http://$PROXY"; \
     fi && \
     pacman -S --needed --noconfirm fontconfig && \
     FONT_DIR="/usr/local/share/fonts/FiraMono-NerdFont" && \
@@ -180,21 +190,31 @@ RUN if [ -n "$PROXY" ]; then \
 RUN if [ -n "$PROXY" ]; then \
         export http_proxy="http://$PROXY"; \
         export https_proxy="http://$PROXY"; \
+        export HTTP_PROXY="http://$PROXY"; \
+        export HTTPS_PROXY="http://$PROXY"; \
     fi && \
     (yay -S --noconfirm lazyssh-bin 2>/dev/null || \
      (INSTALL_DIR="/root/.local/bin" && \
       mkdir -p "$INSTALL_DIR" && \
       ARCH=$(uname -m) && \
-      [ "$ARCH" = "x86_64" ] && ARCH="amd64" || true && \
+      echo "检测架构: $ARCH" && \
       LATEST_TAG=$(curl -fsSL https://api.github.com/repos/Adembc/lazyssh/releases/latest 2>/dev/null | grep -o '"tag_name": "[^"]*' | grep -o '[^"]*$' | head -1) && \
       if [ -n "$LATEST_TAG" ] && [ "$LATEST_TAG" != "null" ]; then \
-          curl -fsSL -L "https://github.com/Adembc/lazyssh/releases/download/${LATEST_TAG}/lazyssh_Linux_${ARCH}.tar.gz" -o /tmp/lazyssh.tar.gz && \
+          echo "下载 lazyssh 版本: $LATEST_TAG (架构: $ARCH)" && \
+          DOWNLOAD_URL="https://github.com/Adembc/lazyssh/releases/download/${LATEST_TAG}/lazyssh_Linux_${ARCH}.tar.gz" && \
+          curl -fsSL -L "$DOWNLOAD_URL" -o /tmp/lazyssh.tar.gz && \
           if [ -f /tmp/lazyssh.tar.gz ] && [ -s /tmp/lazyssh.tar.gz ]; then \
               tar -xzf /tmp/lazyssh.tar.gz -C /tmp && \
-              find /tmp -name "lazyssh" -type f -executable -exec mv {} "$INSTALL_DIR/" \; 2>/dev/null || true && \
-              rm -rf /tmp/lazyssh* || true; \
+              find /tmp -name "lazyssh" -type f -executable -exec mv {} "$INSTALL_DIR/" \; 2>/dev/null && \
+              chmod +x "$INSTALL_DIR/lazyssh" 2>/dev/null || true && \
+              rm -rf /tmp/lazyssh* && \
+              echo "lazyssh 安装成功: $INSTALL_DIR/lazyssh"; \
+          else \
+              echo "警告: lazyssh 下载失败或文件为空"; \
           fi; \
-      fi)) || true
+      else \
+          echo "警告: 无法获取 lazyssh 最新版本"; \
+      fi)) || echo "警告: lazyssh 安装失败，可在运行时手动安装"
 
 # Stage 4: final - 最终镜像
 FROM config AS final
@@ -215,9 +235,15 @@ ENV SHELL=/bin/zsh
 # 设置默认 shell
 RUN chsh -s /bin/zsh root || true
 
+# 确保 zsh 配置文件也包含 PATH（如果 .zshrc 不存在或未设置）
+RUN if [ ! -f /root/.zshrc ] || ! grep -q "\.local/bin" /root/.zshrc 2>/dev/null; then \
+        echo 'export PATH="$HOME/.cargo/bin:$HOME/.local/share/fnm:$HOME/.local/bin:$PATH"' >> /root/.zshrc; \
+    fi
+
 # 设置代理环境变量（如果提供，用于运行时）
 # 在运行时通过 docker run -e 传递
 
 # 默认命令
-CMD ["/bin/zsh"]
+# 使用 sleep infinity 以支持后台运行（Windows 环境下 tail -f /dev/null 会失败）
+CMD ["sleep", "infinity"]
 

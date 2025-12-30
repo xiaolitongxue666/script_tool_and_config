@@ -103,14 +103,28 @@ echo "[INFO] Dockerfile 位置: $SCRIPT_DIR/Dockerfile"
 # 注意：构建上下文是项目根目录，Dockerfile 在 container_dev_env 目录
 cd "$PROJECT_ROOT"
 
-# 构建镜像（移除 --progress=plain，兼容旧版本 docker）
-docker buildx build \
-    "${BUILD_ARGS[@]}" \
-    -f "${SCRIPT_DIR}/Dockerfile" \
-    -t "$FULL_IMAGE_NAME" \
-    .
+# 构建镜像
+# 优先使用 docker buildx，如果失败则回退到 docker build
+BUILD_EXIT_CODE=1
+if docker buildx version >/dev/null 2>&1; then
+    echo "[INFO] 使用 docker buildx 构建"
+    docker buildx build \
+        "${BUILD_ARGS[@]}" \
+        -f "${SCRIPT_DIR}/Dockerfile" \
+        -t "$FULL_IMAGE_NAME" \
+        .
+    BUILD_EXIT_CODE=$?
+else
+    echo "[INFO] 使用 docker build 构建（buildx 不可用）"
+    docker build \
+        "${BUILD_ARGS[@]}" \
+        -f "${SCRIPT_DIR}/Dockerfile" \
+        -t "$FULL_IMAGE_NAME" \
+        .
+    BUILD_EXIT_CODE=$?
+fi
 
-if [ $? -eq 0 ]; then
+if [ $BUILD_EXIT_CODE -eq 0 ]; then
     echo ""
     echo "[SUCCESS] 镜像构建完成: $FULL_IMAGE_NAME"
     echo ""
@@ -122,7 +136,7 @@ if [ $? -eq 0 ]; then
         echo "  ./run.sh"
     fi
 else
-    echo "[ERROR] 镜像构建失败"
-    exit 1
+    echo "[ERROR] 镜像构建失败，退出码: $BUILD_EXIT_CODE"
+    exit $BUILD_EXIT_CODE
 fi
 

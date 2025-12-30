@@ -83,10 +83,10 @@ while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
     # 使用 curl 下载到临时文件，添加超时和重试参数
     if [ -n "$PROXY" ]; then
         /usr/bin/curl --connect-timeout 30 --max-time 300 --retry 2 --retry-delay 1 \
-            -C - -f --proxy "$PROXY" -L -o "$TEMP_FILE" "$URL" 2>/dev/null
+            -C - -f --proxy "$PROXY" -L -o "$TEMP_FILE" "$URL" 2>&1
     else
         /usr/bin/curl --connect-timeout 30 --max-time 300 --retry 2 --retry-delay 1 \
-            -C - -f -L -o "$TEMP_FILE" "$URL" 2>/dev/null
+            -C - -f -L -o "$TEMP_FILE" "$URL" 2>&1
     fi
     EXIT_CODE=$?
 
