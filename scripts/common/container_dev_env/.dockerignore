@@ -1,0 +1,81 @@
+# Git 相关
+.git
+.gitignore
+.gitattributes
+.gitmodules
+
+# 编辑器配置
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# 日志文件
+*.log
+logs/
+**/log
+
+# 临时文件
+*.tmp
+*.bak
+*.backup
+.DS_Store
+Thumbs.db
+
+# 构建产物
+build/
+dist/
+bin/
+lib/
+obj/
+out/
+cmake-build-*/
+CMakeCache.txt
+CMakeFiles/
+*.cmake
+Makefile
+*.o
+*.obj
+*.exe
+*.out
+*.a
+*.so
+*.dylib
+*.dll
+
+# Python 相关
+__pycache__/
+*.pyc
+*.pyo
+env/
+venv/
+ENV/
+.venv
+.env
+.env.local
+.env.*.local
+
+# Node.js 相关
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# 敏感信息
+*.key
+*.pem
+*.cert
+*.crt
+*.p12
+*.pfx
+
+# 其他
+*.md
+!README.md
+LICENSE
+
+# 不要排除容器构建需要的文件
+!.chezmoi
+!dotfiles
+!scripts/common/container_dev_env/
+
