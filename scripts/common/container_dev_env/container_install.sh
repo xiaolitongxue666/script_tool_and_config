@@ -202,18 +202,12 @@ apply_config_with_chezmoi() {
     if chezmoi source-path >/dev/null 2>&1; then
         CHEZMOI_SOURCE_PATH=$(chezmoi source-path)
         log_info "chezmoi 识别的源路径: $CHEZMOI_SOURCE_PATH"
+        if [ "$CHEZMOI_SOURCE_PATH" != "$CHEZMOI_SOURCE_DIR" ]; then
+            log_warning "chezmoi 源路径不匹配: 期望 $CHEZMOI_SOURCE_DIR，实际 $CHEZMOI_SOURCE_PATH"
+        fi
     else
         log_warning "chezmoi source-path 命令失败"
     fi
-
-    # 使用 chezmoi apply 应用配置
-    # --force: 强制覆盖已存在的文件（容器环境需要）
-    # --verbose: 显示详细输出
-    # 注意：chezmoi 会自动使用 CHEZMOI_SOURCE_DIR 环境变量
-    # 目标目录由 $HOME 环境变量决定
-    log_info "执行 chezmoi apply..."
-    log_info "源目录: $CHEZMOI_SOURCE_DIR"
-    log_info "目标目录: $HOME"
 
     # 先检查源目录内容
     if [ -d "$CHEZMOI_SOURCE_DIR" ]; then
@@ -221,30 +215,58 @@ apply_config_with_chezmoi() {
         ls -la "$CHEZMOI_SOURCE_DIR" | head -10 || true
     fi
 
-    # 执行 chezmoi apply，捕获详细输出
-    log_info "开始执行 chezmoi apply..."
-
-    # 先测试 chezmoi 是否能正常工作
-    log_info "测试 chezmoi 命令..."
-    if ! chezmoi --version >/dev/null 2>&1; then
-        log_error "chezmoi 命令不可用"
-        return 1
-    fi
-
     # 检查源目录中的模板文件
     if [ -f "$CHEZMOI_SOURCE_DIR/dot_zshrc.tmpl" ]; then
         log_info "找到 .zshrc 模板文件"
-        log_info "模板文件大小: $(stat -c%s "$CHEZMOI_SOURCE_DIR/dot_zshrc.tmpl" 2>/dev/null || echo "unknown") 字节"
+        TEMPLATE_SIZE=$(stat -c%s "$CHEZMOI_SOURCE_DIR/dot_zshrc.tmpl" 2>/dev/null || echo "unknown")
+        log_info "模板文件大小: $TEMPLATE_SIZE 字节"
     else
         log_warning "未找到 .zshrc 模板文件: $CHEZMOI_SOURCE_DIR/dot_zshrc.tmpl"
         log_info "源目录中的文件:"
         ls -la "$CHEZMOI_SOURCE_DIR" | grep -E "zshrc|bashrc|tmux" || true
     fi
 
+    # 关键步骤：在应用配置之前，清理可能存在的旧配置文件
+    # Oh My Zsh 可能创建了小的 .zshrc 文件，需要删除以确保 chezmoi 能正确应用
+    log_info "清理可能存在的旧配置文件..."
+    CONFIG_FILES_TO_CLEAN=(
+        "$CHEZMOI_DEST_DIR/.zshrc"
+        "$CHEZMOI_DEST_DIR/.bashrc"
+        "$CHEZMOI_DEST_DIR/.tmux.conf"
+    )
+
+    for config_file in "${CONFIG_FILES_TO_CLEAN[@]}"; do
+        if [ -f "$config_file" ]; then
+            FILE_SIZE=$(stat -c%s "$config_file" 2>/dev/null || echo "0")
+            # 如果文件太小（小于 1000 字节），可能是 Oh My Zsh 创建的占位文件，删除它
+            if [ "$FILE_SIZE" -lt 1000 ]; then
+                log_info "删除小的配置文件: $config_file ($FILE_SIZE 字节)"
+                rm -f "$config_file"
+            else
+                log_info "保留现有配置文件: $config_file ($FILE_SIZE 字节)"
+            fi
+        fi
+    done
+
+    # 清理 chezmoi 状态目录（强制重新应用）
+    # 这样可以确保 chezmoi 不会认为文件已经是最新的
+    if [ -d "$CHEZMOI_STATE_DIR" ]; then
+        log_info "清理 chezmoi 状态目录，强制重新应用配置..."
+        rm -rf "$CHEZMOI_STATE_DIR"/*
+        log_info "chezmoi 状态目录已清理"
+    fi
+
     # 执行 chezmoi apply
-    log_info "执行: chezmoi apply --force --verbose"
+    # 参考 install.sh 和 deploy.sh 的使用方式
+    log_info "执行: chezmoi apply -v --force"
+    log_info "源目录: $CHEZMOI_SOURCE_DIR"
+    log_info "目标目录: $HOME"
+
     CHEZMOI_EXIT_CODE=0
-    if chezmoi apply --force --verbose 2>&1 | tee /tmp/chezmoi_output.log; then
+    CHEZMOI_OUTPUT=""
+
+    # 使用与 install.sh 和 deploy.sh 相同的方式执行
+    if CHEZMOI_OUTPUT=$(chezmoi apply -v --force 2>&1); then
         CHEZMOI_EXIT_CODE=0
         log_success "chezmoi 配置应用成功"
     else
@@ -252,10 +274,15 @@ apply_config_with_chezmoi() {
         log_error "chezmoi 配置应用失败，退出码: $CHEZMOI_EXIT_CODE"
     fi
 
-    # 显示 chezmoi 输出（如果有）
-    if [ -f /tmp/chezmoi_output.log ]; then
-        log_info "chezmoi 输出（最后 50 行）:"
-        tail -50 /tmp/chezmoi_output.log || true
+    # 显示 chezmoi 输出（前 100 行）
+    if [ -n "$CHEZMOI_OUTPUT" ]; then
+        log_info "chezmoi 输出:"
+        echo "$CHEZMOI_OUTPUT" | head -100
+        if [ $(echo "$CHEZMOI_OUTPUT" | wc -l) -gt 100 ]; then
+            log_info "... (还有更多输出)"
+        fi
+    else
+        log_warning "chezmoi 没有输出（可能所有文件都是最新的）"
     fi
 
     # 如果失败，尝试诊断
