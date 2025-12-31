@@ -12,6 +12,17 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # 项目根目录
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../../.." && pwd)"
 
+# 加载通用函数库
+COMMON_SH="${PROJECT_ROOT}/scripts/common.sh"
+if [ -f "$COMMON_SH" ]; then
+    source "$COMMON_SH"
+else
+    function log_info() { echo "[INFO] $*"; }
+    function log_success() { echo "[SUCCESS] $*"; }
+    function log_warning() { echo "[WARNING] $*"; }
+    function log_error() { echo "[ERROR] $*" >&2; }
+fi
+
 # Windows 环境下，将 Git Bash 路径转换为 Windows 路径（如果需要）
 # Docker Desktop for Windows 可以直接使用 Git Bash 路径格式
 # 但如果遇到路径问题，可以尝试转换
@@ -123,8 +134,8 @@ while [[ $# -gt 0 ]]; do
             exit 0
             ;;
         *)
-            echo "错误: 未知参数 $1"
-            echo "使用 $0 --help 查看帮助"
+            log_error "未知参数: $1"
+            log_info "使用 $0 --help 查看帮助"
             exit 1
             ;;
     esac
@@ -138,8 +149,8 @@ FULL_IMAGE_NAME="${IMAGE_NAME}:${IMAGE_TAG}"
 
 # 检查镜像是否存在
 if ! docker image inspect "$FULL_IMAGE_NAME" >/dev/null 2>&1; then
-    echo "[ERROR] 镜像不存在: $FULL_IMAGE_NAME"
-    echo "[INFO] 请先运行构建脚本: ./build.sh"
+    log_error "镜像不存在: $FULL_IMAGE_NAME"
+    log_info "请先运行构建脚本: ./build.sh"
     exit 1
 fi
 
@@ -162,12 +173,12 @@ fi
 if [ "$CONTAINER_EXISTS" = true ]; then
     if [ "$CONTAINER_RUNNING" = true ]; then
         # 容器已运行，直接进入（默认行为）
-        echo "[INFO] 进入已运行的容器: $CONTAINER_NAME"
+        log_info "进入已运行的容器: $CONTAINER_NAME"
         if [ -n "$COMMAND" ]; then
-            echo "[INFO] 执行命令: $COMMAND"
+            log_info "执行命令: $COMMAND"
             docker exec -it "$CONTAINER_NAME" /bin/zsh -c "cd ${WORK_DIR} && $COMMAND"
         else
-            echo "[INFO] 进入交互式 shell"
+            log_info "进入交互式 shell"
             docker exec -it "$CONTAINER_NAME" /bin/zsh -c "cd ${WORK_DIR} && exec /bin/zsh"
         fi
         exit 0
@@ -175,21 +186,21 @@ if [ "$CONTAINER_EXISTS" = true ]; then
         # 容器存在但未运行
         # 如果指定了 --exec，启动容器并进入
         if [ "$EXEC_ONLY" = true ]; then
-            echo "[INFO] 启动已停止的容器: $CONTAINER_NAME"
+            log_info "启动已停止的容器: $CONTAINER_NAME"
             docker start "$CONTAINER_NAME" >/dev/null 2>&1
             sleep 1  # 等待容器完全启动
             if [ -n "$COMMAND" ]; then
-                echo "[INFO] 执行命令: $COMMAND"
+                log_info "执行命令: $COMMAND"
                 docker exec -it "$CONTAINER_NAME" /bin/zsh -c "cd ${WORK_DIR} && $COMMAND"
             else
-                echo "[INFO] 进入交互式 shell"
+                log_info "进入交互式 shell"
                 docker exec -it "$CONTAINER_NAME" /bin/zsh -c "cd ${WORK_DIR} && exec /bin/zsh"
             fi
             exit 0
         fi
 
-        echo "[INFO] 发现已停止的容器: $CONTAINER_NAME"
-        echo "[INFO] 选项："
+        log_info "发现已停止的容器: $CONTAINER_NAME"
+        log_info "选项："
         echo "  y - 删除现有容器并创建新容器"
         echo "  n - 启动现有容器"
         echo "  q - 退出"
@@ -199,34 +210,34 @@ if [ "$CONTAINER_EXISTS" = true ]; then
             echo
         else
             # 非交互模式，默认启动现有容器
-            echo "[INFO] 非交互模式，自动选择: n (启动现有容器)"
+            log_info "非交互模式，自动选择: n (启动现有容器)"
             REPLY="n"
         fi
         case $REPLY in
             [Yy]*)
-                echo "[INFO] 删除现有容器..."
+                log_info "删除现有容器..."
                 docker rm -f "$CONTAINER_NAME" >/dev/null 2>&1 || true
-                echo "[SUCCESS] 容器已删除"
+                log_success "容器已删除"
                 ;;
             [Nn]*)
-                echo "[INFO] 启动现有容器..."
+                log_info "启动现有容器..."
                 docker start "$CONTAINER_NAME" >/dev/null 2>&1
                 sleep 1  # 等待容器完全启动
                 if [ -n "$COMMAND" ]; then
-                    echo "[INFO] 执行命令: $COMMAND"
+                    log_info "执行命令: $COMMAND"
                     docker exec -it "$CONTAINER_NAME" /bin/zsh -c "cd ${WORK_DIR} && $COMMAND"
                 else
-                    echo "[INFO] 进入交互式 shell"
+                    log_info "进入交互式 shell"
                     docker exec -it "$CONTAINER_NAME" /bin/zsh -c "cd ${WORK_DIR} && exec /bin/zsh"
                 fi
                 exit 0
                 ;;
             [Qq]*)
-                echo "[INFO] 已取消"
+                log_info "已取消"
                 exit 0
                 ;;
             *)
-                echo "[INFO] 无效选择，已取消"
+                log_info "无效选择，已取消"
                 exit 0
                 ;;
         esac
@@ -274,14 +285,14 @@ if [ -n "$PROXY" ]; then
         -e "HTTP_PROXY=$PROXY_URL"
         -e "HTTPS_PROXY=$PROXY_URL"
     )
-    echo "[INFO] 使用代理: $PROXY_URL"
+    log_info "使用代理: $PROXY_URL"
 else
-    echo "[INFO] 未设置代理"
+    log_info "未设置代理"
 fi
 
-echo "[INFO] 启动容器: $CONTAINER_NAME"
-echo "[INFO] 镜像: $FULL_IMAGE_NAME"
-echo "[INFO] 项目目录: $PROJECT_ROOT -> $WORK_DIR"
+log_info "启动容器: $CONTAINER_NAME"
+log_info "镜像: $FULL_IMAGE_NAME"
+log_info "项目目录: $PROJECT_ROOT -> $WORK_DIR"
 
 # 确定 zsh 路径（避免 Windows Git Bash 路径转换问题）
 ZSH_CMD="/bin/zsh"
@@ -293,7 +304,7 @@ fi
 # 启动容器
 # 注意：不使用 --rm 参数，这样退出容器时不会自动删除容器
 if [ -n "$COMMAND" ]; then
-    echo "[INFO] 执行命令: $COMMAND"
+    log_info "执行命令: $COMMAND"
     # 在命令前添加 cd 到工作目录
     # 使用 -d 后台运行，然后 exec 执行命令，命令完成后容器继续运行
     docker run -d "${DOCKER_RUN_ARGS[@]}" "$FULL_IMAGE_NAME" sleep infinity >/dev/null 2>&1 || {
@@ -312,7 +323,7 @@ if [ -n "$COMMAND" ]; then
         docker exec -it "$CONTAINER_NAME" $ZSH_CMD -c "cd ${WORK_DIR} && $COMMAND"
     fi
 else
-    echo "[INFO] 启动交互式 shell（退出时容器将继续运行）"
+    log_info "启动交互式 shell（退出时容器将继续运行）"
     # 交互式模式：覆盖默认的 sleep infinity，启动 zsh
     # 不使用 --rm，这样退出时容器不会删除
     # Windows Git Bash 环境下，如果 winpty 可用，使用它包装命令
@@ -328,8 +339,8 @@ else
     fi
     # 容器退出后，显示提示信息
     echo ""
-    echo "[INFO] 已退出容器，容器将继续运行"
-    echo "[INFO] 使用以下命令重新进入容器:"
+    log_info "已退出容器，容器将继续运行"
+    log_info "使用以下命令重新进入容器:"
     echo "  $0 --exec"
     echo "  或"
     echo "  $0"

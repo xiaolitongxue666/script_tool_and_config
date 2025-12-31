@@ -12,6 +12,17 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # 项目根目录（向上三级：container_dev_env -> common -> scripts -> root）
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../../.." && pwd)"
 
+# 加载通用函数库
+COMMON_SH="${PROJECT_ROOT}/scripts/common.sh"
+if [ -f "$COMMON_SH" ]; then
+    source "$COMMON_SH"
+else
+    function log_info() { echo "[INFO] $*"; }
+    function log_success() { echo "[SUCCESS] $*"; }
+    function log_warning() { echo "[WARNING] $*"; }
+    function log_error() { echo "[ERROR] $*" >&2; }
+fi
+
 # 默认值
 # 默认使用宿主机 7890 端口作为代理
 PROXY="${PROXY:-127.0.0.1:7890}"
@@ -79,8 +90,8 @@ while [[ $# -gt 0 ]]; do
             shift
             ;;
         *)
-            echo "错误: 未知参数 $1"
-            echo "使用 $0 --help 查看帮助"
+            log_error "未知参数: $1"
+            log_info "使用 $0 --help 查看帮助"
             exit 1
             ;;
     esac
@@ -111,12 +122,12 @@ if [ -n "$PROXY" ]; then
     if [[ "$OSTYPE" == "darwin"* ]] || [[ "$OSTYPE" == "msys" ]] || [[ "$MSYSTEM" == "MINGW"* ]]; then
         if [[ "$PROXY_HOST_PORT" =~ ^127\.0\.0\.1: ]]; then
             PROXY_HOST_PORT="${PROXY_HOST_PORT/127.0.0.1:/host.docker.internal:}"
-            echo "[INFO] 检测到 macOS/Windows，容器内代理地址转换为: $PROXY_HOST_PORT"
+            log_info "检测到 macOS/Windows，容器内代理地址转换为: $PROXY_HOST_PORT"
         fi
     fi
 
     BUILD_ARGS+=(--build-arg "PROXY=$PROXY_HOST_PORT")
-    echo "[INFO] 容器内使用代理: $PROXY_HOST_PORT"
+    log_info "容器内使用代理: $PROXY_HOST_PORT"
 
     # 设置环境变量，让 Docker daemon 也能使用代理（用于拉取基础镜像）
     # Docker daemon 在宿主机上运行，需要使用原始地址（127.0.0.1:7890），而不是 host.docker.internal
@@ -124,17 +135,17 @@ if [ -n "$PROXY" ]; then
     export https_proxy="http://$PROXY_FOR_DAEMON"
     export HTTP_PROXY="http://$PROXY_FOR_DAEMON"
     export HTTPS_PROXY="http://$PROXY_FOR_DAEMON"
-    echo "[INFO] Docker daemon 使用代理: $PROXY_FOR_DAEMON"
+    log_info "Docker daemon 使用代理: $PROXY_FOR_DAEMON"
 else
-    echo "[INFO] 未设置代理，将使用中国镜像源"
+    log_info "未设置代理，将使用中国镜像源"
 fi
 
 # 完整镜像名称
 FULL_IMAGE_NAME="${IMAGE_NAME}:${IMAGE_TAG}"
 
-echo "[INFO] 开始构建 Docker 镜像: $FULL_IMAGE_NAME"
-echo "[INFO] 项目根目录: $PROJECT_ROOT"
-echo "[INFO] Dockerfile 位置: $SCRIPT_DIR/Dockerfile"
+log_info "开始构建 Docker 镜像: $FULL_IMAGE_NAME"
+log_info "项目根目录: $PROJECT_ROOT"
+log_info "Dockerfile 位置: $SCRIPT_DIR/Dockerfile"
 
 # 构建镜像
 # 注意：构建上下文是项目根目录，Dockerfile 在 container_dev_env 目录
@@ -143,14 +154,14 @@ cd "$PROJECT_ROOT"
 # 如果设置了 --no-cache，添加到构建参数
 if [ "$NO_CACHE" = true ]; then
     BUILD_ARGS+=(--no-cache)
-    echo "[INFO] 使用 --no-cache 选项（不使用缓存）"
+    log_info "使用 --no-cache 选项（不使用缓存）"
 fi
 
 # 构建镜像
 # 优先使用 docker buildx，如果失败则回退到 docker build
 BUILD_EXIT_CODE=1
 if docker buildx version >/dev/null 2>&1; then
-    echo "[INFO] 使用 docker buildx 构建"
+    log_info "使用 docker buildx 构建"
     if [ ${#BUILD_ARGS[@]} -gt 0 ]; then
         docker buildx build \
             "${BUILD_ARGS[@]}" \
@@ -165,7 +176,7 @@ if docker buildx version >/dev/null 2>&1; then
     fi
     BUILD_EXIT_CODE=$?
 else
-    echo "[INFO] 使用 docker build 构建（buildx 不可用）"
+    log_info "使用 docker build 构建（buildx 不可用）"
     if [ ${#BUILD_ARGS[@]} -gt 0 ]; then
         docker build \
             "${BUILD_ARGS[@]}" \
@@ -183,9 +194,9 @@ fi
 
 if [ $BUILD_EXIT_CODE -eq 0 ]; then
     echo ""
-    echo "[SUCCESS] 镜像构建完成: $FULL_IMAGE_NAME"
+    log_success "镜像构建完成: $FULL_IMAGE_NAME"
     echo ""
-    echo "使用以下命令启动容器:"
+    log_info "使用以下命令启动容器:"
     echo "  cd $SCRIPT_DIR"
     if [ -n "${PROXY_HOST_PORT:-}" ]; then
         echo "  ./run.sh --proxy $PROXY_HOST_PORT"
@@ -193,7 +204,7 @@ if [ $BUILD_EXIT_CODE -eq 0 ]; then
         echo "  ./run.sh"
     fi
 else
-    echo "[ERROR] 镜像构建失败，退出码: $BUILD_EXIT_CODE"
+    log_error "镜像构建失败，退出码: $BUILD_EXIT_CODE"
     exit $BUILD_EXIT_CODE
 fi
 

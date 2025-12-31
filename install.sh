@@ -287,7 +287,7 @@ if [ "$HAS_STATUS_DIFF" = false ] && [ "$HAS_DIFF" = false ]; then
 else
     log_info "发现配置差异，开始应用配置..."
     log_info "执行: chezmoi apply -v --force"
-    echo ""
+    log_info ""
 
     if chezmoi apply -v --force; then
         log_success "配置应用成功！"
@@ -471,12 +471,12 @@ fi
 end_script
 
 log_success "安装完成！"
-echo ""
+log_info ""
 log_info "后续操作："
 log_info "  快速部署: ./deploy.sh"
 log_info "  查看状态: ./scripts/manage_dotfiles.sh status"
 log_info "  查看差异: ./scripts/manage_dotfiles.sh diff"
 log_info "  编辑配置: ./scripts/manage_dotfiles.sh edit ~/.zshrc"
-echo ""
+log_info ""
 log_info "使用帮助: ./scripts/manage_dotfiles.sh help"
 log_info "部署指南: scripts/common/utils/DEPLOYMENT_GUIDE.md"

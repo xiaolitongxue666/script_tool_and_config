@@ -1259,6 +1259,12 @@ chezmoi diff
 
 ## 更新日志
 
+### 2025-01 项目梳理优化
+- ✅ 优化打印信息内容：统一所有脚本使用 log_info/log_success/log_warning/log_error 函数
+- ✅ 删除无用文件：清理临时日志文件和测试文件
+- ✅ 更新 .gitignore：确保所有临时文件、日志文件、备份文件都被忽略
+- ✅ 更新文档：确保 README.md、project_structure.md 等文档与代码实现一致
+
 ### 2024-12 项目重构
 - ✅ 统一配置管理：所有配置文件转换为 Chezmoi 模板格式
 - ✅ 创建配置审计脚本：`scripts/chezmoi/audit_configs.sh`

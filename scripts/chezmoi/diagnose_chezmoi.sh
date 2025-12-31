@@ -19,10 +19,7 @@ else
     function log_error() { echo "[ERROR] $*" >&2; }
 fi
 
-echo "============================================"
-echo "chezmoi 安装诊断"
-echo "============================================"
-echo ""
+start_script "chezmoi 安装诊断"
 
 # 1. 检查 chezmoi 是否已安装
 log_info "1. 检查 chezmoi 是否已安装..."
@@ -33,7 +30,7 @@ if command -v chezmoi &> /dev/null; then
 else
     log_warning "chezmoi 命令不可用"
 fi
-echo ""
+log_info ""
 
 # 2. 检查 pacman 安装
 log_info "2. 检查 pacman 安装..."
@@ -47,7 +44,7 @@ if command -v pacman &> /dev/null; then
 else
     log_info "pacman 不可用（非 Arch Linux 系统）"
 fi
-echo ""
+log_info ""
 
 # 3. 检查官方安装脚本安装
 log_info "3. 检查官方安装脚本安装..."
@@ -63,7 +60,7 @@ if [ -f "$HOME/.local/bin/chezmoi" ]; then
 else
     log_warning "~/.local/bin/chezmoi 不存在"
 fi
-echo ""
+log_info ""
 
 # 4. 检查 PATH
 log_info "4. 检查 PATH 环境变量..."
@@ -75,7 +72,7 @@ else
     log_info "建议添加到 ~/.bashrc 或 ~/.zshrc:"
     log_info "  export PATH=\"\$HOME/.local/bin:\$PATH\""
 fi
-echo ""
+log_info ""
 
 # 5. 检查网络连接（用于官方安装脚本）
 log_info "5. 检查网络连接..."
@@ -84,7 +81,7 @@ if curl -fsLS https://www.chezmoi.io > /dev/null 2>&1; then
 else
     log_warning "无法访问 chezmoi 官网，可能网络有问题"
 fi
-echo ""
+log_info ""
 
 # 6. 检查代理设置
 log_info "6. 检查代理设置..."
@@ -94,11 +91,11 @@ if [ -n "${http_proxy:-}" ] || [ -n "${HTTP_PROXY:-}" ]; then
 else
     log_info "未设置代理"
 fi
-echo ""
+log_info ""
 
 # 7. 建议
 log_info "7. 建议的解决方案："
-echo ""
+log_info ""
 
 if command -v chezmoi &> /dev/null; then
     log_success "chezmoi 已可用，无需操作"
@@ -121,6 +118,6 @@ else
     log_info "  export PATH=\"\$HOME/.local/bin:\$PATH\""
 fi
 
-echo ""
-log_info "诊断完成"
+log_info ""
+log_success "诊断完成"
 
