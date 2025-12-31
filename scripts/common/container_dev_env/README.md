@@ -176,6 +176,48 @@ export PROXY=192.168.1.76:7890
 - 正确处理条件逻辑（如 `{{- if eq .chezmoi.os "linux" -}}`）
 - 确保配置的正确性和完整性
 
+## 容器配置流程
+
+容器配置流程完全参考 `scripts/linux/system_basic_env/install_common_tools.sh`，分为以下阶段：
+
+### Phase 1: Pacman 配置优化（对应 Linux Phase 1: Pacman operations）
+- 设置代理环境变量
+- 条件配置镜像源（无代理时使用中国镜像源）
+- 优化 pacman 配置（`tune_pacman`）
+  - 配置 HoldPkg, Architecture, CheckSpace, SigLevel
+  - 启用 ParallelDownloads
+  - 配置 core/extra 仓库使用镜像列表
+  - 添加 archlinuxcn 源（8 个可用镜像）
+  - 移除已废弃的 [community] 配置
+  - 配置 pacman 代理策略（使用国内源时移除代理）
+
+**注意**：以下操作已在 Dockerfile 中完成，Phase 1 只做配置优化：
+- `update_system`: 已在 Dockerfile base stage 中完成
+- `install_packages`: 已在 Dockerfile tools stage 中完成
+- `ensure_aur_helper`: 已在 Dockerfile tools stage 中完成（yay）
+
+### Phase 2: 软件配置安装（对应 Linux Phase 2: Other operations）
+- 验证版本管理器（uv, fnm）- 已在 Dockerfile 中安装
+- 安装 Neovim 配置（包括 Python 和 Node.js 环境）
+- 验证 lazyssh（已在 Dockerfile 中安装）
+- 验证可选工具（tree, ctags, file, net-tools, iputils）
+- 验证字体安装（FiraMono Nerd Font，已在 Dockerfile 中安装）
+- 验证 Shell 工具（zsh, Oh My Zsh 及插件，已在 Dockerfile 中安装）
+
+### Phase 3: 配置文件应用
+- 使用 `chezmoi apply` 应用所有配置文件
+- 清理旧的配置文件（如果存在）
+- 强制重新应用配置
+- 会应用 .zshrc, .bashrc, .tmux.conf 等配置文件
+
+### Phase 4: 验证和总结
+- 验证已安装的软件包
+- 验证版本管理器（uv, fnm, yay）
+- 验证配置文件
+- 验证 Neovim 配置
+
+**注意**：软件包的安装已在 Dockerfile 的 `tools` stage 中完成，容器配置阶段主要负责配置优化、配置文件应用和验证。
+
 ## Neovim 配置
 
 Neovim 配置通过 Git Submodule 管理。构建时会自动初始化 `dotfiles/nvim` submodule。

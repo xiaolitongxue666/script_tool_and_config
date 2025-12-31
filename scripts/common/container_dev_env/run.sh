@@ -23,7 +23,9 @@ if [[ "$OSTYPE" == "msys" ]] || [[ "${MSYSTEM:-}" == "MINGW"* ]]; then
 fi
 
 # 默认值
-PROXY=""
+# 默认使用 host.docker.internal:7890 作为容器内部代理
+# 可以通过 --proxy 参数或 PROXY 环境变量覆盖
+PROXY="${PROXY:-host.docker.internal:7890}"
 IMAGE_NAME="archlinux-dev-env"
 IMAGE_TAG="latest"
 CONTAINER_NAME="archlinux-dev-env"
@@ -86,6 +88,8 @@ while [[ $# -gt 0 ]]; do
             echo ""
             echo "选项:"
             echo "  --proxy ADDRESS           设置代理地址（例如: 192.168.1.76:7890）"
+            echo "                            默认: host.docker.internal:7890"
+            echo "                            使用 --proxy \"\" 禁用代理"
             echo "  --image-name NAME         镜像名称（默认: archlinux-dev-env）"
             echo "  --image-tag TAG           镜像标签（默认: latest）"
             echo "  --container-name NAME     容器名称（默认: archlinux-dev-env）"
@@ -98,9 +102,11 @@ while [[ $# -gt 0 ]]; do
             echo "  PROXY                     代理地址（如果未通过参数指定）"
             echo ""
             echo "示例:"
-            echo "  $0 --proxy 192.168.1.76:7890"
+            echo "  $0                                    # 使用默认代理: host.docker.internal:7890"
+            echo "  $0 --proxy 192.168.1.76:7890         # 使用指定代理"
+            echo "  $0 --proxy \"\"                        # 禁用代理"
             echo "  $0 --proxy 192.168.1.76:7890 --command 'nvim'"
-            echo "  PROXY=192.168.1.76:7890 $0"
+            echo "  PROXY=192.168.1.76:7890 $0           # 通过环境变量设置代理"
             exit 0
             ;;
         *)
@@ -111,10 +117,8 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-# 如果未通过参数指定，尝试从环境变量获取
-if [ -z "$PROXY" ]; then
-    PROXY="${PROXY:-}"
-fi
+# 如果通过 --proxy 参数指定了空值（--proxy ""），则禁用代理
+# 否则使用默认值或环境变量中的值（已在默认值设置中处理）
 
 # 完整镜像名称
 FULL_IMAGE_NAME="${IMAGE_NAME}:${IMAGE_TAG}"
@@ -262,15 +266,19 @@ DOCKER_RUN_ARGS=(
 if [ -n "$PROXY" ]; then
     # 如果代理地址不包含协议，添加 http://
     if [[ ! "$PROXY" =~ ^http:// ]] && [[ ! "$PROXY" =~ ^https:// ]]; then
-        PROXY="http://$PROXY"
+        PROXY_URL="http://$PROXY"
+    else
+        PROXY_URL="$PROXY"
     fi
     DOCKER_RUN_ARGS+=(
-        -e "http_proxy=$PROXY"
-        -e "https_proxy=$PROXY"
-        -e "HTTP_PROXY=$PROXY"
-        -e "HTTPS_PROXY=$PROXY"
+        -e "http_proxy=$PROXY_URL"
+        -e "https_proxy=$PROXY_URL"
+        -e "HTTP_PROXY=$PROXY_URL"
+        -e "HTTPS_PROXY=$PROXY_URL"
     )
-    echo "[INFO] 使用代理: $PROXY"
+    echo "[INFO] 使用代理: $PROXY_URL"
+else
+    echo "[INFO] 未设置代理"
 fi
 
 echo "[INFO] 启动容器: $CONTAINER_NAME"

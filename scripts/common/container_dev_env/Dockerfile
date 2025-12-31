@@ -102,6 +102,7 @@ RUN if [ -n "$PROXY" ]; then \
     userdel -r builder
 
 # 安装版本管理器 (uv, fnm)
+# 注意：在多阶段构建中，需要确保 PATH 在后续 stage 中仍然有效
 RUN if [ -n "$PROXY" ]; then \
         export http_proxy="http://$PROXY"; \
         export https_proxy="http://$PROXY"; \
@@ -114,9 +115,14 @@ RUN if [ -n "$PROXY" ]; then \
     # 安装 fnm（添加重试和超时参数） \
     (curl --connect-timeout 30 --max-time 300 --retry 3 --retry-delay 5 -fsSL https://fnm.vercel.app/install | sh -s -- --skip-shell || \
      (sleep 5 && curl --connect-timeout 30 --max-time 300 --retry 3 --retry-delay 5 -fsSL https://fnm.vercel.app/install | sh -s -- --skip-shell)) && \
-    # 添加到 PATH \
+    # 确保安装目录存在 \
+    mkdir -p /root/.cargo/bin /root/.local/share/fnm /root/.local/bin && \
+    # 添加到 PATH（在 .bashrc 中，用于当前 stage） \
     echo 'export PATH="$HOME/.cargo/bin:$HOME/.local/share/fnm:$HOME/.local/bin:$PATH"' >> /root/.bashrc && \
-    echo 'eval "$(fnm env --use-on-cd)"' >> /root/.bashrc
+    echo 'eval "$(fnm env --use-on-cd)"' >> /root/.bashrc && \
+    # 验证安装 \
+    (test -f /root/.cargo/bin/uv && echo "[INFO] uv installed: /root/.cargo/bin/uv" || echo "[WARNING] uv not found") && \
+    (test -f /root/.local/share/fnm/fnm && echo "[INFO] fnm installed: /root/.local/share/fnm/fnm" || echo "[WARNING] fnm not found")
 
 # 安装 chezmoi
 RUN if [ -n "$PROXY" ]; then \
@@ -154,12 +160,17 @@ RUN if [ -n "$PROXY" ]; then \
     mkdir -p "$ZSH_CUSTOM" && \
     git clone https://github.com/zsh-users/zsh-autosuggestions "$ZSH_CUSTOM/zsh-autosuggestions" || true && \
     git clone https://github.com/zsh-users/zsh-history-substring-search "$ZSH_CUSTOM/zsh-history-substring-search" || true && \
-    git clone https://github.com/zsh-users/zsh-syntax-highlighting "$ZSH_CUSTOM/zsh-syntax-highlighting" || true
+    git clone https://github.com/zsh-users/zsh-syntax-highlighting "$ZSH_CUSTOM/zsh-syntax-highlighting" || true && \
+    git clone https://github.com/zsh-users/zsh-completions "$ZSH_CUSTOM/zsh-completions" || true
 
 # Stage 3: config - 配置文件和 Neovim
 FROM tools AS config
 
 ARG PROXY=""
+
+# 重要：在多阶段构建中，确保 PATH 环境变量在 config stage 中可用
+# 这些路径在 tools stage 中已安装，需要确保在 config stage 中也能访问
+ENV PATH="/root/.cargo/bin:/root/.local/share/fnm:/root/.local/bin:$PATH"
 
 # 设置代理环境变量（在 RUN 中设置）
 
@@ -173,8 +184,24 @@ RUN chmod +x /tmp/container_install.sh
 
 # 复制配置文件目录（.chezmoi 和 dotfiles）
 # 注意：构建上下文是项目根目录
+# 确保复制完整的 .chezmoi 目录结构（包括 chezmoi.toml 配置文件）
 COPY .chezmoi /tmp/project/.chezmoi
 COPY dotfiles /tmp/project/dotfiles
+# 复制 scripts 目录（Neovim 安装脚本需要 scripts/common.sh）
+# 注意：需要复制完整的 scripts 目录，确保所有依赖脚本都能访问
+COPY scripts /tmp/project/scripts
+
+# 验证复制的文件
+RUN echo "[INFO] 验证复制的文件..." && \
+    (test -d /tmp/project/.chezmoi && echo "[INFO] .chezmoi 目录存在" || echo "[WARNING] .chezmoi 目录不存在") && \
+    (test -f /tmp/project/.chezmoi/chezmoi.toml && echo "[INFO] chezmoi.toml 文件存在" || echo "[WARNING] chezmoi.toml 文件不存在") && \
+    (test -d /tmp/project/dotfiles && echo "[INFO] dotfiles 目录存在" || echo "[WARNING] dotfiles 目录不存在") && \
+    (test -d /tmp/project/scripts && echo "[INFO] scripts 目录存在" || echo "[WARNING] scripts 目录不存在") && \
+    (test -f /tmp/project/scripts/common.sh && echo "[INFO] scripts/common.sh 文件存在" || echo "[WARNING] scripts/common.sh 文件不存在") && \
+    # 验证 PATH 中的工具是否可用 \
+    (command -v uv >/dev/null 2>&1 && echo "[INFO] uv 在 PATH 中: $(which uv)" || echo "[WARNING] uv 不在 PATH 中") && \
+    (command -v fnm >/dev/null 2>&1 && echo "[INFO] fnm 在 PATH 中: $(which fnm)" || echo "[WARNING] fnm 不在 PATH 中") && \
+    (command -v chezmoi >/dev/null 2>&1 && echo "[INFO] chezmoi 在 PATH 中: $(which chezmoi)" || echo "[WARNING] chezmoi 不在 PATH 中")
 
 # 运行安装脚本
 RUN if [ -n "$PROXY" ]; then \
