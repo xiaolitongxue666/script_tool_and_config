@@ -42,13 +42,29 @@ fi
 if [ -d "{{ .chezmoi.homeDir }}/.local/share/fnm" ]; then
     export PATH="{{ .chezmoi.homeDir }}/.local/share/fnm:$PATH"
     # 初始化 fnm（登录 shell 需要）
+    # 明确指定 shell 类型，避免在某些环境下无法自动检测
     if command -v fnm >/dev/null 2>&1; then
-        eval "$(fnm env --use-on-cd)"
+        eval "$(fnm env --shell=zsh --use-on-cd)"
+        # 如果存在 .node-version 文件，自动激活对应版本
+        if [ -f "$HOME/.node-version" ]; then
+            NODE_VERSION=$(cat "$HOME/.node-version" 2>/dev/null | tr -d '\n\r' | sed 's/^v//')
+            if [ -n "$NODE_VERSION" ]; then
+                fnm use "$NODE_VERSION" 2>/dev/null || true
+            fi
+        fi
     fi
 elif [ -d "{{ .chezmoi.homeDir }}/.fnm" ]; then
     export PATH="{{ .chezmoi.homeDir }}/.fnm:$PATH"
+    # 明确指定 shell 类型，避免在某些环境下无法自动检测
     if command -v fnm >/dev/null 2>&1; then
-        eval "$(fnm env --use-on-cd)"
+        eval "$(fnm env --shell=zsh --use-on-cd)"
+        # 如果存在 .node-version 文件，自动激活对应版本
+        if [ -f "$HOME/.node-version" ]; then
+            NODE_VERSION=$(cat "$HOME/.node-version" 2>/dev/null | tr -d '\n\r' | sed 's/^v//')
+            if [ -n "$NODE_VERSION" ]; then
+                fnm use "$NODE_VERSION" 2>/dev/null || true
+            fi
+        fi
     fi
 fi
 

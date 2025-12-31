@@ -169,6 +169,28 @@ if docker inspect "$CONTAINER_NAME" >/dev/null 2>&1; then
     fi
 fi
 
+# 检测 Windows 环境（Git Bash）
+IS_WINDOWS=false
+if [[ "${MSYSTEM:-}" == "MINGW"* ]] || [[ "$OSTYPE" == "msys" ]] || [[ "$OSTYPE" == "cygwin" ]]; then
+    IS_WINDOWS=true
+fi
+
+# Docker exec 辅助函数（处理 Windows 路径转换问题）
+# 在 Windows Git Bash 环境下，Docker 会尝试将 Unix 路径转换为 Windows 路径
+# 使用 MSYS_NO_PATHCONV=1 和引号包裹路径来防止转换
+docker_exec_zsh() {
+    local container_name="$1"
+    local command="$2"
+
+    if [ "$IS_WINDOWS" = true ]; then
+        # Windows 环境：使用 MSYS_NO_PATHCONV=1 和 //bin/zsh（双斜杠）绕过路径转换
+        MSYS_NO_PATHCONV=1 docker exec -it "$container_name" //bin/zsh -c "$command"
+    else
+        # Linux/macOS 环境：直接使用路径
+        docker exec -it "$container_name" /bin/zsh -c "$command"
+    fi
+}
+
 # 处理已存在的容器
 if [ "$CONTAINER_EXISTS" = true ]; then
     if [ "$CONTAINER_RUNNING" = true ]; then
@@ -176,10 +198,10 @@ if [ "$CONTAINER_EXISTS" = true ]; then
         log_info "进入已运行的容器: $CONTAINER_NAME"
         if [ -n "$COMMAND" ]; then
             log_info "执行命令: $COMMAND"
-            docker exec -it "$CONTAINER_NAME" /bin/zsh -c "cd ${WORK_DIR} && $COMMAND"
+            docker_exec_zsh "$CONTAINER_NAME" "cd ${WORK_DIR} && $COMMAND"
         else
             log_info "进入交互式 shell"
-            docker exec -it "$CONTAINER_NAME" /bin/zsh -c "cd ${WORK_DIR} && exec /bin/zsh"
+            docker_exec_zsh "$CONTAINER_NAME" "cd ${WORK_DIR} && exec /bin/zsh"
         fi
         exit 0
     else
@@ -191,10 +213,10 @@ if [ "$CONTAINER_EXISTS" = true ]; then
             sleep 1  # 等待容器完全启动
             if [ -n "$COMMAND" ]; then
                 log_info "执行命令: $COMMAND"
-                docker exec -it "$CONTAINER_NAME" /bin/zsh -c "cd ${WORK_DIR} && $COMMAND"
+                docker_exec_zsh "$CONTAINER_NAME" "cd ${WORK_DIR} && $COMMAND"
             else
                 log_info "进入交互式 shell"
-                docker exec -it "$CONTAINER_NAME" /bin/zsh -c "cd ${WORK_DIR} && exec /bin/zsh"
+                docker_exec_zsh "$CONTAINER_NAME" "cd ${WORK_DIR} && exec /bin/zsh"
             fi
             exit 0
         fi
@@ -225,10 +247,10 @@ if [ "$CONTAINER_EXISTS" = true ]; then
                 sleep 1  # 等待容器完全启动
                 if [ -n "$COMMAND" ]; then
                     log_info "执行命令: $COMMAND"
-                    docker exec -it "$CONTAINER_NAME" /bin/zsh -c "cd ${WORK_DIR} && $COMMAND"
+                    docker_exec_zsh "$CONTAINER_NAME" "cd ${WORK_DIR} && $COMMAND"
                 else
                     log_info "进入交互式 shell"
-                    docker exec -it "$CONTAINER_NAME" /bin/zsh -c "cd ${WORK_DIR} && exec /bin/zsh"
+                    docker_exec_zsh "$CONTAINER_NAME" "cd ${WORK_DIR} && exec /bin/zsh"
                 fi
                 exit 0
                 ;;
@@ -294,12 +316,8 @@ log_info "启动容器: $CONTAINER_NAME"
 log_info "镜像: $FULL_IMAGE_NAME"
 log_info "项目目录: $PROJECT_ROOT -> $WORK_DIR"
 
-# 确定 zsh 路径（避免 Windows Git Bash 路径转换问题）
+# 容器内 zsh 路径（容器内路径不受宿主机影响，始终使用绝对路径）
 ZSH_CMD="/bin/zsh"
-# 在 Windows Git Bash 中，直接使用命令名而不是路径
-if [[ "${MSYSTEM:-}" == "MINGW"* ]] || [[ "$OSTYPE" == "msys" ]]; then
-    ZSH_CMD="zsh"
-fi
 
 # 启动容器
 # 注意：不使用 --rm 参数，这样退出容器时不会自动删除容器
@@ -307,35 +325,59 @@ if [ -n "$COMMAND" ]; then
     log_info "执行命令: $COMMAND"
     # 在命令前添加 cd 到工作目录
     # 使用 -d 后台运行，然后 exec 执行命令，命令完成后容器继续运行
-    docker run -d "${DOCKER_RUN_ARGS[@]}" "$FULL_IMAGE_NAME" sleep infinity >/dev/null 2>&1 || {
-        # 如果容器已存在，直接使用
-        CONTAINER_ID=$(docker ps -a --filter "name=$CONTAINER_NAME" --format "{{.ID}}" | head -1)
-        if [ -n "$CONTAINER_ID" ]; then
-            # 确保容器正在运行
-            docker start "$CONTAINER_NAME" >/dev/null 2>&1 || true
-            docker exec -it "$CONTAINER_NAME" $ZSH_CMD -c "cd ${WORK_DIR} && $COMMAND"
-            exit 0
-        fi
-    }
+    # Windows 环境下使用 MSYS_NO_PATHCONV=1 防止路径转换
+    if [ "$IS_WINDOWS" = true ]; then
+        MSYS_NO_PATHCONV=1 docker run -d "${DOCKER_RUN_ARGS[@]}" "$FULL_IMAGE_NAME" sleep infinity >/dev/null 2>&1 || {
+            # 如果容器已存在，直接使用
+            CONTAINER_ID=$(docker ps -a --filter "name=$CONTAINER_NAME" --format "{{.ID}}" | head -1)
+            if [ -n "$CONTAINER_ID" ]; then
+                # 确保容器正在运行
+                docker start "$CONTAINER_NAME" >/dev/null 2>&1 || true
+                docker_exec_zsh "$CONTAINER_NAME" "cd ${WORK_DIR} && $COMMAND"
+                exit 0
+            fi
+        }
+    else
+        docker run -d "${DOCKER_RUN_ARGS[@]}" "$FULL_IMAGE_NAME" sleep infinity >/dev/null 2>&1 || {
+            # 如果容器已存在，直接使用
+            CONTAINER_ID=$(docker ps -a --filter "name=$CONTAINER_NAME" --format "{{.ID}}" | head -1)
+            if [ -n "$CONTAINER_ID" ]; then
+                # 确保容器正在运行
+                docker start "$CONTAINER_NAME" >/dev/null 2>&1 || true
+                docker_exec_zsh "$CONTAINER_NAME" "cd ${WORK_DIR} && $COMMAND"
+                exit 0
+            fi
+        }
+    fi
     # 获取新创建的容器 ID
     CONTAINER_ID=$(docker ps -a --filter "name=$CONTAINER_NAME" --format "{{.ID}}" | head -1)
     if [ -n "$CONTAINER_ID" ]; then
-        docker exec -it "$CONTAINER_NAME" $ZSH_CMD -c "cd ${WORK_DIR} && $COMMAND"
+        docker_exec_zsh "$CONTAINER_NAME" "cd ${WORK_DIR} && $COMMAND"
     fi
 else
     log_info "启动交互式 shell（退出时容器将继续运行）"
-    # 交互式模式：覆盖默认的 sleep infinity，启动 zsh
-    # 不使用 --rm，这样退出时容器不会删除
-    # Windows Git Bash 环境下，如果 winpty 可用，使用它包装命令
-    if [[ "${MSYSTEM:-}" == "MINGW"* ]] || [[ "$OSTYPE" == "msys" ]]; then
-        if command -v winpty >/dev/null 2>&1; then
-            winpty docker run "${DOCKER_RUN_ARGS[@]}" "$FULL_IMAGE_NAME" $ZSH_CMD -c "cd ${WORK_DIR} && exec $ZSH_CMD"
-        else
-            # 不使用 -it，直接运行
-            docker run "${DOCKER_RUN_ARGS[@]}" "$FULL_IMAGE_NAME" $ZSH_CMD -c "cd ${WORK_DIR} && exec $ZSH_CMD"
-        fi
+    # 交互式模式：先启动容器（后台运行 sleep infinity），然后使用 exec 进入
+    # 这样即使 zsh 退出，容器的 sleep infinity 进程还在运行，容器不会停止
+    if [ "$IS_WINDOWS" = true ]; then
+        # 先启动容器（后台运行）
+        MSYS_NO_PATHCONV=1 docker run -d "${DOCKER_RUN_ARGS[@]}" "$FULL_IMAGE_NAME" sleep infinity >/dev/null 2>&1 || {
+            # 如果容器已存在，启动它
+            docker start "$CONTAINER_NAME" >/dev/null 2>&1 || true
+        }
+        # 等待容器完全启动
+        sleep 1
+        # 使用 exec 进入容器
+        docker_exec_zsh "$CONTAINER_NAME" "cd ${WORK_DIR} && exec //bin/zsh"
     else
-        docker run "${DOCKER_RUN_ARGS[@]}" "$FULL_IMAGE_NAME" $ZSH_CMD -c "cd ${WORK_DIR} && exec $ZSH_CMD"
+        # 先启动容器（后台运行）
+        docker run -d "${DOCKER_RUN_ARGS[@]}" "$FULL_IMAGE_NAME" sleep infinity >/dev/null 2>&1 || {
+            # 如果容器已存在，启动它
+            docker start "$CONTAINER_NAME" >/dev/null 2>&1 || true
+        }
+        # 等待容器完全启动
+        sleep 1
+        # 使用 exec 进入容器
+        docker_exec_zsh "$CONTAINER_NAME" "cd ${WORK_DIR} && exec /bin/zsh"
     fi
     # 容器退出后，显示提示信息
     echo ""

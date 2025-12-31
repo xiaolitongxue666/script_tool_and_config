@@ -797,6 +797,57 @@ ZPROFILE_EOF
     fi
 }
 
+# 设置 Node.js 默认版本的辅助函数
+_setup_node_default_version() {
+    local version="$1"
+    if [ -z "$version" ]; then
+        return 1
+    fi
+
+    log_info "设置 Node.js 默认版本: $version"
+
+    # 方法1: 使用 fnm alias 设置默认版本
+    if fnm alias default "$version" 2>&1; then
+        log_success "已设置 fnm 默认版本: $version"
+    else
+        log_warning "无法设置 fnm 默认版本，尝试其他方法"
+    fi
+
+    # 方法2: 在用户主目录创建 .node-version 文件
+    # 注意：.node-version 文件中的版本号不应该包含 'v' 前缀
+    if [ -n "$HOME" ] && [ -d "$HOME" ]; then
+        # 移除版本号中的 'v' 前缀（如果有）
+        VERSION_CLEAN=$(echo "$version" | sed 's/^v//')
+        echo "$VERSION_CLEAN" > "$HOME/.node-version" 2>/dev/null && {
+            log_success "已创建 $HOME/.node-version: $VERSION_CLEAN"
+        } || {
+            log_warning "无法创建 $HOME/.node-version"
+        }
+    fi
+
+    # 方法3: 在容器工作目录创建 .node-version 文件（如果存在）
+    # 注意：.node-version 文件中的版本号不应该包含 'v' 前缀
+    PROJECT_ROOT="/tmp/project"
+    VERSION_CLEAN=$(echo "$version" | sed 's/^v//')
+    if [ -d "$PROJECT_ROOT" ]; then
+        echo "$VERSION_CLEAN" > "$PROJECT_ROOT/.node-version" 2>/dev/null && {
+            log_success "已创建 $PROJECT_ROOT/.node-version: $VERSION_CLEAN"
+        } || {
+            log_warning "无法创建 $PROJECT_ROOT/.node-version"
+        }
+    fi
+
+    # 方法4: 在 /workspace 目录创建 .node-version 文件（容器默认工作目录）
+    WORK_DIR="/workspace"
+    if [ -d "$WORK_DIR" ]; then
+        echo "$VERSION_CLEAN" > "$WORK_DIR/.node-version" 2>/dev/null && {
+            log_success "已创建 $WORK_DIR/.node-version: $VERSION_CLEAN"
+        } || {
+            log_warning "无法创建 $WORK_DIR/.node-version"
+        }
+    fi
+}
+
 # 安装 Node.js（使用 fnm，确保代理环境变量已设置）
 install_nodejs_with_fnm() {
     log_info "安装 Node.js（使用 fnm）..."
@@ -811,20 +862,17 @@ install_nodejs_with_fnm() {
     fi
 
     # 初始化 fnm 环境
-    log_info "初始化 fnm 环境..."
+    # 注意：在 bash 脚本中，fnm env --shell=zsh 会输出 zsh 代码，无法在 bash 中执行
+    # 因此我们只确保 fnm 在 PATH 中，不执行 shell 初始化
+    # shell 初始化会在 .zprofile 中通过 chezmoi 配置完成
+    log_info "检查 fnm 环境..."
     if [ -f "$HOME/.local/share/fnm/fnm" ]; then
-        eval "$("$HOME/.local/share/fnm/fnm" env --use-on-cd)" || {
-            log_warning "无法从用户目录初始化 fnm，尝试系统路径"
-            eval "$(fnm env --use-on-cd)" || {
-                log_warning "无法初始化 fnm 环境，跳过 Node.js 安装"
-                return 0
-            }
-        }
+        log_info "fnm 可执行文件存在: $HOME/.local/share/fnm/fnm"
+    elif command -v fnm >/dev/null 2>&1; then
+        log_info "fnm 已在 PATH 中: $(which fnm)"
     else
-        eval "$(fnm env --use-on-cd)" || {
-            log_warning "无法初始化 fnm 环境，跳过 Node.js 安装"
-            return 0
-        }
+        log_warning "fnm 未找到，跳过 Node.js 安装"
+        return 0
     fi
 
     # 检查是否已安装 Node.js
@@ -832,6 +880,18 @@ install_nodejs_with_fnm() {
         NODE_VERSION=$(node --version 2>/dev/null || echo "")
         if [ -n "$NODE_VERSION" ]; then
             log_success "Node.js 已安装: $NODE_VERSION"
+            # 即使已安装，也设置默认版本和 .node-version 文件
+            INSTALLED_VERSION=$(fnm list 2>/dev/null | grep -E "^\s*\*" | head -n 1 | awk '{print $2}' || echo "")
+            if [ -z "$INSTALLED_VERSION" ]; then
+                INSTALLED_VERSION=$(fnm list 2>/dev/null | head -n 2 | tail -n 1 | awk '{print $1}' || echo "")
+            fi
+            if [ -z "$INSTALLED_VERSION" ]; then
+                # 如果无法从列表获取，尝试从 node --version 获取
+                INSTALLED_VERSION=$(echo "$NODE_VERSION" | sed 's/v//' || echo "")
+            fi
+            if [ -n "$INSTALLED_VERSION" ]; then
+                _setup_node_default_version "$INSTALLED_VERSION"
+            fi
             return 0
         fi
     fi
@@ -855,34 +915,34 @@ install_nodejs_with_fnm() {
     log_info "代理环境变量: http_proxy=$http_proxy, https_proxy=$https_proxy"
 
     # 尝试安装 LTS 版本（使用 lts/* 表示最新的 LTS 版本）
-    # fnm install lts/* 会安装最新的 LTS 版本
     if fnm install lts/* 2>&1; then
-        # 安装成功后，使用 lts/* 激活
-        fnm use lts/* 2>&1 || {
-            # 如果 lts/* 不工作，尝试获取已安装的 LTS 版本
+        # 获取实际安装的版本号
+        # 方法1: 从 fnm list 输出中查找 LTS 版本（带 * 标记的是当前激活的版本）
+        INSTALLED_VERSION=$(fnm list 2>/dev/null | grep -E "^\s*\*.*lts" | head -n 1 | awk '{print $2}' || echo "")
+        if [ -z "$INSTALLED_VERSION" ]; then
+            # 方法2: 查找所有 LTS 版本，取第一个
             INSTALLED_VERSION=$(fnm list 2>/dev/null | grep -i "lts" | head -n 1 | awk '{print $1}' || echo "")
-            if [ -n "$INSTALLED_VERSION" ]; then
-                fnm use "$INSTALLED_VERSION" 2>&1 || log_warning "无法激活 Node.js 版本: $INSTALLED_VERSION"
-            else
-                log_warning "无法激活 Node.js LTS"
-            fi
-        }
-
-        # 重新初始化 fnm 环境
-        eval "$(fnm env --use-on-cd)" || true
-
-        # 验证安装
-        if command -v node >/dev/null 2>&1; then
-            NODE_VERSION=$(node --version 2>/dev/null || echo "")
-            if [ -n "$NODE_VERSION" ]; then
-                log_success "Node.js 安装成功: $NODE_VERSION"
-                log_info "Node.js 路径: $(which node)"
-            else
-                log_warning "Node.js 安装完成但无法获取版本信息"
-            fi
-        else
-            log_warning "Node.js 安装完成但不在 PATH 中"
         fi
+        if [ -z "$INSTALLED_VERSION" ]; then
+            # 方法3: 从 fnm list 输出中解析版本号（格式：v20.11.0 或 20.11.0）
+            INSTALLED_VERSION=$(fnm list 2>/dev/null | grep -E "^\s+v?[0-9]" | head -n 1 | awk '{print $1}' | sed 's/^v//' || echo "")
+        fi
+
+        if [ -n "$INSTALLED_VERSION" ]; then
+            # 确保版本号不包含 'v' 前缀
+            INSTALLED_VERSION=$(echo "$INSTALLED_VERSION" | sed 's/^v//')
+            # 设置默认版本和 .node-version 文件
+            _setup_node_default_version "$INSTALLED_VERSION"
+            log_success "Node.js 版本已设置: $INSTALLED_VERSION"
+            log_info "注意：Node.js 将在用户进入容器时通过 .zprofile 自动激活"
+        else
+            log_warning "无法确定安装的 Node.js 版本，但安装可能已成功"
+        fi
+
+        # 注意：不需要在 bash 脚本中初始化 fnm shell 环境或激活 Node.js
+        # shell 初始化会在 .zprofile 中通过 chezmoi 配置完成
+        # 用户进入容器时，fnm 会自动读取 .node-version 文件并激活正确的版本
+        log_info "Node.js 安装完成，将在用户进入容器时自动激活"
     else
         log_warning "Node.js 安装失败（可能是网络问题），可在容器运行时手动安装: fnm install lts/*"
         return 0

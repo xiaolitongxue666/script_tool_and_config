@@ -115,9 +115,9 @@ plugins=(
   colored-man-pages
   extract
   web-search
-  copydir
   copyfile
   dirhistory
+  # copydir 插件在某些版本的 Oh My Zsh 中可能不存在，已移除以避免警告
   zsh-completions
   zsh-history-substring-search
   # zsh-autosuggestions 和 zsh-syntax-highlighting 需要在 oh-my-zsh.sh 之后手动加载
@@ -388,11 +388,20 @@ fi
 # 这里只处理交互式 shell 特有的配置
 
 # fnm (Fast Node Manager) - 交互式 shell 配置
-# 注意：环境变量已在 .zprofile 中设置，这里只确保交互式功能正常
+# 注意：如果 .zprofile 没有加载（非登录 shell），这里确保 fnm 也能正常工作
 if command -v fnm &> /dev/null; then
-    # fnm 的交互式功能（如自动切换版本）已在 .zprofile 中通过 --use-on-cd 配置
-    # 这里不需要额外配置
-    :
+    # 如果 fnm 环境变量未设置（说明 .zprofile 没有加载），在这里初始化
+    if [ -z "$FNM_DIR" ] && [ -d "$HOME/.local/share/fnm" ]; then
+        export PATH="$HOME/.local/share/fnm:$PATH"
+        eval "$(fnm env --shell=zsh --use-on-cd)"
+    fi
+    # 如果存在 .node-version 文件，自动激活对应版本（确保在非登录 shell 中也能工作）
+    if [ -f "$HOME/.node-version" ] && ! command -v node >/dev/null 2>&1; then
+        NODE_VERSION=$(cat "$HOME/.node-version" 2>/dev/null | tr -d '\n\r' | sed 's/^v//')
+        if [ -n "$NODE_VERSION" ]; then
+            fnm use "$NODE_VERSION" 2>/dev/null || true
+        fi
+    fi
 fi
 
 # Direnv - 如果已安装（可选）
@@ -427,7 +436,7 @@ fi
 #
 # 1. colored-man-pages: man ls (应该看到彩色输出)
 # 2. web-search: google test (应该打开浏览器搜索)
-# 3. copydir: copydir (复制当前目录路径)
+# 3. copydir: copydir (复制当前目录路径) - 已移除，某些版本不存在
 # 4. copyfile: copyfile ~/.zshrc (复制文件内容)
 # 5. extract: extract file.zip (解压文件)
 # 6. dirhistory: Alt+←/→ 导航（需要终端支持，或使用 Esc+方向键）
