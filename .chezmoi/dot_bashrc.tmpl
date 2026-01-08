@@ -90,6 +90,12 @@ elif [[ "$OS" == "windows" ]]; then
     export all_proxy="$PROXY_URL"
     export ALL_PROXY="$PROXY_URL"
 
+    # opencode 配置
+    # 如果 opencode 已安装，添加到 PATH
+    if [ -d "/c/opencode" ]; then
+        export PATH="/c/opencode:$PATH"
+    fi
+
     # 网络检查别名
     alias check_network='curl -IL https://www.google.com 2>/dev/null | grep -q -E "200 OK|Connection established" && echo "Network is OK" || echo "Network is down"'
 
