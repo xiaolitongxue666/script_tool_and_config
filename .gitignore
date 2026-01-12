@@ -194,6 +194,9 @@ scripts/windows/system_basic_env/*.backup
 # chezmoi 状态目录（如果使用默认位置）
 .chezmoistate
 
+# chezmoi 状态数据库文件（机器特定，不应提交）
+chezmoistate.boltdb
+
 # chezmoi 临时文件
 .chezmoi.*.tmp
 

@@ -11,11 +11,12 @@ if [[ ! "$OSTYPE" =~ ^(msys|mingw|cygwin) ]]; then
 fi
 
 # ============================================
-# PATH 配置（MSYS2 zsh 支持）
+# PATH 配置（统一管理，避免重复）
 # ============================================
-# 如果 MSYS2 已安装，添加其 bin 目录到 PATH
-# 这样可以使用 MSYS2 中的 zsh 和其他工具
-# 此配置由 zsh 安装脚本自动管理
+# 收集所有需要添加到 PATH 的目录
+PATH_DIRS=()
+
+# MSYS2 zsh 支持（如果已安装）
 for msys2_bin in \
     "/c/msys64/usr/bin" \
     "/d/msys64/usr/bin" \
@@ -24,10 +25,47 @@ for msys2_bin in \
     "/c/Program Files (x86)/msys64/usr/bin" \
     "/d/Program Files (x86)/msys64/usr/bin"; do
     if [ -d "$msys2_bin" ] && [ -f "$msys2_bin/zsh.exe" ]; then
-        export PATH="$msys2_bin:$PATH"
+        PATH_DIRS+=("$msys2_bin")
         break
     fi
 done
+
+# Python 环境（uv）
+PATH_DIRS+=("/c/Users/Administrator/.local/bin")
+PATH_DIRS+=("/c/Users/Administrator/AppData/Roaming/uv/python/cpython-3.10.16-windows-x86_64-none")
+
+# btop4win（如果已安装）
+if [ -d "/c/Program Files/btop4win" ]; then
+    PATH_DIRS+=("/c/Program Files/btop4win")
+fi
+
+# opencode（如果已安装）
+if [ -d "/c/opencode" ]; then
+    PATH_DIRS+=("/c/opencode")
+fi
+
+# bun（如果已安装）
+if [ -d "/c/Users/Administrator/.bun/bin" ]; then
+    PATH_DIRS+=("/c/Users/Administrator/.bun/bin")
+fi
+
+# 构建新的 PATH：先添加自定义路径，然后保留系统原有 PATH
+# 去重处理：只添加不存在的路径
+NEW_PATH=""
+for dir in "${PATH_DIRS[@]}"; do
+    if [ -d "$dir" ] && [[ ":$NEW_PATH:" != *":$dir:"* ]]; then
+        if [ -z "$NEW_PATH" ]; then
+            NEW_PATH="$dir"
+        else
+            NEW_PATH="$NEW_PATH:$dir"
+        fi
+    fi
+done
+
+# 将自定义路径添加到系统 PATH 前面，保留系统原有 PATH
+if [ -n "$NEW_PATH" ]; then
+    export PATH="$NEW_PATH:$PATH"
+fi
 
 # ============================================
 # 历史记录配置
@@ -140,21 +178,6 @@ export GOOGLE_CLOUD_PROJECT="gen-lang-client-0128654003"
 # 注意：路径中包含空格，使用引号包裹
 export CARGO_ENCODED_RUSTFLAGS="-L /d/Program Files/PostgreSQL/17/lib"
 export C_INCLUDE_PATH="/d/Program Files/PostgreSQL/17/include"
-
-# Python 环境配置（uv）
-export PATH="/c/Users/Administrator/.local/bin:/c/Users/Administrator/AppData/Roaming/uv/python/cpython-3.10.16-windows-x86_64-none:$PATH"
-
-# btop4win 配置（系统监控工具）
-# 如果 btop4win 已安装，添加到 PATH
-if [ -d "/c/Program Files/btop4win" ]; then
-    export PATH="/c/Program Files/btop4win:$PATH"
-fi
-
-# opencode 配置
-# 如果 opencode 已安装，添加到 PATH
-if [ -d "/c/opencode" ]; then
-    export PATH="/c/opencode:$PATH"
-fi
 
 # 字符编码设置
 export LANG=zh_CN.UTF-8
