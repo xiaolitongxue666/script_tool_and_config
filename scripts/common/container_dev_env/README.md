@@ -10,6 +10,8 @@
 - 支持代理配置（构建时和运行时）
 - 条件镜像源配置（有代理不修改源，无代理使用中国镜像源）
 - 自动挂载项目目录
+- 支持 SSH Agent Forwarding（容器可使用宿主机的 SSH 密钥，无需复制密钥文件）
+- 自动备份 SSH 关键文件（启动前备份 id_rsa, id_rsa.pub, known_hosts, config）
 
 ## 前置要求
 
@@ -235,6 +237,76 @@ git submodule update --init --recursive dotfiles/nvim
 
 你可以在容器内直接访问和编辑项目文件。
 
+## SSH Agent Forwarding
+
+脚本支持 SSH Agent Forwarding，使容器能够使用宿主机的 SSH 密钥进行认证，无需在容器内复制密钥文件，更安全。
+
+### 功能说明
+
+1. **自动备份 SSH 文件**
+   - 在配置 SSH Agent Forwarding 之前，脚本会自动备份以下文件到压缩包：
+     - `id_rsa` (私钥)
+     - `id_rsa.pub` (公钥)
+     - `known_hosts`
+     - `config`
+   - 备份文件保存在 `~/.ssh/ssh_backup_YYYYMMDD_HHMMSS.tar.gz`
+   - 备份文件权限设置为 600，确保安全性
+
+2. **自动加载私钥**
+   - 脚本会自动检查并加载 `id_rsa` 私钥到 SSH Agent
+   - Linux 系统下，如果 SSH Agent 未运行，脚本会尝试自动启动
+   - macOS/Windows 系统下，需要确保 SSH Agent 已运行
+
+3. **SSH Agent Forwarding**
+   - 通过挂载 SSH Agent 套接字实现
+   - macOS/Windows: 使用 `/run/host-services/ssh-auth.sock`
+   - Linux: 使用 `$SSH_AUTH_SOCK` 环境变量指向的套接字
+   - 容器内可通过 `ssh-add -l` 查看已加载的密钥
+   - 容器内可直接使用 `ssh` 和 `git` 进行认证
+
+### 使用方法
+
+1. **确保 SSH Agent 运行**（macOS/Windows）
+   ```bash
+   # macOS 通常 SSH Agent 会自动运行
+   # 如果需要手动启动
+   eval $(ssh-agent)
+   ```
+
+2. **加载密钥到 SSH Agent**
+   ```bash
+   ssh-add ~/.ssh/id_rsa
+   ```
+
+3. **启动容器**
+   ```bash
+   ./run.sh
+   # 脚本会自动：
+   # 1. 备份 SSH 文件
+   # 2. 确保私钥已加载
+   # 3. 配置 SSH Agent Forwarding
+   ```
+
+4. **在容器内验证**
+   ```bash
+   # 检查 SSH Agent
+   echo $SSH_AUTH_SOCK
+   ssh-add -l
+
+   # 测试 SSH 连接
+   ssh -T git@github.com
+
+   # 使用 Git
+   git clone git@github.com:username/repo.git
+   ```
+
+### 注意事项
+
+- 容器内的 `~/.ssh/` 目录是空的（这是正常的，因为我们只挂载了 SSH Agent 套接字）
+- 密钥通过 SSH Agent 提供，不会出现在容器文件系统中，更安全
+- 第一次连接新主机时，可能需要手动确认主机密钥（因为 `known_hosts` 未挂载）
+- 备份和密钥加载失败不会阻止容器启动，只会记录警告信息
+
 ## 故障排除
 
 ### 镜像构建失败
@@ -248,6 +320,41 @@ git submodule update --init --recursive dotfiles/nvim
 1. **检查镜像是否存在**: 运行 `docker images | grep archlinux-dev-env`
 2. **检查容器名称冲突**: 使用 `--container-name` 指定不同的名称
 3. **检查权限**: 确保 Docker 有权限访问项目目录
+
+### SSH Agent Forwarding 不工作
+
+1. **检查 SSH Agent 是否运行**
+   ```bash
+   # macOS/Windows
+   ssh-add -l
+   # 如果显示 "Could not open a connection to your authentication agent"
+   # 需要启动 SSH Agent
+   eval $(ssh-agent)
+   ssh-add ~/.ssh/id_rsa
+   ```
+
+2. **检查密钥是否已加载**
+   ```bash
+   ssh-add -l
+   # 应该显示已加载的密钥列表
+   ```
+
+3. **在容器内检查**
+   ```bash
+   # 检查环境变量
+   echo $SSH_AUTH_SOCK
+   # 应该显示套接字路径
+
+   # 检查密钥
+   ssh-add -l
+   # 应该显示宿主机 SSH Agent 中的密钥
+   ```
+
+4. **检查套接字文件**（Linux）
+   ```bash
+   ls -la $SSH_AUTH_SOCK
+   # 应该显示套接字文件存在
+   ```
 
 ### 代理不工作
 

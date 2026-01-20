@@ -123,6 +123,20 @@ while [[ $# -gt 0 ]]; do
             echo "环境变量:"
             echo "  PROXY                     代理地址（如果未通过参数指定）"
             echo ""
+            echo "SSH 文件备份:"
+            echo "  脚本会在配置 SSH Agent Forwarding 之前自动备份以下文件："
+            echo "  - id_rsa (私钥)"
+            echo "  - id_rsa.pub (公钥)"
+            echo "  - known_hosts"
+            echo "  - config"
+            echo "  备份文件保存在 ~/.ssh/ssh_backup_YYYYMMDD_HHMMSS.tar.gz"
+            echo ""
+            echo "SSH Agent Forwarding:"
+            echo "  脚本会自动检测并配置 SSH Agent Forwarding，使容器能够使用宿主机的 SSH 密钥"
+            echo "  通过 SSH Agent 套接字挂载实现，无需在容器中复制密钥文件，更安全。"
+            echo "  如果 SSH Agent 未运行，脚本会尝试启动（仅 Linux）。"
+            echo "  如果未检测到密钥，可能需要运行: ssh-add ~/.ssh/id_rsa"
+            echo ""
             echo "示例:"
             echo "  $0                                    # 使用默认代理: host.docker.internal:7890"
             echo "  $0 --proxy 192.168.1.76:7890         # 使用指定代理"
@@ -143,6 +157,165 @@ done
 
 # 如果通过 --proxy 参数指定了空值（--proxy ""），则禁用代理
 # 否则使用默认值或环境变量中的值（已在默认值设置中处理）
+
+# ============================================
+# SSH 文件备份函数
+# ============================================
+backup_ssh_files() {
+    local ssh_dir="${HOME}/.ssh"
+    local files_to_backup=("id_rsa" "id_rsa.pub" "known_hosts" "config")
+    local files_found=()
+
+    # 检查 SSH 目录
+    if [[ ! -d "$ssh_dir" ]]; then
+        log_warning "SSH 目录不存在: $ssh_dir，跳过备份"
+        return 1
+    fi
+
+    # 收集存在的文件
+    for file in "${files_to_backup[@]}"; do
+        local file_path="${ssh_dir}/${file}"
+        if [[ -f "$file_path" ]]; then
+            files_found+=("$file")
+        fi
+    done
+
+    # 如果没有文件需要备份，跳过
+    if [[ ${#files_found[@]} -eq 0 ]]; then
+        log_warning "没有找到需要备份的 SSH 文件"
+        return 1
+    fi
+
+    # 生成带时间戳的备份文件名
+    local timestamp
+    timestamp=$(date +%Y%m%d_%H%M%S)
+    local backup_file="${ssh_dir}/ssh_backup_${timestamp}.tar.gz"
+
+    # 创建压缩包
+    cd "$ssh_dir" || return 1
+    tar -czf "$backup_file" "${files_found[@]}" 2>/dev/null || {
+        log_warning "创建备份压缩包失败"
+        return 1
+    }
+
+    # 设置安全权限
+    chmod 600 "$backup_file"
+
+    log_success "SSH 文件已备份到: $backup_file"
+    log_info "备份的文件: ${files_found[*]}"
+
+    return 0
+}
+
+# ============================================
+# 私钥加载函数
+# ============================================
+ensure_ssh_key_loaded() {
+    local ssh_dir="${HOME}/.ssh"
+    local private_key="${ssh_dir}/id_rsa"
+
+    # 检查私钥文件是否存在
+    if [[ ! -f "$private_key" ]]; then
+        log_warning "私钥文件不存在: $private_key，跳过加载"
+        return 1
+    fi
+
+    # 检查 ssh-add 命令是否可用
+    if ! command -v ssh-add &> /dev/null; then
+        log_warning "ssh-add 命令不可用，跳过密钥加载"
+        return 1
+    fi
+
+    # 检查 SSH Agent 是否运行（通过检查 SSH_AUTH_SOCK 或尝试列出密钥）
+    if ! ssh-add -l &> /dev/null; then
+        # SSH Agent 可能未运行，尝试启动（仅 Linux）
+        if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+            if [[ -z "$SSH_AUTH_SOCK" ]]; then
+                log_info "启动 SSH Agent..."
+                eval $(ssh-agent) || {
+                    log_warning "无法启动 SSH Agent，跳过密钥加载"
+                    return 1
+                }
+            fi
+        else
+            log_warning "SSH Agent 未运行，请先启动 SSH Agent"
+            return 1
+        fi
+    fi
+
+    # 检查私钥是否已加载
+    if ssh-add -l 2>/dev/null | grep -q "id_rsa"; then
+        log_info "私钥已加载到 SSH Agent"
+        return 0
+    fi
+
+    # 尝试加载私钥
+    log_info "加载私钥到 SSH Agent: $private_key"
+    if ssh-add "$private_key" 2>/dev/null; then
+        log_success "私钥已成功加载到 SSH Agent"
+        return 0
+    else
+        log_warning "加载私钥失败，可能需要输入密码或检查文件权限"
+        return 1
+    fi
+}
+
+# ============================================
+# SSH Agent Forwarding 配置函数
+# ============================================
+setup_ssh_agent_forwarding() {
+    local ssh_sock_path=""
+    local ssh_auth_sock=""
+
+    # 检测操作系统
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        # macOS: Docker Desktop 使用固定路径
+        ssh_sock_path="/run/host-services/ssh-auth.sock"
+        ssh_auth_sock="/run/host-services/ssh-auth.sock"
+    elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+        # Linux: 使用环境变量中的路径
+        if [[ -z "$SSH_AUTH_SOCK" ]]; then
+            log_warning "SSH_AUTH_SOCK 未设置，尝试启动 ssh-agent"
+            eval $(ssh-agent) || {
+                log_warning "无法启动 ssh-agent，跳过 SSH Agent Forwarding"
+                return 1
+            }
+        fi
+        ssh_sock_path="$SSH_AUTH_SOCK"
+        ssh_auth_sock="$SSH_AUTH_SOCK"
+    elif [[ "$OSTYPE" == "msys" ]] || [[ "${MSYSTEM:-}" == "MINGW"* ]]; then
+        # Windows: Docker Desktop 使用固定路径
+        ssh_sock_path="/run/host-services/ssh-auth.sock"
+        ssh_auth_sock="/run/host-services/ssh-auth.sock"
+    else
+        log_warning "不支持的操作系统: $OSTYPE，跳过 SSH Agent Forwarding"
+        return 1
+    fi
+
+    # 检查套接字文件是否存在（Linux 需要检查，macOS/Windows 由 Docker Desktop 处理）
+    if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+        if [[ ! -S "$ssh_sock_path" ]]; then
+            log_warning "SSH Agent 套接字不存在: $ssh_sock_path，跳过 SSH Agent Forwarding"
+            return 1
+        fi
+    fi
+
+    # 检查是否有密钥已加载（可选，用于提示）
+    if command -v ssh-add &> /dev/null; then
+        if ssh-add -l &> /dev/null; then
+            log_info "检测到已加载的 SSH 密钥"
+        else
+            log_warning "SSH Agent 中未检测到密钥，可能需要运行: ssh-add ~/.ssh/id_rsa"
+        fi
+    fi
+
+    # 设置全局变量供后续使用
+    SSH_SOCK_PATH="$ssh_sock_path"
+    SSH_AUTH_SOCK_ENV="$ssh_auth_sock"
+
+    log_success "SSH Agent Forwarding 已配置: $ssh_sock_path"
+    return 0
+}
 
 # 完整镜像名称
 FULL_IMAGE_NAME="${IMAGE_NAME}:${IMAGE_TAG}"
@@ -292,6 +465,21 @@ DOCKER_RUN_ARGS=(
     --hostname archlinux-dev
     -v "${PROJECT_ROOT}:${WORK_DIR}"
 )
+
+# 备份 SSH 文件
+backup_ssh_files || log_warning "SSH 文件备份失败或跳过"
+
+# 确保私钥已加载到 SSH Agent
+ensure_ssh_key_loaded || log_warning "私钥加载失败或跳过"
+
+# 配置 SSH Agent Forwarding
+if setup_ssh_agent_forwarding; then
+    DOCKER_RUN_ARGS+=(
+        -v "${SSH_SOCK_PATH}:${SSH_SOCK_PATH}"
+        -e "SSH_AUTH_SOCK=${SSH_AUTH_SOCK_ENV}"
+    )
+    log_info "已启用 SSH Agent Forwarding"
+fi
 
 # 如果设置了代理，添加到环境变量
 if [ -n "$PROXY" ]; then
