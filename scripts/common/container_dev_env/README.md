@@ -115,6 +115,25 @@ export PROXY=192.168.1.76:7890
 ./run.sh
 ```
 
+**注意**: Windows 环境下 SSH Agent Forwarding 可能无法正常工作，建议使用 WSL2 和 `run-wsl.sh` 脚本。
+
+### WSL2 启动脚本 (run-wsl.sh)
+
+专为 WSL2 环境设计的启动脚本，自动配置 SSH Agent 转发。
+
+**参数**:
+- 与 `run.sh` 相同的所有参数
+- `--windows-path PATH`: 将 Windows 路径转换为 WSL 路径并切换到该目录
+
+**示例**:
+```bash
+# 在 WSL2 中启动
+./run-wsl.sh --proxy 192.168.1.76:7890
+
+# 从 Windows 路径启动
+./run-wsl.sh --windows-path "C:\Users\username\project" --proxy 192.168.1.76:7890
+```
+
 ## 镜像源配置策略
 
 ### 有代理时
@@ -237,6 +256,100 @@ git submodule update --init --recursive dotfiles/nvim
 
 你可以在容器内直接访问和编辑项目文件。
 
+## Windows 环境说明
+
+### ⚠️ 重要提示：Windows 用户必须使用 WSL2
+
+**Windows + Docker + SSH Agent 完全不可行**，存在无法解决的技术限制：
+
+1. **Git Bash ssh-agent 的套接字类型问题**
+   - Git Bash 基于 MSYS2，其 `ssh-agent` 生成的是 MSYS2 风格的伪 Unix 域套接字
+   - 这个套接字位于 Windows 文件系统上（如 `/c/Users/xxx/AppData/Local/Temp/ssh-xxxx/agent.xxx`）
+   - Docker 容器（Linux 内核）无法识别这种伪 Unix 套接字，即使挂载也无法通信
+
+2. **路径系统混乱**
+   - Windows 有至少 4 种路径表示：
+     - `C:\Users\xxx` - Windows 原生路径
+     - `/c/Users/xxx` - Git Bash/MSYS2 路径
+     - `/mnt/c/Users/xxx` - WSL2 路径
+     - `\\wsl$\Ubuntu\home\xxx` - Windows 访问 WSL2 路径
+   - Docker Desktop 在不同环境下对路径的处理不一致，导致挂载失败
+
+3. **Socket 类型不兼容**
+   - Windows: 命名管道 (`\.\pipe\ssh-agent-1234`)
+   - Linux: Unix Domain Socket (`/tmp/ssh-XXX/agent.12345`)
+   - 它们完全不兼容，无法直接挂载到 Docker 容器中
+
+4. **权限系统冲突**
+   - Windows: NTFS 权限 + ACL
+   - Linux: Unix 权限 (ugo+rwx)
+   - Docker Desktop 还有 Hyper-V 隔离层，进一步复杂化权限传递
+
+**结论**：在 Windows 上直接使用 `run.sh` 无法实现 SSH Agent Forwarding。
+
+**唯一解决方案**：使用 WSL2 + `run-wsl.sh`
+
+## WSL2 使用说明
+
+### ⚠️ Windows 用户必读
+
+如果您在 Windows 系统上，**必须使用 WSL2 和 `run-wsl.sh` 脚本**。`run.sh` 在 Windows 环境下无法提供 SSH Agent Forwarding 支持。
+
+### 前置要求
+
+1. **安装 WSL2**
+   ```bash
+   # 在 Windows PowerShell (管理员) 中运行
+   wsl --install
+   ```
+
+2. **安装 Docker Desktop**
+   - 下载并安装 Docker Desktop for Windows
+   - 在 Docker Desktop 设置中启用 WSL2 集成
+   - 在 WSL2 发行版中启用 Docker 集成
+
+3. **配置 SSH Agent（推荐）**
+   - 推荐使用 `wsl-ssh-agent` 或 `npiperelay` 来转发 Windows SSH Agent
+   - 脚本会自动检测和配置可用的 SSH Agent 方案
+
+### 使用方法
+
+1. **在 WSL2 中进入项目目录**
+   ```bash
+   # 从 Windows 路径转换到 WSL 路径
+   cd /mnt/c/path/to/project
+   
+   # 或使用 --windows-path 参数
+   ./scripts/common/container_dev_env/run-wsl.sh --windows-path "C:\path\to\project"
+   ```
+
+2. **启动容器**
+   ```bash
+   # 使用默认代理
+   ./scripts/common/container_dev_env/run-wsl.sh
+   
+   # 使用指定代理
+   ./scripts/common/container_dev_env/run-wsl.sh --proxy 192.168.1.76:7890
+   
+   # 执行命令
+   ./scripts/common/container_dev_env/run-wsl.sh --command "nvim"
+   ```
+
+3. **SSH Agent 配置**
+   - 脚本会自动检测和配置 SSH Agent，按以下优先级尝试：
+     1. `wsl-ssh-agent`（推荐）
+     2. `npiperelay`（通过命名管道转发）
+     3. Windows SSH Agent（通过 PowerShell 获取）
+     4. WSL 内置 ssh-agent（备用方案）
+
+### WSL2 脚本特性
+
+- 自动检测 WSL2 环境
+- 自动检测 Docker 可用性
+- 自动配置 SSH Agent 转发
+- 支持 Windows 路径到 WSL 路径的转换
+- 保持与 `run.sh` 相同的参数接口
+
 ## SSH Agent Forwarding
 
 脚本支持 SSH Agent Forwarding，使容器能够使用宿主机的 SSH 密钥进行认证，无需在容器内复制密钥文件，更安全。
@@ -255,12 +368,14 @@ git submodule update --init --recursive dotfiles/nvim
 2. **自动加载私钥**
    - 脚本会自动检查并加载 `id_rsa` 私钥到 SSH Agent
    - Linux 系统下，如果 SSH Agent 未运行，脚本会尝试自动启动
-   - macOS/Windows 系统下，需要确保 SSH Agent 已运行
+   - macOS 系统下，需要确保 SSH Agent 已运行
+   - Windows 系统下，SSH Agent 支持有限，建议使用 WSL2
 
-3. **SSH Agent Forwarding**
-   - 通过挂载 SSH Agent 套接字实现
-   - macOS/Windows: 使用 `/run/host-services/ssh-auth.sock`
-   - Linux: 使用 `$SSH_AUTH_SOCK` 环境变量指向的套接字
+3. **SSH Agent Forwarding（不同环境的差异）**
+   - **macOS**: 使用 Docker Desktop 的固定路径 `/run/host-services/ssh-auth.sock`
+   - **Linux**: 使用 `$SSH_AUTH_SOCK` 环境变量指向的套接字
+   - **WSL2**: 自动检测并配置多种 SSH Agent 方案（wsl-ssh-agent、npiperelay 等）
+   - **Windows (Git Bash)**: ❌ **不支持** - 必须使用 WSL2 和 `run-wsl.sh`
    - 容器内可通过 `ssh-add -l` 查看已加载的密钥
    - 容器内可直接使用 `ssh` 和 `git` 进行认证
 
@@ -323,9 +438,10 @@ git submodule update --init --recursive dotfiles/nvim
 
 ### SSH Agent Forwarding 不工作
 
+#### macOS/Linux/WSL2
+
 1. **检查 SSH Agent 是否运行**
    ```bash
-   # macOS/Windows
    ssh-add -l
    # 如果显示 "Could not open a connection to your authentication agent"
    # 需要启动 SSH Agent
@@ -350,11 +466,20 @@ git submodule update --init --recursive dotfiles/nvim
    # 应该显示宿主机 SSH Agent 中的密钥
    ```
 
-4. **检查套接字文件**（Linux）
+4. **检查套接字文件**（Linux/WSL2）
    ```bash
    ls -la $SSH_AUTH_SOCK
    # 应该显示套接字文件存在
    ```
+
+#### Windows (Git Bash)
+
+**Windows 环境下 SSH Agent Forwarding 完全不可行**，存在无法解决的技术限制。
+
+**唯一解决方案**：
+- 使用 WSL2 和 `run-wsl.sh` 脚本
+- WSL2 提供完整的 Linux 环境，SSH Agent Forwarding 可以正常工作
+- 详见 [WSL2 使用说明](#wsl2-使用说明)
 
 ### 代理不工作
 

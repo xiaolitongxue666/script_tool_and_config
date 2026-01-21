@@ -137,6 +137,18 @@ while [[ $# -gt 0 ]]; do
             echo "  如果 SSH Agent 未运行，脚本会尝试启动（仅 Linux）。"
             echo "  如果未检测到密钥，可能需要运行: ssh-add ~/.ssh/id_rsa"
             echo ""
+            echo "Windows 环境说明:"
+            echo "  Windows + Docker + SSH Agent 存在无法解决的技术限制："
+            echo "  - Git Bash 的 ssh-agent 生成的是 MSYS2 风格的伪 Unix 域套接字，Docker 容器无法识别"
+            echo "  - 路径系统混乱（4 种路径格式）"
+            echo "  - Socket 类型不兼容（命名管道 vs Unix Domain Socket）"
+            echo "  - 权限系统冲突（NTFS vs Unix 权限）"
+            echo ""
+            echo "  Windows 用户必须使用 WSL2 方案："
+            echo "  1. 安装 WSL2: wsl --install"
+            echo "  2. 在 WSL2 中运行: ./run-wsl.sh"
+            echo "  3. 或从 Windows 访问 WSL2 项目目录后运行 run-wsl.sh"
+            echo ""
             echo "示例:"
             echo "  $0                                    # 使用默认代理: host.docker.internal:7890"
             echo "  $0 --proxy 192.168.1.76:7890         # 使用指定代理"
@@ -284,15 +296,25 @@ setup_ssh_agent_forwarding() {
         ssh_sock_path="$SSH_AUTH_SOCK"
         ssh_auth_sock="$SSH_AUTH_SOCK"
     elif [[ "$OSTYPE" == "msys" ]] || [[ "${MSYSTEM:-}" == "MINGW"* ]]; then
-        # Windows: Docker Desktop 使用固定路径
-        ssh_sock_path="/run/host-services/ssh-auth.sock"
-        ssh_auth_sock="/run/host-services/ssh-auth.sock"
+        # Windows: 不支持 SSH Agent Forwarding
+        log_warning "Windows 环境下 SSH Agent Forwarding 存在技术限制，无法正常工作"
+        log_info "原因："
+        log_info "1. Git Bash 的 ssh-agent 生成的是 MSYS2 风格的伪 Unix 域套接字，Docker 容器无法识别"
+        log_info "2. 路径系统混乱（4 种路径格式）"
+        log_info "3. Socket 类型不兼容（命名管道 vs Unix Domain Socket）"
+        log_info "4. 权限系统冲突（NTFS vs Unix 权限）"
+        log_info ""
+        log_info "解决方案：请在 WSL2 中使用 Docker"
+        log_info "1. 安装 WSL2: wsl --install"
+        log_info "2. 在 WSL2 中运行: ./run-wsl.sh"
+        log_info "3. 或从 Windows 访问 WSL2 项目目录后运行 run-wsl.sh"
+        return 1
     else
         log_warning "不支持的操作系统: $OSTYPE，跳过 SSH Agent Forwarding"
         return 1
     fi
 
-    # 检查套接字文件是否存在（Linux 需要检查，macOS/Windows 由 Docker Desktop 处理）
+    # 检查套接字文件是否存在（Linux 需要检查，macOS 由 Docker Desktop 处理）
     if [[ "$OSTYPE" == "linux-gnu"* ]]; then
         if [[ ! -S "$ssh_sock_path" ]]; then
             log_warning "SSH Agent 套接字不存在: $ssh_sock_path，跳过 SSH Agent Forwarding"
@@ -348,19 +370,25 @@ if [[ "${MSYSTEM:-}" == "MINGW"* ]] || [[ "$OSTYPE" == "msys" ]] || [[ "$OSTYPE"
     IS_WINDOWS=true
 fi
 
-# Docker exec 辅助函数（处理 Windows 路径转换问题）
+# Docker exec 辅助函数（处理 Windows 路径转换问题和 SSH Agent 传递）
 # 在 Windows Git Bash 环境下，Docker 会尝试将 Unix 路径转换为 Windows 路径
 # 使用 MSYS_NO_PATHCONV=1 和引号包裹路径来防止转换
 docker_exec_zsh() {
     local container_name="$1"
     local command="$2"
+    local exec_args=(-it)
+
+    # 如果 SSH Agent 已配置，传递环境变量
+    if [[ -n "${SSH_AUTH_SOCK_ENV:-}" ]]; then
+        exec_args+=(-e "SSH_AUTH_SOCK=${SSH_AUTH_SOCK_ENV}")
+    fi
 
     if [ "$IS_WINDOWS" = true ]; then
         # Windows 环境：使用 MSYS_NO_PATHCONV=1 和 //bin/zsh（双斜杠）绕过路径转换
-        MSYS_NO_PATHCONV=1 docker exec -it "$container_name" //bin/zsh -c "$command"
+        MSYS_NO_PATHCONV=1 docker exec "${exec_args[@]}" "$container_name" //bin/zsh -c "$command"
     else
         # Linux/macOS 环境：直接使用路径
-        docker exec -it "$container_name" /bin/zsh -c "$command"
+        docker exec "${exec_args[@]}" "$container_name" /bin/zsh -c "$command"
     fi
 }
 
