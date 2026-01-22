@@ -491,7 +491,6 @@ DOCKER_RUN_ARGS=(
     $USE_TTY
     --name "$CONTAINER_NAME"
     --hostname archlinux-dev
-    -v "${PROJECT_ROOT}:${WORK_DIR}"
 )
 
 # 备份 SSH 文件
@@ -530,7 +529,7 @@ fi
 
 log_info "启动容器: $CONTAINER_NAME"
 log_info "镜像: $FULL_IMAGE_NAME"
-log_info "项目目录: $PROJECT_ROOT -> $WORK_DIR"
+log_info "工作目录: $WORK_DIR"
 
 # 容器内 zsh 路径（容器内路径不受宿主机影响，始终使用绝对路径）
 ZSH_CMD="/bin/zsh"
