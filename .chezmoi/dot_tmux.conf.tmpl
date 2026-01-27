@@ -106,8 +106,7 @@ set -g @catppuccin_window_status_style "rounded"
 # 状态栏配置（Catppuccin 主题会覆盖这些设置，但保留作为备用）
 # ============================================
 
-# 设置状态栏位置为顶部
-set -g status-position top
+# 注意：status-position 必须在 TPM 加载之后设置，否则会被主题覆盖
 
 # 状态栏长度配置（Catppuccin 主题会使用这些设置）
 set -g status-right-length 100
@@ -207,5 +206,12 @@ set -g @continuum-save-interval '15'
 
 # 初始化 TPM（必须放在配置文件最后）
 run '~/.tmux/plugins/tpm/tpm'
+
+# ============================================
+# 必须在 TPM 加载后重新设置这些选项
+# ============================================
+
+# 设置状态栏位置为顶部（覆盖主题默认设置）
+set -g status-position top
 {{- end -}}
 
