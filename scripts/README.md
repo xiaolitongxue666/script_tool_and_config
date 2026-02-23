@@ -4,73 +4,14 @@
 
 ## 目录结构
 
-```
-scripts/
-├── common.sh                    # 通用函数库（所有脚本共享）
-├── README.md                    # 本文件
-│
-├── windows/                     # Windows 专用脚本
-│   └── windows_scripts/         # Windows 批处理脚本
-│       ├── open_multi_vlc.bat   # 打开多个 VLC 播放器
-│       └── open_16_vlc.bat      # 打开 16 个 VLC 播放器
-│
-├── macos/                       # macOS 专用脚本（预留）
-│
-├── common/                       # 跨平台脚本
-    ├── utils/                    # 通用工具脚本
-    │   ├── append_text_to_file.sh
-    │   ├── append_lines_to_file.sh
-    │   ├── replace_text_in_files.sh
-    │   ├── list_all_directories.sh
-    │   ├── get_directory_name.sh
-    │   └── [其他工具脚本]
-    │
-    ├── project_tools/            # 项目生成和管理工具
-    │   ├── create_c_source_file.sh
-    │   ├── generate_cmake_lists.sh
-    │   ├── generate_log4c_config.sh
-    │   ├── merge_static_libraries.sh
-    │   └── cpp_project_generator/
-    │
-    ├── media_tools/             # 媒体处理工具
-    │   ├── open_multiple_ffmpeg_srt.sh
-    │   ├── open_multiple_ffmpeg_udp.sh
-    │   ├── concat_audio/
-    │   └── mix_audio/
-    │
-    ├── git_templates/           # Git 模板
-    │   ├── github_common_config.sh
-    │   └── default_gitignore_files/
-    │
-    ├── patch_examples/          # 补丁示例
-    │   ├── create_patch.sh
-    │   └── use_patch.sh
-    │
-    ├── shc/                     # Shell 脚本编译器示例
-    │   ├── echo_hello_world.sh
-    │   ├── shc_test.sh
-    │   └── source_shc.sh
-    │
-    └── auto_edit_redis_config/  # Redis 配置编辑
-        └── auto_edit_redis_config.sh
-│
-└── linux/                       # Linux 专用脚本
-    ├── system_basic_env/        # 系统基础环境安装脚本（ArchLinux）
-    │   ├── configure_china_mirrors.sh
-    │   ├── install_environment.sh
-    │   ├── install_neovim.sh
-    │   ├── install_common_software.sh
-    │   ├── install_gnome.sh
-    │   └── install_network_manager.sh
-    │
-    ├── network/                 # 网络配置脚本
-    │   ├── configure_ethernet_mac.sh
-    │   ├── deploy_openresty.sh
-    │   └── send_srt_stream.sh
-    │
-    └── hardware/                # 硬件安装脚本
-        └── install_netint_t4xx.sh
-```
+- **common.sh**、**README.md**（本文件）
+- **common/**：跨平台脚本（utils、project_tools、ffmpeg-magic、git_templates、patch_examples、shc、auto_edit_redis_config、container_dev_env 等）
+- **linux/**：Linux 专用（system_basic_env、network、hardware）
+- **macos/**：macOS 专用
+- **windows/**：Windows 专用（windows_scripts、system_basic_env）
+- **chezmoi/**、**migration/**
+
+完整目录树与脚本列表见 [project_structure.md](../project_structure.md)。
 
 ## 脚本分类说明
 
@@ -94,7 +35,7 @@ scripts/
 跨平台脚本位于 `common/` 目录下，可在多个系统使用：
 - **utils/**: 通用工具脚本
 - **project_tools/**: 项目生成和管理工具
-- **media_tools/**: 媒体处理工具
+- **ffmpeg-magic/**: FFmpeg 相关脚本（多路推流、音频拼接/混音、SRT 推流、Netint 安装等）
 - **git_templates/**: Git 模板和配置
 - **patch_examples/**: 补丁使用示例
 - **shc/**: Shell 脚本编译器示例
@@ -125,13 +66,7 @@ end_script
 - 从 `common/` 子目录引用时，路径为 `../../../common.sh`（向上三级到 scripts 根目录）
 - 从 `linux/` 子目录引用时，路径为 `../../common.sh`（向上两级到 scripts 根目录）
 
-## 命名规范
-
-1. **系统安装脚本**: `install_<软件名>.sh` 或 `configure_<配置名>.sh`
-2. **工具脚本**: `<动作>_<对象>.sh` (如: `get_<名称>.sh`, `list_<对象>.sh`)
-3. **项目工具**: `<动作>_<对象>.sh` (如: `generate_<名称>.sh`, `create_<名称>.sh`)
-4. **网络工具**: `<动作>_<协议/服务>.sh` (如: `send_<协议>_stream.sh`, `deploy_<服务>.sh`)
-5. **示例脚本**: `demo_<功能>.sh`
+命名规范与示例见 [AGENTS.md](../AGENTS.md#脚本分类和命名规范)。
 
 ## 注意事项
 

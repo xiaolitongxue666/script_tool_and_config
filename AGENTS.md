@@ -643,76 +643,9 @@ git push
 
 ## 详细目录结构
 
-```
-.
-├── .chezmoi/                      # Chezmoi 配置源目录
-│   ├── dot_config/                # 通用配置文件
-│   │   ├── alacritty/             # Alacritty 终端配置
-│   │   ├── fish/                  # Fish Shell 配置
-│   │   └── starship/              # Starship 提示符配置
-│   ├── run_on_darwin/             # macOS 特定配置
-│   ├── run_on_linux/              # Linux 特定配置
-│   │   └── dot_config/            # Linux 特定配置
-│   └── run_on_windows/            # Windows 特定配置
-│       └── secure_crt/            # SecureCRT 配置
-│
-├── scripts/                       # 脚本集合
-│   ├── common.sh                  # 通用函数库（日志、错误处理等）
-│   ├── manage_dotfiles.sh         # Dotfiles 管理脚本
-│   ├── chezmoi/                   # Chezmoi 相关脚本
-│   │   └── diagnose_chezmoi.sh    # Chezmoi 诊断工具
-│   ├── common/                    # 跨平台脚本
-│   │   ├── utils/                 # 通用工具脚本
-│   │   │   ├── append_text_to_file.sh
-│   │   │   ├── append_lines_to_file.sh
-│   │   │   ├── replace_text_in_files.sh
-│   │   │   ├── list_all_directories.sh
-│   │   │   ├── get_directory_name.sh
-│   │   │   ├── check_and_fix_encoding.sh
-│   │   │   └── ensure_lf_line_endings.sh
-│   │   ├── project_tools/         # 项目生成和管理工具
-│   │   │   ├── create_c_source_file.sh
-│   │   │   ├── generate_cmake_lists.sh
-│   │   │   ├── generate_log4c_config.sh
-│   │   │   ├── merge_static_libraries.sh
-│   │   │   └── cpp_project_generator/
-│   │   ├── media_tools/           # 媒体处理工具
-│   │   │   ├── open_multiple_ffmpeg_srt.sh
-│   │   │   ├── open_multiple_ffmpeg_udp.sh
-│   │   │   ├── concat_audio/
-│   │   │   └── mix_audio/
-│   │   └── git_templates/         # Git 模板
-│   │       ├── github_common_config.sh
-│   │       └── default_gitignore_files/
-│   ├── linux/                     # Linux 专用脚本
-│   │   ├── system_basic_env/      # 系统基础环境安装（ArchLinux）
-│   │   │   ├── configure_china_mirrors.sh
-│   │   │   ├── install_environment.sh
-│   │   │   ├── install_neovim.sh
-│   │   │   ├── install_common_software.sh
-│   │   │   ├── install_gnome.sh
-│   │   │   ├── install_network_manager.sh
-│   │   │   └── test_mirrors.sh
-│   │   ├── network/               # 网络配置脚本
-│   │   │   ├── configure_ethernet_mac.sh
-│   │   │   ├── deploy_openresty.sh
-│   │   │   └── send_srt_stream.sh
-│   │   └── hardware/              # 硬件安装脚本
-│   │       └── install_netint_t4xx.sh
-│   ├── macos/                     # macOS 专用脚本（预留）
-│   ├── windows/                   # Windows 专用脚本
-│   │   └── windows_scripts/       # Windows 批处理脚本
-│   │       ├── open_multi_vlc.bat
-│   │       └── open_16_vlc.bat
-│   └── migration/                 # 迁移脚本
-│
-├── dotfiles/                      # Dotfiles 源文件
-│   └── nvim/                      # Neovim 配置（Git 子模块）
-│
-├── AGENTS.md                      # 本文件（编码代理指南）
-├── README.md                      # 项目说明文档
-└── chezmoi.yaml                   # Chezmoi 主配置
-```
+项目完整目录结构见 [project_structure.md](project_structure.md)。
+
+脚本目录概览：`scripts/` 下为 `common/`（utils、project_tools、ffmpeg-magic、git_templates 等）、`linux/`、`macos/`、`windows/`、`chezmoi/`、`migration/`。
 
 ## 脚本分类和命名规范
 
@@ -721,11 +654,9 @@ git push
 | ---------- | -------------------------- | -------------------- | ----------------------------- |
 | 系统安装       | `linux/system_basic_env/`  | `install_<软件名>.sh`   | `install_neovim.sh`           |
 | 系统配置       | `linux/system_basic_env/`  | `configure_<配置名>.sh` | `configure_china_mirrors.sh`  |
-| 网络工具       | `linux/network/`           | `<动作>_<协议/服务>.sh`    | `send_srt_stream.sh`          |
-| 硬件安装       | `linux/hardware/`          | `install_<硬件名>.sh`   | `install_netint_t4xx.sh`      |
 | 工具脚本       | `common/utils/`            | `<动作>_<对象>.sh`       | `get_directory_name.sh`       |
 | 项目工具       | `common/project_tools/`    | `<动作>_<对象>.sh`       | `generate_cmake_lists.sh`     |
-| 媒体工具       | `common/media_tools/`      | `<动作>_<类型/格式>.sh`    | `open_multiple_ffmpeg_srt.sh` |
+| FFmpeg 工具    | `common/ffmpeg-magic/`     | 见目录内脚本               | `open_multiple_ffmpeg_srt.sh`  |
 | 测试脚本       | 各目录                        | `test_<功能>.sh`       | `test_mirrors.sh`             |
 | Windows 脚本 | `windows/windows_scripts/` | `<功能描述>.bat`         | `open_multi_vlc.bat`          |
 

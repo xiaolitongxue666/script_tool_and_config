@@ -1,5 +1,7 @@
 # 项目结构
 
+本文档为项目目录结构的权威来源，其他文档中的结构描述均以此为准。
+
 ```
 script_tool_and_config/
 ├── .editorconfig                    # 编辑器配置
@@ -21,10 +23,10 @@ script_tool_and_config/
 ├── scripts/                          # 脚本工具集合
 │   ├── common.sh                     # 通用函数库
 │   ├── manage_dotfiles.sh           # dotfiles 管理脚本
-│   ├── readme.md                     # scripts 目录说明
+│   ├── README.md                     # scripts 目录说明
 │   │
 │   ├── chezmoi/                      # chezmoi 相关脚本
-│   │   ├── readme.md                 # chezmoi 脚本说明
+│   │   ├── README.md                 # chezmoi 脚本说明
 │   │   ├── install_chezmoi.sh       # 安装 chezmoi 工具
 │   │   ├── common_install.sh        # 通用安装函数库
 │   │   └── helpers.sh                # 辅助函数
@@ -52,7 +54,6 @@ script_tool_and_config/
 │   │   │   ├── get_pkg_config_flags.sh
 │   │   │   ├── get_svn_revision.sh
 │   │   │   ├── update_ts_key_pair.sh
-│   │   │   ├── open_multiple_terminals.sh
 │   │   │   ├── compare_static_lib_objects.sh
 │   │   │   ├── demo_printf_formatting.sh
 │   │   │   ├── demo_heredoc.sh
@@ -71,9 +72,12 @@ script_tool_and_config/
 │   │   │       ├── ls_dirs_name.sh
 │   │   │       └── src/
 │   │   │
-│   │   ├── media_tools/              # 媒体处理工具
+│   │   ├── ffmpeg-magic/             # FFmpeg 相关脚本工具
 │   │   │   ├── open_multiple_ffmpeg_srt.sh
 │   │   │   ├── open_multiple_ffmpeg_udp.sh
+│   │   │   ├── open_multiple_terminals.sh
+│   │   │   ├── send_srt_stream.sh
+│   │   │   ├── install_netint_t4xx.sh
 │   │   │   ├── concat_audio/
 │   │   │   └── mix_audio/
 │   │   │
@@ -82,7 +86,7 @@ script_tool_and_config/
 │   │   │   └── default_gitignore_files/
 │   │   │
 │   │   ├── patch_examples/           # 补丁使用示例
-│   │   │   ├── readme.md
+│   │   │   ├── README.md
 │   │   │   ├── create_patch.sh
 │   │   │   └── use_patch.sh
 │   │   │
@@ -105,20 +109,18 @@ script_tool_and_config/
 │   │   │
 │   │   ├── network/                  # 网络配置脚本
 │   │   │   ├── configure_ethernet_mac.sh
-│   │   │   ├── deploy_openresty.sh
-│   │   │   └── send_srt_stream.sh
+│   │   │   └── deploy_openresty.sh
 │   │   │
 │   │   └── hardware/                 # 硬件安装脚本
-│   │       └── install_netint_t4xx.sh
 │   │
 │   ├── macos/                        # macOS 专用脚本
 │   │   └── system_basic_env/
-│   │       ├── readme.md
+│   │       ├── README.md
 │   │       └── install_common_tools.sh
 │   │
 │   └── windows/                      # Windows 专用脚本
 │       ├── system_basic_env/
-│       │   ├── readme.md
+│       │   ├── README.md
 │       │   ├── install_common_tools.ps1
 │       │   ├── install_common_tools.bat
 │       │   └── fix_encoding_simple.ps1
@@ -134,9 +136,9 @@ script_tool_and_config/
 
 ### 根目录文件
 
-- **readme.md**: 项目主文档，包含快速开始、使用说明等
+- **README.md**: 项目主文档，包含快速开始、使用说明等
 - **project_structure.md**: 项目结构说明（本文件）
-- **software_list.md**: 完整的软件清单和安装说明
+- **SOFTWARE_LIST.md**: 完整的软件清单和安装说明
 - **chezmoi_use_guide.md**: chezmoi 使用指南
 - **install.sh**: 一键安装脚本
 
@@ -158,29 +160,11 @@ Legacy 目录，所有配置已迁移到 `.chezmoi/` 目录。保留作为参考
 
 ### 脚本分类
 
-#### 系统基础环境安装
+- **系统基础环境安装**：`scripts/linux/system_basic_env/`、`scripts/macos/system_basic_env/`、`scripts/windows/system_basic_env/`
+- **跨平台工具脚本**：位于 `scripts/common/`（utils、project_tools、ffmpeg-magic、git_templates、patch_examples、shc、auto_edit_redis_config 等）
+- **平台特定脚本**：Linux network/hardware、Windows windows_scripts
 
-- **Linux**: `scripts/linux/system_basic_env/`
-- **macOS**: `scripts/macos/system_basic_env/`
-- **Windows**: `scripts/windows/system_basic_env/`
-
-#### 跨平台工具脚本
-
-位于 `scripts/common/` 目录下，可在多个平台使用：
-
-- **utils/**: 通用工具脚本
-- **project_tools/**: 项目生成和管理工具
-- **media_tools/**: 媒体处理工具
-- **git_templates/**: Git 模板
-- **patch_examples/**: 补丁使用示例
-- **shc/**: Shell 脚本编译器示例
-- **auto_edit_redis_config/**: Redis 配置编辑工具
-
-#### 平台特定脚本
-
-- **network/**: 网络配置脚本（Linux）
-- **hardware/**: 硬件安装脚本（Linux）
-- **windows_scripts/**: Windows 批处理脚本
+详细命名与示例见 [AGENTS.md](AGENTS.md#脚本分类和命名规范)。
 
 ## 配置文件位置
 

@@ -4,12 +4,65 @@
 
 ## 目录
 
+- [快速使用](#快速使用)
 - [概述](#概述)
 - [SFTP 配置说明](#sftp-配置说明)
 - [使用方法](#使用方法)
 - [同步脚本](#同步脚本)
 - [远端初始化](#远端初始化)
 - [常见问题](#常见问题)
+
+## 快速使用
+
+### Windows 用户
+
+**方法一：使用 VS Code SFTP 扩展（推荐）**
+
+1. 安装 [SFTP 扩展](https://marketplace.visualstudio.com/items?itemName=Natizyskunk.sftp)
+2. 配置文件已就绪：`.vscode/sftp.json`
+3. 使用命令：
+   - `Ctrl+Shift+P` -> `SFTP: Upload Project` - 上传整个项目
+   - `Ctrl+Shift+P` -> `SFTP: Sync Local -> Remote` - 同步到远端
+
+**方法二：使用同步脚本**
+
+```bash
+# 在 Git Bash 中运行
+./scripts/common/utils/sync_to_remote.sh
+```
+
+若提示 rsync 未安装：脚本会自动使用备用方案（tar + ssh），或在 MSYS2 中运行 `pacman -S rsync`。
+
+### Linux/macOS 用户
+
+```bash
+# 确保已安装 rsync（Arch: sudo pacman -S rsync，Ubuntu/Debian: sudo apt-get install rsync，macOS: brew install rsync）
+./scripts/common/utils/sync_to_remote.sh
+```
+
+### 配置参数
+
+可通过环境变量自定义：
+
+```bash
+export REMOTE_HOST="192.168.1.109"
+export REMOTE_USER="leonli"
+export REMOTE_PATH="/home/leonli/Code/DotfilesAndScript/script_tool_and_config"
+./scripts/common/utils/sync_to_remote.sh
+```
+
+### 远端初始化
+
+同步完成后，在远端 Arch Linux 上运行：
+
+```bash
+cd /home/leonli/Code/DotfilesAndScript/script_tool_and_config
+./scripts/common/utils/remote_init.sh
+# 或直接运行
+./install.sh
+```
+
+---
 
 ## 概述
 

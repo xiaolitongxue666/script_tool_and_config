@@ -50,6 +50,9 @@ chezmoi apply -v
 | [SOFTWARE_LIST.md](SOFTWARE_LIST.md) | 完整软件清单和安装说明 |
 | [project_structure.md](project_structure.md) | 详细项目结构说明 |
 | [AGENTS.md](AGENTS.md) | 代码代理开发指南 |
+| [ENCODING_AND_LINE_ENDINGS.md](ENCODING_AND_LINE_ENDINGS.md) | 文件编码与换行符规范 |
+| [scripts/common/utils/DEPLOYMENT_GUIDE.md](scripts/common/utils/DEPLOYMENT_GUIDE.md) | 部署流程（Windows/Arch） |
+| [scripts/common/utils/SFTP_SYNC_GUIDE.md](scripts/common/utils/SFTP_SYNC_GUIDE.md) | SFTP 与同步指南 |
 
 ## 💻 支持的平台
 
@@ -102,6 +105,8 @@ script_tool_and_config/
 ├── SOFTWARE_LIST.md                # 软件清单
 └── project_structure.md            # 项目结构说明
 ```
+
+详细结构见 [project_structure.md](project_structure.md)。
 
 ## 🔧 常用命令
 
