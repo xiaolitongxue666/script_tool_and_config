@@ -1,0 +1,67 @@
+{{- if eq .chezmoi.os "darwin" -}}
+#!/bin/bash
+
+# ============================================
+# macOS connect 安装脚本（chezmoi run_once_）
+# 用于 SSH ProxyCommand 经代理连接（系统 nc 无转发能力）
+# 参考: clash代理下git-ssh走443配置
+# ============================================
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../../.." && pwd 2>/dev/null || echo "$HOME")"
+COMMON_INSTALL="${PROJECT_ROOT}/scripts/chezmoi/common_install.sh"
+
+if [ ! -f "$COMMON_INSTALL" ]; then
+    COMMON_INSTALL="$HOME/.local/share/chezmoi/scripts/chezmoi/common_install.sh"
+fi
+
+if [ -f "$COMMON_INSTALL" ]; then
+    source "$COMMON_INSTALL"
+else
+    echo "[WARNING] 未找到 common_install.sh，使用基本函数"
+    function log_info() { echo "[INFO] $*"; }
+    function log_success() { echo "[SUCCESS] $*"; }
+    function log_warning() { echo "[WARNING] $*"; }
+    function setup_proxy() { :; }
+    function detect_os_and_package_manager() {
+        PLATFORM="macos"
+        PACKAGE_MANAGER="brew"
+    }
+    function install_package() { brew install "$1"; }
+fi
+
+if [[ "$(uname)" != "Darwin" ]]; then
+    echo "[ERROR] 此脚本仅支持 macOS"
+    exit 1
+fi
+
+setup_proxy "${PROXY:-{{ if .data.proxy }}{{ .data.proxy }}{{ else }}http://127.0.0.1:7890{{ end }}}"
+detect_os_and_package_manager 2>/dev/null || true
+
+# 检测 connect 是否已存在（PATH 或常见路径）
+has_connect() {
+    command -v connect &>/dev/null && return 0
+    [[ -x "/opt/homebrew/bin/connect" ]] && return 0
+    [[ -x "/usr/local/bin/connect" ]] && return 0
+    return 1
+}
+
+if has_connect; then
+    log_info "connect 已安装: $(command -v connect 2>/dev/null || echo '/opt/homebrew/bin/connect 或 /usr/local/bin/connect')"
+    exit 0
+fi
+
+log_info "安装 connect（用于 SSH 经代理连接，如 GitHub 443）..."
+if [[ "$PACKAGE_MANAGER" == "brew" ]]; then
+    brew install connect
+else
+    log_warning "需要 Homebrew，请先安装 Homebrew"
+    exit 1
+fi
+
+if has_connect; then
+    log_success "connect 安装成功"
+else
+    log_warning "connect 可能未正确安装，请手动执行: brew install connect"
+fi
+{{- end -}}

@@ -65,6 +65,17 @@ chezmoi edit ~/.ssh/config
 chezmoi apply ~/.ssh/config
 ```
 
+## GitHub 走 443 + 代理（Clash）
+
+模板已包含 GitHub 使用 `ssh.github.com:443` 及可选 ProxyCommand（经 Clash 等代理）：
+
+- **源文件**：`.chezmoi/dot_ssh/config.tmpl`，应用后生成 `~/.ssh/config`。
+- **Windows**：ProxyCommand 使用 Git 自带的 `connect.exe`，路径由 data 中 `windows_git_connect_path` 指定（默认 `C:/Program Files/Git/mingw64/bin/connect.exe`）。
+- **macOS**：系统 nc 无代理转发能力，需先安装 `connect`（`brew install connect`，或首次 `chezmoi apply` 时由 `run_once_install-connect` 自动安装）；路径由 data 中 `macos_connect_path` 指定。
+- **Linux**：ProxyCommand 使用 `nc -X connect -x ...`，需安装 netcat-openbsd（或发行版等价包）；若报错请安装后重试。
+
+若当前已有 `~/.ssh/config`，请先备份再应用或手动合并模板内容。
+
 ## 更多信息
 
 详细说明请参考：

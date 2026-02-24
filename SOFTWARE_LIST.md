@@ -243,8 +243,9 @@ chezmoi apply -v
 
 SSH 配置文件（`~/.ssh/config`）已纳入 chezmoi 管理：
 
-- **源文件**：`.chezmoi/dot_ssh/config`
+- **源文件**：`.chezmoi/dot_ssh/config.tmpl`（模板，含 GitHub 443 及可选 ProxyCommand）
 - **目标位置**：`~/.ssh/config`
+- **ProxyCommand 前置**：Windows 使用 Git 自带 connect.exe；macOS 需 `brew install connect`（可由 run_once_install-connect 自动安装）；Linux 需 nc/netcat-openbsd
 - **权限**：自动设置为 600
 - **备份**：使用 `scripts/common/utils/backup_ssh_config.sh` 备份
 - **部署**：使用 `scripts/common/utils/setup_ssh_config.sh` 部署

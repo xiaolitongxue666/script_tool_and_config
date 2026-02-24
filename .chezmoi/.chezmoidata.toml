@@ -1,0 +1,10 @@
+# 静态默认数据（供模板使用；config 中的 [data] 会覆盖此处）
+# 详见 .chezmoi/chezmoi.toml 的 [data]
+proxy = "http://127.0.0.1:7890"
+proxy_host = "127.0.0.1"
+proxy_port = "7890"
+git_user_name = ""
+git_user_email = ""
+windows_git_connect_path = "C:/Program Files/Git/mingw64/bin/connect.exe"
+macos_connect_path = "/opt/homebrew/bin/connect"
+identity_file = "~/.ssh/id_rsa"

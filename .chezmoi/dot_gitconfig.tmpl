@@ -1,0 +1,17 @@
+# Git 全局配置（由 chezmoi 管理）
+# 请在 .chezmoi.toml.local 或 .chezmoidata 中设置 git_user_name、git_user_email
+
+[user]
+	name = {{ .git_user_name | default "Your Name" }}
+	email = {{ .git_user_email | default "your.email@example.com" }}
+
+[core]
+	autocrlf = {{ if eq .chezmoi.os "windows" }}true{{ else }}input{{ end }}
+	longpaths = {{ if eq .chezmoi.os "windows" }}true{{ else }}false{{ end }}
+	color.ui = auto
+
+[http "https://github.com"]
+	proxy = {{ .proxy | default "http://127.0.0.1:7890" }}
+
+[https "https://github.com"]
+	proxy = {{ .proxy | default "http://127.0.0.1:7890" }}

@@ -13,6 +13,15 @@
     # 注意：exec 函数在模板解析时执行外部命令，可能导致卡住
     # 改为在运行时通过脚本检测，这里只设置默认值
     package_manager = "{{ if eq .chezmoi.os \"linux\" }}pacman{{ else if eq .chezmoi.os \"darwin\" }}brew{{ else if eq .chezmoi.os \"windows\" }}winget{{ else }}unknown{{ end }}"
+    # Git 全局配置（请在 .chezmoi.toml.local 或 env 中设置真实值，避免敏感信息进仓库）
+    git_user_name = ""
+    git_user_email = ""
+    # Windows 下 SSH ProxyCommand 使用的 connect.exe 路径（若 Git 安装在其他盘符请修改）
+    windows_git_connect_path = "C:/Program Files/Git/mingw64/bin/connect.exe"
+    # macOS 下 SSH ProxyCommand 使用的 connect 路径（需先 brew install connect；Intel Mac 多为 /usr/local/bin/connect）
+    macos_connect_path = "/opt/homebrew/bin/connect"
+    # SSH IdentityFile（如使用 id_ed25519 可在此修改）
+    identity_file = "~/.ssh/id_rsa"
 
 [git]
     autoCommit = false

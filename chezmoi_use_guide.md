@@ -622,6 +622,26 @@ ps aux | grep ssh
 - **配置管理**：只在需要新增/修改主机配置时才打开 lazyssh
 - **后台运行**：使用 `ssh -f -N 主机名` 只开启隧道，不占用终端
 
+## Git 全局配置
+
+Git 全局配置（`~/.gitconfig`）由 `dot_gitconfig.tmpl` 管理，包含：
+
+- **[user]**：`name`、`email`（需在 data 或 `.chezmoi.toml.local` 中设置 `git_user_name`、`git_user_email`，避免敏感信息进仓库）
+- **[core]**：`autocrlf`（Windows 为 true，其余为 input）、`longpaths`（仅 Windows true）、`color.ui`
+- **GitHub 代理**：`[http "https://github.com"]` / `[https "https://github.com"]` 的 `proxy`，使用 data 中的 `proxy`
+
+**不纳入模板的项**（请在本机或单独配置中设置）：`safe.directory`、`credential.*`、`filter.lfs.*` 等机器/用户私有项。
+
+**设置姓名与邮箱**：在仓库根目录创建或编辑 `.chezmoi.toml.local`（该文件已被忽略，不会提交），添加：
+
+```toml
+[data]
+    git_user_name = "你的姓名"
+    git_user_email = "your.email@example.com"
+```
+
+然后执行 `chezmoi apply -v` 即可更新 `~/.gitconfig`。
+
 ## 代理配置
 
 ### 环境变量
