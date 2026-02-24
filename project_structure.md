@@ -59,7 +59,11 @@ script_tool_and_config/
 │   │   │   ├── demo_heredoc.sh
 │   │   │   ├── extract_text_between_markers.sh
 │   │   │   ├── check_and_fix_encoding.sh  # 检查文件编码和换行符
-│   │   │   └── ensure_lf_line_endings.sh  # 规范化换行符
+│   │   │   ├── ensure_lf_line_endings.sh  # 规范化换行符
+│   │   │   ├── backup_ssh_config.sh       # 备份 ~/.ssh/config
+│   │   │   ├── backup_git_config.sh       # 备份 ~/.gitconfig
+│   │   │   ├── setup_ssh_config.sh        # 通过 chezmoi 部署 SSH 配置
+│   │   │   └── SSH_CONFIG_SETUP.md        # SSH 配置管理说明
 │   │   │
 │   │   ├── project_tools/            # 项目生成和管理工具
 │   │   │   ├── create_c_source_file.sh

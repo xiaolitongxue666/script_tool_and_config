@@ -4,11 +4,12 @@
 
 ### 首次纳入管理（当前系统）
 
-如果当前系统已有 SSH 配置，按以下步骤将其纳入 chezmoi 管理：
+如果当前系统已有 SSH 配置，按以下步骤将其纳入 chezmoi 管理。**部署前建议同时备份 SSH 与 Git 配置**（Git 全局配置由 `dot_gitconfig.tmpl` 管理，应用前建议备份 `~/.gitconfig`）：
 
 ```bash
-# 1. 备份现有配置
+# 1. 备份现有配置（SSH + Git）
 ./scripts/common/utils/backup_ssh_config.sh
+./scripts/common/utils/backup_git_config.sh
 
 # 2. 将配置纳入 chezmoi 管理
 export CHEZMOI_SOURCE_DIR="$(pwd)/.chezmoi"
@@ -29,7 +30,7 @@ git push
 
 ### 新系统部署
 
-在新系统上部署 SSH 配置：
+在新系统上部署 SSH 配置。应用前建议备份 `~/.ssh/config` 与 `~/.gitconfig`（执行 `backup_ssh_config.sh` 与 `backup_git_config.sh`）：
 
 ```bash
 # 使用部署脚本（推荐）
@@ -74,7 +75,7 @@ chezmoi apply ~/.ssh/config
 - **macOS**：系统 nc 无代理转发能力，需先安装 `connect`（`brew install connect`，或首次 `chezmoi apply` 时由 `run_once_install-connect` 自动安装）；路径由 data 中 `macos_connect_path` 指定。
 - **Linux**：ProxyCommand 使用 `nc -X connect -x ...`，需安装 netcat-openbsd（或发行版等价包）；若报错请安装后重试。
 
-若当前已有 `~/.ssh/config`，请先备份再应用或手动合并模板内容。
+若当前已有 `~/.ssh/config`，请先备份再应用或手动合并模板内容。Git 全局配置由 `dot_gitconfig.tmpl` 管理，应用前建议备份 `~/.gitconfig`（可使用 `./scripts/common/utils/backup_git_config.sh`）。
 
 ## 更多信息
 

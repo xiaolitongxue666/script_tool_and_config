@@ -397,11 +397,12 @@ SSH 配置文件（`~/.ssh/config`）已纳入 chezmoi 管理，可以通过 laz
 
 ### 首次纳入管理
 
-如果当前系统已有 SSH 配置，需要先备份再纳入管理：
+如果当前系统已有 SSH 配置，需要先备份再纳入管理。应用前建议同时备份 `~/.gitconfig`（Git 全局配置由 `dot_gitconfig.tmpl` 管理）：
 
 ```bash
-# 1. 备份现有配置
+# 1. 备份现有配置（SSH + Git）
 ./scripts/common/utils/backup_ssh_config.sh
+./scripts/common/utils/backup_git_config.sh
 
 # 2. 将配置纳入 chezmoi 管理
 export CHEZMOI_SOURCE_DIR="$(pwd)/.chezmoi"
@@ -479,11 +480,13 @@ chezmoi status ~/.ssh/config
 #### 手动备份
 
 ```bash
-# 使用备份脚本
+# 使用备份脚本（SSH + Git）
 ./scripts/common/utils/backup_ssh_config.sh
+./scripts/common/utils/backup_git_config.sh
 
 # 或手动备份
 cp ~/.ssh/config ~/.ssh/config.backup.$(date +%Y%m%d_%H%M%S)
+cp ~/.gitconfig ~/.gitconfig.backup.$(date +%Y%m%d_%H%M%S)
 ```
 
 #### 恢复备份
@@ -495,6 +498,9 @@ ls -lh ~/.ssh/config.backup.*
 # 恢复指定备份
 cp ~/.ssh/config.backup.YYYYMMDD_HHMMSS ~/.ssh/config
 chmod 600 ~/.ssh/config
+
+# 恢复 Git 配置（若有备份）
+cp ~/.gitconfig.backup.YYYYMMDD_HHMMSS ~/.gitconfig
 ```
 
 ### 安全注意事项

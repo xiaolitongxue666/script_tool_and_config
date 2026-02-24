@@ -33,7 +33,7 @@ bash scripts/chezmoi/install_chezmoi.sh
 # 2. 设置源状态目录
 export CHEZMOI_SOURCE_DIR="$(pwd)/.chezmoi"
 
-# 3. 应用所有配置
+# 3. 应用所有配置（首次应用前建议备份 ~/.ssh/config 与 ~/.gitconfig，参见 scripts/common/utils 下 backup_ssh_config.sh、backup_git_config.sh）
 chezmoi apply -v
 ```
 

@@ -648,8 +648,9 @@ SSH 配置文件（`~/.ssh/config`）已纳入 chezmoi 管理，可以通过 laz
 **首次纳入管理（当前系统）：**
 
 ```bash
-# 1. 备份现有配置
+# 1. 备份现有配置（SSH + Git）
 ./scripts/common/utils/backup_ssh_config.sh
+./scripts/common/utils/backup_git_config.sh
 
 # 2. 将配置纳入 chezmoi 管理
 export CHEZMOI_SOURCE_DIR="$(pwd)/.chezmoi"
@@ -669,6 +670,8 @@ git push
 ```
 
 **新系统部署：**
+
+部署前建议备份 `~/.ssh/config` 与 `~/.gitconfig`（执行 `backup_ssh_config.sh`、`backup_git_config.sh`）：
 
 ```bash
 # 1. 确保 ~/.ssh 目录存在
