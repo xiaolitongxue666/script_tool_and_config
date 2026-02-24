@@ -2,6 +2,8 @@
 # GitHub 走 443 端口，可选经代理（Clash 等）；参考: clash代理下git-ssh走443配置.md
 
 # --- GitHub：ssh.github.com:443，经代理时使用 ProxyCommand ---
+# macOS：ProxyCommand 必须写 connect 的绝对路径，否则 GUI（Obsidian、Finder 等）因 PATH 不含 /usr/local/bin 会报 exec: connect: not found
+# -H = HTTP 代理（如 Clash），-S = SOCKS；由 macos_proxy_connect_opt 控制
 Host github.com
     HostName ssh.github.com
     Port 443
@@ -10,7 +12,7 @@ Host github.com
 {{- if eq .chezmoi.os "windows" }}
     ProxyCommand "{{ .windows_git_connect_path | default "C:/Program Files/Git/mingw64/bin/connect.exe" }}" -S {{ .proxy_host | default "127.0.0.1" }}:{{ .proxy_port | default "7890" }} %h %p
 {{- else if eq .chezmoi.os "darwin" }}
-    ProxyCommand "{{ .macos_connect_path | default "/opt/homebrew/bin/connect" }}" -S {{ .proxy_host | default "127.0.0.1" }}:{{ .proxy_port | default "7890" }} %h %p
+    ProxyCommand "{{ .macos_connect_path | default "/opt/homebrew/bin/connect" }}" {{ .macos_proxy_connect_opt | default "-S" }} {{ .proxy_host | default "127.0.0.1" }}:{{ .proxy_port | default "7890" }} %h %p
 {{- else if eq .chezmoi.os "linux" }}
     ProxyCommand nc -X connect -x {{ .proxy_host | default "127.0.0.1" }}:{{ .proxy_port | default "7890" }} %h %p
 {{- end }}

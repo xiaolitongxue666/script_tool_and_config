@@ -395,6 +395,16 @@ SSH 配置文件（`~/.ssh/config`）已纳入 chezmoi 管理，可以通过 laz
 - ✅ 私有仓库：可以安全地纳入管理
 - ⚠️ 如果未来需要公开仓库，考虑使用 chezmoi 加密功能或模板变量
 
+### GitHub 走 443 与代理（多平台）
+
+模板中 GitHub 使用 `ssh.github.com:443`，经代理时按系统使用不同 ProxyCommand：
+
+- **Windows**：使用 Git 自带的 `connect.exe`（路径由 `windows_git_connect_path` 指定）。
+- **macOS**：必须使用 **connect 的绝对路径**（`macos_connect_path`）：Apple Silicon 多为 `/opt/homebrew/bin/connect`，Intel 多为 `/usr/local/bin/connect`。若只写 `connect`，从 Dock/Spotlight 启动的 GUI（如 Obsidian Git）会因 PATH 不含该目录而报 `exec: connect: not found` 导致 push 失败。代理类型由 `macos_proxy_connect_opt` 控制（`-H` HTTP / `-S` SOCKS）。
+- **Linux**：使用 `nc -X connect -x ...`，需 netcat-openbsd。
+
+详见 `scripts/common/utils/SSH_CONFIG_SETUP.md`。
+
 ### 首次纳入管理
 
 如果当前系统已有 SSH 配置，需要先备份再纳入管理。应用前建议同时备份 `~/.gitconfig`（Git 全局配置由 `dot_gitconfig.tmpl` 管理）：

@@ -18,8 +18,11 @@
     git_user_email = ""
     # Windows 下 SSH ProxyCommand 使用的 connect.exe 路径（若 Git 安装在其他盘符请修改）
     windows_git_connect_path = "C:/Program Files/Git/mingw64/bin/connect.exe"
-    # macOS 下 SSH ProxyCommand 使用的 connect 路径（需先 brew install connect；Intel Mac 多为 /usr/local/bin/connect）
+    # macOS 下 SSH ProxyCommand 必须使用 connect 的绝对路径（GUI 如 Obsidian 不继承 shell PATH，否则会 exec: connect: not found）
+    # Apple Silicon 默认 /opt/homebrew/bin/connect；Intel/旧 Homebrew 请在 .chezmoi.toml.local 中设为 "/usr/local/bin/connect"
     macos_connect_path = "/opt/homebrew/bin/connect"
+    # macOS 经代理时：-H = HTTP 代理（Clash 等），-S = SOCKS；按本机代理类型在 .chezmoi.toml.local 中可覆盖
+    macos_proxy_connect_opt = "-S"
     # SSH IdentityFile（如使用 id_ed25519 可在此修改）
     identity_file = "~/.ssh/id_rsa"
 

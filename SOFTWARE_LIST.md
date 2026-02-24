@@ -246,7 +246,7 @@ SSH 配置文件（`~/.ssh/config`）已纳入 chezmoi 管理；Git 全局配置
 - **SSH 源文件**：`.chezmoi/dot_ssh/config.tmpl`（模板，含 GitHub 443 及可选 ProxyCommand）
 - **Git 源文件**：`.chezmoi/dot_gitconfig.tmpl`
 - **目标位置**：`~/.ssh/config`、`~/.gitconfig`
-- **ProxyCommand 前置**：Windows 使用 Git 自带 connect.exe；macOS 需 `brew install connect`（可由 run_once_install-connect 自动安装）；Linux 需 nc/netcat-openbsd
+- **ProxyCommand 前置**：Windows 使用 Git 自带 connect.exe（绝对路径）；macOS 需 `brew install connect` 且 **必须写 connect 的绝对路径**（`/opt/homebrew/bin/connect` 或 `/usr/local/bin/connect`），否则 GUI 如 Obsidian Git 会报 connect: not found；Linux 需 nc/netcat-openbsd
 - **权限**：SSH config 自动设置为 600
 - **备份**：部署/修改前建议备份 `~/.ssh/config` 与 `~/.gitconfig`，使用 `scripts/common/utils/backup_ssh_config.sh`、`scripts/common/utils/backup_git_config.sh`
 - **部署**：使用 `scripts/common/utils/setup_ssh_config.sh` 部署 SSH 配置
