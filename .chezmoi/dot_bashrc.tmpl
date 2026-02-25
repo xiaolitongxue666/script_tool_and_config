@@ -41,6 +41,35 @@ if command -v bat &> /dev/null; then
 fi
 
 # ============================================
+# fnm (Fast Node Manager) - Node.js 版本管理
+# ============================================
+# 参考: https://github.com/Schniz/fnm
+# fnm 会自动处理 .node-version/.nvmrc 的自动切换（Linux/Windows 下 bash 共用）
+if [ -d "{{ .chezmoi.homeDir }}/.local/share/fnm" ]; then
+    export PATH="{{ .chezmoi.homeDir }}/.local/share/fnm:$PATH"
+    if command -v fnm >/dev/null 2>&1; then
+        eval "$(fnm env --shell=bash --use-on-cd)"
+        if [ -f "$HOME/.node-version" ]; then
+            NODE_VERSION=$(cat "$HOME/.node-version" 2>/dev/null | tr -d '\n\r' | sed 's/^v//')
+            if [ -n "$NODE_VERSION" ]; then
+                fnm use "$NODE_VERSION" 2>/dev/null || true
+            fi
+        fi
+    fi
+elif [ -d "{{ .chezmoi.homeDir }}/.fnm" ]; then
+    export PATH="{{ .chezmoi.homeDir }}/.fnm:$PATH"
+    if command -v fnm >/dev/null 2>&1; then
+        eval "$(fnm env --shell=bash --use-on-cd)"
+        if [ -f "$HOME/.node-version" ]; then
+            NODE_VERSION=$(cat "$HOME/.node-version" 2>/dev/null | tr -d '\n\r' | sed 's/^v//')
+            if [ -n "$NODE_VERSION" ]; then
+                fnm use "$NODE_VERSION" 2>/dev/null || true
+            fi
+        fi
+    fi
+fi
+
+# ============================================
 # 平台特定配置
 # ============================================
 
@@ -64,10 +93,30 @@ if [[ "$OS" == "macos" ]]; then
     export GEM_HOME=$HOME/.gem
     export GEM_PATH=$HOME/.gem
 
-    # NVM
-    export NVM_DIR="$HOME/.nvm"
-    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-    [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+    # fnm (Fast Node Manager) - 与 dot_bash_profile 一致，保持模板语义统一
+    if [ -d "{{ .chezmoi.homeDir }}/.local/share/fnm" ]; then
+        export PATH="{{ .chezmoi.homeDir }}/.local/share/fnm:$PATH"
+        if command -v fnm >/dev/null 2>&1; then
+            eval "$(fnm env --shell=bash --use-on-cd)"
+            if [ -f "$HOME/.node-version" ]; then
+                NODE_VERSION=$(cat "$HOME/.node-version" 2>/dev/null | tr -d '\n\r' | sed 's/^v//')
+                if [ -n "$NODE_VERSION" ]; then
+                    fnm use "$NODE_VERSION" 2>/dev/null || true
+                fi
+            fi
+        fi
+    elif [ -d "{{ .chezmoi.homeDir }}/.fnm" ]; then
+        export PATH="{{ .chezmoi.homeDir }}/.fnm:$PATH"
+        if command -v fnm >/dev/null 2>&1; then
+            eval "$(fnm env --shell=bash --use-on-cd)"
+            if [ -f "$HOME/.node-version" ]; then
+                NODE_VERSION=$(cat "$HOME/.node-version" 2>/dev/null | tr -d '\n\r' | sed 's/^v//')
+                if [ -n "$NODE_VERSION" ]; then
+                    fnm use "$NODE_VERSION" 2>/dev/null || true
+                fi
+            fi
+        fi
+    fi
 
     # Cargo
     if [ -f "$HOME/.cargo/env" ]; then
