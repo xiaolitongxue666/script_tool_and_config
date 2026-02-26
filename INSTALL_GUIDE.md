@@ -27,6 +27,7 @@
    - `ssh -T git@github.com`：应出现 “Hi xxx! You've successfully authenticated” 或类似成功提示。
    - 若使用宿主机密钥：软链接 `~/.ssh` → `/mnt/c/Users/<User>/.ssh` 时需在 `/etc/wsl.conf` 设置 `[automount] options = "metadata"` 并执行 `chmod 600 ~/.ssh/id_rsa`；若用 npiperelay，需确保 `.bashrc`/`.zprofile` 中建立 `SSH_AUTH_SOCK` 的 socat 命令在登录时执行。自检脚本：`./scripts/linux/system_basic_env/verify_wsl_ssh.sh`。
    - **SSH 走 443 与代理**：项目内 `~/.ssh/config` 已配置 GitHub 使用 `ssh.github.com:443`（避免代理/防火墙封 22 端口）。WSL 下代理在宿主机，需：① 安装 `connect-proxy`（`sudo apt install connect-proxy`；或执行 `./install.sh` 时由 run_once_install-git 自动安装）；② 使用 `./install.sh` 时脚本会自动检测 WSL 并设置 PROXY、导出 PROXY_HOST/PROXY_PORT，apply 后 `~/.ssh/config` 会使用宿主机地址；若直接执行 `chezmoi apply` 则需手动 `export PROXY_HOST=$(cat /etc/resolv.conf | grep nameserver | awk '{print $2}')` 或在 `~/.config/chezmoi/chezmoi.toml.local` 中设置 `proxy_host = "192.168.x.x"`（与 `h_proxy` 使用的 IP 一致）；③ Windows 端代理开启「允许局域网连接」。
+   - **提示 "<no hostip for proxy command>"**：经 ProxyCommand 连接时，SSH 可能显示 `The authenticity of host '[ssh.github.com]:443 (<no hostip for proxy command>)'`，多为代理上下文下的显示问题，认证成功可忽略。若 **WSL 内 ~/.ssh 软链接到宿主机**，则读到的 config 为 Windows 版，其中 127.0.0.1 在 WSL 中指向本机无法连到宿主机代理；需在 WSL 内使用独立 config 并设置 ProxyCommand 为宿主机 IP，或运行 `./install.sh` 让 chezmoi 管理 WSL 独立 ~/.ssh。
 
 2. **可选开代理**：`h_proxy`（对 run_once 内 HTTPS、子模块 SSH 失败时的 HTTPS 回退、以及 SSH 经 ProxyCommand 走代理均有帮助）。
 
@@ -76,6 +77,14 @@
        ```
 
 - **字体**：FiraMono Nerd Font 由 `run_once_install-nerd-fonts.sh` 安装（Linux 下为 `/usr/local/share/fonts/FiraMono-NerdFont`）。下载自 [GitHub nerd-fonts  releases](https://github.com/ryanoasis/nerd-fonts/releases)，**下载若失败可设置代理**（如 `export http_proxy=http://127.0.0.1:7890` 后再次 `chezmoi apply`，或手动执行渲染后的脚本）。更多字体与安装方式见 [nerd-fonts](https://github.com/ryanoasis/nerd-fonts) 与 [nerdfonts.com 下载页](https://www.nerdfonts.com/font-downloads)。验证：`fc-list | grep -i Fira` 或查看 [INSTALL_STATUS.md](scripts/linux/system_basic_env/INSTALL_STATUS.md) 第 8 节。
+
+### Cursor/VS Code 连接 WSL 后终端无 Starship 美化
+
+在宿主机 Alacritty 中执行 `wsl` 会得到登录 shell 并加载 zsh/Starship，而 Cursor「Connect to WSL」打开的终端可能默认使用 bash 且为非登录 shell，因此无 Starship。可选做法：
+
+1. **设置默认 Shell 为 zsh**：在 WSL 中执行 `chsh -s $(command -v zsh)` 并重新打开 Cursor 的 WSL 终端；或在该发行版中确保默认 shell 为 zsh，使 Cursor 继承。
+2. **在 Cursor 中指定 WSL 终端 profile**：设置中将 `terminal.integrated.defaultProfile.linux`（或 WSL 对应项）设为 zsh（若已配置 zsh profile）。
+3. **由 .bashrc 在交互式下切到 zsh**：项目 Linux 用 `.bashrc` 模板在「交互式且非 Cursor Agent」时自动 `exec zsh`，这样 Cursor 普通终端会进入 zsh 并加载 Starship；Cursor Agent 模式仍使用 bash 以免影响其脚本行为。
 
 ### WSL 下 Git 访问 GitHub 与代理
 

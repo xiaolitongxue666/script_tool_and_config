@@ -6,6 +6,7 @@
 # macOS：ProxyCommand 必须写 connect 的绝对路径，否则 GUI 会报 exec: connect: not found；-S = SOCKS，-H = HTTP
 # Linux/WSL：WSL 下 127.0.0.1 指向 WSL 自身，代理在宿主机，需设置 proxy_host 为宿主机 IP（/etc/resolv.conf 的 nameserver）
 #            或在应用前 export PROXY_HOST=$(cat /etc/resolv.conf | grep nameserver | awk '{print $2}')；需安装 connect-proxy（apt: connect-proxy）
+#            若 WSL 将 ~/.ssh 软链接到宿主机（/mnt/c/Users/.../.ssh），则本模板管理的是 WSL 内独立 ~/.ssh，不会覆盖软链接目标；此时需在 WSL 内单独维护 config 或使用本仓库 apply 的独立 ~/.ssh，并设置 ProxyCommand 为宿主机 IP。
 Host github.com
     HostName ssh.github.com
     Port 443

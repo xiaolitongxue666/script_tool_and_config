@@ -193,6 +193,10 @@ elif [[ "$OS" == "linux" ]]; then
             fi
         fi
     fi
+    # Cursor/VS Code 连接 WSL 时默认可能启动 bash；交互式下自动切到 zsh 以加载 Starship（Agent 模式保留 bash）
+    if [[ -o interactive ]] && [[ -z "${CURSOR_AGENT:-}" ]] && command -v zsh &>/dev/null; then
+        exec zsh
+    fi
 fi
 {{- end -}}
 

@@ -96,7 +96,7 @@
 - `ssh-add -l`：应列出至少一个密钥；若为 “Could not open a connection to your authentication agent”，说明 agent 未启动或未转发。
 - `ssh -T git@github.com`：应出现 “Hi xxx! You've successfully authenticated” 或类似成功提示。
 
-宿主机密钥：软链接 `~/.ssh` → `/mnt/c/Users/<User>/.ssh` 时需 `/etc/wsl.conf` 的 `[automount] options = "metadata"` 并 `chmod 600 ~/.ssh/id_rsa`；npiperelay 需在 `.bashrc`/`.zprofile` 中建立 `SSH_AUTH_SOCK` 的 socat 命令在登录时执行。一键自检：`./scripts/linux/system_basic_env/verify_wsl_ssh.sh`。
+宿主机密钥：软链接 `~/.ssh` → `/mnt/c/Users/<User>/.ssh` 时需 `/etc/wsl.conf` 的 `[automount] options = "metadata"` 并 `chmod 600 ~/.ssh/id_rsa`；npiperelay 需在 `.bashrc`/`.zprofile` 中建立 `SSH_AUTH_SOCK` 的 socat 命令在登录时执行。一键自检：`./scripts/linux/system_basic_env/verify_wsl_ssh.sh`。若出现 `The authenticity of host '[ssh.github.com]:443 (<no hostip for proxy command>)'`，多为 ProxyCommand 显示问题，认证成功可忽略；若 ~/.ssh 为软链接且 ProxyCommand 使用 127.0.0.1，在 WSL 中无法连到宿主机代理，需在 WSL 内使用独立 config 并设置宿主机 IP（见 INSTALL_GUIDE）。
 
 ### 通用验证命令
 
