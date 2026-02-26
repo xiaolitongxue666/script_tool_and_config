@@ -66,6 +66,8 @@ else
             winget install --id="$pkg" -e --accept-source-agreements --accept-package-agreements
         fi
     }
+    # 无 common_install 时无法做版本检查，视为需要安装/升级
+    function is_nvim_version_ge_0_11() { return 1; }
 fi
 
 # 设置代理
@@ -74,19 +76,76 @@ setup_proxy "${PROXY:-{{ env "http_proxy" | default "http://127.0.0.1:7890" }}}"
 # 检测操作系统和包管理器
 detect_os_and_package_manager || exit 1
 
-# 检查 Neovim 是否已安装
-if command -v nvim &> /dev/null; then
-    echo "[INFO] Neovim 已安装: $(nvim --version | head -n 1)"
+# 检查 Neovim 是否已安装且版本 >= 0.11.0（本仓库配置要求）
+if command -v nvim &> /dev/null && is_nvim_version_ge_0_11; then
+    echo "[INFO] Neovim 已安装且满足版本要求 (>= 0.11.0): $(nvim --version | head -n 1)"
     exit 0
 fi
 
-echo "[INFO] 开始安装 Neovim..."
+# 未安装或版本过低，需要安装或升级
+if command -v nvim &> /dev/null; then
+    echo "[INFO] 当前 Neovim 版本低于 0.11.0，将尝试升级: $(nvim --version | head -n 1)"
+else
+    echo "[INFO] 开始安装 Neovim (需要 >= 0.11.0)..."
+fi
 
-# 根据平台安装 Neovim
+# Neovim 0.11+ 官方 release 下载（Linux 回退用）
+NEOVIM_RELEASE_VERSION="v0.11.5"
+NEOVIM_RELEASE_BASE="https://github.com/neovim/neovim-releases/releases/download/${NEOVIM_RELEASE_VERSION}"
+
+install_neovim_linux_tarball() {
+    local dest_dir="${HOME}/.local/share/nvim-install"
+    local bin_dir="${HOME}/.local/bin"
+    mkdir -p "$dest_dir" "$bin_dir"
+    local tarball="nvim-linux-x86_64.tar.gz"
+    local url="${NEOVIM_RELEASE_BASE}/${tarball}"
+    local tmp_file="${dest_dir}/${tarball}"
+    echo "[INFO] 从 GitHub releases 下载 Neovim ${NEOVIM_RELEASE_VERSION} ..."
+    if command -v curl &> /dev/null; then
+        curl -sL -o "$tmp_file" "$url" || return 1
+    elif command -v wget &> /dev/null; then
+        wget -q -O "$tmp_file" "$url" || return 1
+    else
+        echo "[ERROR] 需要 curl 或 wget 下载"
+        return 1
+    fi
+    tar xzf "$tmp_file" -C "$dest_dir" || return 1
+    rm -f "$tmp_file"
+    ln -sf "${dest_dir}/nvim-linux-x86_64/bin/nvim" "${bin_dir}/nvim"
+    export PATH="${bin_dir}:${PATH}"
+    echo "[INFO] 已安装到 ${bin_dir}/nvim，请确保 ${bin_dir} 在 PATH 中"
+}
+
+install_neovim_linux_deb() {
+    local dest_dir="${HOME}/.local/share/nvim-install"
+    mkdir -p "$dest_dir"
+    local deb="nvim-linux-x86_64.deb"
+    local url="${NEOVIM_RELEASE_BASE}/${deb}"
+    local tmp_file="${dest_dir}/${deb}"
+    echo "[INFO] 从 GitHub releases 下载 Neovim ${NEOVIM_RELEASE_VERSION} (.deb) ..."
+    if command -v curl &> /dev/null; then
+        curl -sL -o "$tmp_file" "$url" || return 1
+    elif command -v wget &> /dev/null; then
+        wget -q -O "$tmp_file" "$url" || return 1
+    else
+        echo "[ERROR] 需要 curl 或 wget 下载"
+        return 1
+    fi
+    # 官方 .deb 与 Ubuntu/Debian 的 neovim/neovim-runtime 文件冲突，先移除再安装
+    sudo apt-get remove -y neovim neovim-runtime 2>/dev/null || true
+    sudo apt-get install -y "$tmp_file" || return 1
+    rm -f "$tmp_file"
+}
+
+# 根据平台安装或升级 Neovim 到 0.11+
 case "$PLATFORM" in
     macos)
         if [[ "$PACKAGE_MANAGER" == "brew" ]]; then
-            install_package "neovim"
+            if command -v nvim &> /dev/null; then
+                brew upgrade neovim 2>/dev/null || brew install neovim
+            else
+                install_package "neovim"
+            fi
         else
             echo "[ERROR] macOS 需要 Homebrew 来安装 Neovim"
             exit 1
@@ -94,26 +153,41 @@ case "$PLATFORM" in
         ;;
     linux)
         if [[ "$PACKAGE_MANAGER" == "pacman" ]]; then
-            install_package "neovim"
+            install_package "neovim" 2>/dev/null || true
+            if ! is_nvim_version_ge_0_11; then
+                install_neovim_linux_tarball || echo "[WARNING] tarball 安装失败，请手动从 https://github.com/neovim/neovim-releases/releases 安装 0.11+"
+            fi
         elif [[ "$PACKAGE_MANAGER" == "apt" ]]; then
-            install_package "neovim"
-        elif [[ "$PACKAGE_MANAGER" == "dnf" ]]; then
-            install_package "neovim"
-        elif [[ "$PACKAGE_MANAGER" == "yum" ]]; then
-            # CentOS/RHEL 7 可能需要 EPEL 仓库
-            install_package "neovim" || {
-                echo "[WARNING] 通过 yum 安装失败，可能需要启用 EPEL 仓库"
-                echo "[INFO] 尝试: sudo yum install epel-release"
-            }
+            if add-apt-repository -y ppa:neovim-ppa/unstable 2>/dev/null; then
+                sudo apt-get update && sudo apt-get install -y neovim 2>/dev/null || true
+            fi
+            if ! is_nvim_version_ge_0_11; then
+                install_package "neovim" 2>/dev/null || true
+            fi
+            if ! is_nvim_version_ge_0_11; then
+                install_neovim_linux_deb || echo "[WARNING] .deb 安装失败，请手动安装 Neovim 0.11+"
+            fi
+        elif [[ "$PACKAGE_MANAGER" == "dnf" ]] || [[ "$PACKAGE_MANAGER" == "yum" ]]; then
+            if [[ "$PACKAGE_MANAGER" == "yum" ]]; then
+                install_package "neovim" 2>/dev/null || {
+                    echo "[WARNING] 通过 yum 安装失败，可能需要启用 EPEL 仓库"
+                }
+            else
+                install_package "neovim" 2>/dev/null || true
+            fi
+            if ! is_nvim_version_ge_0_11; then
+                install_neovim_linux_tarball || echo "[WARNING] tarball 安装失败，请手动安装 Neovim 0.11+"
+            fi
         fi
         ;;
     windows)
         if [[ "$PACKAGE_MANAGER" == "winget" ]]; then
-            install_package "Neovim.Neovim"
+            install_package "Neovim.Neovim" 2>/dev/null || true
         elif [[ "$PACKAGE_MANAGER" == "pacman" ]]; then
-            install_package "neovim"
-        else
-            echo "[WARNING] Windows 上建议使用 winget 或 MSYS2 安装 Neovim"
+            install_package "neovim" 2>/dev/null || true
+        fi
+        if ! is_nvim_version_ge_0_11 2>/dev/null; then
+            echo "[WARNING] 当前安装的 Neovim 可能低于 0.11.0，请从 https://github.com/neovim/neovim-releases/releases 手动安装 0.11+"
         fi
         ;;
     *)
@@ -122,13 +196,13 @@ case "$PLATFORM" in
         ;;
 esac
 
-if command -v nvim &> /dev/null; then
-    echo "[SUCCESS] Neovim 安装成功: $(nvim --version | head -n 1)"
+if is_nvim_version_ge_0_11; then
+    echo "[SUCCESS] Neovim 安装/升级成功 (>= 0.11.0): $(nvim --version | head -n 1)"
     echo "[INFO] Neovim 配置文件位于: ~/.config/nvim/"
     echo "[INFO] 如果使用 Git Submodule 管理配置，请运行:"
     echo "       git submodule update --init dotfiles/nvim"
 else
-    echo "[WARNING] Neovim 可能未正确安装，请手动检查"
+    echo "[WARNING] Neovim 可能未正确安装或版本仍低于 0.11.0，请检查 PATH 或手动从 https://github.com/neovim/neovim-releases/releases 安装"
 fi
 {{- end -}}
 

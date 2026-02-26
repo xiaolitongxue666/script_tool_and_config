@@ -1,6 +1,8 @@
 #!/bin/bash
 
-set -x 
+# 安装 neovim（Arch 仓库版本可能低于 0.11）
+# 本仓库 Neovim 配置要求 0.11.0+；推荐通过 chezmoi run_once_install-neovim 安装以得到 0.11+
+set -x
 
 # 安装 neovim
 pacman -S --noconfirm neovim

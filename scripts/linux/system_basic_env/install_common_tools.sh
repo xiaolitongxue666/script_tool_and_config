@@ -790,11 +790,11 @@ install_fnm_official() {
 }
 
 
-# 安装 Neovim
+# 安装 Neovim 配置（不安装二进制；要求 Neovim 0.11+，由 run_once_install-neovim 保证）
 install_neovim() {
     log_info "Installing Neovim"
 
-    # Neovim 应该已经通过 pacman 安装，这里主要是配置
+    # Neovim 应该已经通过 pacman 或 run_once_install-neovim 安装，这里主要是配置
     if ! command -v nvim >/dev/null 2>&1; then
         log_warning "Neovim not installed, will be installed in install_packages"
     else

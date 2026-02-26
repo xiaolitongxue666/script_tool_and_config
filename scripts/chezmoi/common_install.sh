@@ -106,6 +106,33 @@ detect_os_and_package_manager() {
 }
 
 # ============================================
+# Neovim 版本检查（与 dotfiles/nvim 配置最低要求一致）
+# ============================================
+
+# 检查已安装的 Neovim 是否 >= 0.11.0（本仓库配置要求）
+# 返回 0 表示满足，返回 1 表示未安装、解析失败或版本低于 0.11.0
+is_nvim_version_ge_0_11() {
+    if ! command -v nvim &> /dev/null; then
+        return 1
+    fi
+    local first_line
+    first_line=$(nvim --version 2>/dev/null | head -n 1) || return 1
+    # 解析 "NVIM v0.11.0" 或 "NVIM v0.11" 格式，提取 major.minor
+    local major minor
+    major=$(echo "$first_line" | sed -n 's/.*[vV]\([0-9][0-9]*\)\.\([0-9][0-9]*\).*/\1/p')
+    minor=$(echo "$first_line" | sed -n 's/.*[vV]\([0-9][0-9]*\)\.\([0-9][0-9]*\).*/\2/p')
+    [[ -z "$major" || -z "$minor" ]] && return 1
+    # >= 0.11.0: major>0 或 (major==0 且 minor>=11)
+    if [[ "$major" -gt 0 ]]; then
+        return 0
+    fi
+    if [[ "$minor" -ge 11 ]]; then
+        return 0
+    fi
+    return 1
+}
+
+# ============================================
 # 包安装函数
 # ============================================
 

@@ -17,9 +17,16 @@ set -e
 # 获取脚本所在目录
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="${CHEZMOI_PROJECT_ROOT:-$(cd "${SCRIPT_DIR}/../.." && pwd)}"
+COMMON_INSTALL="${PROJECT_ROOT}/scripts/chezmoi/common_install.sh"
 NVIM_SUBMODULE_DIR="${PROJECT_ROOT}/dotfiles/nvim"
 NVIM_INSTALL_SCRIPT="${NVIM_SUBMODULE_DIR}/install.sh"
 NVIM_CONFIG_DIR="{{ .chezmoi.homeDir }}/.config/nvim"
+
+# 加载 common_install 以使用 is_nvim_version_ge_0_11（可选）
+if [[ -f "${COMMON_INSTALL}" ]]; then
+    # shellcheck source=scripts/chezmoi/common_install.sh
+    source "${COMMON_INSTALL}"
+fi
 
 # 日志函数
 log_info() {
@@ -84,6 +91,13 @@ verify_nvim_prerequisites() {
     uv --version &>/dev/null || { log_error "uv 不可用"; exit 1; }
     fnm --version &>/dev/null || { log_error "fnm 不可用"; exit 1; }
     nvim --version &>/dev/null || { log_error "nvim 不可用"; exit 1; }
+    # 本仓库 Neovim 配置要求 0.11.0+（vim.lsp.config、nvim-notify 等）
+    if [[ -f "${COMMON_INSTALL}" ]] && type is_nvim_version_ge_0_11 &>/dev/null; then
+        is_nvim_version_ge_0_11 || {
+            log_error "Neovim 版本低于 0.11.0，本配置需要 0.11.0+。请先执行 run_once_install-neovim 完成安装/升级后再运行本脚本"
+            exit 1
+        }
+    fi
     log_success "前置校验通过"
 }
 
@@ -181,20 +195,13 @@ bootstrap_lazy_plugins() {
         git config --global https.https://github.com.proxy "${PROXY_URL}" 2>/dev/null || true
         log_info "已设置 Git GitHub 代理: ${PROXY_URL}"
     fi
-    log_info "引导 lazy.nvim 与插件（headless）..."
-    local timeout_sec="${NVIM_BOOTSTRAP_TIMEOUT:-300}"
-    if command -v timeout >/dev/null 2>&1; then
-        if timeout "${timeout_sec}" nvim --headless +qa 2>&1; then
-            log_success "lazy.nvim 与插件引导完成"
-        else
-            log_warning "headless 引导未在 ${timeout_sec}s 内完成或失败，首次启动 nvim 时会继续安装插件"
-        fi
+    # 使用 Lazy! sync 等待插件安装完成后再 +qa，避免仅 +qa 导致未等待安装就退出、一键安装流程卡住
+    # 参见 https://github.com/folke/lazy.nvim#-usage 中 "Lazy! sync" 会等待完成
+    log_info "引导 lazy.nvim 与插件（headless，完成后自动退出）..."
+    if nvim --headless "+Lazy! sync" +qa 2>&1; then
+        log_success "lazy.nvim 与插件引导完成"
     else
-        if nvim --headless +qa 2>&1; then
-            log_success "lazy.nvim 与插件引导完成"
-        else
-            log_warning "headless 引导失败，首次启动 nvim 时会继续安装插件"
-        fi
+        log_warning "headless 引导失败或部分插件未安装，首次启动 nvim 时会继续安装"
     fi
 }
 
