@@ -23,14 +23,27 @@ fi
 # ============================================
 # 代理配置（统一配置，参考 Git Bash）
 # ============================================
-# 默认代理地址（可通过环境变量 PROXY 覆盖）
-PROXY_URL="${PROXY:-{{ if .data.proxy }}{{ .data.proxy }}{{ else }}http://127.0.0.1:7890{{ end }}}"
+# 默认代理地址：Linux 下自动区分 WSL2 与原生（WSL2 中 127.0.0.1 无法访问宿主机，需用 /etc/resolv.conf 的 nameserver）
+if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    if grep -qEi "Microsoft|WSL" /proc/version 2>/dev/null || [[ -n "${WSL_DISTRO_NAME:-}" ]]; then
+        _proxy_host=$(cat /etc/resolv.conf 2>/dev/null | grep nameserver | awk '{print $2}')
+        PROXY_DEFAULT="http://${_proxy_host:-127.0.0.1}:7890"
+    else
+        PROXY_DEFAULT="http://127.0.0.1:7890"
+    fi
+else
+    PROXY_DEFAULT="{{ env "http_proxy" | default "http://127.0.0.1:7890" }}"
+fi
+PROXY_URL="${PROXY:-${http_proxy:-$PROXY_DEFAULT}}"
 
 # 代理控制别名（同时设置大小写环境变量，确保所有工具都能识别）
 # h_proxy: 快速启用代理
 alias h_proxy='export http_proxy='"$PROXY_URL"'; export https_proxy='"$PROXY_URL"'; export HTTP_PROXY='"$PROXY_URL"'; export HTTPS_PROXY='"$PROXY_URL"'; export all_proxy='"$PROXY_URL"'; export ALL_PROXY='"$PROXY_URL"'; echo "代理已启用: $PROXY_URL"'
 # unset_h: 关闭代理（清除所有代理环境变量）
 alias unset_h='unset http_proxy; unset https_proxy; unset HTTP_PROXY; unset HTTPS_PROXY; unset all_proxy; unset ALL_PROXY; echo "代理已关闭"'
+# WSL 常用命名：proxy_on / proxy_off 与 h_proxy / unset_h 等价
+alias proxy_on='h_proxy'
+alias proxy_off='unset_h'
 
 # 默认启用代理（可选，取消注释以自动启用）
 # h_proxy
@@ -102,7 +115,7 @@ elif [[ "$OS" == "windows" ]]; then
     # 代理配置（Windows 使用完整配置，参考 Git Bash）
     # 注意：Windows Git Bash 的详细代理配置在 .bash_profile 中
     # 这里只设置基本变量，.bash_profile 中有完整的 curl 包装函数
-    PROXY_URL="${PROXY:-{{ if .data.proxy }}{{ .data.proxy }}{{ else }}http://127.0.0.1:7890{{ end }}}"
+    PROXY_URL="${PROXY:-{{ env "http_proxy" | default "http://127.0.0.1:7890" }}}"
     export http_proxy="$PROXY_URL"
     export https_proxy="$PROXY_URL"
     export HTTP_PROXY="$PROXY_URL"
@@ -150,6 +163,11 @@ elif [[ "$OS" == "windows" ]]; then
 
 # Linux 特定配置
 elif [[ "$OS" == "linux" ]]; then
+    # 用户本地 bin（chezmoi、uv、lazygit 等）与 cargo，与 .zprofile 对齐，确保登录/自启动后可用
+    export PATH="{{ .chezmoi.homeDir }}/.local/bin:{{ .chezmoi.homeDir }}/.cargo/bin:$PATH"
+    # Debian/Ubuntu: bat 包提供 batcat，fd-find 包提供 fdfind，统一为 bat/fd 命令
+    if command -v batcat &>/dev/null && ! command -v bat &>/dev/null; then alias bat=batcat; fi
+    if command -v fdfind &>/dev/null && ! command -v fd &>/dev/null; then alias fd=fdfind; fi
     # fnm (Fast Node Manager) - Node.js 版本管理（仅 Linux，不影响 Windows）
     # 参考: https://github.com/Schniz/fnm
     if [ -d "{{ .chezmoi.homeDir }}/.local/share/fnm" ]; then

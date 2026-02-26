@@ -8,7 +8,7 @@
 
 # 获取 common_install.sh 路径
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd 2>/dev/null || echo "$HOME")"
+PROJECT_ROOT="${CHEZMOI_PROJECT_ROOT:-$(cd "${SCRIPT_DIR}/../.." && pwd 2>/dev/null || echo "$HOME")}"
 COMMON_INSTALL="${PROJECT_ROOT}/scripts/chezmoi/common_install.sh"
 
 if [ ! -f "$COMMON_INSTALL" ]; then
@@ -69,10 +69,21 @@ else
 fi
 
 # 设置代理
-setup_proxy "${PROXY:-{{ if .data.proxy }}{{ .data.proxy }}{{ else }}http://127.0.0.1:7890{{ end }}}"
+setup_proxy "${PROXY:-{{ env "http_proxy" | default "http://127.0.0.1:7890" }}}"
 
 # 检测操作系统和包管理器
 detect_os_and_package_manager || exit 1
+
+# Linux：安装 connect-proxy，供 ~/.ssh/config 中 GitHub 经代理走 443（ProxyCommand）
+if [[ "$PLATFORM" == "linux" ]]; then
+    if [[ "$PACKAGE_MANAGER" == "apt" ]] && ! command -v connect &> /dev/null; then
+        echo "[INFO] 安装 connect-proxy（SSH 经代理连接 GitHub:443）..."
+        sudo apt-get install -y connect-proxy 2>/dev/null || echo "[WARNING] connect-proxy 安装失败，WSL 下 SSH 需手动安装: sudo apt install connect-proxy"
+    elif [[ "$PACKAGE_MANAGER" == "pacman" ]] && ! command -v connect &> /dev/null; then
+        echo "[INFO] 安装 connect（SSH 经代理连接 GitHub:443）..."
+        sudo pacman -S --noconfirm connect 2>/dev/null || echo "[WARNING] connect 安装失败或未找到，可跳过"
+    fi
+fi
 
 # 检查 Git 是否已安装
 if command -v git &> /dev/null; then

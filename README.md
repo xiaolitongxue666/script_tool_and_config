@@ -45,9 +45,12 @@ chezmoi apply -v
 
 | 文档 | 说明 |
 |------|------|
-| [OS_SETUP_GUIDE.md](os_setup_guide.md) | Windows/macOS 新系统完整安装指南 |
+| [INSTALL_GUIDE.md](INSTALL_GUIDE.md) | 一键安装与配置入口（推荐先看） |
+| [os_setup_guide.md](os_setup_guide.md) | Windows/macOS/Linux 分步安装指南 |
 | [chezmoi_use_guide.md](chezmoi_use_guide.md) | chezmoi 详细使用指南 |
-| [SOFTWARE_LIST.md](SOFTWARE_LIST.md) | 完整软件清单和安装说明 |
+| [SOFTWARE_LIST.md](SOFTWARE_LIST.md) | 完整软件清单与 run_once 对应关系 |
+| [scripts/linux/system_basic_env/INSTALL_STATUS.md](scripts/linux/system_basic_env/INSTALL_STATUS.md) | 所需软件安装与配置状态清单（验证项与命令） |
+| [VERIFICATION_RESULT.md](VERIFICATION_RESULT.md) | 当前环境验证结果摘要；安装后可用 `scripts/chezmoi/verify_installation.sh` 生成报告 |
 | [project_structure.md](project_structure.md) | 详细项目结构说明 |
 | [AGENTS.md](AGENTS.md) | 代码代理开发指南 |
 | [ENCODING_AND_LINE_ENDINGS.md](ENCODING_AND_LINE_ENDINGS.md) | 文件编码与换行符规范 |
@@ -73,6 +76,11 @@ chezmoi apply -v
 | Ubuntu/Debian | apt | ✅ 已验证 |
 | CentOS/RHEL | dnf/yum | ✅ 已验证 |
 | Fedora | dnf | ⚠️ 理论支持 |
+
+### 代理与 Pacman
+
+- **代理**：`install.sh` 从环境变量 `PROXY` 或 `http_proxy` 读取，并导出为 `http_proxy`/`HTTPS_PROXY` 等；run_once 脚本通过 `env http_proxy` 使用，与 install.sh 一致。使用方式：`./install.sh --proxy http://127.0.0.1:7890` 或 `export PROXY=...`。
+- **Pacman（Arch）**：run_on_linux 的 pacman/镜像配置**不使用**代理，直连国内源；其他下载（GitHub、官方安装脚本等）使用上述环境变量代理。
 
 ## 📁 项目结构
 

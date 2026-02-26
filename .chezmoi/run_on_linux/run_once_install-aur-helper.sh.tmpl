@@ -9,7 +9,7 @@
 
 # 获取 common_install.sh 路径
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../../.." && pwd 2>/dev/null || echo "$HOME")"
+PROJECT_ROOT="${CHEZMOI_PROJECT_ROOT:-$(cd "${SCRIPT_DIR}/../../.." && pwd 2>/dev/null || echo "$HOME")}"
 COMMON_INSTALL="${PROJECT_ROOT}/scripts/chezmoi/common_install.sh"
 
 if [ ! -f "$COMMON_INSTALL" ]; then
@@ -46,6 +46,20 @@ else
     }
 fi
 
+# 仅 Arch Linux 执行；其他发行版（Ubuntu/Debian/WSL 等）先跳过，不检查 root，不使 chezmoi apply 失败
+if [[ ! -f /etc/os-release ]]; then
+    log_warning "无法检测系统版本，跳过 AUR 助手安装"
+    exit 0
+fi
+
+source /etc/os-release
+if [[ "${ID:-}" != "arch" ]]; then
+    log_info "当前为 ${ID:-unknown}，跳过 AUR 助手安装（仅 Arch Linux 执行）"
+    exit 0
+fi
+
+log_info "检测到 Arch Linux"
+
 # 检查 root 权限
 if ! check_root; then
     exit 1
@@ -55,20 +69,6 @@ fi
 if ! detect_install_user; then
     exit 1
 fi
-
-# 检查是否为 Arch Linux
-if [[ ! -f /etc/os-release ]]; then
-    log_error "无法检测系统版本"
-    exit 1
-fi
-
-source /etc/os-release
-if [[ "${ID:-}" != "arch" ]]; then
-    log_error "此脚本仅支持 Arch Linux"
-    exit 1
-fi
-
-log_info "检测到 Arch Linux"
 
 # ============================================
 # 确保 AUR 助手已安装

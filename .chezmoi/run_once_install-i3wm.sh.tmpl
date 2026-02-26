@@ -8,7 +8,7 @@
 
 # 获取 common_install.sh 路径
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd 2>/dev/null || echo "$HOME")"
+PROJECT_ROOT="${CHEZMOI_PROJECT_ROOT:-$(cd "${SCRIPT_DIR}/../.." && pwd 2>/dev/null || echo "$HOME")}"
 COMMON_INSTALL="${PROJECT_ROOT}/scripts/chezmoi/common_install.sh"
 
 if [ ! -f "$COMMON_INSTALL" ]; then
@@ -57,7 +57,7 @@ else
 fi
 
 # 设置代理
-setup_proxy "${PROXY:-{{ if .data.proxy }}{{ .data.proxy }}{{ else }}http://127.0.0.1:7890{{ end }}}"
+setup_proxy "${PROXY:-{{ env "http_proxy" | default "http://127.0.0.1:7890" }}}"
 
 # 检测操作系统和包管理器
 detect_os_and_package_manager || exit 1
@@ -70,8 +70,14 @@ fi
 
 echo "[INFO] 开始安装 i3wm..."
 
-# 安装前置依赖
-install_dependencies "xorg-server" "xorg-xinit" "base-devel" "git"
+# 安装前置依赖（按发行版区分：Arch 用 base-devel，Ubuntu/Debian 用 xorg + i3）
+if [[ "$PACKAGE_MANAGER" == "pacman" ]]; then
+    install_dependencies "xorg-server" "xorg-xinit" "base-devel" "git"
+elif [[ "$PACKAGE_MANAGER" == "apt" ]]; then
+    install_dependencies "xorg" "i3"
+else
+    install_dependencies "git"
+fi
 
 # 安装 i3wm
 if [[ "$PACKAGE_MANAGER" == "pacman" ]]; then
@@ -91,8 +97,8 @@ fi
 if command -v i3 &> /dev/null; then
     echo "[SUCCESS] i3wm 安装成功: $(i3 --version | head -n 1)"
 else
-    echo "[ERROR] i3wm 安装失败"
-    exit 1
+    echo "[WARNING] i3wm 未安装或安装失败，可稍后手动安装；继续 apply"
+    exit 0
 fi
 {{- end -}}
 

@@ -14,7 +14,7 @@ set -e
 
 # 获取脚本所在目录
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
+PROJECT_ROOT="${CHEZMOI_PROJECT_ROOT:-$(cd "${SCRIPT_DIR}/../.." && pwd)}"
 NVIM_SUBMODULE_DIR="${PROJECT_ROOT}/dotfiles/nvim"
 NVIM_INSTALL_SCRIPT="${NVIM_SUBMODULE_DIR}/install.sh"
 NVIM_CONFIG_DIR="{{ .chezmoi.homeDir }}/.config/nvim"
@@ -76,6 +76,7 @@ check_prerequisites() {
 # ============================================
 # 初始化 Git Submodule
 # ============================================
+# 先尝试 SSH；失败则清除半成品、改为 HTTPS 并用当前代理重试（不执行 git submodule sync）
 init_submodule() {
     log_info "检查 Git Submodule..."
 
@@ -83,26 +84,31 @@ init_submodule() {
         log_info "Neovim Submodule 未初始化，开始初始化..."
         cd "${PROJECT_ROOT}" || exit 1
 
-        # 设置代理（如果需要）
-        {{ if .data.proxy }}
-        export http_proxy="{{ .data.proxy }}"
-        export https_proxy="{{ .data.proxy }}"
-        export HTTP_PROXY="{{ .data.proxy }}"
-        export HTTPS_PROXY="{{ .data.proxy }}"
-        log_info "使用代理: {{ .data.proxy }}"
-        {{ else if env "PROXY" }}
-        export http_proxy="{{ env "PROXY" }}"
-        export https_proxy="{{ env "PROXY" }}"
-        export HTTP_PROXY="{{ env "PROXY" }}"
-        export HTTPS_PROXY="{{ env "PROXY" }}"
-        log_info "使用环境变量代理: {{ env "PROXY" }}"
-        {{ end }}
+        PROXY_URL="${PROXY:-{{ env "http_proxy" | default "http://127.0.0.1:7890" }}}"
+        export http_proxy="$PROXY_URL"
+        export https_proxy="$PROXY_URL"
+        export HTTP_PROXY="$PROXY_URL"
+        export HTTPS_PROXY="$PROXY_URL"
+        log_info "代理环境: $PROXY_URL（SSH 克隆不走代理；仅 HTTPS 回退时使用）"
 
-        # 初始化 submodule
+        submodule_ok=false
         if git submodule update --init --recursive dotfiles/nvim 2>&1; then
-            log_success "Neovim Submodule 初始化成功"
-        else
-            log_error "Neovim Submodule 初始化失败"
+            log_success "Neovim Submodule 初始化成功（SSH）"
+            submodule_ok=true
+        fi
+
+        if [ "$submodule_ok" = false ]; then
+            log_warning "SSH 克隆失败，尝试 HTTPS + 代理回退..."
+            rm -rf "${NVIM_SUBMODULE_DIR}" ".git/modules/dotfiles" 2>/dev/null || true
+            git config submodule.dotfiles/nvim.url "https://github.com/xiaolitongxue666/nvim.git"
+            if git -c "http.https://github.com.proxy=$PROXY_URL" -c "https.https://github.com.proxy=$PROXY_URL" submodule update --init --recursive dotfiles/nvim 2>&1; then
+                log_success "Neovim Submodule 初始化成功（HTTPS）"
+                submodule_ok=true
+            fi
+        fi
+
+        if [ "$submodule_ok" = false ]; then
+            log_error "Neovim Submodule 初始化失败（SSH 与 HTTPS 回退均失败）"
             exit 1
         fi
     else
@@ -122,18 +128,12 @@ run_nvim_install() {
     log_info "运行 Neovim 配置安装脚本..."
     chmod +x "${NVIM_INSTALL_SCRIPT}"
 
-    # 设置代理环境变量（如果需要）
-    {{ if .data.proxy }}
-    export http_proxy="{{ .data.proxy }}"
-    export https_proxy="{{ .data.proxy }}"
-    export HTTP_PROXY="{{ .data.proxy }}"
-    export HTTPS_PROXY="{{ .data.proxy }}"
-    {{ else if env "PROXY" }}
-    export http_proxy="{{ env "PROXY" }}"
-    export https_proxy="{{ env "PROXY" }}"
-    export HTTP_PROXY="{{ env "PROXY" }}"
-    export HTTPS_PROXY="{{ env "PROXY" }}"
-    {{ end }}
+    # 设置代理环境变量（使用 PROXY 或 http_proxy）
+    PROXY_URL="${PROXY:-{{ env "http_proxy" | default "http://127.0.0.1:7890" }}}"
+    export http_proxy="$PROXY_URL"
+    export https_proxy="$PROXY_URL"
+    export HTTP_PROXY="$PROXY_URL"
+    export HTTPS_PROXY="$PROXY_URL"
 
     # 运行安装脚本
     if bash "${NVIM_INSTALL_SCRIPT}" 2>&1; then

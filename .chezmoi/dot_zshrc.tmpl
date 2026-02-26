@@ -105,8 +105,8 @@ zstyle ':omz:update' mode disabled
 # ============================================
 # 插件配置
 # ============================================
-# Fish-like 体验插件（自动安装，如果未安装会被忽略）
-# 注意：zsh-syntax-highlighting 必须放在最后
+# 基础插件（不依赖 run_once）；可选插件仅当目录存在时追加，避免 "plugin not found"
+# 注意：zsh-syntax-highlighting 必须放在最后，在 oh-my-zsh.sh 之后手动加载
 plugins=(
   git
   docker
@@ -117,11 +117,9 @@ plugins=(
   web-search
   copyfile
   dirhistory
-  # copydir 插件在某些版本的 Oh My Zsh 中可能不存在，已移除以避免警告
-  zsh-completions
-  zsh-history-substring-search
-  # zsh-autosuggestions 和 zsh-syntax-highlighting 需要在 oh-my-zsh.sh 之后手动加载
 )
+[[ -d "${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/zsh-completions" ]] && plugins+=(zsh-completions)
+[[ -d "${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/zsh-history-substring-search" ]] && plugins+=(zsh-history-substring-search)
 
 # ============================================
 # 加载 Oh My Zsh
@@ -203,7 +201,13 @@ if [ -d "$ZSH" ]; then
         bindkey "\e\e[C" dirhistory_zle_dirhistory_future 2>/dev/null || true
     fi
 else
-    echo "警告: Oh My Zsh 未安装，请运行: sh -c \"\$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)\""
+    # 仅提示一次（避免 .zshrc 被多次 source 时重复输出）
+    if [[ -z "${_OMZ_WARN_SHOWN:-}" ]]; then
+        echo "警告: Oh My Zsh 未安装。"
+        echo "  方式一（直接安装）: sh -c \"\$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)\""
+        echo "  方式二（通过本项目）: 在项目根目录执行 ./install.sh 或 chezmoi apply，将运行 run_once_install-zsh 安装 zsh 与 Oh My Zsh"
+        export _OMZ_WARN_SHOWN=1
+    fi
 fi
 
 # ============================================
@@ -250,8 +254,18 @@ setopt EXTENDED_GLOB          # 扩展通配符
 # ============================================
 # 代理配置（统一配置，参考 Git Bash）
 # ============================================
-# 默认代理地址（可通过环境变量 PROXY 或 http_proxy 覆盖，默认: http://127.0.0.1:7890）
-PROXY_URL="${PROXY:-${http_proxy:-http://127.0.0.1:7890}}"
+# 默认代理地址：Linux 下自动区分 WSL2 与原生（WSL2 中 127.0.0.1 无法访问宿主机，需用 /etc/resolv.conf 的 nameserver）
+if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    if grep -qEi "Microsoft|WSL" /proc/version 2>/dev/null || [[ -n "${WSL_DISTRO_NAME:-}" ]]; then
+        _proxy_host=$(cat /etc/resolv.conf 2>/dev/null | grep nameserver | awk '{print $2}')
+        PROXY_DEFAULT="http://${_proxy_host:-127.0.0.1}:7890"
+    else
+        PROXY_DEFAULT="http://127.0.0.1:7890"
+    fi
+else
+    PROXY_DEFAULT="http://127.0.0.1:7890"
+fi
+PROXY_URL="${PROXY:-${http_proxy:-$PROXY_DEFAULT}}"
 
 # h_proxy: 快速启用代理（同时设置大小写环境变量和 ~/.curlrc，确保所有工具都能识别）
 # 先取消可能存在的 alias
@@ -290,6 +304,9 @@ unset_h() {
     fi
     echo "代理已关闭"
 }
+# WSL 常用命名：proxy_on / proxy_off 与 h_proxy / unset_h 等价
+alias proxy_on='h_proxy'
+alias proxy_off='unset_h'
 
 # 自定义别名
 # 注意：zsh 中 unset 是内置命令，不需要别名（Fish 中需要 alias unset 'set --erase'）
@@ -363,6 +380,9 @@ if [[ "$OS" == "macos" ]]; then
 # Linux 特定配置
 # 对应 Fish: else if test "$OS" = "Linux" ... end
 elif [[ "$OS" == "linux" ]]; then
+    # Debian/Ubuntu: bat 包提供 batcat，fd-find 包提供 fdfind，统一为 bat/fd 命令
+    if command -v batcat &>/dev/null && ! command -v bat &>/dev/null; then alias bat=batcat; fi
+    if command -v fdfind &>/dev/null && ! command -v fd &>/dev/null; then alias fd=fdfind; fi
     # 代理配置已在通用部分定义，这里不需要重复定义
 
 # Windows Git Bash 特定配置

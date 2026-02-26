@@ -8,7 +8,7 @@
 
 # 获取 common_install.sh 路径
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd 2>/dev/null || echo "$HOME")"
+PROJECT_ROOT="${CHEZMOI_PROJECT_ROOT:-$(cd "${SCRIPT_DIR}/../.." && pwd 2>/dev/null || echo "$HOME")}"
 COMMON_INSTALL="${PROJECT_ROOT}/scripts/chezmoi/common_install.sh"
 
 if [ ! -f "$COMMON_INSTALL" ]; then
@@ -57,7 +57,7 @@ else
 fi
 
 # 设置代理
-setup_proxy "${PROXY:-{{ if .data.proxy }}{{ .data.proxy }}{{ else }}http://127.0.0.1:7890{{ end }}}"
+setup_proxy "${PROXY:-{{ env "http_proxy" | default "http://127.0.0.1:7890" }}}"
 
 # 检测操作系统和包管理器
 detect_os_and_package_manager || exit 1
@@ -148,16 +148,41 @@ if [[ "$PLATFORM" != "windows" ]]; then
                 echo "[INFO] 插件 $plugin_name 已安装，跳过"
             else
                 echo "[INFO] 安装插件 $plugin_name..."
-                if git clone "$plugin_url" "$plugin_path" 2>/dev/null; then
+                if git clone --depth=1 "$plugin_url" "$plugin_path" 2>/dev/null; then
                     echo "[INFO] 插件 $plugin_name 安装成功"
                 else
-                    echo "[WARNING] 插件 $plugin_name 安装失败，但继续..."
+                    # WSL 下 ~/.gitconfig 的 http.https://github.com.proxy 常为 127.0.0.1:7890，无法访问宿主机代理，导致 clone 失败；临时清空该配置再试
+                    if git -c http.https://github.com.proxy= -c https.https://github.com.proxy= clone --depth=1 "$plugin_url" "$plugin_path" 2>/dev/null; then
+                        echo "[INFO] 插件 $plugin_name 安装成功（已绕过 GitHub proxy 重试）"
+                    else
+                        echo "[WARNING] 插件 $plugin_name 安装失败。若在 WSL 下，可能是 Git 的 GitHub proxy 指向 127.0.0.1 导致，可执行: git config --global --unset http.https://github.com.proxy; git config --global --unset https.https://github.com.proxy 后手动 clone，详见 INSTALL_GUIDE 故障排除"
+                    fi
                 fi
             fi
         done
     fi
 else
     echo "[INFO] Windows 上跳过 Oh My Zsh 安装（可选）"
+fi
+
+# 设置默认 shell 为 zsh（仅 Linux/macOS），使重新登录后使用 zsh
+if [[ "$PLATFORM" == "linux" || "$PLATFORM" == "macos" ]]; then
+    if command -v zsh &>/dev/null; then
+        ZSH_PATH="$(command -v zsh)"
+        CURRENT_SHELL=""
+        if command -v getent &>/dev/null; then
+            CURRENT_SHELL="$(getent passwd "$(id -un)" 2>/dev/null | cut -d: -f7)"
+        elif [[ -f /etc/passwd ]]; then
+            CURRENT_SHELL="$(awk -F: -v u="$(id -un)" '$1==u {print $7}' /etc/passwd)"
+        fi
+        if [[ -n "$ZSH_PATH" && "$CURRENT_SHELL" != "$ZSH_PATH" ]]; then
+            if chsh -s "$ZSH_PATH" 2>/dev/null; then
+                echo "[SUCCESS] 默认 shell 已设为 zsh，请重新登录生效"
+            else
+                echo "[INFO] 未能自动设置默认 shell。请手动执行以下命令后重新登录以使 zsh 为默认: chsh -s $ZSH_PATH"
+            fi
+        fi
+    fi
 fi
 
 echo "[SUCCESS] Zsh 和 Oh My Zsh 安装完成"

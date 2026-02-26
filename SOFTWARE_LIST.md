@@ -1,6 +1,6 @@
 # 软件清单
 
-本文档列出了项目中管理的所有软件，按平台分类。
+本文档列出**项目管理的软件与 run_once 脚本对应关系**，按平台分类。环境验证与逐项检查命令见 [scripts/linux/system_basic_env/INSTALL_STATUS.md](scripts/linux/system_basic_env/INSTALL_STATUS.md)。
 
 ## 多系统共有软件
 

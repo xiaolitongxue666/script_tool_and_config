@@ -341,6 +341,11 @@ scripts/windows/system_basic_env/*.backup
 *.backup
 *.tmp
 
+# 安装/验证报告（脚本输出到项目根目录时忽略）
+/.audit_configs_report.txt
+/install_verification_report_*.txt
+/VERIFICATION_REPORT.txt
+
 # 容器开发环境临时文件
 scripts/common/container_dev_env/test_*.sh
 scripts/common/container_dev_env/*.tmp

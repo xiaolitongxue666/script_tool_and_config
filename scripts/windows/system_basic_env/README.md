@@ -1,5 +1,7 @@
 # Windows 基础工具安装脚本
 
+本目录为 Windows 专用安装脚本（PowerShell + 批处理）。一键安装与跨平台流程见项目根目录 [INSTALL_GUIDE.md](../../../INSTALL_GUIDE.md)。
+
 用于在新装 Windows 系统上自动安装基础开发工具的 PowerShell 脚本。
 
 ## 功能特性

@@ -20,7 +20,7 @@ fi
 # 代理配置（统一配置，参考 Git Bash）
 # ============================================
 # 默认代理地址（可通过环境变量 PROXY 覆盖）
-PROXY_URL="${PROXY:-{{ if .data.proxy }}{{ .data.proxy }}{{ else }}http://127.0.0.1:7890{{ end }}}"
+PROXY_URL="${PROXY:-{{ env "http_proxy" | default "http://127.0.0.1:7890" }}}"
 
 # 代理控制别名（同时设置大小写环境变量，确保所有工具都能识别）
 # h_proxy: 快速启用代理

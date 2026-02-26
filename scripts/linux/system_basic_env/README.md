@@ -1,6 +1,10 @@
 # Arch Linux 系统配置脚本使用说明
 
-本文档说明如何使用 `configure_china_mirrors.sh` 和 `install_common_tools.sh` 两个脚本。
+本目录脚本用途：**Arch 专用**镜像与基础环境；通用一键安装见项目根目录 [INSTALL_GUIDE.md](../../../INSTALL_GUIDE.md)。
+
+- **get_wsl_system_info.sh**：获取 WSL/Linux 版本与环境信息（只读）。
+- **configure_china_mirrors.sh**：配置 Arch 中国镜像源。
+- **install_common_tools.sh**：Arch 完整环境（镜像 + 基础包 + AUR + Neovim 等）。
 
 ---
 
@@ -248,6 +252,7 @@ HTTP_PROXY=http://192.168.1.100:8080 USE_PROXY=1 sudo ./install_common_tools.sh
 
 ## 相关文件
 
+- `get_wsl_system_info.sh` - 获取 WSL/Linux 详细版本与环境信息（只读）
 - `configure_china_mirrors.sh` - 镜像源配置脚本
 - `install_common_tools.sh` - 完整安装脚本
 - `scripts/common.sh` - 通用脚本库

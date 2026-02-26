@@ -1,9 +1,11 @@
 # SSH 配置（由 chezmoi 管理）
-# GitHub 走 443 端口，可选经代理（Clash 等）；参考: clash代理下git-ssh走443配置.md
+# GitHub 走 443 端口（ssh.github.com:443），避免代理或防火墙对 22 端口的限制；经代理时使用 ProxyCommand
 
 # --- GitHub：ssh.github.com:443，经代理时使用 ProxyCommand ---
-# macOS：ProxyCommand 必须写 connect 的绝对路径，否则 GUI（Obsidian、Finder 等）因 PATH 不含 /usr/local/bin 会报 exec: connect: not found
-# -H = HTTP 代理（如 Clash），-S = SOCKS；由 macos_proxy_connect_opt 控制
+# Windows：connect.exe -S 为 SOCKS 代理，127.0.0.1 即本机
+# macOS：ProxyCommand 必须写 connect 的绝对路径，否则 GUI 会报 exec: connect: not found；-S = SOCKS，-H = HTTP
+# Linux/WSL：WSL 下 127.0.0.1 指向 WSL 自身，代理在宿主机，需设置 proxy_host 为宿主机 IP（/etc/resolv.conf 的 nameserver）
+#            或在应用前 export PROXY_HOST=$(cat /etc/resolv.conf | grep nameserver | awk '{print $2}')；需安装 connect-proxy（apt: connect-proxy）
 Host github.com
     HostName ssh.github.com
     Port 443
@@ -14,7 +16,9 @@ Host github.com
 {{- else if eq .chezmoi.os "darwin" }}
     ProxyCommand "{{ .macos_connect_path | default "/opt/homebrew/bin/connect" }}" {{ .macos_proxy_connect_opt | default "-S" }} {{ .proxy_host | default "127.0.0.1" }}:{{ .proxy_port | default "7890" }} %h %p
 {{- else if eq .chezmoi.os "linux" }}
-    ProxyCommand nc -X connect -x {{ .proxy_host | default "127.0.0.1" }}:{{ .proxy_port | default "7890" }} %h %p
+{{- $ph := or (env "PROXY_HOST") .proxy_host "127.0.0.1" }}
+{{- $pp := or (env "PROXY_PORT") .proxy_port "7890" }}
+    ProxyCommand connect -S {{ $ph }}:{{ $pp }} %h %p
 {{- end }}
 
 # 其他 Host（如内网 Git 服务器）请在本机或 lazyssh 中单独添加

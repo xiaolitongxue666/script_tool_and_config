@@ -1,5 +1,7 @@
 # macOS 基础工具安装脚本
 
+本目录为 macOS 专用安装脚本。一键安装与跨平台流程见项目根目录 [INSTALL_GUIDE.md](../../../INSTALL_GUIDE.md)。
+
 用于在 macOS 系统上自动安装基础开发工具的 Bash 脚本。
 
 ## 功能特性

@@ -1,5 +1,6 @@
 # Git 全局配置（由 chezmoi 管理）
 # 请在 .chezmoi.toml.local 或 .chezmoidata 中设置 git_user_name、git_user_email
+# WSL 下 127.0.0.1 指本机无法访问宿主机代理，若 GitHub clone 失败请在 data 中设置 proxy 为宿主机地址，或 apply 后执行: git config --global --unset http.https://github.com.proxy
 
 [user]
 	name = {{ .git_user_name | default "Your Name" }}
@@ -7,8 +8,21 @@
 
 [core]
 	autocrlf = {{ if eq .chezmoi.os "windows" }}true{{ else }}input{{ end }}
-	longpaths = {{ if eq .chezmoi.os "windows" }}true{{ else }}false{{ end }}
-	color.ui = auto
+{{- if eq .chezmoi.os "windows" }}
+	longpaths = true
+{{- end }}
+
+[diff]
+	submodule = log
+
+[status]
+	submodulesummary = 1
+
+[http]
+	sslVerify = true
+	postBuffer = 524288000
+	lowSpeedLimit = 0
+	lowSpeedTime = 999999
 
 [http "https://github.com"]
 	proxy = {{ .proxy | default "http://127.0.0.1:7890" }}

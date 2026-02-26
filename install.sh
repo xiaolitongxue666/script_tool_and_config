@@ -111,6 +111,16 @@ log_success "平台: $PLATFORM"
 # ============================================
 # 代理配置（可选）
 # ============================================
+# Linux 下区分 WSL2 与原生：WSL2 中 127.0.0.1 无法访问宿主机代理，使用 /etc/resolv.conf 的 nameserver 作为宿主机 IP
+if [ -z "${PROXY:-}" ] && [ -z "${http_proxy:-}" ] && [ "$PLATFORM" = "linux" ]; then
+    if grep -qEi "Microsoft|WSL" /proc/version 2>/dev/null || [ -n "${WSL_DISTRO_NAME:-}" ]; then
+        _hostip=$(awk '/^nameserver / {print $2; exit}' /etc/resolv.conf 2>/dev/null)
+        if [ -n "$_hostip" ]; then
+            PROXY="http://${_hostip}:7890"
+            log_info "检测到 WSL，使用宿主机代理: $PROXY"
+        fi
+    fi
+fi
 # 如果代理地址没有 http:// 或 https:// 前缀，自动添加
 if [ -n "${PROXY:-}" ]; then
     if [[ ! "$PROXY" =~ ^https?:// ]]; then
@@ -131,6 +141,16 @@ if [ -n "${PROXY:-}" ]; then
     export HTTP_PROXY="$PROXY"
     export HTTPS_PROXY="$PROXY"
     log_info "使用代理: $PROXY"
+    # 解析 host:port 供 chezmoi 模板使用（如 dot_ssh/config.tmpl 的 PROXY_HOST/PROXY_PORT，WSL 下 SSH 走宿主机代理）
+    _proxy_stripped="${PROXY#*://}"
+    _proxy_host="${_proxy_stripped%%:*}"
+    _proxy_port="${_proxy_stripped#*:}"
+    _proxy_port="${_proxy_port%%/*}"
+    if [ -z "$_proxy_port" ] || [ "$_proxy_port" = "$_proxy_host" ]; then
+        _proxy_port="7890"
+    fi
+    export PROXY_HOST="$_proxy_host"
+    export PROXY_PORT="$_proxy_port"
 else
     log_info "未设置代理，使用直连"
 fi
@@ -140,7 +160,7 @@ fi
 # ============================================
 log_info ""
 log_info "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-log_info "[1/4] 检查并安装 chezmoi"
+log_info "[1/5] 检查并安装 chezmoi"
 log_info "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
 log_info "检查 chezmoi 安装状态..."
@@ -174,7 +194,7 @@ fi
 # ============================================
 log_info ""
 log_info "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-log_info "[2/4] 初始化 chezmoi 环境"
+log_info "[2/5] 初始化 chezmoi 环境"
 log_info "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
 # 创建必要的目录
@@ -213,7 +233,49 @@ else
     log_info "chezmoi 源状态目录已存在: $CHEZMOI_DIR"
 fi
 
+# 3. 确保 chezmoi 使用项目源：写入 ~/.config/chezmoi/chezmoi.toml 的 sourceDir
+#    （chezmoi 不尊重 CHEZMOI_SOURCE_DIR 环境变量，必须通过 config 指定）
+#    run_once 脚本内通过 env http_proxy 使用代理，与 install.sh 导出的环境变量一致
+CHEZMOI_CONFIG_DIR="$HOME/.config/chezmoi"
+CHEZMOI_CONFIG_FILE="${CHEZMOI_CONFIG_DIR}/chezmoi.toml"
+SOURCE_DIR_ABS="$(cd "$SCRIPT_DIR" && pwd)/.chezmoi"
+mkdir -p "$CHEZMOI_CONFIG_DIR"
+NEED_WRITE=false
+if [ ! -f "$CHEZMOI_CONFIG_FILE" ]; then
+    NEED_WRITE=true
+elif ! grep -qF "sourceDir = \"${SOURCE_DIR_ABS}\"" "$CHEZMOI_CONFIG_FILE" 2>/dev/null; then
+    if grep -q "^sourceDir = " "$CHEZMOI_CONFIG_FILE" 2>/dev/null; then
+        sed -i "s|^sourceDir = .*|sourceDir = \"${SOURCE_DIR_ABS}\"|" "$CHEZMOI_CONFIG_FILE"
+        log_info "已更新 chezmoi 源目录配置: $SOURCE_DIR_ABS"
+    else
+        NEED_WRITE=true
+    fi
+fi
+if [ "$NEED_WRITE" = true ]; then
+    if [ -f "$CHEZMOI_CONFIG_FILE" ]; then
+        printf 'sourceDir = "%s"\n\n' "$SOURCE_DIR_ABS" > "${CHEZMOI_CONFIG_FILE}.new"
+        cat "$CHEZMOI_CONFIG_FILE" >> "${CHEZMOI_CONFIG_FILE}.new"
+        mv "${CHEZMOI_CONFIG_FILE}.new" "$CHEZMOI_CONFIG_FILE"
+        log_info "已添加 chezmoi 源目录配置: $SOURCE_DIR_ABS"
+    else
+        printf 'sourceDir = "%s"\n\n[git]\n    autoCommit = false\n    autoPush = false\n' "$SOURCE_DIR_ABS" > "$CHEZMOI_CONFIG_FILE"
+        log_info "已写入 chezmoi 配置: $CHEZMOI_CONFIG_FILE"
+    fi
+fi
+
 log_success "chezmoi 环境初始化完成"
+
+# ============================================
+# 初始化 Git 子模块（Neovim 配置等，需在 chezmoi apply 前就绪）
+# ============================================
+if [ -d "${SCRIPT_DIR}/.git" ] && [ -f "${SCRIPT_DIR}/.gitmodules" ]; then
+    log_info "初始化 Git 子模块（dotfiles/nvim 等）..."
+    if (cd "$SCRIPT_DIR" && git submodule update --init --recursive); then
+        log_success "Git 子模块已初始化"
+    else
+        log_warning "子模块初始化失败或已为最新（Neovim 配置 run_once 会再次尝试）"
+    fi
+fi
 
 # ============================================
 # 配置差异检测和应用（chezmoi 核心流程）
@@ -225,7 +287,7 @@ fi
 
 log_info ""
 log_info "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-log_info "[3/4] 检查配置状态和差异"
+log_info "[3/5] 检查配置状态和差异"
 log_info "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
 if [ ! -d "$CHEZMOI_DIR" ] || [ -z "$(ls -A $CHEZMOI_DIR 2>/dev/null)" ]; then
@@ -235,9 +297,10 @@ if [ ! -d "$CHEZMOI_DIR" ] || [ -z "$(ls -A $CHEZMOI_DIR 2>/dev/null)" ]; then
     exit 0
 fi
 
-# 设置源状态目录和环境变量
+# 设置源状态目录和环境变量（run_once 通过 env http_proxy 使用代理）
 export CHEZMOI_SOURCE_DIR="$CHEZMOI_DIR"
 export PAGER=cat  # 避免 chezmoi 进入交互模式
+[ -d "$HOME/.local/bin" ] && export PATH="$HOME/.local/bin:$PATH"
 
 # 步骤 1: 检查配置状态
 log_info "[1/3] 检查配置状态 (chezmoi status)..."
@@ -288,6 +351,9 @@ else
     log_info "发现配置差异，开始应用配置..."
     log_info "执行: chezmoi apply -v --force"
     log_info ""
+    # 供 run_once 脚本解析 common_install 路径（优先于 SCRIPT_DIR 推导）
+    export CHEZMOI_PROJECT_ROOT="$(cd "$SCRIPT_DIR" && pwd)"
+    [ -d "$HOME/.local/bin" ] && export PATH="$HOME/.local/bin:$PATH"
 
     if chezmoi apply -v --force; then
         log_success "配置应用成功！"
@@ -312,7 +378,7 @@ fi
 # ============================================
 log_info ""
 log_info "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-log_info "[4/4] 检查软件安装状态"
+log_info "[4/5] 检查软件安装状态"
 log_info "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
 # 检测操作系统和包管理器（用于软件检查）
@@ -377,6 +443,30 @@ else
 fi
 
 log_success "软件检查完成"
+
+# ============================================
+# [5/5] 验证与确认（字体、默认 Shell、环境变量、开机启动声明）
+# ============================================
+log_info ""
+log_info "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+log_info "[5/5] 验证与确认"
+log_info "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+VERIFY_SCRIPT="${SCRIPT_DIR}/scripts/chezmoi/verify_installation.sh"
+if [ -f "$VERIFY_SCRIPT" ] && [ -x "$VERIFY_SCRIPT" ]; then
+    if bash "$VERIFY_SCRIPT"; then
+        log_success "验证完成，报告已写入（见上方路径）"
+    else
+        log_warning "验证脚本执行完毕，请查看上方报告摘要"
+    fi
+else
+    if [ -f "$VERIFY_SCRIPT" ]; then
+        chmod +x "$VERIFY_SCRIPT" 2>/dev/null || true
+        bash "$VERIFY_SCRIPT" || true
+    else
+        log_warning "验证脚本不存在: $VERIFY_SCRIPT，跳过验证与报告"
+    fi
+fi
 
 # ============================================
 # 远程测试（如果指定）

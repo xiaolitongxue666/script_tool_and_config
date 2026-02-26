@@ -1,5 +1,7 @@
 # Docker ArchLinux 开发环境
 
+本目录为 Docker ArchLinux 开发环境构建与运行脚本。一键安装与首次配置见项目根目录 [INSTALL_GUIDE.md](../../../INSTALL_GUIDE.md)。
+
 基于当前项目的 Linux 环境配置，创建一个完整的 Docker ArchLinux 开发容器，包含所有已安装的软件和配置文件。
 
 ## 特性

@@ -207,11 +207,26 @@ case "$PLATFORM" in
             fi
         elif command -v apt-get &> /dev/null; then
             log_info "使用 apt-get 安装 chezmoi..."
-            if sudo apt-get update && sudo apt-get install -y chezmoi; then
+            if sudo apt-get update && sudo apt-get install -y chezmoi 2>/dev/null; then
                 log_success "apt-get 安装 chezmoi 成功"
                 hash -r 2>/dev/null || true
             else
-                error_exit "apt-get 安装 chezmoi 失败"
+                log_warning "apt 仓库中无 chezmoi，改用官方安装脚本..."
+                mkdir -p "$HOME/.local/bin"
+                if sh -c "$(curl -fsLS get.chezmoi.io)" -- -b "$HOME/.local/bin" 2>&1; then
+                    if [ -f "$HOME/.local/bin/chezmoi" ]; then
+                        chmod +x "$HOME/.local/bin/chezmoi" 2>/dev/null || true
+                        export PATH="$HOME/.local/bin:$PATH"
+                        if ! echo "$PATH" | grep -q "$HOME/.local/bin"; then
+                            echo "export PATH=\"$HOME/.local/bin:\$PATH\"" >> "$HOME/.bashrc" 2>/dev/null || true
+                        fi
+                        log_success "官方安装脚本安装 chezmoi 成功"
+                    else
+                        error_exit "官方安装脚本未生成 chezmoi 可执行文件"
+                    fi
+                else
+                    error_exit "apt-get 与官方安装脚本均失败，请手动安装: https://www.chezmoi.io/install/"
+                fi
             fi
         elif command -v dnf &> /dev/null; then
             log_info "使用 dnf 安装 chezmoi..."

@@ -814,6 +814,22 @@ else
     log_warning "Zsh/OMZ 检查脚本不可用，跳过检查"
 fi
 
+# ============================================
+# 验证与报告（字体、默认 Shell、环境变量、开机启动声明）
+# ============================================
+VERIFY_SCRIPT="${SCRIPT_DIR}/scripts/chezmoi/verify_installation.sh"
+if [ -f "$VERIFY_SCRIPT" ] && [ -x "$VERIFY_SCRIPT" ]; then
+    log_info ""
+    log_info "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    log_info "验证与确认（安装状态报告）"
+    log_info "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    if bash "$VERIFY_SCRIPT"; then
+        log_success "验证完成，报告已写入（见上方路径）"
+    else
+        log_warning "验证脚本执行完毕，请查看上方报告摘要"
+    fi
+fi
+
 log_info ""
 log_info "提示："
 log_info "  - 如果修改了 Shell 配置（如 ~/.zshrc），运行: source ~/.zshrc"

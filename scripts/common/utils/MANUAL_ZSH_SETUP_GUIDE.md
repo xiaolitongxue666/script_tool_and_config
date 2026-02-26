@@ -186,6 +186,5 @@ cp .chezmoi/dot_zshrc.tmpl ~/.zshrc
 
 - `deploy.sh` - 主部署脚本
 - `scripts/common/utils/check_zsh_omz.sh` - 检查脚本
-- `scripts/common/utils/fix_zsh_omz_complete.sh` - 完整修复脚本
-- `scripts/common/utils/ZSH_OMZ_ISSUE_ANALYSIS.md` - 问题分析文档
+- [INSTALL_GUIDE.md](../../../INSTALL_GUIDE.md) - Oh My Zsh 插件未安装时的故障排除与补救命令（手动 clone 四插件）
 
