@@ -232,7 +232,7 @@ chezmoi is the core configuration management tool:
 ## Important Constraints
 
 ### Platform-Specific Constraints
-1. **ArchLinux Scripts**: Some scripts (e.g., `install_common_tools.sh`) only work on ArchLinux
+1. **ArchLinux Scripts**: Some scripts (e.g., `install_common_tools.sh`, deprecated; cross-platform install via `./install.sh` and run_once, see SOFTWARE_LIST.md) only work on ArchLinux
 2. **Windows Path Handling**: Some scripts require path conversion (`cygpath -w`)
 3. **Permission Requirements**: Linux installation scripts require `sudo`
 4. **Network Requirements**: Initial installation requires network connectivity

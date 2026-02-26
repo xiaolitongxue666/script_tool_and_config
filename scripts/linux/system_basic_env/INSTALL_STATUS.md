@@ -1,6 +1,6 @@
 # 所需软件安装与配置状态清单
 
-本文档为**当前环境验证清单与检查命令**，便于在 WSL/Ubuntu 或 Arch 上核对。完整软件列表与 run_once 对应见 [SOFTWARE_LIST.md](../../../SOFTWARE_LIST.md)。生成/核对环境：**WSL Ubuntu**。
+本文档为**当前环境验证清单与检查命令**，便于在 WSL/Ubuntu 或 Arch 上核对。**一键安装**由 `./install.sh` 完成，所需软件均通过 **run_once** 安装，注意 **OS** 与 **WSL** 区分；`install_common_tools.sh` **已废弃**，职责已拆分到 run_once。完整软件列表见 [SOFTWARE_LIST.md](../../../SOFTWARE_LIST.md)。生成/核对环境：**WSL Ubuntu**。
 
 ---
 
@@ -26,6 +26,8 @@
 | **gh**      | GitHub CLI     | 已安装   |                               |
 | **trash-cli** | 回收站        | 已安装   |                               |
 | **lazygit** | Git TUI        | 已安装   | 来自 GitHub 二进制，~/.local/bin |
+| **btop**    | 系统监控       | 已安装   |                               |
+| **fastfetch** | 系统信息展示 | 已安装/可选 | Ubuntu &lt; 24.10 无官方包，run_once 会尝试 PPA/Snap/.deb |
 
 ---
 

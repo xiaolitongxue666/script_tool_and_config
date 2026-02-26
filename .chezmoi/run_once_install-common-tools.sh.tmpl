@@ -3,8 +3,9 @@
 
 # ============================================
 # 通用工具安装脚本（chezmoi run_once_）
-# 安装 bat, eza, fd, ripgrep, fzf, lazygit, git-delta, gh 等
-# 支持所有平台
+# 一键安装所需通用工具：bat, eza, fd, ripgrep, fzf, lazygit, git-delta, gh, btop, fastfetch 等
+# OS：linux（含 Arch/Ubuntu/Debian/Fedora 等）、darwin、windows
+# Linux 子类型：WSL（多为 apt）、原生（pacman/apt/dnf/yum）；Arch=linux+pacman，WSL=linux+apt
 # ============================================
 
 # 获取 common_install.sh 路径
@@ -75,6 +76,27 @@ setup_proxy "${PROXY:-{{ env "http_proxy" | default "http://127.0.0.1:7890" }}}"
 # 检测操作系统和包管理器
 detect_os_and_package_manager || exit 1
 
+# WSL 检测（仅 Linux 下；用于日志区分）
+IS_WSL=0
+if [[ "$PLATFORM" == "linux" ]]; then
+    if grep -qEi "Microsoft|WSL" /proc/version 2>/dev/null || [[ -n "${WSL_DISTRO_NAME:-}" ]]; then
+        IS_WSL=1
+    fi
+fi
+
+# 环境日志：区分 OS 与 WSL
+if [[ "$PLATFORM" == "darwin" ]]; then
+    echo "[INFO] 环境: macOS (brew)"
+elif [[ "$PLATFORM" == "windows" ]]; then
+    echo "[INFO] 环境: Windows ($PACKAGE_MANAGER)"
+elif [[ "$PLATFORM" == "linux" ]]; then
+    if [[ "$IS_WSL" -eq 1 ]]; then
+        echo "[INFO] 环境: Linux (WSL, $PACKAGE_MANAGER)"
+    else
+        echo "[INFO] 环境: Linux (原生, $PACKAGE_MANAGER)"
+    fi
+fi
+
 echo "[INFO] 开始安装通用工具..."
 
 # 定义工具列表（包名映射）
@@ -91,6 +113,8 @@ case "$PLATFORM" in
         TOOLS["git-delta"]="git-delta"
         TOOLS["gh"]="gh"
         TOOLS["trash"]="trash-cli"
+        TOOLS["btop"]="btop"
+        TOOLS["fastfetch"]="fastfetch"
         ;;
     linux)
         if [[ "$PACKAGE_MANAGER" == "pacman" ]]; then
@@ -103,6 +127,8 @@ case "$PLATFORM" in
             TOOLS["git-delta"]="git-delta"
             TOOLS["gh"]="github-cli"
             TOOLS["trash"]="trash-cli"
+            TOOLS["btop"]="btop"
+            TOOLS["fastfetch"]="fastfetch"
         elif [[ "$PACKAGE_MANAGER" == "apt" ]]; then
             TOOLS["bat"]="bat"
             TOOLS["eza"]="eza"
@@ -113,6 +139,8 @@ case "$PLATFORM" in
             TOOLS["git-delta"]="git-delta"
             TOOLS["gh"]="gh"
             TOOLS["trash"]="trash-cli"
+            TOOLS["btop"]="btop"
+            TOOLS["fastfetch"]="fastfetch"
         else
             TOOLS["bat"]="bat"
             TOOLS["eza"]="eza"
@@ -123,6 +151,8 @@ case "$PLATFORM" in
             TOOLS["git-delta"]="git-delta"
             TOOLS["gh"]="gh"
             TOOLS["trash"]="trash-cli"
+            TOOLS["btop"]="btop"
+            TOOLS["fastfetch"]="fastfetch"
         fi
         ;;
     windows)
@@ -148,6 +178,44 @@ case "$PLATFORM" in
         ;;
 esac
 
+# Ubuntu/Debian 专用：fastfetch 在 24.10 之前官方源无此包，依次尝试 apt → PPA → snap → .deb
+install_fastfetch_apt() {
+    if command -v fastfetch &> /dev/null; then
+        return 0
+    fi
+    echo "[INFO] 尝试安装 fastfetch（Ubuntu 24.10 以下官方源无此包，将依次尝试 apt/PPA/snap/.deb）..."
+    if sudo apt-get install -y fastfetch 2>/dev/null; then
+        return 0
+    fi
+    if command -v add-apt-repository &> /dev/null; then
+        echo "[INFO] 通过 PPA 安装 fastfetch..."
+        if sudo add-apt-repository -y ppa:zhangsongcui3371/fastfetch 2>/dev/null && \
+           sudo apt-get update -qq && sudo apt-get install -y fastfetch 2>/dev/null; then
+            return 0
+        fi
+    fi
+    if command -v snap &> /dev/null; then
+        echo "[INFO] 通过 Snap 安装 fastfetch..."
+        if sudo snap install fastfetch 2>/dev/null; then
+            return 0
+        fi
+    fi
+    local deb_url deb_file
+    deb_url="$(curl -sL https://api.github.com/repos/fastfetch-cli/fastfetch/releases/latest | grep "browser_download_url" | grep "linux-amd64.deb" | head -1 | sed 's/.*"browser_download_url": "\([^"]*\)".*/\1/')"
+    if [[ -n "$deb_url" ]]; then
+        deb_file="/tmp/fastfetch-linux-amd64.$$.deb"
+        echo "[INFO] 从 GitHub Releases 下载 .deb 安装 fastfetch..."
+        if (command -v wget &>/dev/null && wget -q -O "$deb_file" "$deb_url") || (command -v curl &>/dev/null && curl -sL -o "$deb_file" "$deb_url"); then
+            if sudo apt-get install -y "$deb_file" 2>/dev/null || sudo dpkg -i "$deb_file" 2>/dev/null; then
+                rm -f "$deb_file"
+                return 0
+            fi
+            rm -f "$deb_file"
+        fi
+    fi
+    return 1
+}
+
 # 安装工具
 INSTALLED=0
 FAILED=0
@@ -162,7 +230,15 @@ for tool in "${!TOOLS[@]}"; do
     fi
 
     echo "[INFO] 安装 $tool ($pkg)..."
-    if install_package "$pkg"; then
+    if [[ "$tool" == "fastfetch" ]] && [[ "$PLATFORM" == "linux" ]] && [[ "$PACKAGE_MANAGER" == "apt" ]]; then
+        if install_fastfetch_apt; then
+            echo "[SUCCESS] $tool 安装成功"
+            INSTALLED=$((INSTALLED + 1))
+        else
+            echo "[WARNING] $tool 安装失败（可稍后手动: PPA / snap / 或从 https://github.com/fastfetch-cli/fastfetch/releases 下载 .deb）"
+            FAILED=$((FAILED + 1))
+        fi
+    elif install_package "$pkg"; then
         echo "[SUCCESS] $tool 安装成功"
         INSTALLED=$((INSTALLED + 1))
     else

@@ -4,11 +4,11 @@
 
 ## ✨ 核心特性
 
-- 🚀 **一键安装**：自动检测系统、安装 chezmoi、应用所有配置
+- 🚀 **一键安装所需软件和配置**：执行 `./install.sh` 即可完成 chezmoi 安装、配置应用、run_once 软件安装及验证；**区分不同 OS**（linux/darwin/windows）与 **WSL**（Linux 子类型）。
 - 🔄 **智能同步**：配置差异自动检测和应用，软件状态智能管理
-- 🎯 **跨平台支持**：Windows、macOS、Linux（Arch/Ubuntu/CentOS/Fedora）
+- 🎯 **跨平台支持**：Windows、macOS、Linux（Arch/Ubuntu/Debian/WSL、Fedora 等）
 - 📦 **模板化管理**：使用 chezmoi 模板系统实现平台特定配置
-- 🔧 **自动化安装**：通过 `run_once_` 机制自动安装常用软件
+- 🔧 **自动化安装**：通过 `run_once_` 机制安装通用工具、字体、zsh、Neovim 等，Arch 专属由 run_on_linux 下 run_once 处理
 - 🛠️ **工具脚本集合**：跨平台脚本工具，涵盖开发、网络、媒体处理等场景
 
 ## 🚀 快速开始

@@ -118,14 +118,18 @@ install_common_tools.bat
 
 **可用的安装脚本**
 
-- `run_once_install-common-tools.sh.tmpl` - 通用工具（bat, eza, fd, ripgrep, fzf, lazygit, git-delta, gh）
+完整列表见 [SOFTWARE_LIST.md](SOFTWARE_LIST.md)（含「按 run_once 脚本索引」与按 OS 汇总）。主要 run_once 包括：
+
+- `run_once_install-common-tools.sh.tmpl` - 通用工具（bat, eza, fd, ripgrep, fzf, lazygit, git-delta, gh, btop, fastfetch 等）
+- `run_once_install-lazyssh.sh.tmpl` - lazyssh（仅 Linux）
 - `run_once_install-version-managers.sh.tmpl` - 版本管理器（fnm, uv, rustup）
 - `run_once_install-oh-my-posh.sh.tmpl` - Oh My Posh（Windows 提示符工具）
 - `run_once_install-neovim.sh.tmpl` - Neovim 编辑器
 - `run_once_install-git.sh.tmpl` - Git
-- `run_once_install-starship.sh.tmpl` - Starship 提示符（可选）
+- `run_once_install-starship.sh.tmpl` - Starship 提示符
 - `run_once_install-alacritty.sh.tmpl` - Alacritty 终端
 - `run_once_install-nerd-fonts.sh.tmpl` - Nerd Fonts 字体
+- `run_on_linux/run_once_configure-pacman.sh.tmpl`、`run_once_install-arch-base-packages.sh.tmpl`、`run_once_install-aur-helper.sh.tmpl` - 仅 Arch
 
 #### 第四步：配置所需软件
 

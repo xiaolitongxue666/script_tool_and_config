@@ -178,9 +178,41 @@ check_path_and_commands() {
     report_append ""
 }
 
-# 4. 开机启动声明
+# 4. 通用工具（btop、fastfetch 等，Linux/macOS 由 run_once_install-common-tools 安装）
+check_common_tools() {
+    local os="$1"
+    if [[ "$os" != "linux" && "$os" != "darwin" ]]; then
+        report_append "========== 4. 通用工具（btop/fastfetch） =========="
+        report_append "  状态: 跳过 (仅 Linux/macOS 检查)"
+        report_append ""
+        return 0
+    fi
+    report_append "========== 4. 通用工具（btop/fastfetch） =========="
+    local tools_ok=0
+    for cmd in btop fastfetch; do
+        if command -v "$cmd" &>/dev/null; then
+            report_append "  $cmd: $(command -v "$cmd")"
+            ((tools_ok++)) || true
+        else
+            report_append "  $cmd: 未找到"
+        fi
+    done
+    if [[ $tools_ok -eq 2 ]]; then
+        report_append "  状态: 通过 (btop、fastfetch 已安装)"
+        ((SUMMARY_PASS++)) || true
+    elif [[ $tools_ok -eq 1 ]]; then
+        report_append "  状态: 警告 (其一未安装，可由 run_once_install-common-tools 安装)"
+        ((SUMMARY_WARN++)) || true
+    else
+        report_append "  状态: 警告 (未安装，可由 run_once_install-common-tools 安装)"
+        ((SUMMARY_WARN++)) || true
+    fi
+    report_append ""
+}
+
+# 5. 开机启动声明
 check_startup_declaration() {
-    report_append "========== 4. 开机启动服务 =========="
+    report_append "========== 5. 开机启动服务 =========="
     report_append "  本项目未配置 systemd 用户服务、~/.config/autostart 等图形自启动。"
     report_append "  环境变量与 PATH 由 shell 配置文件（如 .zprofile、.bashrc）在登录时加载。"
     report_append "  状态: 已确认（无需检测服务列表）"
@@ -224,6 +256,7 @@ main() {
     check_font "$os"
     check_default_shell "$os"
     check_path_and_commands
+    check_common_tools "$os"
     check_startup_declaration
     write_report_and_summary
     return 0

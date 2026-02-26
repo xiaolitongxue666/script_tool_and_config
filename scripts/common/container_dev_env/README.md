@@ -201,7 +201,7 @@ export PROXY=192.168.1.76:7890
 
 ## 容器配置流程
 
-容器配置流程完全参考 `scripts/linux/system_basic_env/install_common_tools.sh`，分为以下阶段：
+容器配置流程参考 run_once 与 `run_on_linux` 逻辑（原 `install_common_tools.sh` 已废弃，见 [SOFTWARE_LIST.md](../../../SOFTWARE_LIST.md)），分为以下阶段：
 
 ### Phase 1: Pacman 配置优化（对应 Linux Phase 1: Pacman operations）
 - 设置代理环境变量

@@ -1,6 +1,79 @@
 # 软件清单
 
-本文档列出**项目管理的软件与 run_once 脚本对应关系**，按平台分类。环境验证与逐项检查命令见 [scripts/linux/system_basic_env/INSTALL_STATUS.md](scripts/linux/system_basic_env/INSTALL_STATUS.md)。
+本文档列出**项目管理的软件与 run_once 脚本对应关系**，按平台与脚本分类。**一键安装**所需软件与配置均通过 run_once 完成，注意**区分 OS**（linux/darwin/windows）与 **WSL**（Linux 子类型）。环境验证与逐项检查命令见 [scripts/linux/system_basic_env/INSTALL_STATUS.md](scripts/linux/system_basic_env/INSTALL_STATUS.md)。
+
+---
+
+## 按 OS 汇总（一览）
+
+### Linux（含 Arch / Ubuntu·Debian / WSL）
+
+| 类别 | 软件 |
+|------|------|
+| 版本管理 | fnm, uv, rustup（可选） |
+| 终端/Shell | starship, tmux, alacritty（可选）, zsh, oh-my-zsh, fish（可选） |
+| 文件/搜索 | bat, eza, fd, ripgrep, fzf, trash-cli |
+| 开发 | git, neovim, lazygit, git-delta, gh, lazyssh |
+| 系统监控 | btop, fastfetch |
+| 字体 | Nerd Fonts (FiraMono) |
+| 仅 Arch | Pacman 镜像与配置、Arch 基础包（base-devel, gcc, make, tree 等）、AUR 助手；窗口管理器 i3wm, dwm（可选） |
+
+说明：**WSL** 在项目中视为 Linux（多为 apt）；通用工具由同一 run_once_install-common-tools 安装，日志中会区分「Linux (WSL, apt)」与「Linux (原生, pacman/apt)」。
+
+### macOS
+
+| 类别 | 软件 |
+|------|------|
+| 版本管理 | fnm, uv, rustup（可选） |
+| 终端/Shell | starship, tmux, alacritty（可选）, zsh, oh-my-zsh, fish（可选） |
+| 文件/搜索 | bat, eza, fd, ripgrep, fzf, trash-cli |
+| 开发 | git, neovim, lazygit, git-delta, gh |
+| 系统监控 | btop, fastfetch |
+| 字体 | Nerd Fonts (FiraMono) |
+| macOS 专属 | Homebrew 配置、connect（SSH 代理）, yabai, skhd, maccy（剪贴板） |
+
+### Windows
+
+| 类别 | 软件 |
+|------|------|
+| 版本管理 | fnm, uv, rustup（可选） |
+| 终端/Shell | starship, oh-my-posh, zsh（MSYS2 可选） |
+| 文件/搜索 | bat, eza, fd, ripgrep, fzf |
+| 开发 | git, neovim, lazygit, git-delta, gh |
+| 系统监控 | bottom（btop 替代；或单独安装 btop4win） |
+| 字体 | Nerd Fonts (FiraMono) |
+
+---
+
+## 按 run_once 脚本索引
+
+| run_once 脚本 | 安装的软件/作用 | 适用 OS |
+|---------------|-----------------|--------|
+| `run_once_install-common-tools.sh.tmpl` | bat, eza, fd, ripgrep, fzf, lazygit, git-delta, gh, trash-cli, btop, fastfetch | Linux, macOS, Windows（Windows 无 btop） |
+| `run_once_install-version-managers.sh.tmpl` | fnm, uv, rustup（可选） | 多平台 |
+| `run_once_install-starship.sh.tmpl` | starship | Linux, macOS, Windows |
+| `run_once_install-tmux.sh.tmpl` | tmux, TPM 及插件 | Linux, macOS |
+| `run_once_install-alacritty.sh.tmpl` | alacritty | Linux, macOS |
+| `run_once_install-git.sh.tmpl` | git, connect-proxy（Linux） | 多平台 |
+| `run_once_install-neovim.sh.tmpl` | neovim | 多平台 |
+| `run_once_install-neovim-config.sh.tmpl` | Neovim 配置（Lazy 等） | 多平台 |
+| `run_once_install-nerd-fonts.sh.tmpl` | FiraMono Nerd Font | 多平台 |
+| `run_once_install-zsh.sh.tmpl` | zsh, oh-my-zsh 及插件 | Linux, macOS, Windows(MSYS2) |
+| `run_once_install-fish.sh.tmpl` | fish | Linux, macOS |
+| `run_once_install-lazyssh.sh.tmpl` | lazyssh | 仅 Linux |
+| `run_on_linux/run_once_configure-pacman.sh.tmpl` | Arch 镜像、pacman 配置、archlinuxcn、系统更新 | 仅 Linux 且 ID=arch |
+| `run_on_linux/run_once_install-arch-base-packages.sh.tmpl` | base-devel, gcc, make, tree, openssh 等 | 仅 Linux 且 ID=arch |
+| `run_on_linux/run_once_install-aur-helper.sh.tmpl` | yay/paru（AUR 助手） | 仅 Linux（通常 Arch） |
+| `run_once_install-i3wm.sh.tmpl` | i3wm | 仅 Linux |
+| `run_once_install-dwm.sh.tmpl` | dwm | 仅 Linux |
+| `run_once_install-oh-my-posh.sh.tmpl` | oh-my-posh | 仅 Windows |
+| `run_on_darwin/run_once_configure-homebrew.sh.tmpl` | Homebrew 配置 | 仅 macOS |
+| `run_on_darwin/run_once_install-connect.sh.tmpl` | connect（SSH 代理） | 仅 macOS |
+| `run_once_install-yabai.sh.tmpl` | yabai | 仅 macOS |
+| `run_once_install-skhd.sh.tmpl` | skhd | 仅 macOS |
+| `run_once_install-maccy.sh.tmpl` | maccy（剪贴板） | 仅 macOS |
+
+---
 
 ## 多系统共有软件
 
@@ -41,7 +114,7 @@
 | **lazygit** | Git TUI 工具 | `run_once_install-common-tools.sh.tmpl` |
 | **git-delta** | Git diff 增强工具 | `run_once_install-common-tools.sh.tmpl` |
 | **gh** | GitHub CLI | `run_once_install-common-tools.sh.tmpl` |
-| **lazyssh** | 终端 SSH 管理器 | `install_common_tools.sh` (macOS/Linux) |
+| **lazyssh** | 终端 SSH 管理器 | `run_once_install-lazyssh.sh.tmpl`（仅 Linux，按包管理器） |
 
 ### 系统工具
 
@@ -81,7 +154,7 @@
 | 软件 | 描述 | 安装脚本 |
 |------|------|----------|
 | **btop** | 系统监控工具（htop 替代） | `run_once_install-common-tools.sh.tmpl` |
-| **fastfetch** | 系统信息展示工具 | `run_once_install-common-tools.sh.tmpl` |
+| **fastfetch** | 系统信息展示工具（neofetch 替代） | `run_once_install-common-tools.sh.tmpl`；Ubuntu &lt; 24.10 无官方包，脚本依次尝试 apt → PPA → Snap → .deb |
 
 ## macOS 特有软件
 
@@ -105,7 +178,7 @@
 | 软件 | 描述 | 安装脚本 |
 |------|------|----------|
 | **btop** | 系统监控工具（htop 替代） | `run_once_install-common-tools.sh.tmpl` |
-| **fastfetch** | 系统信息展示工具 | `run_once_install-common-tools.sh.tmpl` |
+| **fastfetch** | 系统信息展示工具（neofetch 替代） | `run_once_install-common-tools.sh.tmpl`；Ubuntu &lt; 24.10 为 PPA/Snap/.deb 回退 |
 
 ## Windows 特有软件
 
@@ -151,9 +224,12 @@
 - 安装插件：`prefix + I`（大写 I）
 - 更新插件：`prefix + U`（大写 U）
 - 卸载插件：`prefix + alt + u`（小写 u）
+
+| 配置文件 | 目标位置 | 源文件 |
+|----------|----------|--------|
 | **Alacritty 配置** | `~/.config/alacritty/alacritty.toml` | `.chezmoi/dot_config/alacritty/alacritty.toml` |
 | **Fish 配置** | `~/.config/fish/config.fish` | `.chezmoi/dot_config/fish/config.fish` |
-| **SSH 配置** | `~/.ssh/config` | `.chezmoi/dot_ssh/config` |
+| **SSH 配置** | `~/.ssh/config` | `.chezmoi/dot_ssh/config.tmpl` |
 
 ### Linux 特定配置
 
@@ -235,7 +311,7 @@ chezmoi apply -v
 **lazyssh** 是一个终端 SSH 管理器，可以方便地管理 SSH 配置：
 
 - **功能**：查看、添加、编辑、删除 SSH 服务器配置
-- **安装**：通过 `install_common_tools.sh` 脚本自动安装（macOS/Linux）
+- **安装**：通过 `run_once_install-lazyssh.sh.tmpl` 一键安装（仅 Linux，按包管理器）
 - **使用**：运行 `lazyssh` 启动交互式界面
 - **配置同步**：修改后使用 `chezmoi re-add ~/.ssh/config` 同步到 chezmoi
 

@@ -1,5 +1,13 @@
 #!/usr/bin/env bash
 
+# ============================================
+# 【已废弃】本脚本不再参与一键安装；其职责已拆分到 chezmoi run_once 脚本。
+# 一键安装请使用 ./install.sh，通用工具由 run_once_install-common-tools 安装，
+# Arch 镜像/配置由 run_on_linux/run_once_configure-pacman、Arch 基础包由
+# run_on_linux/run_once_install-arch-base-packages、lazyssh 由 run_once_install-lazyssh 等处理。
+# 仅保留供参考或手动在 Arch 上做完整环境时使用。
+# ============================================
+
 # 启用严格模式：遇到错误立即退出，未定义变量报错，管道中任一命令失败则整个管道失败
 set -euo pipefail
 # 设置默认文件权限掩码

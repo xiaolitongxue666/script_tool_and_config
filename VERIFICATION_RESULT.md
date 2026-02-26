@@ -1,6 +1,6 @@
 # 验证结果与安装状态清单
 
-本文档为**当前环境**执行验证命令后的结果摘要（示例/模板）。完整验证项与检查命令见 [scripts/linux/system_basic_env/INSTALL_STATUS.md](scripts/linux/system_basic_env/INSTALL_STATUS.md)。安装或部署结束后，可运行 `./scripts/chezmoi/verify_installation.sh` 自动生成验证报告，默认写入 `~/install_verification_report_<时间>.txt`。
+本文档为**验证结果示例/模板**。**实际验证报告**以运行 `./scripts/chezmoi/verify_installation.sh` 生成为准，报告默认写入 `~/install_verification_report_<时间>.txt`，检查项包括：字体、默认 Shell、PATH/关键命令、通用工具（btop、fastfetch）、开机启动说明。完整验证项与检查命令见 [INSTALL_STATUS.md](scripts/linux/system_basic_env/INSTALL_STATUS.md)，软件与 run_once 对应见 [SOFTWARE_LIST.md](SOFTWARE_LIST.md)。
 
 ---
 
@@ -36,6 +36,8 @@
 | gh         | 已安装 | /usr/bin/gh                  |
 | git-delta  | 已安装 | /usr/bin/delta               |
 | trash-cli  | 已安装 | /usr/bin/trash               |
+| btop       | 已安装 | /usr/bin/btop（由 run_once_install-common-tools 安装） |
+| fastfetch  | 可选   | Ubuntu 24.10 以下无官方包；脚本会尝试 PPA/Snap/.deb，失败可手动见 INSTALL_GUIDE |
 
 ---
 
@@ -101,7 +103,7 @@ command -v chezmoi uv fnm lazygit
 
 ```bash
 ./scripts/linux/system_basic_env/get_wsl_system_info.sh
-command -v chezmoi git bat eza fd rg fzf fnm uv zsh nvim starship tmux lazygit gh
+command -v chezmoi git bat eza fd rg fzf fnm uv zsh nvim starship tmux lazygit gh btop
 ls -la ~/.bashrc ~/.zshrc ~/.tmux.conf ~/.gitconfig ~/.config/starship/starship.toml
 ```
 

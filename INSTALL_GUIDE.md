@@ -40,17 +40,17 @@
    `./scripts/linux/system_basic_env/get_wsl_system_info.sh`  
    可将输出保存便于排查。
 
-5. **Arch 可选**：独立脚本做完整 Arch 环境（镜像 + 基础包 + AUR 等）：  
-   `sudo ./scripts/linux/system_basic_env/install_common_tools.sh`  
-   详见 [scripts/linux/system_basic_env/README.md](scripts/linux/system_basic_env/README.md)。
+5. **一键安装即覆盖所需软件与配置**：所有软件均通过 **run_once** 脚本安装（通用工具、Arch 镜像与基础包、lazyssh、字体、zsh 等），**不再需要**独立脚本 `install_common_tools.sh`（已废弃，职责已拆分到 run_once，各脚本内区分 **OS** 与 **WSL**）。详见 [SOFTWARE_LIST.md](SOFTWARE_LIST.md) 与 [INSTALL_STATUS.md](scripts/linux/system_basic_env/INSTALL_STATUS.md)。
 
 ## 平台与发行版说明
 
+- **项目主要目标**：一键安装所需软件和配置；**区分不同 OS**（linux/darwin/windows）与 **WSL**（Linux 下通过日志区分 WSL 与原生）。
 - **Windows**：`core.longpaths = true` 仅在本平台生效；SSH 等见 os_setup_guide。
 - **macOS**：Homebrew、connect 路径、yabai/skhd 等见 run_on_darwin 与 os_setup_guide。
-- **Linux**（项目按发行版与是否 WSL 区分）：
-  - **Ubuntu/Debian / WSL**：bat→batcat、fd→fdfind 别名已配置；dwm、Pacman 配置、AUR 助手等**仅 Arch 执行的** run_once 会**自动跳过**（打 INFO 并 exit 0），不会导致 `chezmoi apply` 失败；代理在 WSL 下为宿主机 IP（见上文 WSL SSH 小节）。lazygit 不在默认 apt 源，见 SOFTWARE_LIST。
-  - **Arch**：pacman + AUR；run_on_linux 下 Pacman 镜像、AUR 助手、dwm/i3wm 等正常执行；镜像与 pacman 直连国内源、禁用代理。
+- **Linux**（按发行版与是否 WSL 区分）：
+  - **通用工具**（bat, eza, fd, btop, fastfetch, lazygit, gh 等）：由 **run_once_install-common-tools** 安装，适用于**所有** Linux（含 **Arch**、**Ubuntu/Debian**、**WSL**）与 macOS。
+  - **Ubuntu/Debian / WSL**：bat→batcat、fd→fdfind 别名已配置；**fastfetch** 在 Ubuntu 24.10 之前官方源无此包，脚本会依次尝试 **apt → PPA（zhangsongcui3371/fastfetch）→ Snap → GitHub .deb** 安装；Pacman/AUR 等**仅 Arch 执行的** run_once 会**自动跳过**；代理在 WSL 下为宿主机 IP（见上文 WSL SSH 小节）。
+  - **Arch**：run_on_linux 下 Pacman 镜像、Arch 基础包、AUR 助手、dwm/i3wm 等执行；镜像与 pacman 直连国内源、禁用代理。
 
 部分 run_once（如 dwm、i3wm、alacritty）在部分环境下可能未安装成功，会打 WARNING 并继续 apply，属预期；详见 [SOFTWARE_LIST.md](SOFTWARE_LIST.md) 与 [scripts/linux/system_basic_env/INSTALL_STATUS.md](scripts/linux/system_basic_env/INSTALL_STATUS.md)。
 

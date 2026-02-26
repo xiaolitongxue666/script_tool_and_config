@@ -1,0 +1,61 @@
+{{- if eq .chezmoi.os "linux" -}}
+#!/bin/bash
+
+# ============================================
+# Arch Linux 基础/构建包安装（chezmoi run_once_）
+# 仅 Arch 执行；其他 Linux（Ubuntu/Debian/WSL 等）跳过
+# 与 run_once_install-common-tools 等不重复，补足 base-devel、构建工具等
+# OS 区分：仅 linux 且 ID=arch
+# ============================================
+
+# 仅 Arch Linux 执行
+if [[ ! -f /etc/os-release ]]; then
+    exit 0
+fi
+# shellcheck disable=SC1091
+source /etc/os-release
+if [[ "${ID:-}" != "arch" ]]; then
+    echo "[INFO] 当前为 ${ID:-unknown}，跳过 Arch 基础包安装（仅 Arch Linux 执行）"
+    exit 0
+fi
+
+echo "[INFO] 环境: Linux (Arch)，安装基础/构建包..."
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="${CHEZMOI_PROJECT_ROOT:-$(cd "${SCRIPT_DIR}/../../.." && pwd 2>/dev/null || echo "$HOME")}"
+COMMON_INSTALL="${PROJECT_ROOT}/scripts/chezmoi/common_install.sh"
+if [[ ! -f "$COMMON_INSTALL" ]]; then
+    COMMON_INSTALL="$HOME/.local/share/chezmoi/scripts/chezmoi/common_install.sh"
+fi
+
+if [[ -f "$COMMON_INSTALL" ]]; then
+    # shellcheck disable=SC1090
+    source "$COMMON_INSTALL"
+else
+    function log_info() { echo "[INFO] $*"; }
+    function log_warning() { echo "[WARNING] $*"; }
+fi
+
+# 与 run_once_install-common-tools、run_once_install-neovim 等不重复的基础/构建包
+ARCH_BASE_PACKAGES=(
+    base-devel
+    gcc make tree
+    openssh iputils file
+    cmake ctags
+    unzip zip which
+    net-tools
+    aria2 curl wget
+)
+
+if ! command -v pacman &>/dev/null; then
+    log_warning "未找到 pacman，跳过 Arch 基础包安装"
+    exit 0
+fi
+
+log_info "安装 Arch 基础/构建包: ${ARCH_BASE_PACKAGES[*]}"
+if sudo pacman -S --needed --noconfirm "${ARCH_BASE_PACKAGES[@]}" 2>/dev/null; then
+    echo "[SUCCESS] Arch 基础包安装完成"
+else
+    echo "[WARNING] 部分 Arch 基础包安装失败或已存在，继续"
+fi
+{{- end -}}

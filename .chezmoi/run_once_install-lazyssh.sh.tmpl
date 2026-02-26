@@ -1,0 +1,64 @@
+{{- if eq .chezmoi.os "linux" -}}
+#!/bin/bash
+
+# ============================================
+# lazyssh 安装脚本（chezmoi run_once_）
+# SSH 管理器，仅 Linux；按包管理器区分（Arch 可用 AUR，Ubuntu 等可 apt 或跳过）
+# OS 区分：仅 linux
+# ============================================
+
+if command -v lazyssh &>/dev/null; then
+    echo "[INFO] lazyssh 已安装: $(lazyssh --version 2>/dev/null || echo 'unknown')"
+    exit 0
+fi
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="${CHEZMOI_PROJECT_ROOT:-$(cd "${SCRIPT_DIR}/../.." && pwd 2>/dev/null || echo "$HOME")}"
+COMMON_INSTALL="${PROJECT_ROOT}/scripts/chezmoi/common_install.sh"
+if [[ ! -f "$COMMON_INSTALL" ]]; then
+    COMMON_INSTALL="$HOME/.local/share/chezmoi/scripts/chezmoi/common_install.sh"
+fi
+
+if [[ -f "$COMMON_INSTALL" ]]; then
+    # shellcheck disable=SC1090
+    source "$COMMON_INSTALL"
+else
+    function log_info() { echo "[INFO] $*"; }
+    function log_warning() { echo "[WARNING] $*"; }
+fi
+
+setup_proxy "${PROXY:-${http_proxy:-http://127.0.0.1:7890}}"
+detect_os_and_package_manager || exit 1
+
+if [[ "$PLATFORM" != "linux" ]]; then
+    log_info "lazyssh 仅支持 Linux，跳过"
+    exit 0
+fi
+
+echo "[INFO] 安装 lazyssh（OS: Linux, 包管理器: $PACKAGE_MANAGER）..."
+
+if [[ "$PACKAGE_MANAGER" == "pacman" ]]; then
+    # Arch: 先尝试官方/archlinuxcn，再尝试 AUR
+    if sudo pacman -S --needed --noconfirm lazyssh 2>/dev/null; then
+        echo "[SUCCESS] lazyssh 安装完成（pacman）"
+        exit 0
+    fi
+    for aur in yay paru; do
+        if command -v "$aur" &>/dev/null; then
+            if "$aur" -S --noconfirm lazyssh-bin 2>/dev/null || "$aur" -S --noconfirm lazyssh 2>/dev/null; then
+                echo "[SUCCESS] lazyssh 安装完成（$aur）"
+                exit 0
+            fi
+        fi
+    done
+    log_warning "Arch 下未找到 lazyssh 或 AUR 助手，可稍后手动安装"
+elif [[ "$PACKAGE_MANAGER" == "apt" ]]; then
+    if sudo apt-get update -qq && sudo apt-get install -y lazyssh 2>/dev/null; then
+        echo "[SUCCESS] lazyssh 安装完成（apt）"
+    else
+        log_warning "apt 源中可能无 lazyssh，跳过；可从 GitHub Releases 手动安装"
+    fi
+else
+    log_warning "未支持的包管理器 $PACKAGE_MANAGER，跳过 lazyssh"
+fi
+{{- end -}}

@@ -223,6 +223,6 @@ fi
 
 ## 相关脚本
 
-- `scripts/linux/system_basic_env/install_common_tools.sh` - Linux 版本
+- `scripts/linux/system_basic_env/install_common_tools.sh` - 已废弃，见 [SOFTWARE_LIST.md](../../../SOFTWARE_LIST.md) 与项目根目录 `./install.sh`（run_once）
 - `scripts/windows/system_basic_env/install_common_tools.ps1` - Windows 版本
 

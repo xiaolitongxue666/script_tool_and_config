@@ -4,7 +4,7 @@
 
 - **get_wsl_system_info.sh**：获取 WSL/Linux 版本与环境信息（只读）。
 - **configure_china_mirrors.sh**：配置 Arch 中国镜像源。
-- **install_common_tools.sh**：Arch 完整环境（镜像 + 基础包 + AUR + Neovim 等）。
+- **install_common_tools.sh**：Arch 完整环境（镜像 + 基础包 + AUR + Neovim 等）。**已废弃**：通用一键安装请使用项目根目录 `./install.sh`，软件与 run_once 对应见 [SOFTWARE_LIST.md](../../../SOFTWARE_LIST.md)。
 
 ---
 
@@ -48,7 +48,9 @@ sudo ./configure_china_mirrors.sh
 
 ---
 
-## 2. install_common_tools.sh - 安装常用工具
+## 2. install_common_tools.sh - 安装常用工具（已废弃，Arch 仍可本地使用）
+
+> **说明**：该脚本已废弃，职责已拆分到 run_once。跨平台一键安装请使用项目根目录 `./install.sh`，完整列表见 [SOFTWARE_LIST.md](../../../SOFTWARE_LIST.md)。
 
 ### 功能说明
 完整的 Arch Linux 系统工具安装脚本，包括：
