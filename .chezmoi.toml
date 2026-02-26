@@ -9,12 +9,11 @@
     arch = "{{ .chezmoi.arch }}"
     hostname = "{{ .chezmoi.hostname }}"
 
-    # 代理配置
-    # 优先级：环境变量 PROXY > http_proxy > 默认值
-    # 默认代理地址：http://127.0.0.1:7890
-    # 使用方式：export PROXY="http://127.0.0.1:7890" 或在 .chezmoi.toml 中修改
-    proxy = "{{ envOrDefault \"PROXY\" (envOrDefault \"http_proxy\" \"http://127.0.0.1:7890\") }}"
-    proxy_host = "127.0.0.1"
+    # 代理配置（严格区分 OS 与 WSL：WSL 下默认用宿主机 IP，否则 127.0.0.1）
+    # 优先级：环境变量 PROXY > http_proxy > 默认值（Linux 下 output 检测 WSL 后决定）
+    # 使用方式：export PROXY="http://127.0.0.1:7890" 或 WSL 下由 install.sh 自动设宿主机 IP
+    proxy = "{{ or (env \"PROXY\") (env \"http_proxy\") (output \"sh\" \"-c\" \"if [ \\\"$(uname -s)\\\" != \\\"Linux\\\" ]; then echo \\\"http://127.0.0.1:7890\\\"; elif grep -qEi Microsoft /proc/version 2>/dev/null; then h=$(awk '/^nameserver / {print \\$2; exit}' /etc/resolv.conf 2>/dev/null); [ -n \\\"$h\\\" ] && echo \\\"http://\\\"$h\\\":7890\\\" || echo \\\"http://127.0.0.1:7890\\\"; else echo \\\"http://127.0.0.1:7890\\\"; fi\" | trim) }}"
+    proxy_host = "{{ or (env \"PROXY_HOST\") (output \"sh\" \"-c\" \"if [ \\\"$(uname -s)\\\" != \\\"Linux\\\" ]; then echo 127.0.0.1; elif grep -qEi Microsoft /proc/version 2>/dev/null; then awk '/^nameserver / {print \\$2; exit}' /etc/resolv.conf 2>/dev/null || echo 127.0.0.1; else echo 127.0.0.1; fi\" | trim) }}"
     proxy_port = "7890"
 
     # 包管理器自动检测

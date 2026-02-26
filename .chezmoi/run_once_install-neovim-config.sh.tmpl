@@ -4,10 +4,12 @@
 # ============================================
 # Neovim 配置安装脚本（通过 Git Submodule 管理）
 # ============================================
-# 此脚本负责：
-# 1. 初始化 Git Submodule（如果未初始化）
-# 2. 运行 Neovim 配置的安装脚本
-# 3. 确保前置依赖（uv, fnm）已安装
+# 依赖执行顺序：run_once_00-install-version-managers 必须先执行并验证 uv、fnm 后再运行本脚本
+# 本脚本负责：
+# 1. 校验前置（uv、fnm、nvim）已安装并可用
+# 2. 初始化 Git Submodule（如未初始化）
+# 3. 运行 Neovim 配置的安装脚本（dotfiles/nvim/install.sh）
+# 4. 引导 lazy.nvim 与插件
 # ============================================
 
 set -e
@@ -37,40 +39,52 @@ log_error() {
 }
 
 # ============================================
-# 检查前置依赖
+# 检查前置依赖（仅日志）
 # ============================================
 check_prerequisites() {
     log_info "检查前置依赖..."
-
-    # 检查 uv
-    if ! command -v uv >/dev/null 2>&1; then
-        log_warning "uv 未安装，Neovim Python 环境可能无法正常工作"
-        log_info "请先运行 run_once_install-version-managers.sh.tmpl 安装 uv"
-    else
+    if command -v uv >/dev/null 2>&1; then
         log_success "uv 已安装: $(uv --version | head -n 1)"
-    fi
-
-    # 检查 fnm
-    if ! command -v fnm >/dev/null 2>&1; then
-        log_warning "fnm 未安装，Neovim Node.js 环境可能无法正常工作"
-        log_info "请先运行 run_once_install-version-managers.sh.tmpl 安装 fnm"
     else
+        log_warning "uv 未安装"
+    fi
+    if command -v fnm >/dev/null 2>&1; then
         log_success "fnm 已安装: $(fnm --version)"
-    fi
-
-    # 检查 Neovim
-    if ! command -v nvim >/dev/null 2>&1; then
-        log_warning "Neovim 未安装，请先安装 Neovim"
-        {{ if eq .chezmoi.os "linux" }}
-        log_info "Linux: sudo pacman -S neovim 或 sudo apt-get install neovim"
-        {{ else if eq .chezmoi.os "darwin" }}
-        log_info "macOS: brew install neovim"
-        {{ else if eq .chezmoi.os "windows" }}
-        log_info "Windows: 从 https://github.com/neovim/neovim/releases 下载安装"
-        {{ end }}
     else
-        log_success "Neovim 已安装: $(nvim --version | head -n 1)"
+        log_warning "fnm 未安装"
     fi
+    if command -v nvim >/dev/null 2>&1; then
+        log_success "Neovim 已安装: $(nvim --version | head -n 1)"
+    else
+        log_warning "Neovim 未安装"
+    fi
+}
+
+# ============================================
+# 校验前置：uv、fnm、nvim 必须已安装并可用，否则不安装子项目
+# 执行顺序依赖 run_once_00-install-version-managers 先于本脚本执行
+# ============================================
+verify_nvim_prerequisites() {
+    log_info "校验前置（uv、fnm、nvim）..."
+    local missing=""
+    if ! command -v uv >/dev/null 2>&1; then
+        missing="${missing} uv"
+    fi
+    if ! command -v fnm >/dev/null 2>&1; then
+        missing="${missing} fnm"
+    fi
+    if ! command -v nvim >/dev/null 2>&1; then
+        missing="${missing} nvim"
+    fi
+    if [[ -n "${missing}" ]]; then
+        log_error "缺少前置:${missing}。请先完成 00-install-version-managers 与 Neovim 安装后再次执行 ./install.sh"
+        log_info "run_once 执行顺序：00-install-version-managers（uv/fnm）→ install-neovim（nvim）→ install-neovim-config"
+        exit 1
+    fi
+    uv --version &>/dev/null || { log_error "uv 不可用"; exit 1; }
+    fnm --version &>/dev/null || { log_error "fnm 不可用"; exit 1; }
+    nvim --version &>/dev/null || { log_error "nvim 不可用"; exit 1; }
+    log_success "前置校验通过"
 }
 
 # ============================================
@@ -84,12 +98,12 @@ init_submodule() {
         log_info "Neovim Submodule 未初始化，开始初始化..."
         cd "${PROJECT_ROOT}" || exit 1
 
-        PROXY_URL="${PROXY:-{{ env "http_proxy" | default "http://127.0.0.1:7890" }}}"
+        PROXY_URL="${PROXY:-{{ env "http_proxy" | default .proxy | default "http://127.0.0.1:7890" }}}"
         export http_proxy="$PROXY_URL"
         export https_proxy="$PROXY_URL"
         export HTTP_PROXY="$PROXY_URL"
         export HTTPS_PROXY="$PROXY_URL"
-        log_info "代理环境: $PROXY_URL（SSH 克隆不走代理；仅 HTTPS 回退时使用）"
+        log_info "代理环境: $PROXY_URL（区分 OS/WSL；SSH 克隆不走代理，仅 HTTPS 回退时使用）"
 
         submodule_ok=false
         if git submodule update --init --recursive dotfiles/nvim 2>&1; then
@@ -128,8 +142,8 @@ run_nvim_install() {
     log_info "运行 Neovim 配置安装脚本..."
     chmod +x "${NVIM_INSTALL_SCRIPT}"
 
-    # 设置代理环境变量（使用 PROXY 或 http_proxy）
-    PROXY_URL="${PROXY:-{{ env "http_proxy" | default "http://127.0.0.1:7890" }}}"
+    # 设置代理环境变量（优先 PROXY/http_proxy，否则用 data .proxy（WSL 下已为宿主机 IP））
+    PROXY_URL="${PROXY:-{{ env "http_proxy" | default .proxy | default "http://127.0.0.1:7890" }}}"
     export http_proxy="$PROXY_URL"
     export https_proxy="$PROXY_URL"
     export HTTP_PROXY="$PROXY_URL"
@@ -141,6 +155,46 @@ run_nvim_install() {
     else
         log_error "Neovim 配置安装失败"
         exit 1
+    fi
+}
+
+# ============================================
+# 引导 lazy.nvim 与插件（一键安装时预装，避免首次启动 nvim 再 clone 导致 127.0.0.1 代理失败）
+# ============================================
+# 依赖此时 ~/.gitconfig 已由 chezmoi 写入正确代理（WSL 下为宿主机 IP），run_once 继承的 PROXY/http_proxy 与 install.sh 一致
+bootstrap_lazy_plugins() {
+    if [ "${NVIM_SKIP_BOOTSTRAP:-0}" = "1" ]; then
+        log_info "跳过 LazyVim 插件引导（NVIM_SKIP_BOOTSTRAP=1）"
+        return 0
+    fi
+    if ! command -v nvim >/dev/null 2>&1; then
+        log_warning "未找到 nvim，跳过插件引导"
+        return 0
+    fi
+    if [ ! -f "${NVIM_CONFIG_DIR}/init.lua" ]; then
+        log_warning "Neovim 配置目录不完整，跳过插件引导"
+        return 0
+    fi
+    # 强制写入 Git GitHub 代理，避免 nvim 内 git clone lazy.nvim 仍走 127.0.0.1（WSL 下必为宿主机 IP）
+    if [ -n "${PROXY_URL:-}" ]; then
+        git config --global http.https://github.com.proxy "${PROXY_URL}" 2>/dev/null || true
+        git config --global https.https://github.com.proxy "${PROXY_URL}" 2>/dev/null || true
+        log_info "已设置 Git GitHub 代理: ${PROXY_URL}"
+    fi
+    log_info "引导 lazy.nvim 与插件（headless）..."
+    local timeout_sec="${NVIM_BOOTSTRAP_TIMEOUT:-300}"
+    if command -v timeout >/dev/null 2>&1; then
+        if timeout "${timeout_sec}" nvim --headless +qa 2>&1; then
+            log_success "lazy.nvim 与插件引导完成"
+        else
+            log_warning "headless 引导未在 ${timeout_sec}s 内完成或失败，首次启动 nvim 时会继续安装插件"
+        fi
+    else
+        if nvim --headless +qa 2>&1; then
+            log_success "lazy.nvim 与插件引导完成"
+        else
+            log_warning "headless 引导失败，首次启动 nvim 时会继续安装插件"
+        fi
     fi
 }
 
@@ -167,8 +221,18 @@ main() {
     log_info "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
     check_prerequisites
+    verify_nvim_prerequisites
+    # 统一设置代理（供 init_submodule、run_nvim_install、bootstrap_lazy_plugins 及 Git clone lazy.nvim 使用）
+    PROXY_URL="${PROXY:-{{ env "http_proxy" | default .proxy | default "http://127.0.0.1:7890" }}}"
+    export PROXY_URL
+    export http_proxy="$PROXY_URL"
+    export https_proxy="$PROXY_URL"
+    export HTTP_PROXY="$PROXY_URL"
+    export HTTPS_PROXY="$PROXY_URL"
+    log_info "代理: ${PROXY_URL}（WSL 下应为宿主机 IP，避免 clone lazy.nvim 连 127.0.0.1 失败）"
     init_submodule
     run_nvim_install
+    bootstrap_lazy_plugins
     verify_installation
 
     log_info ""
@@ -176,7 +240,7 @@ main() {
     log_info ""
     log_info "使用说明："
     log_info "  1. 运行 nvim 启动 Neovim"
-    log_info "  2. 首次启动时会自动安装插件（可能需要一些时间）"
+    log_info "  2. 插件已在一键安装时引导（若跳过则首次启动时会自动安装）"
     log_info "  3. 更新配置: cd ${NVIM_SUBMODULE_DIR} && git pull && ./install.sh"
     log_info ""
 }

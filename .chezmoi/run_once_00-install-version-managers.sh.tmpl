@@ -2,9 +2,8 @@
 #!/bin/bash
 
 # ============================================
-# 版本管理器安装脚本（chezmoi run_once_）
-# 安装 fnm, uv, rustup (可选)
-# 支持所有平台
+# 00：版本管理器（前置）— 必须先于 Neovim 配置安装
+# 安装并验证 fnm、uv，供 run_once_install-neovim-config 使用
 # ============================================
 
 # 获取 common_install.sh 路径
@@ -67,7 +66,7 @@ setup_proxy "${PROXY:-{{ env "http_proxy" | default "http://127.0.0.1:7890" }}}"
 # 检测操作系统和包管理器
 detect_os_and_package_manager || exit 1
 
-echo "[INFO] 开始安装版本管理器..."
+echo "[INFO] [00] 安装版本管理器（Neovim 配置前置）..."
 
 # 安装 fnm (Fast Node Manager)
 if command -v fnm &> /dev/null; then
@@ -162,6 +161,17 @@ else
     echo "[INFO] 跳过 rustup 安装（设置 INSTALL_RUSTUP=1 以启用）"
 fi
 
-echo "[SUCCESS] 版本管理器安装完成"
+# 验证：确保 uv、fnm 可用后再继续（Neovim 配置依赖）
+echo "[INFO] 验证前置：uv、fnm..."
+if ! command -v uv &> /dev/null; then
+    echo "[ERROR] 验证失败：uv 未找到，Neovim 配置将无法安装。请检查 PATH 或重新执行 ./install.sh"
+    exit 1
+fi
+if ! command -v fnm &> /dev/null; then
+    echo "[ERROR] 验证失败：fnm 未找到，Neovim 配置将无法安装。请检查 PATH 或重新执行 ./install.sh"
+    exit 1
+fi
+uv --version &>/dev/null || { echo "[ERROR] uv 不可用"; exit 1; }
+fnm --version &>/dev/null || { echo "[ERROR] fnm 不可用"; exit 1; }
+echo "[SUCCESS] 版本管理器安装并验证完成（uv、fnm 可用）"
 {{- end -}}
-

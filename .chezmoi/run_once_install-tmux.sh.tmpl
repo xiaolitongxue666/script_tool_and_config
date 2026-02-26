@@ -47,9 +47,17 @@ else
     }
 fi
 
-# 设置代理（优先使用环境变量，否则使用默认值）
-# 代理由环境变量 PROXY/http_proxy 提供，与 install.sh 导出一致
-PROXY_VALUE="${PROXY:-${http_proxy:-${HTTP_PROXY:-http://127.0.0.1:7890}}}"
+# 设置代理（严格区分 OS 与 WSL：有 env 用 env，无则 WSL 用宿主机 IP，否则 127.0.0.1）
+# 与 install.sh 导出一致；避免 WSL 下写死 127.0.0.1 导致 git clone 失败
+PROXY_VALUE="${PROXY:-${http_proxy:-${HTTP_PROXY:-}}}"
+if [ -z "$PROXY_VALUE" ]; then
+    if [ "$(uname -s)" = "Linux" ] && grep -qEi Microsoft /proc/version 2>/dev/null; then
+        _proxy_host=$(awk '/^nameserver / {print $2; exit}' /etc/resolv.conf 2>/dev/null)
+        [ -n "$_proxy_host" ] && PROXY_VALUE="http://${_proxy_host}:7890" || PROXY_VALUE="http://127.0.0.1:7890"
+    else
+        PROXY_VALUE="http://127.0.0.1:7890"
+    fi
+fi
 setup_proxy "$PROXY_VALUE"
 
 # 检测操作系统和包管理器

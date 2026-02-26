@@ -345,6 +345,8 @@ scripts/windows/system_basic_env/*.backup
 /.audit_configs_report.txt
 /install_verification_report_*.txt
 /VERIFICATION_REPORT.txt
+# 一键安装脚本日志（tee 生成，便于排错）
+/install_*.log
 
 # 容器开发环境临时文件
 scripts/common/container_dev_env/test_*.sh

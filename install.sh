@@ -40,6 +40,13 @@ fi
 TEMP_DIR=$(mktemp -d)
 trap "rm -rf '$TEMP_DIR'" EXIT INT TERM
 
+# ============================================
+# 安装日志（tee 同时输出到终端与文件，便于排错；该 log 已由 .gitignore 忽略）
+# ============================================
+INSTALL_LOG="${SCRIPT_DIR}/install_$(date +%Y%m%d_%H%M%S).log"
+exec > >(tee -a "$INSTALL_LOG") 2>&1
+echo "[INFO] 安装日志: ${INSTALL_LOG}"
+
 start_script "一键安装脚本"
 
 # ============================================

@@ -122,7 +122,7 @@ install_common_tools.bat
 
 - `run_once_install-common-tools.sh.tmpl` - 通用工具（bat, eza, fd, ripgrep, fzf, lazygit, git-delta, gh, btop, fastfetch 等）
 - `run_once_install-lazyssh.sh.tmpl` - lazyssh（仅 Linux）
-- `run_once_install-version-managers.sh.tmpl` - 版本管理器（fnm, uv, rustup）
+- `run_once_00-install-version-managers.sh.tmpl` - 版本管理器（fnm, uv, rustup）；执行顺序优先，为 Neovim 配置前置
 - `run_once_install-oh-my-posh.sh.tmpl` - Oh My Posh（Windows 提示符工具）
 - `run_once_install-neovim.sh.tmpl` - Neovim 编辑器
 - `run_once_install-git.sh.tmpl` - Git

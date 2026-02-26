@@ -47,10 +47,12 @@
 
 ## 按 run_once 脚本索引
 
+**执行顺序**：run_once 按目标名字母序执行。Neovim 配置依赖 uv、fnm、nvim，故使用 `00-install-version-managers` 与 `install-neovim` 确保先于 `install-neovim-config` 执行：**00-install-version-managers**（uv/fnm）→ **install-neovim**（nvim 二进制）→ **install-neovim-config**（子项目与 Lazy 插件）。
+
 | run_once 脚本 | 安装的软件/作用 | 适用 OS |
 |---------------|-----------------|--------|
 | `run_once_install-common-tools.sh.tmpl` | bat, eza, fd, ripgrep, fzf, lazygit, git-delta, gh, trash-cli, btop, fastfetch | Linux, macOS, Windows（Windows 无 btop） |
-| `run_once_install-version-managers.sh.tmpl` | fnm, uv, rustup（可选） | 多平台 |
+| `run_once_00-install-version-managers.sh.tmpl` | fnm, uv, rustup（可选）；**执行顺序优先**，为 Neovim 配置前置 | 多平台 |
 | `run_once_install-starship.sh.tmpl` | starship | Linux, macOS, Windows |
 | `run_once_install-tmux.sh.tmpl` | tmux, TPM 及插件 | Linux, macOS |
 | `run_once_install-alacritty.sh.tmpl` | alacritty | Linux, macOS |
@@ -81,9 +83,9 @@
 
 | 软件 | 描述 | 安装脚本 |
 |------|------|----------|
-| **fnm** | Fast Node Manager (Node.js 版本管理) | `run_once_install-version-managers.sh.tmpl` |
-| **uv** | Python 包管理器 | `run_once_install-version-managers.sh.tmpl` |
-| **rustup** | Rust 工具链（可选） | `run_once_install-version-managers.sh.tmpl` |
+| **fnm** | Fast Node Manager (Node.js 版本管理) | `run_once_00-install-version-managers.sh.tmpl` |
+| **uv** | Python 包管理器 | `run_once_00-install-version-managers.sh.tmpl` |
+| **rustup** | Rust 工具链（可选） | `run_once_00-install-version-managers.sh.tmpl` |
 
 ### 终端工具
 

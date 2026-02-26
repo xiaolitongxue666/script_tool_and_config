@@ -25,7 +25,7 @@
 	lowSpeedTime = 999999
 
 [http "https://github.com"]
-	proxy = {{ .proxy | default "http://127.0.0.1:7890" }}
+	proxy = {{ or (env "http_proxy") .proxy "http://127.0.0.1:7890" }}
 
 [https "https://github.com"]
-	proxy = {{ .proxy | default "http://127.0.0.1:7890" }}
+	proxy = {{ or (env "http_proxy") .proxy "http://127.0.0.1:7890" }}

@@ -5,9 +5,9 @@
     os = "{{ .chezmoi.os }}"
     arch = "{{ .chezmoi.arch }}"
     hostname = "{{ .chezmoi.hostname }}"
-    # 代理配置（默认 127.0.0.1:7890，可通过环境变量覆盖）
-    proxy = "{{ envOrDefault \"PROXY\" (envOrDefault \"http_proxy\" \"http://127.0.0.1:7890\") }}"
-    proxy_host = "127.0.0.1"
+    # 代理配置（严格区分 OS 与 WSL：WSL 下默认宿主机 IP，原生 Linux/macOS/Windows 为 127.0.0.1）
+    proxy = "{{ or (env \"PROXY\") (env \"http_proxy\") (output \"sh\" \"-c\" \"if [ \\\"$(uname -s)\\\" != \\\"Linux\\\" ]; then echo \\\"http://127.0.0.1:7890\\\"; elif grep -qEi Microsoft /proc/version 2>/dev/null; then h=$(awk '/^nameserver / {print \\$2; exit}' /etc/resolv.conf 2>/dev/null); [ -n \\\"$h\\\" ] && echo \\\"http://\\\"$h\\\":7890\\\" || echo \\\"http://127.0.0.1:7890\\\"; else echo \\\"http://127.0.0.1:7890\\\"; fi\" | trim) }}"
+    proxy_host = "{{ or (env \"PROXY_HOST\") (output \"sh\" \"-c\" \"if [ \\\"$(uname -s)\\\" != \\\"Linux\\\" ]; then echo 127.0.0.1; elif grep -qEi Microsoft /proc/version 2>/dev/null; then awk '/^nameserver / {print \\$2; exit}' /etc/resolv.conf 2>/dev/null || echo 127.0.0.1; else echo 127.0.0.1; fi\" | trim) }}"
     proxy_port = "7890"
     # 平台特定的包管理器（使用静态检测，避免 exec 导致卡住）
     # 注意：exec 函数在模板解析时执行外部命令，可能导致卡住
