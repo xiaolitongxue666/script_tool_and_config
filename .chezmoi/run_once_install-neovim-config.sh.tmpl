@@ -195,13 +195,20 @@ bootstrap_lazy_plugins() {
         git config --global https.https://github.com.proxy "${PROXY_URL}" 2>/dev/null || true
         log_info "已设置 Git GitHub 代理: ${PROXY_URL}"
     fi
-    # 使用 Lazy! sync 等待插件安装完成后再 +qa，避免仅 +qa 导致未等待安装就退出、一键安装流程卡住
+    # 使用 Lazy! sync 等待插件安装完成后再 +qa；加超时避免因网络/插件过多导致一键安装一直卡住
     # 参见 https://github.com/folke/lazy.nvim#-usage 中 "Lazy! sync" 会等待完成
-    log_info "引导 lazy.nvim 与插件（headless，完成后自动退出）..."
-    if nvim --headless "+Lazy! sync" +qa 2>&1; then
+    # 超时时间（秒），可环境变量覆盖：NVIM_LAZY_SYNC_TIMEOUT=600
+    LAZY_SYNC_TIMEOUT="${NVIM_LAZY_SYNC_TIMEOUT:-600}"
+    log_info "引导 lazy.nvim 与插件（headless，最长等待 ${LAZY_SYNC_TIMEOUT}s，完成后自动退出）..."
+    if timeout "${LAZY_SYNC_TIMEOUT}" nvim --headless "+Lazy! sync" +qa 2>&1; then
         log_success "lazy.nvim 与插件引导完成"
     else
-        log_warning "headless 引导失败或部分插件未安装，首次启动 nvim 时会继续安装"
+        local exit_code=$?
+        if [ "$exit_code" = 124 ]; then
+            log_warning "lazy.nvim 引导超时（${LAZY_SYNC_TIMEOUT}s），首次启动 nvim 时会继续安装"
+        else
+            log_warning "headless 引导失败或部分插件未安装，首次启动 nvim 时会继续安装"
+        fi
     fi
 }
 

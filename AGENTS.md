@@ -28,6 +28,15 @@ chezmoi apply -v           # 应用更改
 ./scripts/chezmoi/diagnose_chezmoi.sh  # 验证配置
 ```
 
+### Neovim 健康检查
+
+一键安装后可选生成 checkhealth 日志并据此修复：
+
+```bash
+./scripts/common/utils/nvim_checkhealth_to_log.sh   # 生成 nvim_checkhealth.log
+# 查看 log 中 ERROR/WARNING，按 dotfiles/nvim/README.md「常见 checkhealth 问题与处理」修复
+```
+
 ### 测试
 
 无自动化测试。手动运行 `test_*.sh` 脚本。
