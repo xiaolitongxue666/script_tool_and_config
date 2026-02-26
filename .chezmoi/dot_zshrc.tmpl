@@ -248,7 +248,9 @@ setopt PUSHD_IGNORE_DUPS      # 忽略重复目录
 setopt PUSHD_SILENT           # pushd 时不打印目录栈
 
 # 其他选项
-setopt CORRECT                # 命令拼写纠正
+# 关闭命令/参数拼写纠错，避免输错命令时出现 [nyae]? 提示、需多按一次键；关闭后输错会直接报错，可立即重新输入
+unsetopt correct
+unsetopt correct_all
 setopt EXTENDED_GLOB          # 扩展通配符
 
 # ============================================

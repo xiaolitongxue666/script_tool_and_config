@@ -449,7 +449,7 @@ chezmoi apply -v
 安装完成后，配置文件会部署到以下位置：
 
 **Shell 配置**
-- `~/.zshrc` - Zsh 配置
+- `~/.zshrc` - Zsh 配置（已关闭 `correct`/`correct_all`，输错命令不会出现纠错提示，可直接重新输入）
 - `~/.zprofile` - Zsh 启动配置
 - `~/.config/fish/config.fish` - Fish Shell 配置
 

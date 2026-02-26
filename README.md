@@ -241,6 +241,8 @@ git commit -m "Update zsh config"
 git push
 ```
 
+本项目提供的 `~/.zshrc` 已关闭 zsh 拼写纠错（`correct`/`correct_all`），输错命令不会出现 `[nyae]?` 提示，可直接重新输入。
+
 ### 智能安装机制
 
 `install.sh` 脚本提供智能功能：
