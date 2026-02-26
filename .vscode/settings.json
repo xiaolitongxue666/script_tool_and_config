@@ -40,6 +40,9 @@
     "*.bat": "bat",
     "*.cmd": "bat",
     "*.ps1": "powershell"
-  }
+  },
+
+  // 9. WSL/Linux 下集成终端默认使用 zsh（Cursor 连接 WSL 时新建终端会开 zsh 而非 bash）
+  "terminal.integrated.defaultProfile.linux": "zsh"
 }
 
