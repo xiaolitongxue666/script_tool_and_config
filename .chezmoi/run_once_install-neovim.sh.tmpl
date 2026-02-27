@@ -200,7 +200,7 @@ if is_nvim_version_ge_0_11; then
     echo "[SUCCESS] Neovim 安装/升级成功 (>= 0.11.0): $(nvim --version | head -n 1)"
     echo "[INFO] Neovim 配置文件位于: ~/.config/nvim/"
     echo "[INFO] 如果使用 Git Submodule 管理配置，请运行:"
-    echo "       git submodule update --init dotfiles/nvim"
+    echo "       run_once_install-neovim-config 会将 nvim 克隆到 ~/.config/nvim"
 else
     echo "[WARNING] Neovim 可能未正确安装或版本仍低于 0.11.0，请检查 PATH 或手动从 https://github.com/neovim/neovim-releases/releases 安装"
 fi

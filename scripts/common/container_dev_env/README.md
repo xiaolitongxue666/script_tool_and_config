@@ -243,13 +243,16 @@ export PROXY=192.168.1.76:7890
 
 ## Neovim 配置
 
-Neovim 配置通过 Git Submodule 管理。构建时会自动初始化 `dotfiles/nvim` submodule。
+本项目中**没有** Neovim 的 git submodule。Neovim 配置的流程是：在系统目标位置（如 `~/.config/nvim`）克隆 nvim 仓库，再执行仓库内的 install.sh 安装前置。
 
-如果 submodule 未初始化，构建可能会失败。请确保：
+- **宿主机**：由 run_once_install-neovim-config 自动将 `git@github.com:xiaolitongxue666/nvim.git` 克隆到 `~/.config/nvim` 并执行 `install.sh`。
+- **容器内**：若需使用 Neovim 配置，需在目标位置手动克隆并执行安装脚本，例如：
 
 ```bash
-# 在项目根目录
-git submodule update --init --recursive dotfiles/nvim
+# 克隆到目标位置（如 ~/.config/nvim）
+git clone git@github.com:xiaolitongxue666/nvim.git ~/.config/nvim
+# 执行 nvim 仓库中的前置安装脚本
+~/.config/nvim/install.sh
 ```
 
 ## 目录挂载
@@ -429,7 +432,7 @@ git submodule update --init --recursive dotfiles/nvim
 ### 镜像构建失败
 
 1. **检查网络连接**: 确保可以访问 ArchLinux 镜像源或代理
-2. **检查 Git Submodule**: 确保 `dotfiles/nvim` submodule 已初始化
+2. **Neovim 配置**: 由 run_once 克隆到 ~/.config/nvim 或手动克隆
 3. **检查代理设置**: 如果使用代理，确保代理地址正确
 
 ### 容器启动失败
@@ -491,7 +494,7 @@ git submodule update --init --recursive dotfiles/nvim
 
 ## 注意事项
 
-1. **Neovim Submodule**: 需要确保 `dotfiles/nvim` submodule 已初始化
+1. **Neovim 配置**: 需已通过 run_once 克隆到 ~/.config/nvim 或手动克隆
 2. **chezmoi 配置**: 使用 chezmoi 正确解析和应用所有模板文件，确保配置的正确性
 3. **字体安装**: 字体文件较大，构建时从网络下载
 4. **AUR 包**: 在容器中构建 AUR 包需要 base-devel 组（已包含）
@@ -508,10 +511,8 @@ git submodule update --init --recursive dotfiles/nvim
    - 解决：运行 `./scripts/common/utils/ensure_lf_line_endings.sh` 规范化换行符
    - 或在 Dockerfile 中添加换行符转换
 
-2. **Git Submodule 未初始化**
-   ```bash
-   git submodule update --init --recursive dotfiles/nvim
-   ```
+2. **Neovim 配置目录不存在**
+   - 本项目无 submodule；需在目标位置克隆 nvim 仓库并执行 install.sh，例如：`git clone git@github.com:xiaolitongxue666/nvim.git ~/.config/nvim && ~/.config/nvim/install.sh`
 
 3. **网络问题**: 安装 Python 包或 Node.js 包时网络超时
    - 解决：使用代理构建镜像

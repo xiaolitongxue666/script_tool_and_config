@@ -168,15 +168,12 @@ log_info ""
 log_info "检查 Neovim 配置..."
 NVIM_CONFIG_DIR="$HOME/.config/nvim"
 if [ -d "$NVIM_CONFIG_DIR" ]; then
-    if [ -f "${PROJECT_ROOT}/dotfiles/nvim/install.sh" ]; then
-        log_info "Neovim 配置通过 submodule 管理: dotfiles/nvim/"
-        # 检查是否有安装模板
-        if [ ! -f "${CHEZMOI_DIR}/run_once_install-neovim-config.sh.tmpl" ]; then
-            echo "MISSING: Neovim 配置安装模板不存在" | tee -a "$AUDIT_REPORT"
-            MISSING_COUNT=$((MISSING_COUNT + 1))
-        fi
-    else
-        log_warning "Neovim 配置目录存在，但 submodule 未初始化"
+    if [ -f "${NVIM_CONFIG_DIR}/install.sh" ]; then
+        log_info "Neovim 配置目录就绪: ${NVIM_CONFIG_DIR}（由 run_once 克隆）"
+    fi
+    if [ ! -f "${CHEZMOI_DIR}/run_once_install-neovim-config.sh.tmpl" ]; then
+        echo "MISSING: Neovim 配置安装模板不存在" | tee -a "$AUDIT_REPORT"
+        MISSING_COUNT=$((MISSING_COUNT + 1))
     fi
 fi
 

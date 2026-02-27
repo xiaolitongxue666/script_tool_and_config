@@ -85,8 +85,8 @@ git config core.autocrlf input
 RUN pacman -S --noconfirm dos2unix || true
 
 # 转换特定文件
-RUN dos2unix /tmp/project/dotfiles/nvim/install.sh 2>/dev/null || \
-    sed -i 's/\r$//' /tmp/project/dotfiles/nvim/install.sh || true
+RUN dos2unix /tmp/project/scripts/common.sh 2>/dev/null || true
+# Neovim install.sh 位于 ~/.config/nvim/install.sh（由 run_once 克隆后），若在容器内使用需单独处理
 ```
 
 或者使用 sed 命令（更通用）：

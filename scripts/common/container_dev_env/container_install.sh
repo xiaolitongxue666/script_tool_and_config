@@ -1061,26 +1061,19 @@ install_neovim_config() {
     log_info "安装 Neovim 配置..."
 
     PROJECT_ROOT="/tmp/project"
-    NVIM_SUBMODULE_DIR="$PROJECT_ROOT/dotfiles/nvim"
-    NVIM_INSTALL_SCRIPT="$NVIM_SUBMODULE_DIR/install.sh"
+    NVIM_CONFIG_DIR="${HOME}/.config/nvim"
+    NVIM_INSTALL_SCRIPT="${NVIM_CONFIG_DIR}/install.sh"
     COMMON_LIB="$PROJECT_ROOT/scripts/common.sh"
 
-    # 验证 scripts/common.sh 是否存在（Neovim 安装脚本需要）
     if [ ! -f "$COMMON_LIB" ]; then
         log_warning "scripts/common.sh 不存在: $COMMON_LIB"
-        log_info "Neovim 安装脚本可能需要此文件，但会尝试继续"
     else
         log_info "找到 scripts/common.sh: $COMMON_LIB"
     fi
 
     if [ -f "$NVIM_INSTALL_SCRIPT" ]; then
-        log_info "使用 Git Submodule 安装 Neovim 配置"
+        log_info "使用 ~/.config/nvim 安装 Neovim 配置"
         cd "$PROJECT_ROOT" || log_error "无法切换到项目根目录"
-
-        # 初始化 submodule（如果未初始化）
-        if [ ! -f "$NVIM_SUBMODULE_DIR/init.lua" ] && [ ! -d "$NVIM_SUBMODULE_DIR/lua" ]; then
-            git submodule update --init --recursive dotfiles/nvim || log_warning "Neovim submodule 初始化失败"
-        fi
 
         # 确保 PATH 包含 uv 和 fnm 的路径
         # uv 安装在 ~/.cargo/bin，fnm 安装在 ~/.local/share/fnm
@@ -1126,17 +1119,18 @@ install_neovim_config() {
             log_warning "scripts/common.sh 不可访问: $COMMON_LIB"
         fi
 
+        export PROJECT_ROOT COMMON_LIB
         if [ -n "$PROXY_URL" ]; then
             http_proxy="$PROXY_URL" https_proxy="$PROXY_URL" \
             HTTP_PROXY="$PROXY_URL" HTTPS_PROXY="$PROXY_URL" \
             USE_SYSTEM_NVIM_VENV=1 \
             INSTALL_USER=root \
-            PROJECT_ROOT="$PROJECT_ROOT" \
+            PROJECT_ROOT="$PROJECT_ROOT" COMMON_LIB="$COMMON_LIB" \
             bash "$NVIM_INSTALL_SCRIPT" || log_warning "Neovim 配置安装失败"
         else
             USE_SYSTEM_NVIM_VENV=1 \
             INSTALL_USER=root \
-            PROJECT_ROOT="$PROJECT_ROOT" \
+            PROJECT_ROOT="$PROJECT_ROOT" COMMON_LIB="$COMMON_LIB" \
             bash "$NVIM_INSTALL_SCRIPT" || log_warning "Neovim 配置安装失败"
         fi
         # 即使安装失败也继续，不阻止容器构建

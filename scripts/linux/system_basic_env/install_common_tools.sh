@@ -806,20 +806,14 @@ install_neovim() {
         install_uv
     fi
 
-    # 获取项目根目录和 Neovim 安装脚本
-    local nvim_install_script="${PROJECT_ROOT}/dotfiles/nvim/install.sh"
-
-    # 检查并使用 submodule 安装配置
+    # Neovim 配置由 run_once 克隆到 ~/.config/nvim；若存在则执行其 install.sh
+    local nvim_install_script="${HOME}/.config/nvim/install.sh"
     if [[ -f "${nvim_install_script}" ]]; then
-        log_info "Installing Neovim configuration using Git Submodule"
-        # 确保 submodule 已初始化
-        cd "${PROJECT_ROOT}" || error_exit "Failed to change to project root directory"
-        sudo -u "${INSTALL_USER}" git submodule update --init dotfiles/nvim 2>/dev/null || true
-
-        # 运行安装脚本，传递环境变量（代理和系统级 venv 配置）
+        log_info "Installing Neovim configuration from ~/.config/nvim/install.sh"
         chmod +x "${nvim_install_script}"
-        # 传递代理和系统级 venv 环境变量给 nvim 安装脚本
+        local common_lib="${PROJECT_ROOT}/scripts/common.sh"
         sudo -u "${INSTALL_USER}" env \
+            PROJECT_ROOT="${PROJECT_ROOT}" COMMON_LIB="${common_lib}" \
             http_proxy="${PROXY_URL:-}" https_proxy="${PROXY_URL:-}" \
             HTTP_PROXY="${PROXY_URL:-}" HTTPS_PROXY="${PROXY_URL:-}" \
             USE_SYSTEM_NVIM_VENV="${USE_SYSTEM_NVIM_VENV:-0}" \
@@ -828,8 +822,7 @@ install_neovim() {
             log_warning "Neovim configuration installation failed, but continuing"
         }
     else
-        log_warning "Neovim install script not found: ${nvim_install_script}"
-        log_info "Neovim configuration will be managed by LazyVim framework"
+        log_warning "Neovim install script not found (run run_once_install-neovim-config first): ${nvim_install_script}"
     fi
 
     log_success "Neovim installation completed"

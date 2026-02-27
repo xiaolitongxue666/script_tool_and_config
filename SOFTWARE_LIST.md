@@ -47,7 +47,7 @@
 
 ## 按 run_once 脚本索引
 
-**执行顺序**：run_once 按目标名字母序执行。Neovim 配置依赖 uv、fnm、nvim，故使用 `00-install-version-managers` 与 `install-neovim` 确保先于 `install-neovim-config` 执行：**00-install-version-managers**（uv/fnm）→ **install-neovim**（nvim 二进制）→ **install-neovim-config**（子项目与 Lazy 插件）。
+**执行顺序**：run_once 按目标名字母序执行。Neovim 配置依赖 uv、fnm、nvim，故 **00-install-version-managers**（uv/fnm）→ **install-neovim**（nvim 二进制）→ **install-neovim-config**（将 nvim 仓库克隆到 ~/.config/nvim 并执行 install.sh、Lazy 插件）。
 
 | run_once 脚本 | 安装的软件/作用 | 适用 OS |
 |---------------|-----------------|--------|
@@ -58,7 +58,7 @@
 | `run_once_install-alacritty.sh.tmpl` | alacritty | Linux, macOS |
 | `run_once_install-git.sh.tmpl` | git, connect-proxy（Linux） | 多平台 |
 | `run_once_install-neovim.sh.tmpl` | neovim | 多平台 |
-| `run_once_install-neovim-config.sh.tmpl` | Neovim 配置（Lazy 等） | 多平台 |
+| `run_once_install-neovim-config.sh.tmpl` | 克隆 nvim 到 ~/.config/nvim 并执行 install.sh、Lazy 插件 | 多平台 |
 | `run_once_install-nerd-fonts.sh.tmpl` | FiraMono Nerd Font | 多平台 |
 | `run_once_install-zsh.sh.tmpl` | zsh, oh-my-zsh 及插件 | Linux, macOS, Windows(MSYS2) |
 | `run_once_install-fish.sh.tmpl` | fish | Linux, macOS |

@@ -182,10 +182,9 @@ git config --global core.autocrlf true   # Windows
 git config --global core.safecrlf true
 ```
 
-#### Submodule Management
-- Neovim config in `dotfiles/nvim/` is a Git submodule
-- Initialize: `git submodule update --init dotfiles/nvim`
-- Update: `git submodule update --remote dotfiles/nvim`
+#### Neovim Config
+- Neovim config is cloned by run_once to `~/.config/nvim` (no submodule in repo)
+- Update: `cd ~/.config/nvim && git pull && ./install.sh`
 
 ## Domain Context
 

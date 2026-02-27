@@ -10,32 +10,16 @@ pacman -S --noconfirm neovim
 # 获取脚本所在目录
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
-NEOVIM_INSTALL_SCRIPT="$PROJECT_ROOT/dotfiles/nvim/install.sh"
-
-# 检查并使用 submodule 安装配置
+# Neovim 配置由 run_once 克隆到 ~/.config/nvim；若已存在则执行其 install.sh
+NEOVIM_INSTALL_SCRIPT="${HOME}/.config/nvim/install.sh"
 if [ -f "$NEOVIM_INSTALL_SCRIPT" ]; then
-    echo "使用 Git Submodule 安装 Neovim 配置..."
-    # 确保 submodule 已初始化
-    cd "$PROJECT_ROOT"
-    git submodule update --init dotfiles/nvim 2>/dev/null || true
-    
-    # 运行安装脚本
+    echo "运行 Neovim 配置安装脚本（~/.config/nvim/install.sh）..."
     chmod +x "$NEOVIM_INSTALL_SCRIPT"
-    "$NEOVIM_INSTALL_SCRIPT"
+    export PROJECT_ROOT COMMON_LIB
+    COMMON_LIB="${PROJECT_ROOT}/scripts/common.sh"
+    bash "$NEOVIM_INSTALL_SCRIPT"
 else
-    echo "警告: 未找到 Neovim 安装脚本，使用传统方式安装..."
-    # 回退到传统方式（如果 submodule 不存在）
-    # 安装 vim plug（如果需要）
-    curl -fLo ~/.local/share/nvim/site/autoload/plug.vim --create-dirs \
-        https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
-    
-    # 克隆 neovim 配置
-    mkdir -p ~/.config/nvim/
-    cd ~/.config
-    git clone git@github.com:xiaolitongxue666/nvim.git
-    
-    # 安装插件（如果使用 vim-plug）
-    # nvim +'PlugInstall --sync' +qa
+    echo "未找到 ~/.config/nvim/install.sh，请先执行 chezmoi apply 以触发 run_once_install-neovim-config，或手动: git clone https://github.com/xiaolitongxue666/nvim.git ~/.config/nvim && ~/.config/nvim/install.sh"
 fi
 
 # ============================================

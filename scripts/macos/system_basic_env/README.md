@@ -134,7 +134,7 @@ HTTP_PROXY= HTTPS_PROXY= ./install_common_tools.sh
    - 安装 Shell 工具（zsh, oh-my-zsh）
 
 5. **Neovim 配置**
-   - 调用 `dotfiles/nvim/install.sh`（如果存在）
+   - 调用 `~/.config/nvim/install.sh`（若已由 run_once 克隆）
 
 6. **完成**
    - 打印安装摘要

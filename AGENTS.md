@@ -34,7 +34,7 @@ chezmoi apply -v           # 应用更改
 
 ```bash
 ./scripts/common/utils/nvim_checkhealth_to_log.sh   # 生成 nvim_checkhealth.log
-# 查看 log 中 ERROR/WARNING，按 dotfiles/nvim/README.md「常见 checkhealth 问题与处理」修复
+# 查看 log 中 ERROR/WARNING，按 ~/.config/nvim 内 README 或上游 nvim 仓库「常见 checkhealth 问题与处理」修复
 ```
 
 ### 测试
@@ -187,9 +187,8 @@ ensure_directory() {
 
 ### Git 子模块
 
-- Neovim 配置位于 `dotfiles/nvim/`，是 Git 子模块
-- 初始化: `git submodule update --init dotfiles/nvim`
-- 更新: `git submodule update --remote dotfiles/nvim`
+- Neovim 配置由 run_once 克隆到 `~/.config/nvim`，本仓库不再包含 dotfiles/nvim 子模块
+- 更新: `cd ~/.config/nvim && git pull && ./install.sh`
 
 ### 重要说明
 

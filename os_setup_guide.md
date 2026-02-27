@@ -315,8 +315,7 @@ git clone <your-repo-url> ~/script_tool_and_config
 cd ~/script_tool_and_config
 
 # 如果项目包含 Git Submodule（如 Neovim 配置），需要初始化
-# 注意：dotfiles/ 目录现在仅用于 nvim Git Submodule
-git submodule update --init --recursive
+# Neovim 配置由 run_once_install-neovim-config 克隆到 ~/.config/nvim，无需 submodule
 ```
 
 #### 步骤 2: 运行一键安装脚本
@@ -548,10 +547,7 @@ brew services start skhd
 #### 2. 配置 Neovim（如果使用 Git Submodule）
 
 ```bash
-# 确保 submodule 已初始化
-git submodule update --init dotfiles/nvim
-
-# 注意：dotfiles/ 目录现在仅用于 nvim Git Submodule
+# Neovim 配置由 run_once 克隆到 ~/.config/nvim；更新：cd ~/.config/nvim && git pull && ./install.sh
 # 所有其他配置已迁移到 .chezmoi/ 目录，由 chezmoi 统一管理
 # Neovim 配置会自动通过 chezmoi 管理（创建符号链接到 ~/.config/nvim）
 ```
