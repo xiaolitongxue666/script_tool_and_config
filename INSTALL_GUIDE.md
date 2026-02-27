@@ -10,7 +10,7 @@
 ./install.sh
 ```
 
-脚本会：检测 OS、安装 chezmoi（若未安装）、**自动写入** `~/.config/chezmoi/chezmoi.toml` 的 `sourceDir` 指向项目、**初始化 Git 子模块**（如 `dotfiles/nvim`，供 Neovim 配置使用）、执行 `chezmoi apply` 并运行各 run_once 安装脚本；最后执行 **[5/5] 验证与确认**（字体、默认 Shell、环境变量、开机启动声明）并生成报告文件（默认 `~/install_verification_report_<时间>.txt`）。
+脚本会：检测 OS、安装 chezmoi（若未安装）、**自动写入** `~/.config/chezmoi/chezmoi.toml` 的 `sourceDir` 指向项目、执行 `chezmoi apply` 并运行各 run_once 安装脚本（Neovim 由 run_once_install-neovim-config 克隆到 ~/.config/nvim）；最后执行 **[5/5] 验证与确认**（字体、默认 Shell、环境变量、开机启动声明）并生成报告文件（默认 `~/install_verification_report_<时间>.txt`）。
 
 ### 代理
 
@@ -34,7 +34,7 @@
 3. **一键安装**：  
    `./install.sh`  
    若需 root（如 Arch 下配置 Pacman）：`sudo chezmoi apply -v`。  
-   Neovim 子模块：先尝试 SSH 克隆；若失败，脚本会自动改为 HTTPS 并用当前代理重试，此时需已执行 `h_proxy`。
+   Neovim 配置由 run_once_install-neovim-config 克隆到 ~/.config/nvim；先尝试 SSH，失败则 HTTPS+代理，需已执行 `h_proxy` 时更稳。
 
 4. **获取环境信息**（可选）：  
    `./scripts/linux/system_basic_env/get_wsl_system_info.sh`  
@@ -89,4 +89,4 @@
 ### WSL 下 Git 访问 GitHub 与代理
 
 项目在 `~/.gitconfig` 中为 GitHub 配置了 proxy（由 dot_gitconfig 模板写入），默认 `http://127.0.0.1:7890`。在 WSL 中 **127.0.0.1 指 WSL 本机**，无法连到 Windows 宿主机上的代理，且 Git 的 URL 作用域配置 `http.https://github.com.proxy` **优先于** 环境变量 `http_proxy`，因此即使 shell 里设置了宿主机代理，`git clone` 访问 GitHub 仍可能走 127.0.0.1:7890 导致失败。  
-**建议**：WSL 用户要么在 apply 前通过 data 设置 `proxy` 为宿主机地址（见上文），要么 apply 后在 WSL 内执行 `git config --global --unset http.https://github.com.proxy` 与 `https.https://github.com.proxy`，再执行需访问 GitHub 的 git 操作（如插件 clone、submodule 等）。
+**建议**：WSL 用户要么在 apply 前通过 data 设置 `proxy` 为宿主机地址（见上文），要么 apply 后在 WSL 内执行 `git config --global --unset http.https://github.com.proxy` 与 `https.https://github.com.proxy`，再执行需访问 GitHub 的 git 操作（如插件 clone、nvim 配置克隆等）。

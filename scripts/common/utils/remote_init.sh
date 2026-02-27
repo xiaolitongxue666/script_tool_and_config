@@ -55,7 +55,7 @@ else
 fi
 
 # ============================================
-# 初始化 Git Submodule（如果需要）
+# 初始化 Git Submodule（如果需要；script_tool_and_config 当前无子模块，Neovim 由 run_once 克隆到 ~/.config/nvim）
 # ============================================
 if [ -f "${PROJECT_ROOT}/.gitmodules" ]; then
     log_info "检测到 Git Submodule，开始初始化..."

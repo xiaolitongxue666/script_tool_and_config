@@ -273,18 +273,6 @@ fi
 log_success "chezmoi 环境初始化完成"
 
 # ============================================
-# 初始化 Git 子模块（Neovim 配置等，需在 chezmoi apply 前就绪）
-# ============================================
-if [ -d "${SCRIPT_DIR}/.git" ] && [ -f "${SCRIPT_DIR}/.gitmodules" ]; then
-    log_info "初始化 Git 子模块（dotfiles/nvim 等）..."
-    if (cd "$SCRIPT_DIR" && git submodule update --init --recursive); then
-        log_success "Git 子模块已初始化"
-    else
-        log_warning "子模块初始化失败或已为最新（Neovim 配置 run_once 会再次尝试）"
-    fi
-fi
-
-# ============================================
 # 配置差异检测和应用（chezmoi 核心流程）
 # ============================================
 # 再次确认 chezmoi 可用

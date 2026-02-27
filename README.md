@@ -103,8 +103,7 @@ script_tool_and_config/
 │   ├── macos/                      # macOS 专用脚本
 │   └── windows/                    # Windows 专用脚本
 │
-├── dotfiles/                       # Git Submodule（仅 nvim 配置）
-│   └── nvim/                       # Neovim 配置
+├── dotfiles/                       # 点文件目录（Neovim 由 run_once 克隆到 ~/.config/nvim，不在此仓库）
 │
 ├── install.sh                      # 一键安装脚本
 ├── README.md                       # 本文件
@@ -211,13 +210,7 @@ chezmoi add ~/.new_config
 - **windows_scripts/**: Windows 批处理脚本
 
 ### 4. Neovim 配置
-使用 Git Submodule 管理独立的 Neovim 配置仓库：
-- 基于 Lua 的现代化配置
-- lazy.nvim 插件管理器
-- LSP 支持、代码补全、语法高亮
-- 丰富的 UI 组件和主题
-
-详细说明请参考：[dotfiles/nvim/README.md](dotfiles/nvim/README.md)
+Neovim 配置由 run_once_install-neovim-config 克隆到 `~/.config/nvim` 并执行其 install.sh；上游仓库 [xiaolitongxue666/nvim](https://github.com/xiaolitongxue666/nvim)。配置基于 Lua、lazy.nvim、LSP 等。若上游 install.sh 需与 run_once 协作（同源跳过、uv/fnm 按需安装等），见 [docs/NEOVIM_INSTALL_REQUIREMENTS.md](docs/NEOVIM_INSTALL_REQUIREMENTS.md)。
 
 ## 📚 使用指南
 
@@ -256,11 +249,8 @@ git push
 Neovim 配置使用 Git Submodule 管理：
 
 ```bash
-# 初始化 submodule
-git submodule update --init dotfiles/nvim
-
-# 更新 submodule
-git submodule update --remote dotfiles/nvim
+# 更新 Neovim 配置（配置位于 ~/.config/nvim）
+cd ~/.config/nvim && git pull && ./install.sh
 ```
 
 ## 🛡️ 安全和规范
@@ -287,7 +277,7 @@ git submodule update --remote dotfiles/nvim
 1. **权限要求**：某些脚本需要 root 权限（使用 `sudo`）
 2. **平台特定**：部分脚本仅适用于特定操作系统
 3. **备份**：修改系统配置文件前，建议先备份原文件
-4. **Git Submodule**：首次克隆后需要初始化 submodule
+4. **Neovim 配置**：由 run_once_install-neovim-config 自动克隆到 ~/.config/nvim 并执行 install.sh
 5. **代理配置**：安装脚本支持通过 `PROXY` 环境变量配置代理
 
 ## 🔗 相关链接

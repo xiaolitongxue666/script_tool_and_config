@@ -17,8 +17,7 @@ script_tool_and_config/
 ├── chezmoi_use_guide.md              # chezmoi 使用指南
 ├── os_setup_guide.md                 # 操作系统设置指南
 │
-├── dotfiles/                         # Git Submodule（仅 nvim 配置）
-│   └── nvim/                         # Neovim 配置（Git Submodule）
+├── dotfiles/                         # 点文件目录（可选保留；本仓库无 submodule，Neovim 由 run_once 克隆到 ~/.config/nvim）
 │
 ├── scripts/                          # 脚本工具集合
 │   ├── common.sh                     # 通用函数库
@@ -148,7 +147,7 @@ script_tool_and_config/
 
 ### dotfiles/ 目录
 
-Legacy 目录，所有配置已迁移到 `.chezmoi/` 目录。保留作为参考。
+Legacy 目录，所有配置已迁移到 `.chezmoi/` 目录；本仓库无 submodule，Neovim 由 run_once 克隆到 ~/.config/nvim。保留作为参考或空目录。
 
 ### scripts/ 目录
 
@@ -188,7 +187,7 @@ Legacy 配置文件位于 `dotfiles/` 目录，仅作为参考。
 ## 注意事项
 
 1. `.chezmoi/` 目录包含所有配置文件模板，由 chezmoi 统一管理
-2. `dotfiles/` 目录仅用于 Git Submodule（nvim 配置）
+2. 本仓库无 submodule；Neovim 由 run_once 克隆到 ~/.config/nvim
 3. 所有配置统一通过 `.chezmoi/*.tmpl` → `chezmoi apply` → `~/.` 流程部署
 4. 跨平台脚本位于 `scripts/common/` 目录下
 5. 所有脚本注释已翻译为中文
