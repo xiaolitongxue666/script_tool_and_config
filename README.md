@@ -210,7 +210,7 @@ chezmoi add ~/.new_config
 - **windows_scripts/**: Windows 批处理脚本
 
 ### 4. Neovim 配置
-Neovim 配置由 run_once_install-neovim-config 克隆到 `~/.config/nvim` 并执行其 install.sh；上游仓库 [xiaolitongxue666/nvim](https://github.com/xiaolitongxue666/nvim)。配置基于 Lua、lazy.nvim、LSP 等。若上游 install.sh 需与 run_once 协作（同源跳过、uv/fnm 按需安装等），见 [docs/NEOVIM_INSTALL_REQUIREMENTS.md](docs/NEOVIM_INSTALL_REQUIREMENTS.md)。
+Neovim 为独立项目；本仓库由 run_once_install-neovim-config 将 [xiaolitongxue666/nvim](https://github.com/xiaolitongxue666/nvim) 克隆到 `~/.config/nvim` 并执行其 install.sh（不注入本仓库路径）。配置基于 Lua、lazy.nvim、LSP 等。详见 [docs/NEOVIM_AND_THIS_REPO.md](docs/NEOVIM_AND_THIS_REPO.md)。
 
 ## 📚 使用指南
 

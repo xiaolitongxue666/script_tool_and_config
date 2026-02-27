@@ -39,7 +39,7 @@ chezmoi apply -v           # 应用更改
 
 ### 测试
 
-无自动化测试。手动运行 `test_*.sh` 脚本。
+无自动化测试。手动运行 `test_*.sh` 脚本。nvim 独立化相关改动后，可按 [docs/TEST_PLAN_NVIM_INDEPENDENT.md](docs/TEST_PLAN_NVIM_INDEPENDENT.md) 做手动验证。
 
 ## 代码风格指南
 
@@ -220,7 +220,7 @@ ensure_directory() {
 │   ├── run_on_linux/          # Linux 特定配置
 │   ├── run_on_darwin/         # macOS 特定配置
 │   ├── run_on_windows/        # Windows 特定配置
-│   └── nvim/                  # Neovim 配置（Git 子模块）
+│   └── nvim/                  # Neovim 为独立项目，由 run_once 克隆到 ~/.config/nvim，不在此仓库
 └── docs/                      # 文档目录
 ```
 

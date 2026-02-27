@@ -2,14 +2,12 @@
 #!/bin/bash
 
 # ============================================
-# Neovim 配置安装脚本（克隆 nvim 仓库到系统目录）
+# Neovim 配置安装脚本（仅在未 clone 时克隆并执行 install.sh）
 # ============================================
 # 依赖执行顺序：run_once_00-install-version-managers、install-neovim 先于本脚本
-# 本脚本负责：
-# 1. 校验前置（uv、fnm、nvim）已安装并可用
-# 2. 将 nvim 仓库克隆到 ~/.config/nvim（若已存在则 git pull）
-# 3. 执行 ~/.config/nvim/install.sh（注入 PROJECT_ROOT/COMMON_LIB）
-# 4. 引导 lazy.nvim 与插件
+# 正常流程：
+#   - nvim 未被 clone：克隆到 ~/.config/nvim，然后调用其中的 install.sh 并引导插件
+#   - nvim 已被 clone：直接跳过；nvim 为独立项目，由使用者自行维护版本与更新
 # ============================================
 
 set -e
@@ -17,7 +15,6 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="${CHEZMOI_PROJECT_ROOT:-$(cd "${SCRIPT_DIR}/../.." && pwd)}"
 COMMON_INSTALL="${PROJECT_ROOT}/scripts/chezmoi/common_install.sh"
-COMMON_LIB="${PROJECT_ROOT}/scripts/common.sh"
 NVIM_CONFIG_DIR="{{ .chezmoi.homeDir }}/.config/nvim"
 NVIM_REPO_SSH="git@github.com:xiaolitongxue666/nvim.git"
 NVIM_REPO_HTTPS="https://github.com/xiaolitongxue666/nvim.git"
@@ -69,24 +66,10 @@ verify_nvim_prerequisites() {
 }
 
 # ============================================
-# 克隆或更新 nvim 仓库到 ~/.config/nvim
+# 克隆 nvim 仓库到 ~/.config/nvim（仅当尚未 clone 时执行）
 # ============================================
-clone_or_update_nvim() {
+clone_nvim_if_missing() {
     log_info "检查 Neovim 配置目录: ${NVIM_CONFIG_DIR}"
-
-    if [[ -d "${NVIM_CONFIG_DIR}/.git" ]]; then
-        log_info "已有 git 仓库，执行 git pull..."
-        cd "${NVIM_CONFIG_DIR}" || exit 1
-        PROXY_URL="${PROXY:-{{ env "http_proxy" | default .proxy | default "http://127.0.0.1:7890" }}}"
-        export http_proxy="$PROXY_URL" https_proxy="$PROXY_URL" HTTP_PROXY="$PROXY_URL" HTTPS_PROXY="$PROXY_URL"
-        if git pull --rebase 2>&1; then
-            log_success "Neovim 配置已更新"
-        else
-            log_warning "git pull 失败，继续使用当前配置"
-        fi
-        cd - >/dev/null || true
-        return 0
-    fi
 
     if [[ -d "${NVIM_CONFIG_DIR}" ]] && [[ -n "$(ls -A "${NVIM_CONFIG_DIR}" 2>/dev/null)" ]]; then
         log_warning "目录已存在且非 git 仓库，备份后克隆"
@@ -95,6 +78,7 @@ clone_or_update_nvim() {
         log_info "已备份到 ${backup}"
     fi
 
+    # 此处仅剩「不存在或已清空」的情况，执行克隆
     mkdir -p "$(dirname "${NVIM_CONFIG_DIR}")"
     PROXY_URL="${PROXY:-{{ env "http_proxy" | default .proxy | default "http://127.0.0.1:7890" }}}"
     export http_proxy="$PROXY_URL" https_proxy="$PROXY_URL" HTTP_PROXY="$PROXY_URL" HTTPS_PROXY="$PROXY_URL"
@@ -118,7 +102,7 @@ clone_or_update_nvim() {
 }
 
 # ============================================
-# 运行 ~/.config/nvim/install.sh（注入 PROJECT_ROOT / COMMON_LIB）
+# 运行 ~/.config/nvim/install.sh（nvim 为独立项目，仅传递代理等环境变量）
 # ============================================
 run_nvim_install() {
     local install_script="${NVIM_CONFIG_DIR}/install.sh"
@@ -127,12 +111,11 @@ run_nvim_install() {
         exit 1
     fi
 
-    log_info "运行 Neovim 配置安装脚本（注入 PROJECT_ROOT/COMMON_LIB）..."
+    log_info "运行 Neovim 配置安装脚本..."
     chmod +x "${install_script}"
 
     PROXY_URL="${PROXY:-{{ env "http_proxy" | default .proxy | default "http://127.0.0.1:7890" }}}"
     export PROXY_URL http_proxy="$PROXY_URL" https_proxy="$PROXY_URL" HTTP_PROXY="$PROXY_URL" HTTPS_PROXY="$PROXY_URL"
-    export PROJECT_ROOT COMMON_LIB
 
     if bash "${install_script}" 2>&1; then
         log_success "Neovim 配置安装成功"
@@ -184,7 +167,7 @@ verify_installation() {
 main() {
     log_info ""
     log_info "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    log_info "开始安装 Neovim 配置（克隆到系统目录）"
+    log_info "Neovim 配置（仅未 clone 时克隆并执行 install.sh）"
     log_info "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
     check_prerequisites
@@ -194,7 +177,15 @@ main() {
     export PROXY_URL http_proxy="$PROXY_URL" https_proxy="$PROXY_URL" HTTP_PROXY="$PROXY_URL" HTTPS_PROXY="$PROXY_URL"
     log_info "代理: ${PROXY_URL}"
 
-    clone_or_update_nvim
+    # 若 nvim 已被 clone（存在 .git），直接跳过；由使用者自行维护版本与更新
+    if [[ -d "${NVIM_CONFIG_DIR}/.git" ]]; then
+        log_success "Neovim 配置已存在: ${NVIM_CONFIG_DIR}，跳过（独立项目由使用者自行维护）"
+        log_info "更新与维护请自行在目录内执行: git pull、./install.sh 等"
+        log_info ""
+        return 0
+    fi
+
+    clone_nvim_if_missing
     run_nvim_install
     bootstrap_lazy_plugins
     verify_installation

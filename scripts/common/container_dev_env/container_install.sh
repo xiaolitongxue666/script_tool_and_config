@@ -1060,80 +1060,44 @@ install_tpm() {
 install_neovim_config() {
     log_info "安装 Neovim 配置..."
 
-    PROJECT_ROOT="/tmp/project"
     NVIM_CONFIG_DIR="${HOME}/.config/nvim"
     NVIM_INSTALL_SCRIPT="${NVIM_CONFIG_DIR}/install.sh"
-    COMMON_LIB="$PROJECT_ROOT/scripts/common.sh"
-
-    if [ ! -f "$COMMON_LIB" ]; then
-        log_warning "scripts/common.sh 不存在: $COMMON_LIB"
-    else
-        log_info "找到 scripts/common.sh: $COMMON_LIB"
-    fi
 
     if [ -f "$NVIM_INSTALL_SCRIPT" ]; then
-        log_info "使用 ~/.config/nvim 安装 Neovim 配置"
-        cd "$PROJECT_ROOT" || log_error "无法切换到项目根目录"
+        log_info "使用 ~/.config/nvim 安装 Neovim 配置（nvim 为独立项目，仅执行其 install.sh）"
 
         # 确保 PATH 包含 uv 和 fnm 的路径
-        # uv 安装在 ~/.cargo/bin，fnm 安装在 ~/.local/share/fnm
         export PATH="$HOME/.cargo/bin:$HOME/.local/share/fnm:$HOME/.local/bin:$PATH"
 
-        # 验证 uv 和 fnm 是否在 PATH 中
         log_info "检查 PATH 环境变量..."
-        log_info "PATH: $PATH"
-
         if command -v uv >/dev/null 2>&1; then
             log_success "uv 已找到: $(uv --version 2>&1 | head -n 1)"
         else
-            log_warning "uv 未在 PATH 中找到，尝试直接使用完整路径..."
+            log_warning "uv 未在 PATH 中找到"
             if [ -f "$HOME/.cargo/bin/uv" ]; then
-                log_info "找到 uv: $HOME/.cargo/bin/uv"
                 export PATH="$HOME/.cargo/bin:$PATH"
-            else
-                log_error "uv 未安装或不在预期位置"
             fi
         fi
 
         if command -v fnm >/dev/null 2>&1; then
             log_success "fnm 已找到: $(fnm --version 2>&1 | head -n 1)"
         else
-            log_warning "fnm 未在 PATH 中找到，尝试直接使用完整路径..."
+            log_warning "fnm 未在 PATH 中找到"
             if [ -f "$HOME/.local/share/fnm/fnm" ]; then
-                log_info "找到 fnm: $HOME/.local/share/fnm/fnm"
                 export PATH="$HOME/.local/share/fnm:$PATH"
-            else
-                log_error "fnm 未安装或不在预期位置"
             fi
         fi
 
-        # 运行安装脚本
         chmod +x "$NVIM_INSTALL_SCRIPT"
-        # 确保 PROJECT_ROOT 环境变量已设置（Neovim 安装脚本需要）
-        export PROJECT_ROOT="$PROJECT_ROOT"
-
-        # 验证 scripts/common.sh 是否可访问
-        if [ -f "$COMMON_LIB" ]; then
-            log_info "scripts/common.sh 可访问: $COMMON_LIB"
-        else
-            log_warning "scripts/common.sh 不可访问: $COMMON_LIB"
-        fi
-
-        export PROJECT_ROOT COMMON_LIB
         if [ -n "$PROXY_URL" ]; then
-            http_proxy="$PROXY_URL" https_proxy="$PROXY_URL" \
-            HTTP_PROXY="$PROXY_URL" HTTPS_PROXY="$PROXY_URL" \
-            USE_SYSTEM_NVIM_VENV=1 \
-            INSTALL_USER=root \
-            PROJECT_ROOT="$PROJECT_ROOT" COMMON_LIB="$COMMON_LIB" \
-            bash "$NVIM_INSTALL_SCRIPT" || log_warning "Neovim 配置安装失败"
+            env http_proxy="$PROXY_URL" https_proxy="$PROXY_URL" \
+                HTTP_PROXY="$PROXY_URL" HTTPS_PROXY="$PROXY_URL" \
+                USE_SYSTEM_NVIM_VENV=1 INSTALL_USER=root \
+                bash "$NVIM_INSTALL_SCRIPT" || log_warning "Neovim 配置安装失败"
         else
-            USE_SYSTEM_NVIM_VENV=1 \
-            INSTALL_USER=root \
-            PROJECT_ROOT="$PROJECT_ROOT" COMMON_LIB="$COMMON_LIB" \
-            bash "$NVIM_INSTALL_SCRIPT" || log_warning "Neovim 配置安装失败"
+            env USE_SYSTEM_NVIM_VENV=1 INSTALL_USER=root \
+                bash "$NVIM_INSTALL_SCRIPT" || log_warning "Neovim 配置安装失败"
         fi
-        # 即使安装失败也继续，不阻止容器构建
         log_success "Neovim 配置安装流程完成"
     else
         log_warning "Neovim 安装脚本未找到: $NVIM_INSTALL_SCRIPT"

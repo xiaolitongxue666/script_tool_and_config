@@ -7,16 +7,11 @@ set -x
 # 安装 neovim
 pacman -S --noconfirm neovim
 
-# 获取脚本所在目录
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
-# Neovim 配置由 run_once 克隆到 ~/.config/nvim；若已存在则执行其 install.sh
+# Neovim 为独立项目，配置由 run_once 克隆到 ~/.config/nvim；若已存在则仅执行其 install.sh
 NEOVIM_INSTALL_SCRIPT="${HOME}/.config/nvim/install.sh"
 if [ -f "$NEOVIM_INSTALL_SCRIPT" ]; then
     echo "运行 Neovim 配置安装脚本（~/.config/nvim/install.sh）..."
     chmod +x "$NEOVIM_INSTALL_SCRIPT"
-    export PROJECT_ROOT COMMON_LIB
-    COMMON_LIB="${PROJECT_ROOT}/scripts/common.sh"
     bash "$NEOVIM_INSTALL_SCRIPT"
 else
     echo "未找到 ~/.config/nvim/install.sh，请先执行 chezmoi apply 以触发 run_once_install-neovim-config，或手动: git clone https://github.com/xiaolitongxue666/nvim.git ~/.config/nvim && ~/.config/nvim/install.sh"

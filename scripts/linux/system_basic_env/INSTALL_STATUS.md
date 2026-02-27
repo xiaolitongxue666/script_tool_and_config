@@ -57,7 +57,7 @@
 | 软件/配置       | 说明           | 安装状态 | 配置状态 | 备注           |
 |----------------|----------------|----------|----------|----------------|
 | **neovim**     | 编辑器         | 已安装   | 已配置   | run_once 克隆到 ~/.config/nvim |
-| neovim-config  | Neovim 子模块  | 已应用   | -        | run_once 已跑  |
+| neovim-config  | Neovim 配置（独立项目） | 已应用   | -        | run_once 克隆到 ~/.config/nvim 并执行 install.sh |
 
 ---
 

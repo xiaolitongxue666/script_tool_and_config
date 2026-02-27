@@ -165,7 +165,9 @@ obj/
 # ============================================
 
 # dotfiles 目录说明
-# 本仓库无 nvim 子模块；nvim 由 run_once 克隆到系统目标位置（如 ~/.config/nvim），不在此仓库
+# nvim 为独立项目，配置位于 ~/.config/nvim，本仓库不包含 nvim 源码或子模块；run_once 会克隆到目标位置
+# 若存在 dotfiles/nvim/ 则为误克隆或遗留，不应提交
+dotfiles/nvim/
 # 所有其他配置文件已迁移到 .chezmoi/ 目录，由 chezmoi 统一管理；dotfiles/ 若存在则为遗留或空目录
 
 # 项目生成器生成的文件（cpp_project_generator）

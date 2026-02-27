@@ -806,14 +806,12 @@ install_neovim() {
         install_uv
     fi
 
-    # Neovim 配置由 run_once 克隆到 ~/.config/nvim；若存在则执行其 install.sh
+    # Neovim 为独立项目，配置由 run_once 克隆到 ~/.config/nvim；若存在则仅执行其 install.sh
     local nvim_install_script="${HOME}/.config/nvim/install.sh"
     if [[ -f "${nvim_install_script}" ]]; then
         log_info "Installing Neovim configuration from ~/.config/nvim/install.sh"
         chmod +x "${nvim_install_script}"
-        local common_lib="${PROJECT_ROOT}/scripts/common.sh"
         sudo -u "${INSTALL_USER}" env \
-            PROJECT_ROOT="${PROJECT_ROOT}" COMMON_LIB="${common_lib}" \
             http_proxy="${PROXY_URL:-}" https_proxy="${PROXY_URL:-}" \
             HTTP_PROXY="${PROXY_URL:-}" HTTPS_PROXY="${PROXY_URL:-}" \
             USE_SYSTEM_NVIM_VENV="${USE_SYSTEM_NVIM_VENV:-0}" \
