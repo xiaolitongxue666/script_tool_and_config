@@ -114,9 +114,13 @@ check_default_shell() {
 
     if [[ "$os" == "linux" || "$os" == "darwin" ]]; then
         local current_shell=""
-        if command -v getent &>/dev/null; then
+        if [[ "$os" == "darwin" ]]; then
+            current_shell="$(dscl . -read "/Users/$(id -un)" UserShell 2>/dev/null | awk '{print $2}')"
+        fi
+        if [[ -z "$current_shell" ]] && command -v getent &>/dev/null; then
             current_shell="$(getent passwd "$(id -un)" 2>/dev/null | cut -d: -f7)"
-        elif [[ -f /etc/passwd ]]; then
+        fi
+        if [[ -z "$current_shell" ]] && [[ -f /etc/passwd ]]; then
             current_shell="$(awk -F: -v u="$(id -un)" '$1==u {print $7}' /etc/passwd)"
         fi
         if [[ -n "$current_shell" ]]; then

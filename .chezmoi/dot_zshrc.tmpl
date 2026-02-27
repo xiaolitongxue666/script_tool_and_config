@@ -89,6 +89,10 @@ fi
 # ============================================
 # Oh My Zsh 配置
 # ============================================
+# 关闭拼写纠错，避免输错命令时出现 [nyae]? 提示（全平台一致）
+ENABLE_CORRECTION="false"
+unsetopt correct
+unsetopt correct_all
 # Oh My Zsh 安装路径
 export ZSH="$HOME/.oh-my-zsh"
 

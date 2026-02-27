@@ -25,7 +25,7 @@
 | 类别 | 软件 |
 |------|------|
 | 版本管理 | fnm, uv, rustup（可选） |
-| 终端/Shell | starship, tmux, alacritty（可选）, zsh, oh-my-zsh, fish（可选） |
+| 终端/Shell | starship, tmux, **Ghostty**（终端）, zsh, oh-my-zsh, fish（可选） |
 | 文件/搜索 | bat, eza, fd, ripgrep, fzf, trash-cli |
 | 开发 | git, neovim, lazygit, git-delta, gh |
 | 系统监控 | btop, fastfetch |
@@ -55,7 +55,7 @@
 | `run_once_00-install-version-managers.sh.tmpl` | fnm, uv, rustup（可选）；**执行顺序优先**，为 Neovim 配置前置 | 多平台 |
 | `run_once_install-starship.sh.tmpl` | starship | Linux, macOS, Windows |
 | `run_once_install-tmux.sh.tmpl` | tmux, TPM 及插件 | Linux, macOS |
-| `run_once_install-alacritty.sh.tmpl` | alacritty | Linux, macOS |
+| `run_once_install-alacritty.sh.tmpl` | alacritty | 仅 Linux |
 | `run_once_install-git.sh.tmpl` | git, connect-proxy（Linux） | 多平台 |
 | `run_once_install-neovim.sh.tmpl` | neovim | 多平台 |
 | `run_once_install-neovim-config.sh.tmpl` | 克隆 nvim 到 ~/.config/nvim 并执行 install.sh、Lazy 插件 | 多平台 |
@@ -71,6 +71,7 @@
 | `run_once_install-oh-my-posh.sh.tmpl` | oh-my-posh | 仅 Windows |
 | `run_on_darwin/run_once_configure-homebrew.sh.tmpl` | Homebrew 配置 | 仅 macOS |
 | `run_on_darwin/run_once_install-connect.sh.tmpl` | connect（SSH 代理） | 仅 macOS |
+| `run_on_darwin/run_once_install-ghostty.sh.tmpl` | Ghostty 终端（使用 zsh） | 仅 macOS |
 | `run_once_install-yabai.sh.tmpl` | yabai | 仅 macOS |
 | `run_once_install-skhd.sh.tmpl` | skhd | 仅 macOS |
 | `run_once_install-maccy.sh.tmpl` | maccy（剪贴板） | 仅 macOS |
@@ -94,7 +95,8 @@
 | **starship** | 跨 shell 提示符 | Linux, macOS, Windows | `run_once_install-starship.sh.tmpl` |
 | **tmux** | 终端复用器 | Linux, macOS | `run_once_install-tmux.sh.tmpl` |
 | **TPM** | Tmux Plugin Manager（tmux 插件管理器） | Linux, macOS | `run_once_install-tmux.sh.tmpl` |
-| **alacritty** | GPU 加速终端模拟器 | Linux, macOS | `run_once_install-alacritty.sh.tmpl` |
+| **alacritty** | GPU 加速终端模拟器 | 仅 Linux | `run_once_install-alacritty.sh.tmpl` |
+| **ghostty** | 跨平台终端（原生 UI + GPU 加速，使用 zsh）；安装到 /Applications 以便启动台显示 | 仅 macOS | `run_on_darwin/run_once_install-ghostty.sh.tmpl` |
 
 ### 文件工具
 
@@ -229,7 +231,7 @@
 
 | 配置文件 | 目标位置 | 源文件 |
 |----------|----------|--------|
-| **Alacritty 配置** | `~/.config/alacritty/alacritty.toml` | `.chezmoi/dot_config/alacritty/alacritty.toml` |
+| **Alacritty 配置** | `~/.config/alacritty/alacritty.toml` | `.chezmoi/run_on_linux/dot_config/alacritty/alacritty.toml.tmpl`（仅 Linux） |
 | **Fish 配置** | `~/.config/fish/config.fish` | `.chezmoi/dot_config/fish/config.fish` |
 | **SSH 配置** | `~/.ssh/config` | `.chezmoi/dot_ssh/config.tmpl` |
 
@@ -243,6 +245,7 @@
 
 | 配置文件 | 目标位置 | 源文件 |
 |----------|----------|--------|
+| **Ghostty 配置** | `~/.config/ghostty/config` | `.chezmoi/run_on_darwin/dot_config/ghostty/config.tmpl` |
 | **Yabai 配置** | `~/.yabairc` | `.chezmoi/run_on_darwin/dot_yabairc` |
 | **skhd 配置** | `~/.skhdrc` | `.chezmoi/run_on_darwin/dot_skhdrc` |
 

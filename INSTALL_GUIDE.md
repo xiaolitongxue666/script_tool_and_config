@@ -54,6 +54,8 @@
 
 部分 run_once（如 dwm、i3wm、alacritty）在部分环境下可能未安装成功，会打 WARNING 并继续 apply，属预期；详见 [SOFTWARE_LIST.md](SOFTWARE_LIST.md) 与 [scripts/linux/system_basic_env/INSTALL_STATUS.md](scripts/linux/system_basic_env/INSTALL_STATUS.md)。
 
+- **macOS 终端**：使用 **Ghostty** + zsh（由 `run_on_darwin/run_once_install-ghostty.sh.tmpl` 安装，配置在 `~/.config/ghostty/config`，指定 zsh 为 shell）。Alacritty 仅 Linux 安装。
+
 ### Linux 默认 Shell 与字体
 
 - **默认 Shell**：项目期望 Linux 下默认使用 **zsh + Oh My Zsh**。`run_once_install-zsh.sh` 会在安装后尝试执行 `chsh -s $(command -v zsh)`；若因权限/交互未生效，请**手动执行** `chsh -s $(command -v zsh)` 后**重新登录**（或新开 WSL 窗口），登录 shell 才会变为 zsh。

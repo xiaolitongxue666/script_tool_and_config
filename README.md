@@ -159,7 +159,8 @@ chezmoi add ~/.new_config
 ### 终端工具
 - **starship** - 跨 shell 提示符
 - **tmux** - 终端复用器
-- **alacritty** - GPU 加速终端模拟器
+- **alacritty** - GPU 加速终端模拟器（仅 Linux）
+- **ghostty** - 跨平台终端（仅 macOS，使用 zsh）
 
 ### 文件工具
 - **bat** - cat 替代工具（语法高亮）
@@ -181,7 +182,7 @@ chezmoi add ~/.new_config
 ### 1. 环境配置管理
 通过 chezmoi 统一管理所有配置文件，支持：
 - Shell 配置（Bash、Zsh、Fish）
-- 终端配置（Tmux、Alacritty）
+- 终端配置（Tmux、Alacritty 仅 Linux、Ghostty 仅 macOS）
 - 窗口管理器（i3wm、dwm、Yabai）
 - 开发工具配置（Neovim、Git）
 

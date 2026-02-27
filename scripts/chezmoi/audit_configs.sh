@@ -71,7 +71,6 @@ CONFIG_MAPPINGS["~/.bashrc"]=".chezmoi/dot_bashrc.tmpl"
 CONFIG_MAPPINGS["~/.bash_profile"]=".chezmoi/dot_bash_profile.tmpl"
 CONFIG_MAPPINGS["~/.zprofile"]=".chezmoi/dot_zprofile"
 CONFIG_MAPPINGS["~/.config/starship/starship.toml"]=".chezmoi/dot_config/starship/starship.toml"
-CONFIG_MAPPINGS["~/.config/alacritty/alacritty.toml"]=".chezmoi/dot_config/alacritty/alacritty.toml"
 CONFIG_MAPPINGS["~/.config/fish/config.fish"]=".chezmoi/dot_config/fish/config.fish"
 CONFIG_MAPPINGS["~/.config/fish/completions/alacritty.fish"]=".chezmoi/dot_config/fish/completions/alacritty.fish"
 CONFIG_MAPPINGS["~/.config/fish/conf.d/fnm.fish"]=".chezmoi/dot_config/fish/conf.d/fnm.fish"
@@ -80,11 +79,13 @@ CONFIG_MAPPINGS["~/.ssh/config"]=".chezmoi/dot_ssh/config.tmpl"
 
 # Linux 特定配置
 if [[ "$PLATFORM" == "linux" ]]; then
+    CONFIG_MAPPINGS["~/.config/alacritty/alacritty.toml"]=".chezmoi/run_on_linux/dot_config/alacritty/alacritty.toml.tmpl"
     CONFIG_MAPPINGS["~/.config/i3/config"]=".chezmoi/run_on_linux/dot_config/i3/config"
 fi
 
 # macOS 特定配置
 if [[ "$PLATFORM" == "darwin" ]]; then
+    CONFIG_MAPPINGS["~/.config/ghostty/config"]=".chezmoi/run_on_darwin/dot_config/ghostty/config.tmpl"
     CONFIG_MAPPINGS["~/.yabairc"]=".chezmoi/run_on_darwin/dot_yabairc"
     CONFIG_MAPPINGS["~/.skhdrc"]=".chezmoi/run_on_darwin/dot_skhdrc"
 fi

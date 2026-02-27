@@ -1,0 +1,9 @@
+# Ghostty 终端配置（macOS，由 chezmoi 管理）
+# 参考: https://ghostty.org/docs/config
+# 使用 zsh 作为 shell，与 run_once_install-zsh 一致
+
+# 使用 zsh（优先 Homebrew；Intel Mac 可改为 /usr/local/bin/zsh）
+command = {{ index . "macos_zsh_path" | default "/opt/homebrew/bin/zsh" }}
+
+# 显式启用 zsh 集成（工作目录继承、提示标记等）
+shell-integration = zsh

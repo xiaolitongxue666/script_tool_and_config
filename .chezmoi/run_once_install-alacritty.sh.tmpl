@@ -1,9 +1,9 @@
-{{- if or (eq .chezmoi.os "linux") (eq .chezmoi.os "darwin") -}}
+{{- if eq .chezmoi.os "linux" -}}
 #!/bin/bash
 
 # ============================================
 # Alacritty 终端安装脚本（chezmoi run_once_）
-# 支持 Linux/macOS
+# 仅 Linux；macOS 使用 Ghostty（run_on_darwin/run_once_install-ghostty）
 # ============================================
 
 # 获取 common_install.sh 路径
@@ -61,16 +61,8 @@ fi
 
 echo "[INFO] 开始安装 Alacritty..."
 
-# 根据平台安装 Alacritty
+# 根据包管理器安装（仅 Linux）
 case "$PLATFORM" in
-    macos)
-        if [[ "$PACKAGE_MANAGER" == "brew" ]]; then
-            install_package "alacritty"
-        else
-            echo "[ERROR] macOS 需要 Homebrew 来安装 Alacritty"
-            exit 1
-        fi
-        ;;
     linux)
         if [[ "$PACKAGE_MANAGER" == "pacman" ]]; then
             install_package "alacritty"

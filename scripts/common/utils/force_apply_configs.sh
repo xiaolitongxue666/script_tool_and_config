@@ -56,9 +56,18 @@ declare -A FILE_MAPPINGS=(
 
     # 配置目录
     ["$CHEZMOI_DIR/dot_config/starship/starship.toml"]="$HOME/.config/starship/starship.toml"
-    ["$CHEZMOI_DIR/dot_config/alacritty/alacritty.toml"]="$HOME/.config/alacritty/alacritty.toml"
     ["$CHEZMOI_DIR/dot_config/fish/config.fish"]="$HOME/.config/fish/config.fish"
 )
+
+# 平台特定配置
+case "$(uname -s)" in
+    Linux)
+        FILE_MAPPINGS["$CHEZMOI_DIR/run_on_linux/dot_config/alacritty/alacritty.toml.tmpl"]="$HOME/.config/alacritty/alacritty.toml"
+        ;;
+    Darwin)
+        FILE_MAPPINGS["$CHEZMOI_DIR/run_on_darwin/dot_config/ghostty/config.tmpl"]="$HOME/.config/ghostty/config"
+        ;;
+esac
 
 # ============================================
 # 处理文件映射

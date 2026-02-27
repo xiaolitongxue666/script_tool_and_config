@@ -1,0 +1,95 @@
+{{- if eq .chezmoi.os "darwin" -}}
+#!/bin/bash
+
+# ============================================
+# macOS Ghostty 终端安装脚本（chezmoi run_once_）
+# 参考: https://github.com/ghostty-org/ghostty
+# 安装说明: https://ghostty.org/docs/install/binary
+# 确保安装到 /Applications/Ghostty.app，以便启动台显示
+# 与 run_once_install-zsh 配合，使用 zsh 作为 shell
+# ============================================
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="${CHEZMOI_PROJECT_ROOT:-$(cd "${SCRIPT_DIR}/../../.." && pwd 2>/dev/null || echo "$HOME")}"
+COMMON_INSTALL="${PROJECT_ROOT}/scripts/chezmoi/common_install.sh"
+
+readonly APPLICATIONS_GHOSTTY="/Applications/Ghostty.app"
+
+if [ ! -f "$COMMON_INSTALL" ]; then
+    COMMON_INSTALL="$HOME/.local/share/chezmoi/scripts/chezmoi/common_install.sh"
+fi
+
+if [ -f "$COMMON_INSTALL" ]; then
+    source "$COMMON_INSTALL"
+else
+    echo "[WARNING] 未找到 common_install.sh，使用基本函数"
+    function log_info() { echo "[INFO] $*"; }
+    function log_success() { echo "[SUCCESS] $*"; }
+    function log_warning() { echo "[WARNING] $*"; }
+    function setup_proxy() { :; }
+    function detect_os_and_package_manager() {
+        PLATFORM="macos"
+        PACKAGE_MANAGER="brew"
+    }
+    function install_package() { brew install --cask "$1"; }
+fi
+
+if [[ "$(uname)" != "Darwin" ]]; then
+    echo "[ERROR] 此脚本仅支持 macOS"
+    exit 1
+fi
+
+setup_proxy "${PROXY:-{{ env "http_proxy" | default "http://127.0.0.1:7890" }}}"
+detect_os_and_package_manager 2>/dev/null || true
+
+# 已安装：以 /Applications 中存在为准，保证启动台可见
+if [[ -d "$APPLICATIONS_GHOSTTY" ]]; then
+    if command -v ghostty &> /dev/null; then
+        log_info "Ghostty 已安装: $(ghostty --version 2>/dev/null | head -n 1 || echo 'ghostty')"
+    else
+        log_info "Ghostty 已安装于 ${APPLICATIONS_GHOSTTY}"
+    fi
+    exit 0
+fi
+
+log_info "安装 Ghostty 终端（macOS 推荐，使用 zsh 作为 shell）..."
+if [[ "$PACKAGE_MANAGER" != "brew" ]]; then
+    log_warning "需要 Homebrew，请先安装 Homebrew"
+    exit 1
+fi
+
+install_package "ghostty"
+
+# 确保 /Applications/Ghostty.app 存在（供启动台显示）
+if [[ -d "$APPLICATIONS_GHOSTTY" ]]; then
+    if command -v ghostty &> /dev/null; then
+        log_success "Ghostty 安装成功: $(ghostty --version 2>/dev/null | head -n 1 || echo 'ghostty')"
+    else
+        log_success "Ghostty 已安装到 ${APPLICATIONS_GHOSTTY}"
+    fi
+    exit 0
+fi
+
+# cask 未放入 /Applications 时，从 Caskroom 创建符号链接
+BREW_PREFIX="${HOMEBREW_PREFIX:-$(brew --prefix 2>/dev/null)}"
+CASK_APP=""
+if [[ -n "${BREW_PREFIX:-}" ]] && [[ -d "${BREW_PREFIX}/Caskroom/ghostty" ]]; then
+    for candidate in "${BREW_PREFIX}/Caskroom/ghostty/"*/Ghostty.app; do
+        if [[ -d "$candidate" ]]; then
+            CASK_APP="$candidate"
+            break
+        fi
+    done
+fi
+
+if [[ -n "$CASK_APP" ]]; then
+    if ln -sf "$CASK_APP" "$APPLICATIONS_GHOSTTY" 2>/dev/null; then
+        log_success "已从 Caskroom 链接到 ${APPLICATIONS_GHOSTTY}"
+    else
+        log_warning "无法创建 ${APPLICATIONS_GHOSTTY}，请尝试: sudo ln -sf \"${CASK_APP}\" \"${APPLICATIONS_GHOSTTY}\""
+    fi
+else
+    log_warning "未在 Caskroom 找到 Ghostty.app，请检查 brew list --cask ghostty 或从 https://ghostty.org/docs/install/binary 手动安装"
+fi
+{{ "\n" -}}
+{{- end -}}

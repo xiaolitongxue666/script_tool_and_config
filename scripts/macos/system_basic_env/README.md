@@ -59,8 +59,9 @@
 - **uv** - Python 包管理器（优先通过 Homebrew 安装，失败则使用官方脚本）
 - **fnm** - Node.js 版本管理器（优先通过 Homebrew 安装，失败则使用官方脚本）
 
-### Shell 工具
+### 终端与 Shell
 
+- **终端应用**：**Ghostty**（由 `run_on_darwin/run_once_install-ghostty.sh.tmpl` 安装，配置使用 zsh 作为 shell）。详见 [SOFTWARE_LIST.md](../../../SOFTWARE_LIST.md)。
 - **zsh** - Z shell（macOS 默认 shell）
 - **oh-my-zsh** - Zsh 配置框架
 

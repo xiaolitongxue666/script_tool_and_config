@@ -127,7 +127,8 @@ install_common_tools.bat
 - `run_once_install-neovim.sh.tmpl` - Neovim 编辑器
 - `run_once_install-git.sh.tmpl` - Git
 - `run_once_install-starship.sh.tmpl` - Starship 提示符
-- `run_once_install-alacritty.sh.tmpl` - Alacritty 终端
+- `run_once_install-alacritty.sh.tmpl` - Alacritty 终端（仅 Linux）
+- `run_on_darwin/run_once_install-ghostty.sh.tmpl` - Ghostty 终端（仅 macOS）
 - `run_once_install-nerd-fonts.sh.tmpl` - Nerd Fonts 字体
 - `run_on_linux/run_once_configure-pacman.sh.tmpl`、`run_once_install-arch-base-packages.sh.tmpl`、`run_once_install-aur-helper.sh.tmpl` - 仅 Arch
 
@@ -154,7 +155,8 @@ chezmoi 会将以下配置文件应用到系统：
 - `dot_bashrc` → `~/.bashrc`（Git Bash 非登录配置）
 
 **通用配置**（`.chezmoi/`）：
-- `dot_config/alacritty/alacritty.toml` → `~/.config/alacritty/alacritty.toml`
+- `run_on_linux/dot_config/alacritty/alacritty.toml.tmpl` → `~/.config/alacritty/alacritty.toml`（仅 Linux）
+- `run_on_darwin/dot_config/ghostty/config.tmpl` → `~/.config/ghostty/config`（仅 macOS）
 - `dot_config/starship/starship.toml` → `~/.config/starship/starship.toml`
 - `dot_config/fish/config.fish` → `~/.config/fish/config.fish`（如果使用 Fish Shell）
 - `dot_tmux.conf` → `~/.tmux.conf`（如果使用 Tmux）
@@ -173,7 +175,8 @@ export CHEZMOI_SOURCE_DIR="$(pwd)/.chezmoi"
 # 添加配置文件到 chezmoi 管理
 chezmoi add ~/.bash_profile
 chezmoi add ~/.bashrc
-chezmoi add ~/.config/alacritty/alacritty.toml
+chezmoi add ~/.config/alacritty/alacritty.toml   # Linux
+chezmoi add ~/.config/ghostty/config             # macOS
 ```
 
 ### Windows 完整执行示例
@@ -363,7 +366,8 @@ export https_proxy="$PROXY"
 **终端工具**
 - starship (跨 shell 提示符)
 - tmux (终端复用器)
-- alacritty (GPU 加速终端)
+- alacritty (GPU 加速终端，仅 Linux)
+- ghostty (终端，仅 macOS，使用 zsh)
 
 **文件工具**
 - bat, eza, fd, ripgrep, fzf, trash-cli
@@ -453,7 +457,8 @@ chezmoi apply -v
 - `~/.config/fish/config.fish` - Fish Shell 配置
 
 **终端和工具配置**
-- `~/.config/alacritty/alacritty.toml` - Alacritty 终端配置
+- `~/.config/alacritty/alacritty.toml` - Alacritty 终端配置（仅 Linux）
+- `~/.config/ghostty/config` - Ghostty 终端配置（仅 macOS）
 - `~/.tmux.conf` - Tmux 配置
 - `~/.config/starship/starship.toml` - Starship 提示符配置
 
