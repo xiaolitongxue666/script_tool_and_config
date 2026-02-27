@@ -355,3 +355,6 @@ scripts/common/container_dev_env/*.log
 # 编码检查和修复脚本生成的临时文件
 scripts/common/utils/*.tmp
 scripts/common/utils/*.bak
+
+# 误产生的根目录文件名为 -（如重定向或保存错误）
+/-
