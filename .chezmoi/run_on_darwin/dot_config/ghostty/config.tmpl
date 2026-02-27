@@ -2,8 +2,15 @@
 # 参考: https://ghostty.org/docs/config
 # 使用 zsh 作为 shell，与 run_once_install-zsh 一致
 
-# 使用 zsh（优先 Homebrew；Intel Mac 可改为 /usr/local/bin/zsh）
-command = {{ index . "macos_zsh_path" | default "/opt/homebrew/bin/zsh" }}
+# 使用 zsh（data.macos_zsh_path 优先；否则 arm64 用 /opt/homebrew/bin/zsh，Intel 用 /usr/local/bin/zsh）
+command = {{ if index . "macos_zsh_path" }}{{ index . "macos_zsh_path" }}{{ else if eq .chezmoi.arch "arm64" }}/opt/homebrew/bin/zsh{{ else }}/usr/local/bin/zsh{{ end }}
 
 # 显式启用 zsh 集成（工作目录继承、提示标记等）
 shell-integration = zsh
+
+# 外观：与 iTerm2 默认一致（纯黑底、浅色字、不透明、无模糊）
+background = #000000
+foreground = #c0c0c0
+background-opacity = 1.0
+background-blur = false
+cursor-color = #c0c0c0

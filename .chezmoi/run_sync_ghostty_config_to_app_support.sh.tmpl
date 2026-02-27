@@ -1,0 +1,41 @@
+#!/bin/bash
+{{- if eq .chezmoi.os "darwin" }}
+# 每次 apply 后同步 ghostty config 到 Ghostty 实际读取的路径：
+# 1) Application Support（后加载，覆盖 GUI 设置）
+# 2) ~/.config/ghostty/config（若不存在则创建，供首路径加载）
+# 源：本仓库 apply 后可能在 ~/run_on_darwin/.config/ghostty/config 或 ~/.config/ghostty/config
+set -e
+SRC=""
+[[ -f "$HOME/run_on_darwin/.config/ghostty/config" ]] && SRC="$HOME/run_on_darwin/.config/ghostty/config"
+[[ -z "$SRC" ]] && [[ -f "$HOME/.config/ghostty/config" ]] && SRC="$HOME/.config/ghostty/config"
+if [[ -n "$SRC" ]]; then
+    # 本机可用的 zsh 路径（Intel 多为 /usr/local/bin/zsh，Apple Silicon 多为 /opt/homebrew/bin/zsh）
+    ZSH_PATH=""
+    if command -v zsh &>/dev/null; then
+        ZSH_PATH="$(command -v zsh)"
+    elif [[ -x /opt/homebrew/bin/zsh ]]; then
+        ZSH_PATH="/opt/homebrew/bin/zsh"
+    elif [[ -x /usr/local/bin/zsh ]]; then
+        ZSH_PATH="/usr/local/bin/zsh"
+    fi
+    if [[ -n "$ZSH_PATH" ]]; then
+        # 用本机 zsh 路径覆盖 config 中的 command，再写入两处
+        TMP_CONFIG=$(mktemp)
+        sed "s|^command = .*|command = $ZSH_PATH|" "$SRC" > "$TMP_CONFIG"
+        DEST_DIR="$HOME/Library/Application Support/com.mitchellh.ghostty"
+        mkdir -p "$DEST_DIR"
+        cp "$TMP_CONFIG" "$DEST_DIR/config"
+        mkdir -p "$HOME/.config/ghostty"
+        cp "$TMP_CONFIG" "$HOME/.config/ghostty/config"
+        rm -f "$TMP_CONFIG"
+    else
+        DEST_DIR="$HOME/Library/Application Support/com.mitchellh.ghostty"
+        mkdir -p "$DEST_DIR"
+        cp "$SRC" "$DEST_DIR/config"
+        mkdir -p "$HOME/.config/ghostty"
+        cp "$SRC" "$HOME/.config/ghostty/config"
+    fi
+fi
+{{- else }}
+exit 0
+{{- end }}
