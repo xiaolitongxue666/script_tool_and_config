@@ -105,7 +105,12 @@ cmd_install() {
 cmd_apply() {
     check_chezmoi
     setup_chezmoi_source
-    log_info "应用所有配置..."
+    if command -v export_chezmoi_apply_env &>/dev/null; then
+        export_chezmoi_apply_env
+    fi
+    log_info "应用所有配置 (chezmoi apply -v)..."
+    export PAGER=cat
+    export CHEZMOI_PAGER=""
     chezmoi apply -v
 }
 
@@ -120,6 +125,8 @@ cmd_diff() {
     check_chezmoi
     setup_chezmoi_source
     log_info "查看配置差异..."
+    export PAGER=cat
+    export CHEZMOI_PAGER=""
     chezmoi diff
 }
 

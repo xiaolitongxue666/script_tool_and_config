@@ -85,6 +85,24 @@ setup_chezmoi_source_dir() {
     fi
 }
 
+# 在 apply 前导出模板所需环境变量（如 macOS connect 路径，供 ~/.ssh/config 使用）
+export_chezmoi_apply_env() {
+    if [[ "$(uname)" != "Darwin" ]]; then
+        return 0
+    fi
+    local connect_path=""
+    if command -v connect &>/dev/null; then
+        connect_path="$(command -v connect)"
+    elif [[ -x /opt/homebrew/bin/connect ]]; then
+        connect_path="/opt/homebrew/bin/connect"
+    elif [[ -x /usr/local/bin/connect ]]; then
+        connect_path="/usr/local/bin/connect"
+    fi
+    if [[ -n "$connect_path" ]]; then
+        export CHEZMOI_MACOS_CONNECT_PATH="$connect_path"
+    fi
+}
+
 # 初始化 chezmoi 仓库
 init_chezmoi_repo() {
     local source_dir="$(get_chezmoi_source_dir)"

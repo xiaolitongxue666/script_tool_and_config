@@ -349,6 +349,16 @@ else
     # 供 run_once 脚本解析 common_install 路径（优先于 SCRIPT_DIR 推导）
     export CHEZMOI_PROJECT_ROOT="$(cd "$SCRIPT_DIR" && pwd)"
     [ -d "$HOME/.local/bin" ] && export PATH="$HOME/.local/bin:$PATH"
+    # macOS：供 ~/.ssh/config 模板使用 connect 实际路径（避免 arch 与 Homebrew 路径不一致）
+    if [[ "$(uname)" == "Darwin" ]]; then
+        if command -v connect &>/dev/null; then
+            export CHEZMOI_MACOS_CONNECT_PATH="$(command -v connect)"
+        elif [[ -x /opt/homebrew/bin/connect ]]; then
+            export CHEZMOI_MACOS_CONNECT_PATH="/opt/homebrew/bin/connect"
+        elif [[ -x /usr/local/bin/connect ]]; then
+            export CHEZMOI_MACOS_CONNECT_PATH="/usr/local/bin/connect"
+        fi
+    fi
 
     if chezmoi apply -v --force; then
         log_success "配置应用成功！"
