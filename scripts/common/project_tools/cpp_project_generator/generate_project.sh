@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# 脚本所在目录，用于解析 gitignore 模板路径（引用 git_templates 下模板）
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+GIT_IGNORE_TEMPLATES_DIR="${SCRIPT_DIR}/../../git_templates/default_gitignore_files"
+
 # 项目名称使用当前目录名
 project_path=$(pwd)
 project_name="${project_path##*/}"
@@ -77,14 +81,14 @@ if [ ! -f "$git_ignore_file_path" ]; then
   echo -e "./generate_project.sh" >> $git_ignore_file_path
   echo -e "./ls_dirs_name.sh" >> $git_ignore_file_path
   echo -e "build/" >> $git_ignore_file_path
-  # 默认 git ignore 文件
-  echo -e "./git_ignore_default_c.txt" >> $git_ignore_file_path
-  echo -e "./git_ignore_default_cpp.txt" >> $git_ignore_file_path
   # 新行
   echo -e "\n" >> $git_ignore_file_path
-  # 中间文件
-  # 项目类型默认忽略中间文件
-  cat ./git_ignore_default_c.txt >> $git_ignore_file_path
+  # 项目类型默认忽略中间文件（从 git_templates 引用）
+  if [ "$project_type" = "c" ]; then
+    cat "${GIT_IGNORE_TEMPLATES_DIR}/git_ignore_default_c.txt" >> $git_ignore_file_path
+  else
+    cat "${GIT_IGNORE_TEMPLATES_DIR}/git_ignore_default_cpp.txt" >> $git_ignore_file_path
+  fi
 fi
 
 # CMakeLists.txt 更新

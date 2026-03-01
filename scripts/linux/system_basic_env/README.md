@@ -48,148 +48,9 @@ sudo ./configure_china_mirrors.sh
 
 ---
 
-## 2. install_common_tools.sh - 安装常用工具（已废弃，Arch 仍可本地使用）
+## 2. install_common_tools.sh（已废弃，仅 Arch 本地可选）
 
-> **说明**：该脚本已废弃，职责已拆分到 run_once。跨平台一键安装请使用项目根目录 `./install.sh`，完整列表见 [SOFTWARE_LIST.md](../../../SOFTWARE_LIST.md)。
-
-### 功能说明
-完整的 Arch Linux 系统工具安装脚本，包括：
-- 配置中国镜像源
-- 优化 pacman 配置
-- 安装基础开发工具
-- 安装 AUR 助手（yay/paru）
-- 安装编程语言工具（uv, fnm）
-- 安装 Neovim 及 Python 工具
-- 安装字体和 Shell 工具
-
-### 使用方法
-
-#### 基本用法
-
-```bash
-# 需要 root 权限
-sudo ./install_common_tools.sh
-```
-
-#### 使用代理（可选）
-
-如果需要使用代理，设置环境变量：
-
-```bash
-# 启用代理（使用默认代理地址 192.168.1.76:7890）
-USE_PROXY=1 sudo ./install_common_tools.sh
-
-# 或指定自定义代理地址
-HTTP_PROXY=http://your-proxy:port USE_PROXY=1 sudo ./install_common_tools.sh
-```
-
-#### 自定义代理地址
-
-```bash
-# 设置自定义代理
-export DEFAULT_PROXY_URL=http://your-proxy:port
-USE_PROXY=1 sudo ./install_common_tools.sh
-```
-
-### 环境变量说明
-
-| 变量名 | 说明 | 默认值 |
-|--------|------|--------|
-| `USE_PROXY` | 是否启用代理 | `0` (禁用) |
-| `HTTP_PROXY` | HTTP 代理地址 | - |
-| `HTTPS_PROXY` | HTTPS 代理地址 | - |
-| `DEFAULT_PROXY_URL` | 默认代理地址 | `http://192.168.1.76:7890` |
-
-### 安装内容
-
-#### 基础工具
-- `base-devel` - 基础开发工具
-- `git`, `curl`, `wget`, `aria2` - 网络工具
-- `tmux`, `starship` - 终端工具
-- `fzf`, `ripgrep`, `fd`, `bat`, `eza` - 文件搜索和查看工具
-- `neovim` - 编辑器
-- `gcc`, `make`, `cmake` - 编译工具
-
-#### AUR 助手
-- 自动检测并安装 `yay` 或 `paru`（优先 yay）
-
-#### 编程语言工具
-- **uv** - Python 包管理器
-- **fnm** - Node.js 版本管理器
-
-#### Neovim 配置
-- 自动安装 Neovim 配置（如果存在 Git Submodule）
-- 创建 Python 虚拟环境并安装工具：
-  - `pynvim`, `pyright`, `ruff-lsp`, `debugpy`
-  - `black`, `isort`, `flake8`, `mypy`
-
-#### 字体
-- FiraMono Nerd Font
-
-#### Shell 工具
-- `zsh` 和 `oh-my-zsh`
-
-### 日志和状态
-
-脚本会创建以下目录和文件：
-
-- **日志目录**: `~/Code/DotfilesAndScript/script_tool_and_config/logs/system_basic_env/`
-- **状态目录**: `~/.local/share/system_basic_env/`
-- **配置目录**: `~/.config/system_basic_env/`
-- **PATH 环境文件**: `~/.config/system_basic_env/path.env`
-
-### 执行流程
-
-1. 检查系统（Arch Linux）
-2. 检测安装用户（用于 AUR 构建）
-3. 配置镜像源
-4. 优化 pacman 配置
-5. 更新系统
-6. 安装 archlinuxcn-keyring（如果配置了 archlinuxcn 源）
-7. 安装软件包
-8. 安装 AUR 助手
-9. 安装编程工具
-10. 安装 Neovim 配置
-11. 安装字体和 Shell 工具
-
-### 注意事项
-
-1. **需要 root 权限**：脚本会修改系统配置，必须使用 `sudo` 运行
-2. **网络连接**：需要稳定的网络连接下载软件包
-3. **时间消耗**：完整安装可能需要较长时间，请耐心等待
-4. **代理设置**：默认不使用代理，如需使用请设置 `USE_PROXY=1`
-5. **archlinuxcn 源**：如果 archlinuxcn 源无法访问，脚本会继续执行，但相关软件包可能无法安装
-
-### 故障排除
-
-#### 如果 archlinuxcn 源无法访问
-
-脚本会自动处理，但如果需要手动修复：
-
-```bash
-# 编辑 pacman.conf，确保只使用可用的镜像
-sudo nano /etc/pacman.conf
-
-# 手动安装 keyring
-sudo pacman -Sy archlinuxcn-keyring
-```
-
-#### 如果代理测试失败
-
-```bash
-# 禁用代理
-unset HTTP_PROXY HTTPS_PROXY http_proxy https_proxy
-
-# 或设置 NO_PROXY=1
-NO_PROXY=1 sudo ./install_common_tools.sh
-```
-
-#### 查看详细日志
-
-```bash
-# 日志文件位置
-ls -lh ~/Code/DotfilesAndScript/script_tool_and_config/logs/system_basic_env/
-```
+该脚本已废弃，职责已拆分到 run_once。**推荐使用项目根目录 `./install.sh`** 完成跨平台一键安装，软件与 run_once 对应见 [SOFTWARE_LIST.md](../../../SOFTWARE_LIST.md)。仅在 Arch 上需要本地执行完整环境安装时，可运行：`sudo ./install_common_tools.sh`（需 root，支持 `USE_PROXY`、`HTTP_PROXY` 等环境变量，详见脚本内注释）。
 
 ---
 
@@ -202,42 +63,18 @@ cd ~/Code/DotfilesAndScript/script_tool_and_config/scripts/linux/system_basic_en
 sudo ./configure_china_mirrors.sh
 ```
 
-### 示例 2：完整安装（不使用代理）
+### 示例 2：Arch 本地完整安装（已废弃，可选）
 
 ```bash
-cd ~/Code/DotfilesAndScript/script_tool_and_config/scripts/linux/system_basic_env
-sudo ./install_common_tools.sh
-```
-
-### 示例 3：完整安装（使用代理）
-
-```bash
-cd ~/Code/DotfilesAndScript/script_tool_and_config/scripts/linux/system_basic_env
-USE_PROXY=1 sudo ./install_common_tools.sh
-```
-
-### 示例 4：使用自定义代理
-
-```bash
-cd ~/Code/DotfilesAndScript/script_tool_and_config/scripts/linux/system_basic_env
-HTTP_PROXY=http://192.168.1.100:8080 USE_PROXY=1 sudo ./install_common_tools.sh
+sudo ./install_common_tools.sh   # 可选 USE_PROXY=1 或 HTTP_PROXY=... 见脚本内注释
 ```
 
 ---
 
 ## 脚本依赖
 
-### install_common_tools.sh 依赖
-
-- `scripts/common.sh` - 通用脚本库（必须存在）
-- Git 仓库结构（用于 Neovim 配置安装）
-
-### 系统要求
-
-- Arch Linux 系统
-- root 权限
-- 网络连接
-- 足够的磁盘空间
+- `configure_china_mirrors.sh` / `install_common_tools.sh` 需 root，依赖 `scripts/common.sh`
+- 系统要求：Arch Linux、网络连接、足够磁盘空间
 
 ---
 
@@ -256,7 +93,7 @@ HTTP_PROXY=http://192.168.1.100:8080 USE_PROXY=1 sudo ./install_common_tools.sh
 
 - `get_wsl_system_info.sh` - 获取 WSL/Linux 详细版本与环境信息（只读）
 - `configure_china_mirrors.sh` - 镜像源配置脚本
-- `install_common_tools.sh` - 完整安装脚本
+- `install_common_tools.sh` - 完整安装脚本（已废弃，仅 Arch 本地可选；推荐 `./install.sh`）
 - `scripts/common.sh` - 通用脚本库
 - `logs/system_basic_env/` - 日志目录
 - `~/.config/system_basic_env/path.env` - PATH 环境变量配置

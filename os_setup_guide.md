@@ -2,7 +2,8 @@
 
 本指南适用于在全新的操作系统上使用 chezmoi 管理 dotfiles 配置，支持 Windows、macOS 和 Linux。
 
-**一键安装入口**：推荐优先阅读 [INSTALL_GUIDE.md](INSTALL_GUIDE.md)，在项目根目录执行 `./install.sh` 即可完成安装与验证；本指南提供各平台分步说明与故障排除。
+**一键安装入口**：推荐优先阅读 [INSTALL_GUIDE.md](INSTALL_GUIDE.md)，在项目根目录执行 `./install.sh` 即可完成安装与验证。  
+**本指南**：仅保留各平台分步操作与前置条件（如 Windows 管理员、macOS Homebrew、Linux 发行版与 WSL）；一键安装命令、代理与 WSL 说明、故障排除等见 [INSTALL_GUIDE.md](INSTALL_GUIDE.md)。
 
 ## 目录
 

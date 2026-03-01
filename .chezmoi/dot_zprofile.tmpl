@@ -12,6 +12,11 @@
 # 基础路径（本地本来就有的）
 export PATH="{{ .chezmoi.homeDir }}/.local/bin:{{ .chezmoi.homeDir }}/.cargo/bin:$PATH"
 
+# OpenCode（官方脚本默认可能安装到 ~/.opencode/bin）
+if [ -d "{{ .chezmoi.homeDir }}/.opencode/bin" ]; then
+    export PATH="{{ .chezmoi.homeDir }}/.opencode/bin:$PATH"
+fi
+
 # 系统路径（根据操作系统添加）
 {{ if eq .chezmoi.os "linux" }}
 # Linux 特定路径

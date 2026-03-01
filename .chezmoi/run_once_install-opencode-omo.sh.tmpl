@@ -1,0 +1,73 @@
+{{- if or (eq .chezmoi.os "linux") (eq .chezmoi.os "darwin") (eq .chezmoi.os "windows") -}}
+#!/bin/bash
+
+# ============================================
+# Oh My OpenCode 安装脚本（chezmoi run_once_）
+# 依赖：OpenCode 已安装、Node 可用（fnm 由 run_once_00 安装）
+# 支持 Linux（含 WSL/多发行版）、macOS、Windows
+# 参考: https://github.com/code-yeongyu/oh-my-opencode
+# 命名：opencode-omo 确保在 install-opencode 之后执行（字母序）
+# ============================================
+
+# 获取 common_install.sh 路径
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="${CHEZMOI_PROJECT_ROOT:-$(cd "${SCRIPT_DIR}/../.." && pwd 2>/dev/null || echo "$HOME")}"
+COMMON_INSTALL="${PROJECT_ROOT}/scripts/chezmoi/common_install.sh"
+
+if [ ! -f "$COMMON_INSTALL" ]; then
+    COMMON_INSTALL="$HOME/.local/share/chezmoi/scripts/chezmoi/common_install.sh"
+fi
+
+if [ -f "$COMMON_INSTALL" ]; then
+    source "$COMMON_INSTALL"
+else
+    function setup_proxy() { :; }
+    function detect_os_and_package_manager() { :; }
+fi
+
+# 设置代理
+setup_proxy "${PROXY:-{{ env "http_proxy" | default "http://127.0.0.1:7890" }}}"
+
+# 检测操作系统（用于日志）
+detect_os_and_package_manager 2>/dev/null || true
+PLATFORM="${PLATFORM:-unknown}"
+
+# 前置：OpenCode 必须已安装
+if ! command -v opencode &> /dev/null; then
+    echo "[WARNING] OpenCode 未安装，跳过 Oh My OpenCode。请先执行 run_once_install-opencode 或手动安装 OpenCode。"
+    exit 0
+fi
+
+# 已安装 OMO：检查 ~/.config/opencode/opencode.json 是否包含 oh-my-opencode
+OC_JSON="${HOME}/.config/opencode/opencode.json"
+if [[ -f "$OC_JSON" ]] && grep -q '"oh-my-opencode"' "$OC_JSON" 2>/dev/null; then
+    echo "[INFO] Oh My OpenCode 已配置（plugin 已含 oh-my-opencode）"
+    exit 0
+fi
+
+# Node 用于 bunx/npx
+export PATH="${HOME}/.local/bin:${HOME}/.local/share/fnm:${HOME}/.fnm:${HOME}/.cargo/bin:$PATH"
+if command -v fnm &>/dev/null; then
+    eval "$(fnm env --shell=bash --use-on-cd)" 2>/dev/null || true
+fi
+if ! command -v node &> /dev/null && ! command -v bun &> /dev/null; then
+    echo "[WARNING] 未检测到 node 或 bun，跳过 Oh My OpenCode。请先执行 run_once_00-install-version-managers 或安装 Node。"
+    exit 0
+fi
+
+echo "[INFO] 开始安装 Oh My OpenCode（最小默认，无订阅）..."
+
+# --no-tui 非交互；默认不启用各订阅，用户可后续重新运行选择
+if command -v bunx &>/dev/null; then
+    bunx oh-my-opencode install --no-tui --claude=no --gemini=no --copilot=no 2>/dev/null || true
+else
+    npx oh-my-opencode install --no-tui --claude=no --gemini=no --copilot=no 2>/dev/null || true
+fi
+
+if [[ -f "$OC_JSON" ]] && grep -q '"oh-my-opencode"' "$OC_JSON" 2>/dev/null; then
+    echo "[SUCCESS] Oh My OpenCode 已安装并写入 plugin 配置"
+    echo "[INFO] 后续可按需运行: bunx oh-my-opencode install 选择订阅并认证"
+else
+    echo "[WARNING] Oh My OpenCode 可能未写入配置，可手动运行: bunx oh-my-opencode install"
+fi
+{{- end -}}

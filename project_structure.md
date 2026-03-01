@@ -69,7 +69,7 @@ script_tool_and_config/
 │   │   │   ├── generate_cmake_lists.sh
 │   │   │   ├── generate_log4c_config.sh
 │   │   │   ├── merge_static_libraries.sh
-│   │   │   └── cpp_project_generator/
+│   │   │   └── cpp_project_generator/   # 生成 C/C++ 项目，.gitignore 引用 git_templates 下模板
 │   │   │       ├── generate_project.sh
 │   │   │       ├── cmake_all_project.sh
 │   │   │       ├── ls_dirs_name.sh
@@ -103,7 +103,7 @@ script_tool_and_config/
 │   │   ├── system_basic_env/        # 系统基础环境安装（ArchLinux）
 │   │   │   ├── README.md             # 使用说明
 │   │   │   ├── configure_china_mirrors.sh
-│   │   │   ├── install_common_tools.sh
+│   │   │   ├── install_common_tools.sh  # 已废弃，可选；推荐根目录 ./install.sh
 │   │   │   ├── install_environment.sh
 │   │   │   ├── install_neovim.sh
 │   │   │   ├── install_common_software.sh
@@ -119,7 +119,7 @@ script_tool_and_config/
 │   ├── macos/                        # macOS 专用脚本
 │   │   └── system_basic_env/
 │   │       ├── README.md
-│   │       └── install_common_tools.sh
+│   │       └── install_common_tools.sh  # 已废弃，可选；推荐根目录 ./install.sh
 │   │
 │   └── windows/                      # Windows 专用脚本
 │       ├── system_basic_env/

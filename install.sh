@@ -417,6 +417,7 @@ if [ -d "$CHEZMOI_DIR" ]; then
             not_installed_count=0
 
             echo "$INSTALL_SCRIPTS" | while IFS= read -r script; do
+                script_applicable_to_platform "$script" "$PLATFORM" || continue
                 software_name=$(extract_software_name_from_script "$script")
 
                 if check_script_software_installed "$script"; then

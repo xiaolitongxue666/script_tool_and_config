@@ -82,6 +82,54 @@ chezmoi apply -v
 - **代理**：`install.sh` 从环境变量 `PROXY` 或 `http_proxy` 读取，并导出为 `http_proxy`/`HTTPS_PROXY` 等；run_once 脚本通过 `env http_proxy` 使用，与 install.sh 一致。使用方式：`./install.sh --proxy http://127.0.0.1:7890` 或 `export PROXY=...`。
 - **Pacman（Arch）**：run_on_linux 的 pacman/镜像配置**不使用**代理，直连国内源；其他下载（GitHub、官方安装脚本等）使用上述环境变量代理。
 
+## 📦 各 OS 与 WSL 安装的软件及功能简介
+
+一键安装按 OS 与 WSL 自动选择 run_once 脚本，以下为各平台会安装的软件及简短功能说明。完整 run_once 对应关系见 [SOFTWARE_LIST.md](SOFTWARE_LIST.md)。
+
+### Linux（含 Arch / Ubuntu·Debian / WSL）
+
+| 软件 | 功能简介 | 备注 |
+|------|----------|------|
+| fnm | Node.js 版本管理 | 多平台共有 |
+| uv | Python 包管理器 | 多平台共有 |
+| rustup | Rust 工具链 | 可选，多平台共有 |
+| starship | 跨 shell 提示符 | 多平台共有 |
+| tmux | 终端复用器 | 多平台共有（含 TPM 插件） |
+| zsh, oh-my-zsh | Z shell 与配置框架 | 多平台共有 |
+| fish | Fish Shell | 可选 |
+| bat, eza, fd, ripgrep, fzf, trash-cli | 文件/搜索工具（cat/ls/find/grep 替代与模糊查找、回收站） | 多平台共有；Ubuntu 下 bat→batcat、fd→fdfind 已别名 |
+| git, neovim, lazygit, git-delta, gh | 版本控制、编辑器、Git TUI、diff 增强、GitHub CLI | 多平台共有 |
+| btop, fastfetch | 系统监控与信息展示 | 多平台共有；Ubuntu &lt; 24.10 的 fastfetch 可能走 PPA/Snap/.deb |
+| Nerd Fonts (FiraMono) | 编程字体（图标支持） | 多平台共有 |
+| alacritty | GPU 加速终端模拟器 | 仅 Linux |
+| lazyssh | 终端 SSH 管理器 | 仅 Linux |
+| i3wm, dwm | 平铺/动态窗口管理器 | 仅 Linux（可选） |
+| Pacman 镜像与配置、Arch 基础包、AUR 助手 | Arch 镜像、base-devel/gcc/make/tree 等、yay/paru | 仅 Arch（run_on_linux） |
+
+### macOS
+
+| 软件 | 功能简介 | 备注 |
+|------|----------|------|
+| 上表多平台共有项 | fnm, uv, starship, tmux, zsh, bat, eza, fd, ripgrep, fzf, trash-cli, git, neovim, lazygit, git-delta, gh, btop, fastfetch, Nerd Fonts | 同上 |
+| Ghostty | 跨平台终端（zsh），安装到 /Applications | 仅 macOS |
+| connect | SSH 代理（ProxyCommand） | 仅 macOS |
+| yabai, skhd | 平铺窗口管理器与快捷键守护进程 | 仅 macOS |
+| maccy | 剪贴板工具 | 仅 macOS |
+| Homebrew 配置 | run_on_darwin 下配置 | 仅 macOS |
+
+### Windows
+
+| 软件 | 功能简介 | 备注 |
+|------|----------|------|
+| fnm, uv, starship, zsh（MSYS2 可选） | 版本管理、提示符、Shell | 多平台共有或 Windows 可选 |
+| bat, eza, fd, ripgrep, fzf, git, neovim, lazygit, git-delta, gh, Nerd Fonts | 文件/搜索与开发工具 | 多平台共有 |
+| oh-my-posh | PowerShell 提示符美化 | 仅 Windows |
+| bottom | 系统监控（btop 替代） | 仅 Windows（run_once_install-common-tools） |
+
+### WSL
+
+WSL 与原生 Linux **共享同一套软件列表**（同上 Linux 表格），run_once 按 Linux 执行。差异仅为：代理使用宿主机 IP（`/etc/resolv.conf` 的 nameserver）、SSH/Git 的 ProxyCommand 与 proxy 配置、以及 WSL 专用验证脚本（如 `scripts/linux/system_basic_env/verify_wsl_ssh.sh`、`get_wsl_system_info.sh`）。日志中会区分「Linux (WSL, apt)」与「Linux (原生, pacman/apt)」。详细步骤与故障排除见 [INSTALL_GUIDE.md](INSTALL_GUIDE.md)。
+
 ## 📁 项目结构
 
 ```
@@ -149,33 +197,9 @@ chezmoi edit ~/.zshrc
 chezmoi add ~/.new_config
 ```
 
-## 📦 主要软件清单
+## 📦 主要软件清单（总览）
 
-### 版本管理器
-- **fnm** - Node.js 版本管理
-- **uv** - Python 包管理器
-- **rustup** - Rust 工具链
-
-### 终端工具
-- **starship** - 跨 shell 提示符
-- **tmux** - 终端复用器
-- **alacritty** - GPU 加速终端模拟器（仅 Linux）
-- **ghostty** - 跨平台终端（仅 macOS，使用 zsh）
-
-### 文件工具
-- **bat** - cat 替代工具（语法高亮）
-- **eza** - ls 替代工具
-- **fd** - find 替代工具
-- **ripgrep** - grep 替代工具
-- **fzf** - 模糊查找工具
-
-### 开发工具
-- **neovim** - 现代文本编辑器
-- **git** - 版本控制系统
-- **lazygit** - Git TUI 工具
-- **gh** - GitHub CLI
-
-详细软件清单请参考：[SOFTWARE_LIST.md](SOFTWARE_LIST.md)
+上述「各 OS 与 WSL 安装的软件及功能简介」已按平台列出；此处仅作总览：版本管理（fnm, uv, rustup）、终端/提示符（starship, tmux, alacritty 仅 Linux、Ghostty 仅 macOS）、文件与搜索（bat, eza, fd, ripgrep, fzf）、开发（git, neovim, lazygit, git-delta, gh）、系统监控与字体等。完整 run_once 对应关系与配置说明见 [SOFTWARE_LIST.md](SOFTWARE_LIST.md)。
 
 ## 🎯 主要功能分类
 

@@ -196,6 +196,40 @@ extract_software_name_from_script() {
     echo "$software_name"
 }
 
+# 判断安装脚本是否适用于当前平台（用于安装状态检查时过滤）
+# 参数: script_path, platform (linux|macos|windows)
+# 返回: 0=适用于当前平台应检查, 1=不适用应跳过
+script_applicable_to_platform() {
+    local script_path="$1"
+    local platform="$2"
+    if [[ -z "$platform" ]]; then
+        return 0
+    fi
+    if [[ "$script_path" == *"/run_on_linux/"* ]]; then
+        [[ "$platform" != "linux" ]] && return 1
+        return 0
+    fi
+    if [[ "$script_path" == *"/run_on_darwin/"* ]]; then
+        [[ "$platform" != "macos" ]] && return 1
+        return 0
+    fi
+    if [[ "$script_path" == *"/run_on_windows/"* ]]; then
+        [[ "$platform" != "windows" ]] && return 1
+        return 0
+    fi
+    local software_name
+    software_name="$(extract_software_name_from_script "$script_path")"
+    case "$software_name" in
+        i3wm|alacritty|dwm|lazyssh)
+            [[ "$platform" != "linux" ]] && return 1
+            ;;
+        oh-my-posh)
+            [[ "$platform" != "windows" ]] && return 1
+            ;;
+    esac
+    return 0
+}
+
 # 检查安装脚本对应的软件是否已安装
 # 参数: script_path
 # 返回: 0=已安装, 1=未安装
@@ -223,6 +257,17 @@ check_script_software_installed() {
         system-basic-env)
             # 系统基础环境，通常已安装
             return 0
+            ;;
+        opencode-omo)
+            # Oh My OpenCode：检查 opencode 存在且 opencode.json 含 oh-my-opencode 插件
+            if ! check_command_exists "opencode"; then
+                return 1
+            fi
+            local oc_json="${HOME}/.config/opencode/opencode.json"
+            if [[ -f "$oc_json" ]] && grep -q '"oh-my-opencode"' "$oc_json" 2>/dev/null; then
+                return 0
+            fi
+            return 1
             ;;
         *)
             # 默认使用软件名作为命令名

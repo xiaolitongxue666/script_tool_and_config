@@ -1,0 +1,171 @@
+{{- if or (eq .chezmoi.os "linux") (eq .chezmoi.os "darwin") (eq .chezmoi.os "windows") -}}
+#!/bin/bash
+
+# ============================================
+# OpenCode 安装脚本（chezmoi run_once_）
+# 支持 Linux（含多发行版与 WSL）、macOS、Windows
+# 参考: https://github.com/anomalyco/opencode
+# ============================================
+
+# 获取 common_install.sh 路径
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="${CHEZMOI_PROJECT_ROOT:-$(cd "${SCRIPT_DIR}/../.." && pwd 2>/dev/null || echo "$HOME")}"
+COMMON_INSTALL="${PROJECT_ROOT}/scripts/chezmoi/common_install.sh"
+
+if [ ! -f "$COMMON_INSTALL" ]; then
+    COMMON_INSTALL="$HOME/.local/share/chezmoi/scripts/chezmoi/common_install.sh"
+fi
+
+# 加载通用函数库
+if [ -f "$COMMON_INSTALL" ]; then
+    source "$COMMON_INSTALL"
+else
+    echo "[WARNING] 未找到 common_install.sh，使用基本函数"
+    function setup_proxy() { :; }
+    function detect_os_and_package_manager() {
+        OS="$(uname -s)"
+        if [[ "$OS" == "Darwin" ]]; then
+            PLATFORM="macos"
+            PACKAGE_MANAGER="brew"
+        elif [[ "$OS" == "Linux" ]]; then
+            PLATFORM="linux"
+            if command -v pacman &> /dev/null; then
+                PACKAGE_MANAGER="pacman"
+            elif command -v apt-get &> /dev/null; then
+                PACKAGE_MANAGER="apt"
+            elif command -v dnf &> /dev/null; then
+                PACKAGE_MANAGER="dnf"
+            elif command -v yum &> /dev/null; then
+                PACKAGE_MANAGER="yum"
+            fi
+        elif [[ "$OS" =~ ^(MINGW|MSYS|CYGWIN) ]]; then
+            PLATFORM="windows"
+            if command -v winget &> /dev/null; then
+                PACKAGE_MANAGER="winget"
+            elif command -v pacman.exe &> /dev/null; then
+                PACKAGE_MANAGER="pacman"
+            fi
+        fi
+    }
+fi
+
+# 设置代理
+setup_proxy "${PROXY:-{{ env "http_proxy" | default "http://127.0.0.1:7890" }}}"
+
+# 检测操作系统和包管理器
+detect_os_and_package_manager || exit 1
+
+# WSL 检测（仅 Linux 下；用于日志）
+IS_WSL=0
+if [[ "$PLATFORM" == "linux" ]]; then
+    if grep -qEi "Microsoft|WSL" /proc/version 2>/dev/null || [[ -n "${WSL_DISTRO_NAME:-}" ]]; then
+        IS_WSL=1
+    fi
+fi
+
+if [[ "$PLATFORM" == "darwin" ]]; then
+    echo "[INFO] 环境: macOS (brew)"
+elif [[ "$PLATFORM" == "windows" ]]; then
+    echo "[INFO] 环境: Windows ($PACKAGE_MANAGER)"
+elif [[ "$PLATFORM" == "linux" ]]; then
+    if [[ "$IS_WSL" -eq 1 ]]; then
+        echo "[INFO] 环境: Linux (WSL, $PACKAGE_MANAGER)"
+    else
+        echo "[INFO] 环境: Linux (原生, $PACKAGE_MANAGER)"
+    fi
+fi
+
+# 已安装且版本可用则跳过（OMO 建议 >= 1.0.150）
+if command -v opencode &> /dev/null; then
+    if opencode --version 2>/dev/null | head -n1 | grep -qE "1\.[0-9]+\.[0-9]+"; then
+        echo "[INFO] OpenCode 已安装: $(opencode --version 2>/dev/null | head -n1)"
+        exit 0
+    fi
+fi
+
+echo "[INFO] 开始安装 OpenCode..."
+
+install_via_official_script() {
+    echo "[INFO] 使用官方安装脚本 (https://opencode.ai/install)..."
+    # 尊重 OPENCODE_INSTALL_DIR、XDG_BIN_DIR、HOME/bin；默认 ~/.opencode/bin
+    if [[ -n "${XDG_BIN_DIR:-}" ]] && [[ -d "${XDG_BIN_DIR}" ]]; then
+        export XDG_BIN_DIR
+    fi
+    if [[ -d "$HOME/.local/bin" ]]; then
+        export PATH="$HOME/.local/bin:$PATH"
+    fi
+    if curl -fsSL https://opencode.ai/install | bash; then
+        hash -r 2>/dev/null || true
+        return 0
+    fi
+    return 1
+}
+
+INSTALLED=0
+
+case "$PLATFORM" in
+    macos)
+        if [[ "$PACKAGE_MANAGER" == "brew" ]]; then
+            if brew list opencode &>/dev/null || brew list anomalyco/tap/opencode &>/dev/null; then
+                echo "[INFO] OpenCode 已通过 Homebrew 安装"
+                INSTALLED=1
+            elif brew install anomalyco/tap/opencode 2>/dev/null || brew install opencode 2>/dev/null; then
+                echo "[SUCCESS] OpenCode 通过 Homebrew 安装成功"
+                INSTALLED=1
+            fi
+        fi
+        if [[ "$INSTALLED" -eq 0 ]]; then
+            install_via_official_script && INSTALLED=1
+        fi
+        ;;
+    linux)
+        # 多发行版：首选官方脚本，不区分 Arch/Ubuntu/Debian/Fedora/WSL
+        if [[ "$PACKAGE_MANAGER" == "pacman" ]]; then
+            if pacman -Q opencode &>/dev/null 2>&1; then
+                echo "[INFO] OpenCode 已通过 pacman 安装"
+                INSTALLED=1
+            elif sudo pacman -S --noconfirm opencode 2>/dev/null; then
+                echo "[SUCCESS] OpenCode 通过 pacman 安装成功"
+                INSTALLED=1
+            fi
+        fi
+        if [[ "$INSTALLED" -eq 0 ]]; then
+            install_via_official_script && INSTALLED=1
+        fi
+        ;;
+    windows)
+        if [[ "$PACKAGE_MANAGER" == "winget" ]]; then
+            if winget list --id AnomalyCo.Opencode &>/dev/null 2>&1; then
+                echo "[INFO] OpenCode 已通过 winget 安装"
+                INSTALLED=1
+            elif winget install -e --id AnomalyCo.Opencode --accept-source-agreements --accept-package-agreements 2>/dev/null; then
+                echo "[SUCCESS] OpenCode 通过 winget 安装成功"
+                INSTALLED=1
+            fi
+        fi
+        if [[ "$INSTALLED" -eq 0 ]] && command -v scoop &>/dev/null; then
+            if scoop list opencode &>/dev/null 2>&1; then
+                echo "[INFO] OpenCode 已通过 scoop 安装"
+                INSTALLED=1
+            elif scoop install opencode 2>/dev/null; then
+                echo "[SUCCESS] OpenCode 通过 scoop 安装成功"
+                INSTALLED=1
+            fi
+        fi
+        if [[ "$INSTALLED" -eq 0 ]]; then
+            install_via_official_script && INSTALLED=1
+        fi
+        ;;
+    *)
+        echo "[ERROR] 不支持的操作系统"
+        exit 1
+        ;;
+esac
+
+if [[ "$INSTALLED" -eq 1 ]] && command -v opencode &>/dev/null; then
+    echo "[SUCCESS] OpenCode 可用: $(opencode --version 2>/dev/null | head -n1)"
+    echo "[INFO] 配置目录: ~/.config/opencode/"
+else
+    echo "[WARNING] OpenCode 可能未正确安装，请检查 PATH 或手动安装: https://opencode.ai/docs"
+fi
+{{- end -}}

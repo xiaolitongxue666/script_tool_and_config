@@ -214,9 +214,34 @@ check_common_tools() {
     report_append ""
 }
 
-# 5. 开机启动声明
+# 5. OpenCode / Oh My OpenCode
+check_opencode() {
+    report_append "========== 5. OpenCode / Oh My OpenCode =========="
+    if ! command -v opencode &>/dev/null; then
+        report_append "  opencode: 未在 PATH 中"
+        report_append "  说明: 可由 run_once_install-opencode.sh 安装"
+        ((SUMMARY_WARN++)) || true
+    else
+        report_append "  opencode: $(command -v opencode)"
+        local ver
+        ver="$(opencode --version 2>/dev/null | head -n1)"
+        report_append "  版本: ${ver:-未知}"
+        local oc_json="${HOME}/.config/opencode/opencode.json"
+        if [[ -f "$oc_json" ]] && grep -q '"oh-my-opencode"' "$oc_json" 2>/dev/null; then
+            report_append "  Oh My OpenCode: 已配置"
+            ((SUMMARY_PASS++)) || true
+        else
+            report_append "  Oh My OpenCode: 未配置或未找到 plugin"
+            report_append "  说明: 可由 run_once_install-opencode-omo.sh 安装；或手动运行: bunx oh-my-opencode install"
+            ((SUMMARY_WARN++)) || true
+        fi
+    fi
+    report_append ""
+}
+
+# 6. 开机启动声明
 check_startup_declaration() {
-    report_append "========== 5. 开机启动服务 =========="
+    report_append "========== 6. 开机启动服务 =========="
     report_append "  本项目未配置 systemd 用户服务、~/.config/autostart 等图形自启动。"
     report_append "  环境变量与 PATH 由 shell 配置文件（如 .zprofile、.bashrc）在登录时加载。"
     report_append "  状态: 已确认（无需检测服务列表）"
@@ -261,6 +286,7 @@ main() {
     check_default_shell "$os"
     check_path_and_commands
     check_common_tools "$os"
+    check_opencode
     check_startup_declaration
     write_report_and_summary
     return 0
