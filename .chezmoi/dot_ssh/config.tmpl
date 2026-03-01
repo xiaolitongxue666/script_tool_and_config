@@ -22,6 +22,17 @@ Host github.com
     ProxyCommand connect -S {{ $ph }}:{{ $pp }} %h %p
 {{- end }}
 
+# --- Alchemy / Moicen VNC（ssh to alchemy/moicen through VNC）---
+Host alchemy-vnc
+    HostName alchemy-studio.cn
+    User leonli
+    LocalForward 5901 localhost:5901
+
+Host moicen-vnc
+    HostName moicen.com
+    User leonli
+    LocalForward 5904 localhost:5901
+
 # 其他 Host（如内网 Git 服务器）请在本机或 lazyssh 中单独添加
 # --- 其他 Host 默认 ---
 Host *

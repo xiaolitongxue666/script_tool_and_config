@@ -46,6 +46,7 @@ usage() {
 功能:
     通过 chezmoi 部署 SSH 配置文件到 ~/.ssh/config
     自动设置正确的文件权限（600）
+    预置包含 github.com、alchemy-vnc（正式）、moicen-vnc（测试）；部署后可用 ssh alchemy-vnc / ssh moicen-vnc 便捷登录，lazyssh 会直接识别
 
 示例:
     $(basename "$0")                  # 部署 SSH 配置（自动备份）
@@ -228,6 +229,7 @@ main() {
     log_info "  1. 编辑配置: chezmoi edit ${SSH_CONFIG}"
     log_info "  2. 查看差异: chezmoi diff ${SSH_CONFIG}"
     log_info "  3. 同步 lazyssh 更改: chezmoi re-add ${SSH_CONFIG}"
+    log_info "  4. 便捷登录: ssh alchemy-vnc / ssh moicen-vnc"
 
     end_script
 }

@@ -37,6 +37,8 @@ export CHEZMOI_SOURCE_DIR="$(pwd)/.chezmoi"
 chezmoi apply -v
 ```
 
+SSH 配置由 `.chezmoi/dot_ssh/config.tmpl` 管理，预置包含 `github.com`、`alchemy-vnc`（正式）、`moicen-vnc`（测试）；使用 `ssh alchemy-vnc` / `ssh moicen-vnc` 便捷登录，lazyssh 会直接识别。
+
 ### Windows 快速安装
 
 双击 `scripts/windows/install_with_chezmoi.bat`（需要管理员权限）
