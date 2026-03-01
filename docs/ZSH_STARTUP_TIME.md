@@ -21,12 +21,17 @@
 
 ## 基线说明
 
-当前配置下未做 lazy loading / compinit 缓存等优化，启动耗时主要来自：
+启动耗时主要来自：
 
 - `.zprofile`：brew shellenv、fnm、pyenv 的 eval
 - `.zshrc`：Oh My Zsh 全量加载、多插件同步加载、compinit
 
-优化（如 compinit -C、OMZ 延迟加载）可作为后续任务，本记录作为优化前基线。
+## 已做优化（dot_zshrc.tmpl）
+
+- **ZSH_DISABLE_COMPFIX=1**：跳过 Oh My Zsh 的 compaudit 安全检查，减少启动时间。
+- **去掉重复 compinit**：原先在「自动补全配置」中再次执行了 `compinit`，与 OMZ 内部 compinit 重复，已删除，现仅由 OMZ 执行一次。
+
+后续可考虑：compinit 缓存（需改 OMZ 或在其前自管 compinit）、OMZ 插件延迟加载等。
 
 ## 示例记录
 
