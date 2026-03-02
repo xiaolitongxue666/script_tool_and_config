@@ -25,6 +25,8 @@
     macos_proxy_connect_opt = "-S"
     # SSH IdentityFile（如使用 id_ed25519 可在此修改）
     identity_file = "~/.ssh/id_rsa"
+    # 是否对 github.com 使用 ProxyCommand（经代理访问）。设为 true 时需要本机有 connect/connect.exe 且代理可用；设为 false 时直连 ssh.github.com:443，无需 connect
+    ssh_use_proxy = false
 
 [git]
     autoCommit = false
