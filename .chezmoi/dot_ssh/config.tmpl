@@ -19,7 +19,8 @@ Host github.com
     User git
     IdentityFile {{ .identity_file | default "~/.ssh/id_rsa" }}
 {{- if eq .chezmoi.os "windows" }}
-{{- $win_connect := or (.windows_git_connect_path) (trim (output "cmd" "/c" "if exist \"C:\\Program Files\\Git\\mingw64\\bin\\connect.exe\" (echo C:/Program Files/Git/mingw64/bin/connect.exe) else (if exist \"D:\\Program Files\\Git\\mingw64\\bin\\connect.exe\" (echo D:/Program Files/Git/mingw64/bin/connect.exe) else (echo C:/Program Files/Git/mingw64/bin/connect.exe))")) }}
+{{- $win_detect := trim (output "cmd" "/c" "if exist \"D:\\Program Files\\Git\\mingw64\\bin\\connect.exe\" (echo D:/Program Files/Git/mingw64/bin/connect.exe) else (if exist \"C:\\Program Files\\Git\\mingw64\\bin\\connect.exe\" (echo C:/Program Files/Git/mingw64/bin/connect.exe) else (echo.))") }}
+{{- $win_connect := or $win_detect (.windows_git_connect_path) "C:/Program Files/Git/mingw64/bin/connect.exe" }}
     ProxyCommand "{{ $win_connect }}" -S {{ .proxy_host | default "127.0.0.1" }}:{{ .proxy_port | default "7890" }} %h %p
 {{- else if eq .chezmoi.os "darwin" }}
     ProxyCommand "{{ $macos_connect := or (env "CHEZMOI_MACOS_CONNECT_PATH") (index . "macos_connect_path") }}{{ if $macos_connect }}{{ $macos_connect }}{{ else if eq .chezmoi.arch "arm64" }}/opt/homebrew/bin/connect{{ else if eq .chezmoi.arch "amd64" }}/usr/local/bin/connect{{ else }}/usr/local/bin/connect{{ end }}" {{ index . "macos_proxy_connect_opt" | default "-S" }} {{ index . "proxy_host" | default "127.0.0.1" }}:{{ index . "proxy_port" | default "7890" }} %h %p

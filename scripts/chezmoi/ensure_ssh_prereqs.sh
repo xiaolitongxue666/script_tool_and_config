@@ -132,9 +132,20 @@ ensure_windows() {
     if [[ -n "${WINDOWS_GIT_CONNECT_PATH:-}" ]] && [[ -f "${WINDOWS_GIT_CONNECT_PATH}" ]]; then
         connect_exe="${WINDOWS_GIT_CONNECT_PATH}"
     fi
+    # 从 git 所在目录查找 connect.exe（Git 在 D: 等非 C: 盘时 cmd 检测可能不可靠，此处用 PATH 中的 git 推导）
+    if [[ -z "$connect_exe" ]] && command -v git &>/dev/null; then
+        local git_path
+        git_path="$(command -v git)"
+        local git_bin
+        git_bin="$(dirname "$git_path")"
+        if [[ -f "${git_bin}/connect.exe" ]]; then
+            connect_exe="${git_bin}/connect.exe"
+        fi
+    fi
     if [[ -z "$connect_exe" ]] && command -v cmd &>/dev/null; then
         local detected
         detected="$(cmd //c "if exist \"C:\\Program Files\\Git\\mingw64\\bin\\connect.exe\" (echo C:/Program Files/Git/mingw64/bin/connect.exe) else (if exist \"D:\\Program Files\\Git\\mingw64\\bin\\connect.exe\" (echo D:/Program Files/Git/mingw64/bin/connect.exe) else (echo))" 2>/dev/null || true)"
+        detected="$(printf '%s' "$detected" | tr -d '\r')"
         if [[ -n "$detected" ]] && [[ -f "$detected" ]]; then
             connect_exe="$detected"
         fi
