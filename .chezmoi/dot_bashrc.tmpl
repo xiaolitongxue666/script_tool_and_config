@@ -164,11 +164,11 @@ elif [[ "$OS" == "windows" ]]; then
     fi
     unset _omp_config
 
-    # 打开默认路径
-    cd /d/Code 2>/dev/null || cd ~
-
-    # 启动时显示欢迎信息
-    echo "Welcome! 😊"
+    # 打开默认路径：仅在非编辑器终端中执行，避免 Cursor/VS Code 终端被切到固定目录（保持项目根目录）
+    if [ -z "${TERM_PROGRAM:-}" ]; then
+        cd /d/Code 2>/dev/null || cd ~
+        echo "Welcome! 😊"
+    fi
 
 # Linux 特定配置
 elif [[ "$OS" == "linux" ]]; then

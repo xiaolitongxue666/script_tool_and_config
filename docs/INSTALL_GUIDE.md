@@ -56,6 +56,15 @@
 
 - **项目主要目标**：一键安装所需软件和配置；**区分不同 OS**（linux/darwin/windows）与 **WSL**（Linux 下通过日志区分 WSL 与原生）。
 - **Windows**：`core.longpaths = true` 仅在本平台生效；SSH 等见 os_setup_guide。**Win10 + Alacritty + Git Bash**：请在 **Git Bash** 中执行 `./install.sh`；若使用 Alacritty 作为终端，请确保其配置的 shell 与 PATH 与 Git Bash 一致（例如 Alacritty 的 shell 指向 Git 自带的 bash），否则 chezmoi 的 sourceDir 与脚本解释器路径可能解析错误（install.sh 会写入正斜杠 Windows 路径与 bash 解释器到 `~/.config/chezmoi/chezmoi.toml`）。
+
+### Win10 + Cursor：Git Bash 终端在项目根目录
+
+在 Win10 上使用 Cursor、终端为 Git Bash 时，若希望「在项目中打开终端即位于项目根目录」：
+
+- **原因**：若在 `~/.bashrc` 中有无条件的 `cd /d/Code` 或 `cd ~`，每次启动终端都会执行，覆盖 Cursor 传入的工作目录。
+- **解决**：本项目在 dot_bashrc 的 Windows 分支中，用环境变量 `TERM_PROGRAM` 区分是否在编辑器内：Cursor/VS Code 会设置 `TERM_PROGRAM`，此时**不**执行默认目录的 `cd`，终端保持在工作区根目录；单独打开 Git Bash 时未设置 `TERM_PROGRAM`，仍会执行 `cd /d/Code` 或 `cd ~`。
+- **生效**：执行 `chezmoi apply` 或 `./install.sh` 应用配置后，重新打开 Cursor 终端即可（`pwd` 应为项目根目录）。
+
 - **macOS**：Homebrew、connect 路径、yabai/skhd 等见 run_on_darwin 与 os_setup_guide。
 - **Linux**（按发行版与是否 WSL 区分）：
   - **通用工具**（bat, eza, fd, btop, fastfetch, lazygit, gh 等）：由 **run_once_install-common-tools** 安装，适用于**所有** Linux（含 **Arch**、**Ubuntu/Debian**、**WSL**）与 macOS。
