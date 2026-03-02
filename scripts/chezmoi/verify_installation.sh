@@ -254,6 +254,43 @@ check_startup_declaration() {
     report_append ""
 }
 
+# 7. SSH 与 connect（ProxyCommand 依赖，供 GitHub 等经代理走 443）
+check_ssh_and_connect() {
+    local os="$1"
+    report_append "========== 7. SSH 与 connect =========="
+
+    if [[ -f "${HOME}/.ssh/config" ]]; then
+        report_append "  ~/.ssh/config: 存在"
+    else
+        report_append "  ~/.ssh/config: 不存在（chezmoi apply 后会生成）"
+    fi
+
+    if [[ "$os" == "linux" || "$os" == "darwin" ]]; then
+        local connect_path=""
+        if command -v connect &>/dev/null; then
+            connect_path="$(command -v connect)"
+        elif [[ -x /opt/homebrew/bin/connect ]]; then
+            connect_path="/opt/homebrew/bin/connect"
+        elif [[ -x /usr/local/bin/connect ]]; then
+            connect_path="/usr/local/bin/connect"
+        fi
+        if [[ -n "$connect_path" ]]; then
+            report_append "  connect: ${connect_path}"
+            report_append "  状态: 通过 (SSH ProxyCommand 可用)"
+            ((SUMMARY_PASS++)) || true
+        else
+            report_append "  connect: 未找到"
+            report_append "  说明: Linux 可 sudo apt install connect-proxy 或 sudo pacman -S connect；macOS 可 brew install connect"
+            ((SUMMARY_WARN++)) || true
+        fi
+    else
+        report_append "  connect.exe: Windows 下随 Git for Windows 提供，请确认已安装 Git for Windows"
+        report_append "  说明: 若 Git 安装在其他盘符，可在 .chezmoi.toml.local 中设置 windows_git_connect_path"
+    fi
+    report_append "  建议: 安装后手动执行 ssh -T git@github.com 验证；WSL/Linux 可运行 scripts/linux/system_basic_env/verify_wsl_ssh.sh"
+    report_append ""
+}
+
 # 写报告文件并打印摘要
 write_report_and_summary() {
     local report_dir
@@ -293,6 +330,7 @@ main() {
     check_path_and_commands
     check_common_tools "$os"
     check_opencode
+    check_ssh_and_connect "$os"
     check_startup_declaration
     write_report_and_summary
     return 0

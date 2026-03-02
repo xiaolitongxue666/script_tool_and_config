@@ -20,6 +20,16 @@
 
 **WSL 与代理**：项目会区分 **WSL2 内的 Linux** 与 **原生 Linux**。在 WSL2 中，`127.0.0.1` 无法访问 Windows 宿主机上的代理，因此 `.bashrc`/`.zshrc` 在检测到 WSL 时，会将默认代理地址设为 `http://<宿主机IP>:7890`（宿主机 IP 来自 `/etc/resolv.conf` 的 nameserver）。你只需在 Windows 端代理软件中开启「允许局域网连接」，在 WSL 终端执行 `h_proxy` 或 `proxy_on` 即可启用代理。一键安装前若需代理，可先执行 `h_proxy` 再执行 `./install.sh`，或 `export PROXY=http://$(cat /etc/resolv.conf | grep nameserver | awk '{print $2}'):7890` 后执行 `./install.sh`。
 
+### 安装后验证（含 SSH）
+
+执行 `./install.sh` 后，SSH 配置已通过 chezmoi 应用到 `~/.ssh/config`。建议验证：
+
+- `ssh-add -l`：应列出已加载的密钥
+- `ssh -T git@github.com`：应出现 “Hi xxx! You've successfully authenticated” 或类似成功提示
+- **WSL/Linux**：可运行自检脚本 `./scripts/linux/system_basic_env/verify_wsl_ssh.sh`
+
+若在 WSL 下 ProxyCommand 使用 127.0.0.1 无法连到宿主机代理，需使用宿主机 IP：执行 `./install.sh` 时若已设置 PROXY（如 `export PROXY=http://<宿主机IP>:7890`），脚本会导出 PROXY_HOST，apply 后 config 即使用宿主机地址；或先执行 `export PROXY_HOST=$(awk '/^nameserver / {print $2; exit}' /etc/resolv.conf)` 再执行 `./install.sh`。完整说明见下方「WSL / Linux 建议步骤」中的（WSL）验证 SSH。
+
 ## WSL / Linux 建议步骤
 
 1. **（WSL）验证 SSH**：子模块与部分 run_once 使用 `git clone`（SSH）。在 WSL 中执行：

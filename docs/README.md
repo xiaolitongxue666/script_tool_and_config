@@ -9,7 +9,7 @@
 | [INSTALL_GUIDE.md](INSTALL_GUIDE.md) | 一键安装与首次配置入口（推荐先看）；各平台分步与故障排除 |
 | [os_setup_guide.md](os_setup_guide.md) | Windows / macOS / Linux 分步安装指南与前置条件 |
 | [SOFTWARE_LIST.md](SOFTWARE_LIST.md) | 完整软件清单与 run_once 脚本对应关系（按 OS / WSL 区分） |
-| [VERIFICATION_RESULT.md](VERIFICATION_RESULT.md) | 验证结果示例/模板；实际报告由 `scripts/chezmoi/verify_installation.sh` 生成 |
+| [VERIFICATION_RESULT.md](VERIFICATION_RESULT.md) | 验证结果示例/模板；实际报告由 `scripts/chezmoi/verify_installation.sh` 生成；安装后 SSH 验证见 [INSTALL_GUIDE.md](INSTALL_GUIDE.md) 或 WSL/Linux 下运行 `scripts/linux/system_basic_env/verify_wsl_ssh.sh` |
 
 ## Chezmoi 与项目结构
 

@@ -410,6 +410,17 @@ else
         fi
     fi
 
+    # apply 前确保 SSH ProxyCommand 依赖就绪（connect/connect.exe）
+    ENSURE_SSH_PREREQS="${SCRIPT_DIR}/scripts/chezmoi/ensure_ssh_prereqs.sh"
+    if [[ -f "$ENSURE_SSH_PREREQS" ]] && [[ -x "$ENSURE_SSH_PREREQS" ]]; then
+        log_info "确保 SSH 前置依赖就绪..."
+        bash "$ENSURE_SSH_PREREQS" || true
+    elif [[ -f "$ENSURE_SSH_PREREQS" ]]; then
+        chmod +x "$ENSURE_SSH_PREREQS" 2>/dev/null || true
+        log_info "确保 SSH 前置依赖就绪..."
+        bash "$ENSURE_SSH_PREREQS" || true
+    fi
+
     if chezmoi apply -v --force; then
         log_success "配置应用成功！"
 
