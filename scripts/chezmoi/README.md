@@ -1,6 +1,6 @@
 # chezmoi 相关脚本说明
 
-本目录脚本：安装 chezmoi 本身（`install_chezmoi.sh`）、通用安装函数库（`common_install.sh`）。一键安装与首次使用见项目根目录 [INSTALL_GUIDE.md](../../INSTALL_GUIDE.md)。
+本目录脚本：安装 chezmoi 本身（`install_chezmoi.sh`）、通用安装函数库（`common_install.sh`）。一键安装与首次使用见项目根目录 [docs/INSTALL_GUIDE.md](../../docs/INSTALL_GUIDE.md)。
 
 ## 脚本职责划分
 

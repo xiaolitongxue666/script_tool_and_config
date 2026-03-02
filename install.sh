@@ -8,6 +8,12 @@
 
 set -e
 
+# 在 Windows (Git Bash/MSYS2) 下强制 UTF-8，避免 tee 写入的安装日志出现乱码
+if [[ "$(uname -s)" =~ ^(MINGW|MSYS|CYGWIN) ]]; then
+    export LANG=C.UTF-8
+    export LC_ALL=C.UTF-8
+fi
+
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 COMMON_SH="${SCRIPT_DIR}/scripts/common.sh"
 INSTALL_HELPERS_SH="${SCRIPT_DIR}/scripts/chezmoi/install_helpers.sh"
@@ -41,9 +47,11 @@ TEMP_DIR=$(mktemp -d)
 trap "rm -rf '$TEMP_DIR'" EXIT INT TERM
 
 # ============================================
-# 安装日志（tee 同时输出到终端与文件，便于排错；该 log 已由 .gitignore 忽略）
+# 安装日志（统一写入 logs/，UTF-8、LF；该目录已由 .gitignore 忽略）
 # ============================================
-INSTALL_LOG="${SCRIPT_DIR}/install_$(date +%Y%m%d_%H%M%S).log"
+readonly LOG_DIR="${SCRIPT_DIR}/logs"
+mkdir -p "$LOG_DIR"
+INSTALL_LOG="${LOG_DIR}/install_$(date +%Y%m%d_%H%M%S).log"
 exec > >(tee -a "$INSTALL_LOG") 2>&1
 echo "[INFO] 安装日志: ${INSTALL_LOG}"
 
@@ -243,9 +251,25 @@ fi
 # 3. 确保 chezmoi 使用项目源：写入 ~/.config/chezmoi/chezmoi.toml 的 sourceDir
 #    （chezmoi 不尊重 CHEZMOI_SOURCE_DIR 环境变量，必须通过 config 指定）
 #    run_once 脚本内通过 env http_proxy 使用代理，与 install.sh 导出的环境变量一致
+#    Windows 下写入 sourceDir（正斜杠路径）与 [interpreters.sh]（bash），以便 apply 时 run_once_*.sh 由 bash 执行
 CHEZMOI_CONFIG_DIR="$HOME/.config/chezmoi"
 CHEZMOI_CONFIG_FILE="${CHEZMOI_CONFIG_DIR}/chezmoi.toml"
 SOURCE_DIR_ABS="$(cd "$SCRIPT_DIR" && pwd)/.chezmoi"
+if [ "$PLATFORM" = "windows" ]; then
+    # MINGW/MSYS/Git Bash 中 pwd 为 /e/Code/...，写入 config 后 chezmoi.exe 会解析成 E:/e/Code/... 导致路径错误
+    # 转为 Windows 风格路径；TOML 中反斜杠为转义符会破坏路径，故统一用正斜杠（Windows API 接受）
+    if command -v cygpath &>/dev/null; then
+        _win_path="$(cygpath -w "$(cd "$SCRIPT_DIR" && pwd)/.chezmoi")"
+        SOURCE_DIR_ABS="${_win_path//\\//}"
+    else
+        _unix_path="$(cd "$SCRIPT_DIR" && pwd)/.chezmoi"
+        if [[ "$_unix_path" =~ ^/([a-zA-Z])/(.*) ]]; then
+            SOURCE_DIR_ABS="${BASH_REMATCH[1]^^}:/${BASH_REMATCH[2]}"
+        fi
+        unset _unix_path
+    fi
+    unset _win_path 2>/dev/null || true
+fi
 mkdir -p "$CHEZMOI_CONFIG_DIR"
 NEED_WRITE=false
 if [ ! -f "$CHEZMOI_CONFIG_FILE" ]; then
@@ -269,8 +293,34 @@ if [ "$NEED_WRITE" = true ]; then
         log_info "已写入 chezmoi 配置: $CHEZMOI_CONFIG_FILE"
     fi
 fi
+# Windows 下 .sh 需通过 bash 执行，否则会报「不是有效的 Win32 应用程序」
+if [ "$PLATFORM" = "windows" ]; then
+    BASH_CMD="bash"
+    if command -v bash &>/dev/null; then
+        if command -v cygpath &>/dev/null; then
+            _b="$(cygpath -w "$(command -v bash)" 2>/dev/null)"
+            [ -n "$_b" ] && BASH_CMD="${_b//\\//}"  # 正斜杠避免 TOML 转义
+            unset _b
+        fi
+    fi
+    if ! grep -q "\[interpreters\.sh\]" "$CHEZMOI_CONFIG_FILE" 2>/dev/null; then
+        printf '\n[interpreters.sh]\n    command = "%s"\n' "$BASH_CMD" >> "$CHEZMOI_CONFIG_FILE"
+        log_info "已添加 chezmoi 脚本解释器: [interpreters.sh] command = $BASH_CMD"
+    fi
+fi
 
 log_success "chezmoi 环境初始化完成"
+
+# ============================================
+# 确保 chezmoi 未占用（锁检测与释放，非交互）
+# ============================================
+ENSURE_UNLOCKED="${SCRIPT_DIR}/scripts/common/utils/ensure_chezmoi_unlocked.sh"
+if [[ -f "$ENSURE_UNLOCKED" ]] && [[ -x "$ENSURE_UNLOCKED" ]]; then
+    bash "$ENSURE_UNLOCKED" || true
+elif [[ -f "$ENSURE_UNLOCKED" ]]; then
+    chmod +x "$ENSURE_UNLOCKED" 2>/dev/null || true
+    bash "$ENSURE_UNLOCKED" || true
+fi
 
 # ============================================
 # 配置差异检测和应用（chezmoi 核心流程）
@@ -363,14 +413,34 @@ else
     if chezmoi apply -v --force; then
         log_success "配置应用成功！"
 
-        # 验证应用结果
+        # 验证应用结果（当前 OS 下，仅其他平台的 run_on_* 未应用属正常）
         log_info "验证配置应用结果..."
         VERIFY_STATUS=$(chezmoi status 2>&1 || true)
         VERIFY_DIFF=$(chezmoi diff 2>&1 || true)
         if [ -z "$VERIFY_STATUS" ] && [ -z "$VERIFY_DIFF" ]; then
             log_success "配置已完全同步"
         else
-            log_warning "配置应用后仍有差异，请检查"
+            # 若剩余差异仅包含其他平台的 run_on_* 项（当前 OS 不会应用），属预期
+            ONLY_OTHER_OS=false
+            if [ -n "$VERIFY_STATUS" ] || [ -n "$VERIFY_DIFF" ]; then
+                COMBINED="$VERIFY_STATUS
+$VERIFY_DIFF"
+                case "$PLATFORM" in
+                    windows) PATTERN='run_on_(darwin|linux)/' ;;
+                    linux)   PATTERN='run_on_(darwin|windows)/' ;;
+                    macos)   PATTERN='run_on_(linux|windows)/' ;;
+                    *)       PATTERN='' ;;
+                esac
+                if [ -n "$PATTERN" ]; then
+                    NON_OTHER=$(echo "$COMBINED" | grep -vE "$PATTERN" | grep -v '^[[:space:]]*$' || true)
+                    [[ -z "$NON_OTHER" ]] && ONLY_OTHER_OS=true
+                fi
+            fi
+            if [ "$ONLY_OTHER_OS" = true ]; then
+                log_info "当前平台配置已同步；剩余差异仅为其他 OS 的 run_on_* 项，属预期"
+            else
+                log_warning "配置应用后仍有差异，请检查"
+            fi
         fi
     else
         log_error "配置应用失败，请检查错误信息"
@@ -399,50 +469,13 @@ else
     PACKAGE_MANAGER=""
 fi
 
-# 扫描并检查安装脚本
+# 按 docs/SOFTWARE_LIST.md 的 OS/WSL 分类打印安装状态（仅显示当前平台适用项）
 if [ -d "$CHEZMOI_DIR" ]; then
-    log_info "扫描安装脚本..."
-    INSTALL_SCRIPTS=$(find "$CHEZMOI_DIR" -name "run_once_install-*.sh.tmpl" -type f 2>/dev/null || true)
-
-    if [ -n "$INSTALL_SCRIPTS" ]; then
-        script_count=$(echo "$INSTALL_SCRIPTS" | wc -l | tr -d ' ')
-        log_info "找到 $script_count 个安装脚本"
-
-        # 如果有包管理器信息，进行详细检查
-        if [ -n "$PACKAGE_MANAGER" ]; then
-            log_info "检查软件安装状态..."
-            installed_list=""
-            not_installed_list=""
-            installed_count=0
-            not_installed_count=0
-
-            echo "$INSTALL_SCRIPTS" | while IFS= read -r script; do
-                script_applicable_to_platform "$script" "$PLATFORM" || continue
-                software_name=$(extract_software_name_from_script "$script")
-
-                if check_script_software_installed "$script"; then
-                    installed_list="${installed_list}${installed_list:+ }$software_name"
-                    installed_count=$((installed_count + 1))
-                    log_info "  ✓ $software_name (已安装)"
-                else
-                    not_installed_list="${not_installed_list}${not_installed_list:+ }$software_name"
-                    not_installed_count=$((not_installed_count + 1))
-                    log_info "  ✗ $software_name (未安装，将通过 chezmoi apply 安装)"
-                fi
-            done
-
-            if [ "$installed_count" -gt 0 ]; then
-                log_success "已安装软件: $installed_count 个"
-            fi
-            if [ "$not_installed_count" -gt 0 ]; then
-                log_info "待安装软件: $not_installed_count 个（将通过 chezmoi apply 自动安装）"
-            fi
-        else
-            log_info "注意: 软件安装将通过 chezmoi apply 自动执行 run_once_ 脚本"
-            log_info "已安装的软件会被跳过，未安装的软件会自动安装"
-        fi
+    if [ -n "$PLATFORM" ]; then
+        report_install_status_by_platform "$CHEZMOI_DIR" "$PLATFORM" "$PACKAGE_MANAGER"
     else
-        log_info "未找到安装脚本"
+        log_info "未检测到平台，跳过软件安装状态检查"
+        log_info "软件将通过 chezmoi apply 自动执行 run_once_ 脚本安装"
     fi
 else
     log_warning "chezmoi 源状态目录不存在，跳过软件检查"

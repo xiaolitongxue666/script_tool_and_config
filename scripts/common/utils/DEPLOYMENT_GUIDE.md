@@ -409,7 +409,7 @@ chezmoi apply ~/.zshrc
 
 ## 参考文档
 
-- [chezmoi 使用指南](../chezmoi_use_guide.md)
+- [chezmoi 使用指南](../../docs/chezmoi_use_guide.md)
 - [SFTP 同步指南](./SFTP_SYNC_GUIDE.md)
 - [项目 README](../../README.md)
 

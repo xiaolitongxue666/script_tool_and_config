@@ -93,52 +93,12 @@ if ! command -v chezmoi &> /dev/null; then
 fi
 
 # ============================================
-# 检查并修复 chezmoi 锁文件问题
+# 确保 chezmoi 未占用（非交互，与 install.sh 一致）
 # ============================================
-FIX_LOCK_SCRIPT="${SCRIPT_DIR}/scripts/common/utils/fix_chezmoi_lock.sh"
-if [ -f "$FIX_LOCK_SCRIPT" ]; then
-    if [ ! -x "$FIX_LOCK_SCRIPT" ]; then
-        chmod +x "$FIX_LOCK_SCRIPT"
-    fi
-
-    # 检查是否有锁文件问题
-    CHEZMOI_STATE_DIR="$HOME/.local/share/chezmoi"
-    LOCK_FILE="$CHEZMOI_STATE_DIR/.chezmoi.lock"
-
-    if [ -f "$LOCK_FILE" ]; then
-        log_warning "发现 chezmoi 锁文件，检查是否有问题..."
-
-        # 检查是否有进程在使用锁文件
-        CHEZMOI_PIDS=$(pgrep -f "chezmoi" 2>/dev/null || true)
-
-        if [ -z "$CHEZMOI_PIDS" ]; then
-            # 没有进程，但锁文件存在，可能是残留的
-            LOCK_AGE=$(find "$LOCK_FILE" -mmin +1 2>/dev/null || echo "")
-            if [ -n "$LOCK_AGE" ]; then
-                log_warning "锁文件已存在超过 1 分钟且没有相关进程，可能是残留的"
-                log_info "自动清理锁文件..."
-                rm -f "$LOCK_FILE"
-                log_success "锁文件已清理"
-            fi
-        else
-            log_info "发现正在运行的 chezmoi 进程，等待其完成..."
-            # 等待最多 10 秒
-            for i in {1..10}; do
-                sleep 1
-                CHEZMOI_PIDS=$(pgrep -f "chezmoi" 2>/dev/null || true)
-                if [ -z "$CHEZMOI_PIDS" ]; then
-                    log_success "进程已完成"
-                    rm -f "$LOCK_FILE"
-                    break
-                fi
-            done
-
-            if [ -n "$(pgrep -f "chezmoi" 2>/dev/null || true)" ]; then
-                log_warning "chezmoi 进程仍在运行，可能需要手动处理"
-                log_info "可以运行: $FIX_LOCK_SCRIPT"
-            fi
-        fi
-    fi
+ENSURE_UNLOCKED="${SCRIPT_DIR}/scripts/common/utils/ensure_chezmoi_unlocked.sh"
+if [ -f "$ENSURE_UNLOCKED" ]; then
+    [ ! -x "$ENSURE_UNLOCKED" ] && chmod +x "$ENSURE_UNLOCKED"
+    bash "$ENSURE_UNLOCKED" || true
 fi
 
 # ============================================

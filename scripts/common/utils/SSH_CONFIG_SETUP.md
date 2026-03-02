@@ -80,6 +80,6 @@ chezmoi apply ~/.ssh/config
 ## 更多信息
 
 详细说明请参考：
-- [chezmoi_use_guide.md](../../../../chezmoi_use_guide.md#ssh-配置管理)
-- [os_setup_guide.md](../../../../os_setup_guide.md#ssh-配置管理)
+- [chezmoi_use_guide.md](../../../../docs/chezmoi_use_guide.md#ssh-配置管理)
+- [os_setup_guide.md](../../../../docs/os_setup_guide.md#ssh-配置管理)
 

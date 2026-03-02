@@ -1,10 +1,10 @@
 # Arch Linux 系统配置脚本使用说明
 
-本目录脚本用途：**Arch 专用**镜像与基础环境；通用一键安装见项目根目录 [INSTALL_GUIDE.md](../../../INSTALL_GUIDE.md)。
+本目录脚本用途：**Arch 专用**镜像与基础环境；通用一键安装见项目根目录 [docs/INSTALL_GUIDE.md](../../../docs/INSTALL_GUIDE.md)。
 
 - **get_wsl_system_info.sh**：获取 WSL/Linux 版本与环境信息（只读）。
 - **configure_china_mirrors.sh**：配置 Arch 中国镜像源。
-- **install_common_tools.sh**：Arch 完整环境（镜像 + 基础包 + AUR + Neovim 等）。**已废弃**：通用一键安装请使用项目根目录 `./install.sh`，软件与 run_once 对应见 [SOFTWARE_LIST.md](../../../SOFTWARE_LIST.md)。
+- **install_common_tools.sh**：Arch 完整环境（镜像 + 基础包 + AUR + Neovim 等）。**已废弃**：通用一键安装请使用项目根目录 `./install.sh`，软件与 run_once 对应见 [SOFTWARE_LIST.md](../../../docs/SOFTWARE_LIST.md)。
 
 ---
 
@@ -50,7 +50,7 @@ sudo ./configure_china_mirrors.sh
 
 ## 2. install_common_tools.sh（已废弃，仅 Arch 本地可选）
 
-该脚本已废弃，职责已拆分到 run_once。**推荐使用项目根目录 `./install.sh`** 完成跨平台一键安装，软件与 run_once 对应见 [SOFTWARE_LIST.md](../../../SOFTWARE_LIST.md)。仅在 Arch 上需要本地执行完整环境安装时，可运行：`sudo ./install_common_tools.sh`（需 root，支持 `USE_PROXY`、`HTTP_PROXY` 等环境变量，详见脚本内注释）。
+该脚本已废弃，职责已拆分到 run_once。**推荐使用项目根目录 `./install.sh`** 完成跨平台一键安装，软件与 run_once 对应见 [SOFTWARE_LIST.md](../../../docs/SOFTWARE_LIST.md)。仅在 Arch 上需要本地执行完整环境安装时，可运行：`sudo ./install_common_tools.sh`（需 root，支持 `USE_PROXY`、`HTTP_PROXY` 等环境变量，详见脚本内注释）。
 
 ---
 

@@ -1,6 +1,6 @@
 # 软件清单
 
-本文档列出**项目管理的软件与 run_once 脚本对应关系**，按平台与脚本分类。**一键安装**所需软件与配置均通过 run_once 完成，注意**区分 OS**（linux/darwin/windows）与 **WSL**（Linux 子类型）。环境验证与逐项检查命令见 [scripts/linux/system_basic_env/INSTALL_STATUS.md](scripts/linux/system_basic_env/INSTALL_STATUS.md)。
+本文档列出**项目管理的软件与 run_once 脚本对应关系**，按平台与脚本分类。**一键安装**所需软件与配置均通过 run_once 完成，注意**区分 OS**（linux/darwin/windows）与 **WSL**（Linux 子类型）。环境验证与逐项检查命令见 [INSTALL_STATUS.md](../scripts/linux/system_basic_env/INSTALL_STATUS.md)。
 
 ---
 
@@ -43,11 +43,17 @@
 | 系统监控 | bottom（btop 替代；或单独安装 btop4win） |
 | 字体 | Nerd Fonts (FiraMono) |
 
+**Windows 安装流程简述**：在项目根执行 `./install.sh`（Git Bash）；脚本会写入 `~/.config/chezmoi/chezmoi.toml` 的 `sourceDir`（正斜杠路径）和 `[interpreters.sh]`（bash 解释器），以便 `chezmoi apply` 在 Windows 上通过 bash 执行 run_once_*.sh。仅 Windows 会安装的 run_once：`oh-my-posh`；多平台共用的 run_once（00-install-version-managers、common-tools、starship、git、neovim、nerd-fonts、zsh、opencode 等）在 Windows 上同样执行。tmux、fish、alacritty、Ghostty 等不在 Windows 下安装（Ghostty 仅在 macOS 使用和配置）。与 WSL 区分：WSL 视为 Linux（apt/pacman），走 Linux 软件列表与 run_on_linux；Windows 本机为 winget 等，走本表。
+
+**Windows 需要安装和配置的 run_once**（与 [4/5] 检查一致）：00-install-version-managers、common-tools、starship、git、neovim、neovim-config、nerd-fonts、zsh（MSYS2 可选）、oh-my-posh、opencode、opencode-omo、system-basic-env。配置（dotfiles）：通用模板（.bashrc、.zshrc、.gitconfig、.ssh/config 等）及 `run_on_windows/` 下的 .bash_profile、.bashrc。
+
 ---
 
 ## 按 run_once 脚本索引
 
 **执行顺序**：run_once 按目标名字母序执行。Neovim 配置依赖 uv、fnm、nvim，故 **00-install-version-managers**（uv/fnm）→ **install-neovim**（nvim 二进制）→ **install-neovim-config**（将 nvim 仓库克隆到 ~/.config/nvim 并执行 install.sh、Lazy 插件）。
+
+**版本要求与验证**：对版本有要求的软件会在对应 run_once 内做检查与升级（例如 Neovim 要求 ≥ 0.11.0，`run_once_install-neovim.sh.tmpl` 会先判断 `is_nvim_version_ge_0_11`，不满足则执行包管理器升级或官方 release 安装）。安装完成后，`install.sh` 会调用 `scripts/chezmoi/verify_installation.sh` 做全局验证（字体、Shell、PATH、通用工具等）。
 
 | run_once 脚本 | 安装的软件/作用 | 适用 OS |
 |---------------|-----------------|--------|

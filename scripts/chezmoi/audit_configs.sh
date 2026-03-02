@@ -48,7 +48,7 @@ log_info "当前平台: $PLATFORM_NAME ($OS)"
 # 设置路径
 # ============================================
 CHEZMOI_DIR="${PROJECT_ROOT}/.chezmoi"
-SOFTWARE_LIST="${PROJECT_ROOT}/SOFTWARE_LIST.md"
+SOFTWARE_LIST="${PROJECT_ROOT}/docs/SOFTWARE_LIST.md"
 AUDIT_REPORT="${PROJECT_ROOT}/.audit_configs_report.txt"
 
 if [ ! -f "$SOFTWARE_LIST" ]; then

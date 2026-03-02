@@ -230,17 +230,19 @@ alias python='python3.10'
 # 注意：inshellisense 按键绑定在 .bashrc 中加载
 # 这样可以确保在非登录 shell 中也能使用
 
-# Oh My Posh 主题配置
-# 注意：必须在 exec zsh 之前执行，因为它会初始化提示符
-# 但由于我们会切换到 zsh，这个配置实际上不会在 zsh 中生效
-# 如果需要在 zsh 中使用主题，请在 .zshrc 中配置
+# Oh My Posh 主题配置（与 .bashrc 一致，保证登录/非登录、Alacritty/Cursor 终端显示相同）
+# 使用 ~ 以便多用户兼容，不写死 Administrator
+_omp_config="$HOME/AppData/Local/Programs/oh-my-posh/themes/montys.omp.json"
 if command -v oh-my-posh &> /dev/null; then
-    eval "$(oh-my-posh --init --shell bash --config ~/AppData/Local/Programs/oh-my-posh/themes/montys.omp.json)"
+    if [ -f "$_omp_config" ]; then
+        eval "$(oh-my-posh --init --shell bash --config "$_omp_config")"
+    else
+        eval "$(oh-my-posh --init --shell bash)"
+    fi
+elif command -v starship &> /dev/null; then
+    eval "$(starship init bash)"
 fi
-
-# Starship 提示符（可选，已注释）
-# 如果使用 Starship，请注释掉 Oh My Posh 配置
-# eval "$(starship init bash)"
+unset _omp_config
 
 # ============================================
 # 自动启动 Zsh（如果可用）

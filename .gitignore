@@ -346,7 +346,7 @@ scripts/windows/system_basic_env/*.backup
 /.audit_configs_report.txt
 /install_verification_report_*.txt
 /VERIFICATION_REPORT.txt
-# 一键安装脚本日志（tee 生成，便于排错）
+# 一键安装脚本日志（已统一写入 logs/install_*.log；保留此项兼容旧运行产生的根目录日志）
 /install_*.log
 
 # 容器开发环境临时文件
@@ -360,3 +360,8 @@ scripts/common/utils/*.bak
 
 # 误产生的根目录文件名为 -（如重定向或保存错误）
 /-
+# Windows 保留设备名（如误重定向到 nul 会导致 git add 失败）
+/nul
+/con
+/prn
+/aux

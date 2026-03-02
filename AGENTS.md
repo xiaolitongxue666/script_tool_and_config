@@ -182,8 +182,10 @@ ensure_directory() {
 
 ### 平台特定代码
 
+- 项目支持多 OS（Win10、macOS Intel、Linux Ubuntu/Arch）与 WSL（Ubuntu）；WSL 视为 Linux，共用 `run_on_linux/`，脚本内通过 WSL 检测区分代理与路径。
 - 平台特定配置使用 `run_on_linux/`、`run_on_darwin/`、`run_on_windows/`
 - 安装脚本中的平台特定逻辑使用模板条件判断
+- Win10 下推荐在 Git Bash 中执行 `install.sh`；若使用 Alacritty，需保证其 shell 与 PATH 与 Git Bash 一致（见 [docs/INSTALL_GUIDE.md](docs/INSTALL_GUIDE.md)）。
 
 ### Git 子模块
 
@@ -651,7 +653,7 @@ git push
 
 ## 详细目录结构
 
-项目完整目录结构见 [project_structure.md](project_structure.md)。
+项目完整目录结构见 [docs/project_structure.md](docs/project_structure.md)。
 
 脚本目录概览：`scripts/` 下为 `common/`（utils、project_tools、ffmpeg-magic、git_templates 等）、`linux/`、`macos/`、`windows/`、`chezmoi/`、`migration/`。
 

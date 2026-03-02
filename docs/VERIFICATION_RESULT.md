@@ -1,6 +1,6 @@
 # 验证结果与安装状态清单
 
-本文档为**验证结果示例/模板**。**实际验证报告**以运行 `./scripts/chezmoi/verify_installation.sh` 生成为准，报告默认写入 `~/install_verification_report_<时间>.txt`，检查项包括：字体、默认 Shell、PATH/关键命令、通用工具（btop、fastfetch）、开机启动说明。完整验证项与检查命令见 [INSTALL_STATUS.md](scripts/linux/system_basic_env/INSTALL_STATUS.md)，软件与 run_once 对应见 [SOFTWARE_LIST.md](SOFTWARE_LIST.md)。
+本文档为**验证结果示例/模板**。**实际验证报告**以运行 `./scripts/chezmoi/verify_installation.sh` 生成为准，报告默认写入 `~/install_verification_report_<时间>.txt`，检查项包括：字体、默认 Shell、PATH/关键命令、通用工具（btop、fastfetch）、开机启动说明。完整验证项与检查命令见 [INSTALL_STATUS.md](../scripts/linux/system_basic_env/INSTALL_STATUS.md)，软件与 run_once 对应见 [SOFTWARE_LIST.md](SOFTWARE_LIST.md)。
 
 ---
 
@@ -92,7 +92,7 @@ command -v chezmoi uv fnm lazygit
 
 ## 5. 清单与后续检查
 
-- **完整清单（按类别）**：[INSTALL_STATUS.md](scripts/linux/system_basic_env/INSTALL_STATUS.md)  
+- **完整清单（按类别）**：[INSTALL_STATUS.md](../scripts/linux/system_basic_env/INSTALL_STATUS.md)  
   含：核心与配置管理、通用工具、版本管理器、Shell 与终端、Neovim、配置文件、Linux 特有、验证命令、一键安装验证步骤与问题记录。
 
 - **软件与 run_once 对应**：[SOFTWARE_LIST.md](SOFTWARE_LIST.md)

@@ -11,11 +11,16 @@ script_tool_and_config/
 ├── install.sh                        # 一键安装脚本
 │
 ├── README.md                         # 项目主文档
-├── project_structure.md              # 项目结构说明（本文件）
-├── SOFTWARE_LIST.md                  # 软件清单
-├── ENCODING_AND_LINE_ENDINGS.md      # 文件编码和换行符规范
-├── chezmoi_use_guide.md              # chezmoi 使用指南
-├── os_setup_guide.md                 # 操作系统设置指南
+├── AGENTS.md                         # 代理/编码规范
+├── docs/                             # 文档目录
+│   ├── project_structure.md          # 项目结构说明（本文件）
+│   ├── SOFTWARE_LIST.md              # 软件清单
+│   ├── ENCODING_AND_LINE_ENDINGS.md  # 文件编码和换行符规范
+│   ├── chezmoi_use_guide.md           # chezmoi 使用指南
+│   ├── os_setup_guide.md             # 操作系统设置指南
+│   ├── INSTALL_GUIDE.md              # 一键安装与首次配置入口
+│   ├── VERIFICATION_RESULT.md        # 验证结果示例/模板
+│   └── ...
 │
 ├── dotfiles/                         # 点文件目录（可选保留；本仓库无 submodule，Neovim 由 run_once 克隆到 ~/.config/nvim）
 │
@@ -137,13 +142,12 @@ script_tool_and_config/
 
 ## 目录说明
 
-### 根目录文件
+### 根目录与文档
 
 - **README.md**: 项目主文档，包含快速开始、使用说明等
-- **project_structure.md**: 项目结构说明（本文件）
-- **SOFTWARE_LIST.md**: 完整的软件清单和安装说明
-- **chezmoi_use_guide.md**: chezmoi 使用指南
-- **install.sh**: 一键安装脚本
+- **AGENTS.md**: 代理与编码规范
+- **install.sh** / **deploy.sh**: 一键安装与快速部署
+- **docs/**: 文档目录，含 project_structure.md（本文件）、SOFTWARE_LIST.md、INSTALL_GUIDE.md、chezmoi_use_guide.md、os_setup_guide.md、ENCODING_AND_LINE_ENDINGS.md、VERIFICATION_RESULT.md 等
 
 ### dotfiles/ 目录
 
@@ -167,7 +171,7 @@ Legacy 目录，所有配置已迁移到 `.chezmoi/` 目录；本仓库无 submo
 - **跨平台工具脚本**：位于 `scripts/common/`（utils、project_tools、ffmpeg-magic、git_templates、patch_examples、shc、auto_edit_redis_config 等）
 - **平台特定脚本**：Linux network/hardware、Windows windows_scripts
 
-详细命名与示例见 [AGENTS.md](AGENTS.md#脚本分类和命名规范)。
+详细命名与示例见 [AGENTS.md](../AGENTS.md#脚本分类和命名规范)。
 
 ## 配置文件位置
 

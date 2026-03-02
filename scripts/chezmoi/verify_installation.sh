@@ -25,7 +25,13 @@ fi
 REPORT_FILE="${VERIFY_REPORT_FILE:-}"
 REPORT_DATE="$(date +%Y%m%d_%H%M%S)"
 if [[ -z "$REPORT_FILE" ]]; then
-    REPORT_FILE="${HOME}/install_verification_report_${REPORT_DATE}.txt"
+    # Windows（Git Bash）下优先使用 USERPROFILE，避免报告写到 /home/... 导致用户找不到
+    if [[ "$(uname -s)" =~ ^(MINGW|MSYS|CYGWIN) ]] && [[ -n "${USERPROFILE:-}" ]]; then
+        REPORT_DIR="$(cygpath -u "$USERPROFILE" 2>/dev/null || echo "$USERPROFILE")"
+        REPORT_FILE="${REPORT_DIR}/install_verification_report_${REPORT_DATE}.txt"
+    else
+        REPORT_FILE="${HOME}/install_verification_report_${REPORT_DATE}.txt"
+    fi
 fi
 
 # 报告内容缓存（先写入变量，最后统一写文件并打印摘要）

@@ -1,6 +1,6 @@
 # Docker ArchLinux 开发环境
 
-本目录为 Docker ArchLinux 开发环境构建与运行脚本。一键安装与首次配置见项目根目录 [INSTALL_GUIDE.md](../../../INSTALL_GUIDE.md)。
+本目录为 Docker ArchLinux 开发环境构建与运行脚本。一键安装与首次配置见项目根目录 [docs/INSTALL_GUIDE.md](../../../docs/INSTALL_GUIDE.md)。
 
 基于当前项目的 Linux 环境配置，创建一个完整的 Docker ArchLinux 开发容器，包含所有已安装的软件和配置文件。
 
@@ -201,7 +201,7 @@ export PROXY=192.168.1.76:7890
 
 ## 容器配置流程
 
-容器配置流程参考 run_once 与 `run_on_linux` 逻辑（原 `install_common_tools.sh` 已废弃，见 [SOFTWARE_LIST.md](../../../SOFTWARE_LIST.md)），分为以下阶段：
+容器配置流程参考 run_once 与 `run_on_linux` 逻辑（原 `install_common_tools.sh` 已废弃，见 [SOFTWARE_LIST.md](../../../docs/SOFTWARE_LIST.md)），分为以下阶段：
 
 ### Phase 1: Pacman 配置优化（对应 Linux Phase 1: Pacman operations）
 - 设置代理环境变量

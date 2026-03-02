@@ -47,15 +47,15 @@ SSH 配置由 `.chezmoi/dot_ssh/config.tmpl` 管理，预置包含 `github.com`�
 
 | 文档 | 说明 |
 |------|------|
-| [INSTALL_GUIDE.md](INSTALL_GUIDE.md) | 一键安装与配置入口（推荐先看） |
-| [os_setup_guide.md](os_setup_guide.md) | Windows/macOS/Linux 分步安装指南 |
-| [chezmoi_use_guide.md](chezmoi_use_guide.md) | chezmoi 详细使用指南 |
-| [SOFTWARE_LIST.md](SOFTWARE_LIST.md) | 完整软件清单与 run_once 对应关系 |
+| [docs/INSTALL_GUIDE.md](docs/INSTALL_GUIDE.md) | 一键安装与配置入口（推荐先看） |
+| [docs/os_setup_guide.md](docs/os_setup_guide.md) | Windows/macOS/Linux 分步安装指南 |
+| [docs/chezmoi_use_guide.md](docs/chezmoi_use_guide.md) | chezmoi 详细使用指南 |
+| [docs/SOFTWARE_LIST.md](docs/SOFTWARE_LIST.md) | 完整软件清单与 run_once 对应关系 |
 | [scripts/linux/system_basic_env/INSTALL_STATUS.md](scripts/linux/system_basic_env/INSTALL_STATUS.md) | 所需软件安装与配置状态清单（验证项与命令） |
-| [VERIFICATION_RESULT.md](VERIFICATION_RESULT.md) | 当前环境验证结果摘要；安装后可用 `scripts/chezmoi/verify_installation.sh` 生成报告 |
-| [project_structure.md](project_structure.md) | 详细项目结构说明 |
+| [docs/VERIFICATION_RESULT.md](docs/VERIFICATION_RESULT.md) | 当前环境验证结果摘要；安装后可用 `scripts/chezmoi/verify_installation.sh` 生成报告 |
+| [docs/project_structure.md](docs/project_structure.md) | 详细项目结构说明 |
 | [AGENTS.md](AGENTS.md) | 代码代理开发指南 |
-| [ENCODING_AND_LINE_ENDINGS.md](ENCODING_AND_LINE_ENDINGS.md) | 文件编码与换行符规范 |
+| [docs/ENCODING_AND_LINE_ENDINGS.md](docs/ENCODING_AND_LINE_ENDINGS.md) | 文件编码与换行符规范 |
 | [scripts/common/utils/DEPLOYMENT_GUIDE.md](scripts/common/utils/DEPLOYMENT_GUIDE.md) | 部署流程（Windows/Arch） |
 | [scripts/common/utils/SFTP_SYNC_GUIDE.md](scripts/common/utils/SFTP_SYNC_GUIDE.md) | SFTP 与同步指南 |
 
@@ -65,6 +65,7 @@ SSH 配置由 `.chezmoi/dot_ssh/config.tmpl` 管理，预置包含 `github.com`�
 - **版本**：Windows 10/11
 - **包管理器**：winget（优先）、MSYS2 pacman
 - **Shell**：Git Bash、PowerShell
+- **Win10 + Alacritty + Git Bash**：推荐在 **Git Bash** 中执行 `./install.sh`。若使用 Alacritty 作为终端，请确保其使用的 shell 与 PATH 与 Git Bash 一致（如 Alacritty 配置中 shell 指向 Git 自带的 bash），以免 chezmoi 源路径与解释器解析错误（项目会在 `~/.config/chezmoi/chezmoi.toml` 中写入正斜杠 Windows 路径与 bash 解释器）。
 
 ### macOS
 - **版本**：macOS 10.15+（Catalina 及以上）
@@ -86,7 +87,7 @@ SSH 配置由 `.chezmoi/dot_ssh/config.tmpl` 管理，预置包含 `github.com`�
 
 ## 📦 各 OS 与 WSL 安装的软件及功能简介
 
-一键安装按 OS 与 WSL 自动选择 run_once 脚本，以下为各平台会安装的软件及简短功能说明。完整 run_once 对应关系见 [SOFTWARE_LIST.md](SOFTWARE_LIST.md)。
+一键安装按 OS 与 WSL 自动选择 run_once 脚本，以下为各平台会安装的软件及简短功能说明。完整 run_once 对应关系见 [docs/SOFTWARE_LIST.md](docs/SOFTWARE_LIST.md)。
 
 ### Linux（含 Arch / Ubuntu·Debian / WSL）
 
@@ -130,7 +131,7 @@ SSH 配置由 `.chezmoi/dot_ssh/config.tmpl` 管理，预置包含 `github.com`�
 
 ### WSL
 
-WSL 与原生 Linux **共享同一套软件列表**（同上 Linux 表格），run_once 按 Linux 执行。差异仅为：代理使用宿主机 IP（`/etc/resolv.conf` 的 nameserver）、SSH/Git 的 ProxyCommand 与 proxy 配置、以及 WSL 专用验证脚本（如 `scripts/linux/system_basic_env/verify_wsl_ssh.sh`、`get_wsl_system_info.sh`）。日志中会区分「Linux (WSL, apt)」与「Linux (原生, pacman/apt)」。详细步骤与故障排除见 [INSTALL_GUIDE.md](INSTALL_GUIDE.md)。
+WSL 与原生 Linux **共享同一套软件列表**（同上 Linux 表格），run_once 按 Linux 执行。差异仅为：代理使用宿主机 IP（`/etc/resolv.conf` 的 nameserver）、SSH/Git 的 ProxyCommand 与 proxy 配置、以及 WSL 专用验证脚本（如 `scripts/linux/system_basic_env/verify_wsl_ssh.sh`、`get_wsl_system_info.sh`）。日志中会区分「Linux (WSL, apt)」与「Linux (原生, pacman/apt)」。详细步骤与故障排除见 [docs/INSTALL_GUIDE.md](docs/INSTALL_GUIDE.md)。
 
 ## 📁 项目结构
 
@@ -156,14 +157,18 @@ script_tool_and_config/
 ├── dotfiles/                       # 点文件目录（Neovim 由 run_once 克隆到 ~/.config/nvim，不在此仓库）
 │
 ├── install.sh                      # 一键安装脚本
+├── deploy.sh                        # 快速部署脚本
 ├── README.md                       # 本文件
 ├── AGENTS.md                       # 代码代理开发指南
-├── chezmoi_use_guide.md           # chezmoi 使用指南
-├── SOFTWARE_LIST.md                # 软件清单
-└── project_structure.md            # 项目结构说明
+├── docs/                           # 文档目录
+│   ├── INSTALL_GUIDE.md            # 一键安装与首次配置
+│   ├── SOFTWARE_LIST.md            # 软件清单
+│   ├── project_structure.md        # 项目结构说明
+│   └── ...
+└── logs/                           # 安装/部署日志（统一）
 ```
 
-详细结构见 [project_structure.md](project_structure.md)。
+详细结构见 [docs/project_structure.md](docs/project_structure.md)。
 
 ## 🔧 常用命令
 
@@ -201,7 +206,7 @@ chezmoi add ~/.new_config
 
 ## 📦 主要软件清单（总览）
 
-上述「各 OS 与 WSL 安装的软件及功能简介」已按平台列出；此处仅作总览：版本管理（fnm, uv, rustup）、终端/提示符（starship, tmux, alacritty 仅 Linux、Ghostty 仅 macOS）、文件与搜索（bat, eza, fd, ripgrep, fzf）、开发（git, neovim, lazygit, git-delta, gh）、系统监控与字体等。完整 run_once 对应关系与配置说明见 [SOFTWARE_LIST.md](SOFTWARE_LIST.md)。
+上述「各 OS 与 WSL 安装的软件及功能简介」已按平台列出；此处仅作总览：版本管理（fnm, uv, rustup）、终端/提示符（starship, tmux, alacritty 仅 Linux、Ghostty 仅 macOS）、文件与搜索（bat, eza, fd, ripgrep, fzf）、开发（git, neovim, lazygit, git-delta, gh）、系统监控与字体等。完整 run_once 对应关系与配置说明见 [docs/SOFTWARE_LIST.md](docs/SOFTWARE_LIST.md)。
 
 ## 🎯 主要功能分类
 
@@ -297,7 +302,7 @@ cd ~/.config/nvim && git pull && ./install.sh
 ./scripts/common/utils/ensure_lf_line_endings.sh
 ```
 
-详细说明请参考：[ENCODING_AND_LINE_ENDINGS.md](ENCODING_AND_LINE_ENDINGS.md)
+详细说明请参考：[docs/ENCODING_AND_LINE_ENDINGS.md](docs/ENCODING_AND_LINE_ENDINGS.md)
 
 ## ⚠️ 注意事项
 
@@ -320,7 +325,7 @@ cd ~/.config/nvim && git pull && ./install.sh
 - ✅ 优化打印信息内容：统一所有脚本使用 log_info/log_success/log_warning/log_error 函数
 - ✅ 删除无用文件：清理临时日志文件和测试文件
 - ✅ 更新 .gitignore：确保所有临时文件、日志文件、备份文件都被忽略
-- ✅ 更新文档：确保 README.md、project_structure.md 等文档与代码实现一致
+- ✅ 更新文档：确保 README.md、docs/ 下文档与代码实现一致
 
 ### 2024-12 项目重构
 - ✅ 统一配置管理：所有配置文件转换为 Chezmoi 模板格式

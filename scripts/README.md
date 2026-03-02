@@ -1,6 +1,6 @@
 # Scripts 目录
 
-本目录包含按操作系统分类的脚本工具集合。一键安装与首次使用见项目根目录 [INSTALL_GUIDE.md](../INSTALL_GUIDE.md)。
+本目录包含按操作系统分类的脚本工具集合。一键安装与首次使用见项目根目录 [docs/INSTALL_GUIDE.md](../docs/INSTALL_GUIDE.md)。
 
 ## 目录结构
 
@@ -11,7 +11,7 @@
 - **windows/**：Windows 专用（windows_scripts、system_basic_env）
 - **chezmoi/**、**migration/**
 
-完整目录树与脚本列表见 [project_structure.md](../project_structure.md)。
+完整目录树与脚本列表见 [project_structure.md](../docs/project_structure.md)。
 
 ## 脚本分类说明
 

@@ -1,6 +1,6 @@
 # 所需软件安装与配置状态清单
 
-本文档为**当前环境验证清单与检查命令**，便于在 WSL/Ubuntu 或 Arch 上核对。**一键安装**由 `./install.sh` 完成，所需软件均通过 **run_once** 安装，注意 **OS** 与 **WSL** 区分；`install_common_tools.sh` **已废弃**，职责已拆分到 run_once。完整软件列表见 [SOFTWARE_LIST.md](../../../SOFTWARE_LIST.md)。生成/核对环境：**WSL Ubuntu**。
+本文档为**当前环境验证清单与检查命令**，便于在 WSL/Ubuntu 或 Arch 上核对。**一键安装**由 `./install.sh` 完成，所需软件均通过 **run_once** 安装，注意 **OS** 与 **WSL** 区分；`install_common_tools.sh` **已废弃**，职责已拆分到 run_once。完整软件列表见 [SOFTWARE_LIST.md](../../../docs/SOFTWARE_LIST.md)。生成/核对环境：**WSL Ubuntu**。
 
 ---
 
@@ -98,7 +98,7 @@
 - `ssh-add -l`：应列出至少一个密钥；若为 “Could not open a connection to your authentication agent”，说明 agent 未启动或未转发。
 - `ssh -T git@github.com`：应出现 “Hi xxx! You've successfully authenticated” 或类似成功提示。
 
-宿主机密钥：软链接 `~/.ssh` → `/mnt/c/Users/<User>/.ssh` 时需 `/etc/wsl.conf` 的 `[automount] options = "metadata"` 并 `chmod 600 ~/.ssh/id_rsa`；npiperelay 需在 `.bashrc`/`.zprofile` 中建立 `SSH_AUTH_SOCK` 的 socat 命令在登录时执行。一键自检：`./scripts/linux/system_basic_env/verify_wsl_ssh.sh`。若出现 `The authenticity of host '[ssh.github.com]:443 (<no hostip for proxy command>)'`，多为 ProxyCommand 显示问题，认证成功可忽略；若 ~/.ssh 为软链接且 ProxyCommand 使用 127.0.0.1，在 WSL 中无法连到宿主机代理，需在 WSL 内使用独立 config 并设置宿主机 IP（见 INSTALL_GUIDE）。
+宿主机密钥：软链接 `~/.ssh` → `/mnt/c/Users/<User>/.ssh` 时需 `/etc/wsl.conf` 的 `[automount] options = "metadata"` 并 `chmod 600 ~/.ssh/id_rsa`；npiperelay 需在 `.bashrc`/`.zprofile` 中建立 `SSH_AUTH_SOCK` 的 socat 命令在登录时执行。一键自检：`./scripts/linux/system_basic_env/verify_wsl_ssh.sh`。若出现 `The authenticity of host '[ssh.github.com]:443 (<no hostip for proxy command>)'`，多为 ProxyCommand 显示问题，认证成功可忽略；若 ~/.ssh 为软链接且 ProxyCommand 使用 127.0.0.1，在 WSL 中无法连到宿主机代理，需在 WSL 内使用独立 config 并设置宿主机 IP（见 docs/INSTALL_GUIDE.md）。
 
 ### 通用验证命令
 
@@ -122,7 +122,7 @@ getent passwd "$(id -un)" | cut -d: -f7
 
 ### Oh My Zsh 插件
 
-- 检查：`bash scripts/common/utils/check_zsh_omz.sh`。若显示已安装插件 0/4，多为 **WSL 下** Git 的 `http.https://github.com.proxy` 指向 127.0.0.1 导致 clone 失败。取消该配置后重试 clone 或执行 [INSTALL_GUIDE.md](../../../INSTALL_GUIDE.md) 中的「Oh My Zsh 插件未安装 故障排除」补救命令。
+- 检查：`bash scripts/common/utils/check_zsh_omz.sh`。若显示已安装插件 0/4，多为 **WSL 下** Git 的 `http.https://github.com.proxy` 指向 127.0.0.1 导致 clone 失败。取消该配置后重试 clone 或执行 [INSTALL_GUIDE.md](../../../docs/INSTALL_GUIDE.md) 中的「Oh My Zsh 插件未安装 故障排除」补救命令。
 
 ---
 
@@ -147,4 +147,4 @@ getent passwd "$(id -un)" | cut -d: -f7
 
 **成功标准**：单次 `./install.sh` 后，无需手动改 `~/.config/chezmoi`、无需手动执行多个 run_once，即可得到文档中承诺的软件与配置状态（允许个别可选 run_once 如 dwm/i3wm/alacritty 失败并打 WARNING）。
 
-**问题记录**：若某 run_once 失败或某软件未安装，请记录发行版、错误输出与步骤，用于后续迭代；可附于本文件或提交 issue。若 **Oh My Zsh 插件 0/4**：多为 WSL 下 `http.https://github.com.proxy` 指向 127.0.0.1 导致，取消该配置后重试或按 INSTALL_GUIDE 故障排除执行补救命令。
+**问题记录**：若某 run_once 失败或某软件未安装，请记录发行版、错误输出与步骤，用于后续迭代；可附于本文件或提交 issue。若 **Oh My Zsh 插件 0/4**：多为 WSL 下 `http.https://github.com.proxy` 指向 127.0.0.1 导致，取消该配置后重试或按 docs/INSTALL_GUIDE.md 故障排除执行补救命令。

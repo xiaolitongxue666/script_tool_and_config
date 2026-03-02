@@ -1,6 +1,6 @@
 # macOS 基础工具安装脚本
 
-本目录为 macOS 专用安装脚本。一键安装与跨平台流程见项目根目录 [INSTALL_GUIDE.md](../../../INSTALL_GUIDE.md)。
+本目录为 macOS 专用安装脚本。一键安装与跨平台流程见项目根目录 [docs/INSTALL_GUIDE.md](../../../docs/INSTALL_GUIDE.md)。
 
 用于在 macOS 系统上自动安装基础开发工具的 Bash 脚本。
 
@@ -61,7 +61,7 @@
 
 ### 终端与 Shell
 
-- **终端应用**：**Ghostty**（由 `run_on_darwin/run_once_install-ghostty.sh.tmpl` 安装，配置使用 zsh 作为 shell）。详见 [SOFTWARE_LIST.md](../../../SOFTWARE_LIST.md)。
+- **终端应用**：**Ghostty**（由 `run_on_darwin/run_once_install-ghostty.sh.tmpl` 安装，配置使用 zsh 作为 shell）。详见 [SOFTWARE_LIST.md](../../../docs/SOFTWARE_LIST.md)。
 - **zsh** - Z shell（macOS 默认 shell）
 - **oh-my-zsh** - Zsh 配置框架
 
@@ -224,6 +224,6 @@ fi
 
 ## 相关脚本
 
-- `scripts/linux/system_basic_env/install_common_tools.sh` - 已废弃，见 [SOFTWARE_LIST.md](../../../SOFTWARE_LIST.md) 与项目根目录 `./install.sh`（run_once）
+- `scripts/linux/system_basic_env/install_common_tools.sh` - 已废弃，见 [SOFTWARE_LIST.md](../../../docs/SOFTWARE_LIST.md) 与项目根目录 `./install.sh`（run_once）
 - `scripts/windows/system_basic_env/install_common_tools.ps1` - Windows 版本
 

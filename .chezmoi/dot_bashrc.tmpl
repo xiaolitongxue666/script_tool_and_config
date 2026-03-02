@@ -145,21 +145,30 @@ elif [[ "$OS" == "windows" ]]; then
         (export MSYS_NO_PATHCONV=1; "docker-compose.exe" "$@")
     }
 
-    # Windows Terminal Theme（必须在最后一行）
+    # 非登录 shell 下确保能找到 oh-my-posh/starship（与 run_on_windows/dot_bash_profile 的 PATH 一致）
+    for _d in "$HOME/AppData/Local/Microsoft/WinGet/Links" "$HOME/AppData/Local/Programs/oh-my-posh"; do
+        [ -d "$_d" ] && [[ ":$PATH:" != *":$_d:"* ]] && export PATH="$PATH:$_d"
+    done
+    unset _d
+
+    # Windows 提示符：仅用 Oh My Posh（与 run_on_windows/dot_bash_profile 一致，避免登录/非登录显示不同）
+    _omp_config="$HOME/AppData/Local/Programs/oh-my-posh/themes/montys.omp.json"
     if command -v oh-my-posh &> /dev/null; then
-        eval "$(oh-my-posh --init --shell bash --config /c/Users/Administrator/AppData/Local/Programs/oh-my-posh/themes/montys.omp.json)"
+        if [ -f "$_omp_config" ]; then
+            eval "$(oh-my-posh --init --shell bash --config "$_omp_config")"
+        else
+            eval "$(oh-my-posh --init --shell bash)"
+        fi
+    elif command -v starship &> /dev/null; then
+        eval "$(starship init bash)"
     fi
+    unset _omp_config
 
     # 打开默认路径
     cd /d/Code 2>/dev/null || cd ~
 
     # 启动时显示欢迎信息
     echo "Welcome! 😊"
-
-    # Starship
-    if command -v starship &> /dev/null; then
-        eval "$(starship init bash)"
-    fi
 
 # Linux 特定配置
 elif [[ "$OS" == "linux" ]]; then

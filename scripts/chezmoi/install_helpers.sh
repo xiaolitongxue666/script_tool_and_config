@@ -182,18 +182,64 @@ get_chezmoi_diff_summary() {
 
 # 从安装脚本文件名提取软件名
 # 参数: script_path
-# 返回: software_name
+# 返回: software_name（与 SOFTWARE_LIST.md 中 run_once 索引一致）
 extract_software_name_from_script() {
     local script_path="$1"
+    [[ -z "$script_path" ]] && { echo ''; return 0; }
     local basename=$(basename "$script_path")
+    local base
 
-    # 移除 run_once_install- 前缀
-    local software_name="${basename#run_once_install-}"
-    # 移除 .sh.tmpl 或 .sh 后缀
-    software_name="${software_name%.sh.tmpl}"
-    software_name="${software_name%.sh}"
+    # 支持 run_once_00-install-* 与 run_once_install-*
+    if [[ "$basename" == run_once_00-* ]]; then
+        base="${basename#run_once_}"
+        base="${base%.sh.tmpl}"
+        base="${base%.sh}"
+    else
+        base="${basename#run_once_install-}"
+        base="${base%.sh.tmpl}"
+        base="${base%.sh}"
+    fi
+    echo "$base"
+}
 
-    echo "$software_name"
+# 返回软件所属分类（与 SOFTWARE_LIST.md 按 OS 汇总一致，用于 [4/5] 分栏打印）
+# 参数: software_name
+# 返回: 分类名
+get_software_category() {
+    local name="$1"
+    case "$name" in
+        00-install-version-managers)  echo "版本管理" ;;
+        common-tools)                 echo "文件/搜索与通用" ;;
+        starship|tmux|zsh|fish|alacritty|oh-my-posh)  echo "终端/Shell" ;;
+        ghostty|connect)              echo "macOS 专属" ;;
+        git|neovim|neovim-config|lazyssh)  echo "开发" ;;
+        nerd-fonts)                   echo "字体" ;;
+        system-basic-env)             echo "系统基础" ;;
+        yabai|skhd|maccy)             echo "macOS 专属" ;;
+        i3wm|dwm|arch-base-packages|aur-helper|configure-pacman)  echo "Linux 专属" ;;
+        opencode|opencode-omo)        echo "OpenCode" ;;
+        *)                            echo "其他" ;;
+    esac
+}
+
+# 返回当前平台显示名（含 WSL 区分，与 SOFTWARE_LIST.md / INSTALL_STATUS 一致）
+# 参数: platform, package_manager
+# 返回: 如 "Windows" / "macOS" / "Linux (WSL, apt)" / "Linux (原生, pacman)"
+get_platform_display_name() {
+    local platform="$1"
+    local pkg="${2:-}"
+    case "$platform" in
+        windows)  echo "Windows" ;;
+        macos)    echo "macOS" ;;
+        linux)
+            if grep -qEi "Microsoft|WSL" /proc/version 2>/dev/null || [[ -n "${WSL_DISTRO_NAME:-}" ]]; then
+                echo "Linux (WSL, ${pkg:-apt})"
+            else
+                echo "Linux (原生, ${pkg:-})"
+            fi
+            ;;
+        *)        echo "${platform:-未知}" ;;
+    esac
 }
 
 # 判断安装脚本是否适用于当前平台（用于安装状态检查时过滤）
@@ -202,6 +248,7 @@ extract_software_name_from_script() {
 script_applicable_to_platform() {
     local script_path="$1"
     local platform="$2"
+    script_path="${script_path//\\/\/}"
     if [[ -z "$platform" ]]; then
         return 0
     fi
@@ -220,9 +267,19 @@ script_applicable_to_platform() {
     local software_name
     software_name="$(extract_software_name_from_script "$script_path")"
     case "$software_name" in
+        # 仅 Linux（含 WSL 原生环境）
         i3wm|alacritty|dwm|lazyssh)
             [[ "$platform" != "linux" ]] && return 1
             ;;
+        # 仅 Linux + macOS（不在 Windows 安装，与 SOFTWARE_LIST 一致）
+        tmux|fish)
+            [[ "$platform" != "linux" && "$platform" != "macos" ]] && return 1
+            ;;
+        # 仅 macOS
+        maccy|skhd|yabai)
+            [[ "$platform" != "macos" ]] && return 1
+            ;;
+        # 仅 Windows
         oh-my-posh)
             [[ "$platform" != "windows" ]] && return 1
             ;;
@@ -240,6 +297,12 @@ check_script_software_installed() {
     # 常见软件名到命令名的映射
     local command_name="$software_name"
     case "$software_name" in
+        00-install-version-managers)
+            if check_command_exists "fnm" || check_command_exists "uv" || check_command_exists "rustup"; then
+                return 0
+            fi
+            return 1
+            ;;
         common-tools)
             # 检查几个主要工具
             if check_command_exists "bat" || check_command_exists "eza" || check_command_exists "fd"; then
@@ -310,5 +373,101 @@ scan_and_check_install_scripts() {
 
     # 返回统计信息（通过全局变量或文件）
     echo "STATS:$installed_count:$not_installed_count"
+}
+
+# 按 SOFTWARE_LIST.md 的 OS/WSL 分类打印安装状态（[4/5] 检查软件安装状态）
+# 参数: chezmoi_dir, platform, package_manager
+# 依赖: log_info, log_success 等（由 install.sh 提供）
+report_install_status_by_platform() {
+    local chezmoi_dir="$1"
+    local platform="$2"
+    local pkg="$3"
+    [[ -z "$platform" ]] && return 0
+    [[ ! -d "$chezmoi_dir" ]] && return 1
+
+    local display_name
+    display_name="$(get_platform_display_name "$platform" "$pkg")"
+    log_info '当前: '"$display_name"'（依据 docs/SOFTWARE_LIST.md 按 OS 汇总）'
+
+    local all_scripts
+    if [[ "$platform" == "windows" ]]; then
+        if [[ -x /usr/bin/find ]]; then
+            all_scripts=$(/usr/bin/find "$chezmoi_dir" -name "run_once_install-*.sh.tmpl" -type f 2>/dev/null || true; /usr/bin/find "$chezmoi_dir" -name "run_once_00-*.sh.tmpl" -type f 2>/dev/null || true)
+        fi
+        if [[ -z "$all_scripts" ]]; then
+            local _d="$chezmoi_dir"
+            all_scripts=$(
+                shopt -s nullglob 2>/dev/null || true
+                for f in "$_d"/run_once_install-*.sh.tmpl "$_d"/run_once_00-*.sh.tmpl \
+                    "$_d"/run_on_linux/run_once_*.sh.tmpl "$_d"/run_on_darwin/run_once_*.sh.tmpl "$_d"/run_on_windows/run_once_*.sh.tmpl; do
+                    [[ -f "$f" ]] && echo "$f"
+                done | sort -u
+            )
+        fi
+        all_scripts=$(echo "$all_scripts" | sort -u)
+    else
+        all_scripts=$(find "$chezmoi_dir" -name "run_once_install-*.sh.tmpl" -type f 2>/dev/null || true; find "$chezmoi_dir" -name "run_once_00-*.sh.tmpl" -type f 2>/dev/null || true)
+        all_scripts=$(echo "$all_scripts" | sort -u)
+    fi
+    [[ -z "$all_scripts" ]] && return 0
+
+    local tmp_list
+    tmp_list=$(mktemp)
+    trap "rm -f '$tmp_list'" RETURN EXIT
+
+    while IFS= read -r script; do
+        [[ -z "$script" ]] && continue
+        script_applicable_to_platform "$script" "$platform" || continue
+        local name
+        name="$(extract_software_name_from_script "$script")"
+        [[ -z "$name" ]] && continue
+        local cat
+        cat="$(get_software_category "$name")"
+        if check_script_software_installed "$script"; then
+            printf '%s\t%s\t1\n' "$cat" "$name" >> "$tmp_list"
+        else
+            printf '%s\t%s\t0\n' "$cat" "$name" >> "$tmp_list"
+        fi
+    done <<< "$all_scripts"
+
+    [[ ! -s "$tmp_list" ]] && { log_info "无适用于当前平台的 run_once 安装项"; return 0; }
+
+    local category_order="版本管理 终端/Shell 文件/搜索与通用 开发 字体 系统基础 macOS 专属 Linux 专属 Windows 专属 OpenCode 其他"
+    local total_installed=0
+    local total_not=0
+
+    for cat in $category_order; do
+        local lines=""
+        while IFS= read -r line; do
+            line="${line//$'\r'/}"
+            [[ -z "$line" ]] && continue
+            local first_field="${line%%$'\t'*}"
+            [[ "$first_field" == "$cat" ]] && lines+="$line"$'\n'
+        done < "$tmp_list"
+        [[ -z "$lines" ]] && continue
+        log_info "【$cat】"
+        while IFS= read -r line; do
+            line="${line//$'\r'/}"
+            [[ -z "$line" ]] && continue
+            name_installed=$(echo "$line" | cut -f2-)
+            name="${name_installed%$'\t'*}"
+            inst="${name_installed##*$'\t'}"
+            inst="${inst//$'\r'/}"
+            if [[ "$inst" == "1" ]]; then
+                total_installed=$((total_installed + 1))
+                log_info "  ✓ ${name} 已安装"
+            else
+                total_not=$((total_not + 1))
+                log_info "  ✗ ${name} 未安装, 将通过 chezmoi apply 安装"
+            fi
+        done <<< "$lines"
+    done
+
+    if [[ $total_installed -gt 0 ]]; then
+        log_success "已安装: ${total_installed} 个"
+    fi
+    if [[ $total_not -gt 0 ]]; then
+        log_info "待安装: ${total_not} 个, 将通过 chezmoi apply 自动安装"
+    fi
 }
 

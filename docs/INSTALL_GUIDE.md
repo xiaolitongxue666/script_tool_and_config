@@ -40,12 +40,12 @@
    `./scripts/linux/system_basic_env/get_wsl_system_info.sh`  
    可将输出保存便于排查。
 
-5. **一键安装即覆盖所需软件与配置**：所有软件均通过 **run_once** 脚本安装（通用工具、Arch 镜像与基础包、lazyssh、字体、zsh 等），**不再需要**独立脚本 `install_common_tools.sh`（已废弃，职责已拆分到 run_once，各脚本内区分 **OS** 与 **WSL**）。详见 [SOFTWARE_LIST.md](SOFTWARE_LIST.md) 与 [INSTALL_STATUS.md](scripts/linux/system_basic_env/INSTALL_STATUS.md)。
+5. **一键安装即覆盖所需软件与配置**：所有软件均通过 **run_once** 脚本安装（通用工具、Arch 镜像与基础包、lazyssh、字体、zsh 等），**不再需要**独立脚本 `install_common_tools.sh`（已废弃，职责已拆分到 run_once，各脚本内区分 **OS** 与 **WSL**）。详见 [SOFTWARE_LIST.md](SOFTWARE_LIST.md) 与 [INSTALL_STATUS.md](../scripts/linux/system_basic_env/INSTALL_STATUS.md)。
 
 ## 平台与发行版说明
 
 - **项目主要目标**：一键安装所需软件和配置；**区分不同 OS**（linux/darwin/windows）与 **WSL**（Linux 下通过日志区分 WSL 与原生）。
-- **Windows**：`core.longpaths = true` 仅在本平台生效；SSH 等见 os_setup_guide。
+- **Windows**：`core.longpaths = true` 仅在本平台生效；SSH 等见 os_setup_guide。**Win10 + Alacritty + Git Bash**：请在 **Git Bash** 中执行 `./install.sh`；若使用 Alacritty 作为终端，请确保其配置的 shell 与 PATH 与 Git Bash 一致（例如 Alacritty 的 shell 指向 Git 自带的 bash），否则 chezmoi 的 sourceDir 与脚本解释器路径可能解析错误（install.sh 会写入正斜杠 Windows 路径与 bash 解释器到 `~/.config/chezmoi/chezmoi.toml`）。
 - **macOS**：Homebrew、connect 路径、yabai/skhd 等见 run_on_darwin 与 os_setup_guide。
 - **Linux**（按发行版与是否 WSL 区分）：
   - **通用工具**（bat, eza, fd, btop, fastfetch, lazygit, gh 等）：由 **run_once_install-common-tools** 安装，适用于**所有** Linux（含 **Arch**、**Ubuntu/Debian**、**WSL**）与 macOS。
@@ -78,7 +78,7 @@
        done
        ```
 
-- **字体**：FiraMono Nerd Font 由 `run_once_install-nerd-fonts.sh` 安装（Linux 下为 `/usr/local/share/fonts/FiraMono-NerdFont`）。下载自 [GitHub nerd-fonts  releases](https://github.com/ryanoasis/nerd-fonts/releases)，**下载若失败可设置代理**（如 `export http_proxy=http://127.0.0.1:7890` 后再次 `chezmoi apply`，或手动执行渲染后的脚本）。更多字体与安装方式见 [nerd-fonts](https://github.com/ryanoasis/nerd-fonts) 与 [nerdfonts.com 下载页](https://www.nerdfonts.com/font-downloads)。验证：`fc-list | grep -i Fira` 或查看 [INSTALL_STATUS.md](scripts/linux/system_basic_env/INSTALL_STATUS.md) 第 8 节。
+- **字体**：FiraMono Nerd Font 由 `run_once_install-nerd-fonts.sh` 安装（Linux 下为 `/usr/local/share/fonts/FiraMono-NerdFont`）。下载自 [GitHub nerd-fonts  releases](https://github.com/ryanoasis/nerd-fonts/releases)，**下载若失败可设置代理**（如 `export http_proxy=http://127.0.0.1:7890` 后再次 `chezmoi apply`，或手动执行渲染后的脚本）。更多字体与安装方式见 [nerd-fonts](https://github.com/ryanoasis/nerd-fonts) 与 [nerdfonts.com 下载页](https://www.nerdfonts.com/font-downloads)。验证：`fc-list | grep -i Fira` 或查看 [INSTALL_STATUS.md](../scripts/linux/system_basic_env/INSTALL_STATUS.md) 第 8 节。
 
 ### Cursor/VS Code 连接 WSL 后终端无 Starship 美化
 
