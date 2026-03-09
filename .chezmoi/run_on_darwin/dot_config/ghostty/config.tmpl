@@ -8,6 +8,9 @@ command = {{ if index . "macos_zsh_path" }}{{ index . "macos_zsh_path" }}{{ else
 # 显式启用 zsh 集成（工作目录继承、提示标记等）
 shell-integration = zsh
 
+# 使用 xterm-256color 以兼容 SSH 与远程 tmux（远程通常无 xterm-ghostty terminfo）
+term = xterm-256color
+
 # 外观：与 iTerm2 默认一致（纯黑底、浅色字、不透明、无模糊）
 background = #000000
 foreground = #c0c0c0
