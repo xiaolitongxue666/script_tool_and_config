@@ -318,6 +318,9 @@ alias proxy_off='unset_h'
 # 自定义别名
 # 注意：zsh 中 unset 是内置命令，不需要别名（Fish 中需要 alias unset 'set --erase'）
 alias c_google='curl cip.cc'
+# net_diag: 网络诊断（出口 IP、GitHub 连通性、下载测速）
+# 说明：保留 -k 以适配部分代理/证书链环境，便于快速排查网络问题
+alias net_diag='echo "出口IP信息：" && curl -s -L -k ip-api.com && echo "" && echo "GitHub状态：" && curl -IsLk https://github.com | head -n 1 && echo "" && echo "测速结果：" && curl -s -L -k "https://speed.cloudflare.com/__down?bytes=10000000" -o /dev/null -w "下载速度: %{speed_download} B/s\n"'
 
 # 使用 bat 替换 cat，提供更好的格式化输出
 # 对应 Fish: alias cat='bat --style=plain'
