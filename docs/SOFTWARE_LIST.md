@@ -37,15 +37,15 @@
 | 类别 | 软件 |
 |------|------|
 | 版本管理 | fnm, uv, rustup（可选） |
-| 终端/Shell | starship, oh-my-posh, zsh（MSYS2 可选） |
+| 终端/Shell | starship, **Windows Terminal**（默认终端）, oh-my-posh, zsh（MSYS2 可选） |
 | 文件/搜索 | bat, eza, fd, ripgrep, fzf |
 | 开发 | git, neovim, lazygit, git-delta, gh |
 | 系统监控 | bottom（btop 替代；或单独安装 btop4win） |
 | 字体 | Nerd Fonts (FiraMono) |
 
-**Windows 安装流程简述**：在项目根执行 `./install.sh`（Git Bash）；脚本会写入 `~/.config/chezmoi/chezmoi.toml` 的 `sourceDir`（正斜杠路径）和 `[interpreters.sh]`（bash 解释器），以便 `chezmoi apply` 在 Windows 上通过 bash 执行 run_once_*.sh。仅 Windows 会安装的 run_once：`oh-my-posh`；多平台共用的 run_once（00-install-version-managers、common-tools、starship、git、neovim、nerd-fonts、zsh、opencode 等）在 Windows 上同样执行。tmux、fish、alacritty、Ghostty 等不在 Windows 下安装（Ghostty 仅在 macOS 使用和配置）。与 WSL 区分：WSL 视为 Linux（apt/pacman），走 Linux 软件列表与 run_on_linux；Windows 本机为 winget 等，走本表。
+**Windows 安装流程简述**：在项目根执行 `./install.sh`（Git Bash）；脚本会写入 `~/.config/chezmoi/chezmoi.toml` 的 `sourceDir`（正斜杠路径）和 `[interpreters.sh]`（bash 解释器），以便 `chezmoi apply` 在 Windows 上通过 bash 执行 run_once_*.sh。仅 Windows 会安装的 run_once：`oh-my-posh`、`windows-terminal`；多平台共用的 run_once（00-install-version-managers、common-tools、starship、git、neovim、nerd-fonts、zsh、opencode 等）在 Windows 上同样执行。**Windows Terminal 作为 Windows 默认终端**（替代 Alacritty），每次 chezmoi apply 后自动同步配置文件到 WT 实际路径。tmux、fish、alacritty、Ghostty 等不在 Windows 下安装（Alacritty 仅 Linux，Ghostty 仅 macOS）。与 WSL 区分：WSL 视为 Linux（apt/pacman），走 Linux 软件列表与 run_on_linux；Windows 本机为 winget 等，走本表。
 
-**Windows 需要安装和配置的 run_once**（与 [4/5] 检查一致）：00-install-version-managers、common-tools、starship、git、neovim、neovim-config、nerd-fonts、zsh（MSYS2 可选）、oh-my-posh、opencode、opencode-omo、system-basic-env。配置（dotfiles）：通用模板（.bashrc、.zshrc、.gitconfig、.ssh/config 等）及 `run_on_windows/` 下的 .bash_profile、.bashrc。
+**Windows 需要安装和配置的 run_once**（与 [4/5] 检查一致）：00-install-version-managers、common-tools、starship、git、neovim、neovim-config、nerd-fonts、zsh（MSYS2 可选）、oh-my-posh、windows-terminal、opencode、opencode-omo、system-basic-env。配置（dotfiles）：通用模板（.bashrc、.zshrc、.gitconfig、.ssh/config 等）及 `run_on_windows/` 下的 .bash_profile、.bashrc、Windows Terminal settings.json（同步脚本自动部署到 WT 实际路径）。
 
 ---
 
@@ -75,6 +75,8 @@
 | `run_once_install-i3wm.sh.tmpl` | i3wm | 仅 Linux |
 | `run_once_install-dwm.sh.tmpl` | dwm | 仅 Linux |
 | `run_once_install-oh-my-posh.sh.tmpl` | oh-my-posh | 仅 Windows |
+| `run_on_windows/run_once_install-windows-terminal.sh.tmpl` | Windows Terminal（winget） | 仅 Windows |
+| `run_on_windows/run_sync_windows_terminal_config.sh.tmpl` | 同步 Windows Terminal 配置到实际路径（每次 apply） | 仅 Windows |
 | `run_on_darwin/run_once_configure-homebrew.sh.tmpl` | Homebrew 配置 | 仅 macOS |
 | `run_on_darwin/run_once_install-connect.sh.tmpl` | connect（SSH 代理） | 仅 macOS |
 | `run_on_darwin/run_once_install-ghostty.sh.tmpl` | Ghostty 终端（使用 zsh） | 仅 macOS |
@@ -103,6 +105,7 @@
 | **TPM** | Tmux Plugin Manager（tmux 插件管理器） | Linux, macOS | `run_once_install-tmux.sh.tmpl` |
 | **alacritty** | GPU 加速终端模拟器 | 仅 Linux | `run_once_install-alacritty.sh.tmpl` |
 | **ghostty** | 跨平台终端（原生 UI + GPU 加速，使用 zsh）；安装到 /Applications 以便启动台显示 | 仅 macOS | `run_on_darwin/run_once_install-ghostty.sh.tmpl` |
+| **windows-terminal** | Windows 默认终端（使用 Git Bash），配置 Catppuccin Mocha 主题 + CaskaydiaCove Nerd Font | 仅 Windows | `run_on_windows/run_once_install-windows-terminal.sh.tmpl` |
 
 ### 文件工具
 
@@ -192,6 +195,11 @@
 
 ## Windows 特有软件
 
+### 终端
+| 软件 | 描述 | 安装脚本 |
+|------|------|----------|
+| **Windows Terminal** | Windows 默认终端（替代 Alacritty），使用 Git Bash + Catppuccin Mocha 主题 + CaskaydiaCove Nerd Font | `run_on_windows/run_once_install-windows-terminal.sh.tmpl` |
+
 ### Shell 环境
 
 | 软件 | 描述 | 安装脚本 |
@@ -237,7 +245,7 @@
 
 | 配置文件 | 目标位置 | 源文件 |
 |----------|----------|--------|
-| **Alacritty 配置** | `~/.config/alacritty/alacritty.toml` | `.chezmoi/run_on_linux/dot_config/alacritty/alacritty.toml.tmpl`（仅 Linux） |
+| **Windows Terminal 配置** | `~/.config/windows-terminal/settings.json` | `.chezmoi/run_on_windows/dot_config/windows-terminal/settings.json.tmpl`（仅 Windows；同步脚本自动部署到 WT 实际路径） |
 | **Fish 配置** | `~/.config/fish/config.fish` | `.chezmoi/dot_config/fish/config.fish` |
 | **SSH 配置** | `~/.ssh/config` | `.chezmoi/dot_ssh/config.tmpl` |
 
@@ -261,6 +269,7 @@
 |----------|----------|--------|
 | **Git Bash Profile** | `~/.bash_profile` | `.chezmoi/run_on_windows/dot_bash_profile` |
 | **Git Bash RC** | `~/.bashrc` | `.chezmoi/run_on_windows/dot_bashrc` |
+| **Windows Terminal 配置** | `~/.config/windows-terminal/settings.json`（同步脚本自动部署到 WT 实际路径） | `.chezmoi/run_on_windows/dot_config/windows-terminal/settings.json.tmpl` |
 
 ## 安装方式说明
 

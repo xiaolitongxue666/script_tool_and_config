@@ -161,7 +161,7 @@ log_info "检查现有配置文件..."
 CONFIG_FILES=(
     "$HOME/.bash_profile"
     "$HOME/.bashrc"
-    "$HOME/.config/alacritty/alacritty.toml"
+    "$HOME/.config/windows-terminal/settings.json"
     "$HOME/.config/starship/starship.toml"
 )
 

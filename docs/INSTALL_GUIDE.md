@@ -55,7 +55,7 @@
 ## 平台与发行版说明
 
 - **项目主要目标**：一键安装所需软件和配置；**区分不同 OS**（linux/darwin/windows）与 **WSL**（Linux 下通过日志区分 WSL 与原生）。
-- **Windows**：`core.longpaths = true` 仅在本平台生效；SSH 等见 os_setup_guide。**Win10 + Alacritty + Git Bash**：请在 **Git Bash** 中执行 `./install.sh`；若使用 Alacritty 作为终端，请确保其配置的 shell 与 PATH 与 Git Bash 一致（例如 Alacritty 的 shell 指向 Git 自带的 bash），否则 chezmoi 的 sourceDir 与脚本解释器路径可能解析错误（install.sh 会写入正斜杠 Windows 路径与 bash 解释器到 `~/.config/chezmoi/chezmoi.toml`）。
+- **Windows**：`core.longpaths = true` 仅在本平台生效；SSH 等见 os_setup_guide。**Win10 + Windows Terminal + Git Bash**：请在 **Git Bash** 中执行 `./install.sh`；项目会通过 winget 安装 Windows Terminal 并自动配置（Catppuccin Mocha 主题、CaskaydiaCove Nerd Font、Git Bash profile）。install.sh 会写入正斜杠 Windows 路径与 bash 解释器到 `~/.config/chezmoi/chezmoi.toml`。
 
 ### Win10 + Cursor：Git Bash 终端在项目根目录
 
@@ -71,9 +71,9 @@
   - **Ubuntu/Debian / WSL**：bat→batcat、fd→fdfind 别名已配置；**fastfetch** 在 Ubuntu 24.10 之前官方源无此包，脚本会依次尝试 **apt → PPA（zhangsongcui3371/fastfetch）→ Snap → GitHub .deb** 安装；Pacman/AUR 等**仅 Arch 执行的** run_once 会**自动跳过**；代理在 WSL 下为宿主机 IP（见上文 WSL SSH 小节）。
   - **Arch**：run_on_linux 下 Pacman 镜像、Arch 基础包、AUR 助手、dwm/i3wm 等执行；镜像与 pacman 直连国内源、禁用代理。
 
-部分 run_once（如 dwm、i3wm、alacritty）在部分环境下可能未安装成功，会打 WARNING 并继续 apply，属预期；详见 [SOFTWARE_LIST.md](SOFTWARE_LIST.md) 与 [scripts/linux/system_basic_env/INSTALL_STATUS.md](scripts/linux/system_basic_env/INSTALL_STATUS.md)。
+部分 run_once（如 dwm、i3wm、alacritty）在部分环境下可能未安装成功，会打 WARNING 并继续 apply，属预期；Windows 上 windows-terminal 通过 winget 安装，需确保 winget 可用。
 
-- **macOS 终端**：使用 **Ghostty** + zsh（由 `run_on_darwin/run_once_install-ghostty.sh.tmpl` 安装，配置在 `~/.config/ghostty/config`，指定 zsh 为 shell）。Alacritty 仅 Linux 安装。
+- **macOS 终端**：使用 **Ghostty** + zsh（由 `run_on_darwin/run_once_install-ghostty.sh.tmpl` 安装，配置在 `~/.config/ghostty/config`，指定 zsh 为 shell）。**Windows 终端**：使用 **Windows Terminal** + Git Bash（由 `run_on_windows/run_once_install-windows-terminal.sh.tmpl` 安装，配置在 `~/.config/windows-terminal/settings.json`，每次 apply 自动同步到 WT 实际路径）。Alacritty 仅 Linux 安装。
 
 ### Linux 默认 Shell 与字体
 

@@ -27,7 +27,7 @@
 - **rustup** - Rust 工具链
 
 ### 终端工具
-- **alacritty** - GPU 加速终端模拟器
+- **Windows Terminal** - Windows 默认终端（通过 winget 安装，chezmoi 管理配置）
 - **注意**：tmux 在 Windows 上不支持，使用 Windows Terminal 或 WSL
 
 ### 系统监控工具
@@ -44,7 +44,7 @@
 
 ### 提示符工具
 - **oh-my-posh** - PowerShell 提示符工具
-  - **注意**：Windows 下使用 alacritty + git bash + oh-my-posh，不使用 starship
+  - **注意**：Windows 下使用 Windows Terminal + git bash + oh-my-posh，不使用 starship
 
 ### 开发工具
 - **gcc** - MinGW-w64 GCC 编译器（C/C++ 开发，与 Linux GCC 行为一致）
@@ -165,7 +165,7 @@ powershell -ExecutionPolicy Bypass -File .\install_common_tools.ps1
 ```powershell
 # 单独操作某个工具（会显示详细菜单）
 .\install_common_tools.ps1 -ToolName fnm
-.\install_common_tools.ps1 -ToolName alacritty
+\.\install_common_tools.ps1 -ToolName "Microsoft.WindowsTerminal"
 .\install_common_tools.ps1 -ToolName btop4win
 
 # 结合操作类型
@@ -181,7 +181,7 @@ powershell -ExecutionPolicy Bypass -File .\install_common_tools.ps1
 | `-PackageManager` | 指定包管理器 | `winget`, `chocolatey`, `auto` | `auto` |
 | `-SkipFonts` | 跳过字体安装 | 开关 | False |
 | `-Action` | 操作类型 | `Install`, `Update`, `Uninstall` | `Install` |
-| `-ToolName` | 指定要单独操作的工具名称 | 工具名称（如 `fnm`, `alacritty`） | 空 |
+| `-ToolName` | 指定要单独操作的工具名称 | 工具名称（如 `fnm`, `"Microsoft.WindowsTerminal"`） | 空 |
 | `-Msys2Mirror` | 指定 MSYS2 pacman 镜像源（pacman 在代理失败时会自动切换） | 例如 `https://mirrors.tuna.tsinghua.edu.cn/msys2` | 空 |
 | `-GccPreset` | GCC 安装方案：`minimal` 仅安装 gcc/g++/gdb/make 等核心组件，`toolchain` 为完整套件 | `toolchain`, `minimal` | `minimal` |
 
@@ -206,8 +206,8 @@ powershell -ExecutionPolicy Bypass -File .\install_common_tools.ps1
 # 示例 6: 单独更新 uv 工具
 .\install_common_tools.ps1 -Action Update -ToolName uv
 
-# 示例 7: 卸载 alacritty
-.\install_common_tools.ps1 -Action Uninstall -ToolName alacritty
+# 示例 7: 卸载 Windows Terminal
+.\install_common_tools.ps1 -Action Uninstall -ToolName "Microsoft.WindowsTerminal"
 
 # 示例 8: 安装所有工具但跳过字体
 .\install_common_tools.ps1 -SkipFonts
@@ -266,7 +266,7 @@ powershell -ExecutionPolicy Bypass -File .\install_common_tools.ps1
 ### Windows 特定配置
 
 - **提示符工具**：Windows 下使用 **oh-my-posh** 而非 starship
-- **终端组合**：推荐使用 alacritty + git bash + oh-my-posh
+- **终端组合**：推荐使用 Windows Terminal + git bash + oh-my-posh
 - **GitHub CLI**：gh 不作为默认安装工具，如需安装请使用交互式模式
 
 ### 包管理器优先级
@@ -487,7 +487,7 @@ powershell -ExecutionPolicy Bypass -File .\install_common_tools.ps1
 .\install_common_tools.ps1 -Action Uninstall -Interactive
 
 # 卸载特定工具
-.\install_common_tools.ps1 -Action Uninstall -ToolName alacritty
+.\install_common_tools.ps1 -Action Uninstall -ToolName "Microsoft.WindowsTerminal"
 ```
 
 ### Q: 字体安装失败怎么办？

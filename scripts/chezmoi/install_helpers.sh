@@ -210,7 +210,7 @@ get_software_category() {
     case "$name" in
         00-install-version-managers)  echo "版本管理" ;;
         common-tools)                 echo "文件/搜索与通用" ;;
-        starship|tmux|zsh|fish|alacritty|oh-my-posh)  echo "终端/Shell" ;;
+        starship|tmux|zsh|fish|alacritty|oh-my-posh|windows-terminal)  echo "终端/Shell" ;;
         ghostty|connect)              echo "macOS 专属" ;;
         git|neovim|neovim-config|lazyssh)  echo "开发" ;;
         nerd-fonts)                   echo "字体" ;;

@@ -1,0 +1,79 @@
+{{- if eq .chezmoi.os "windows" -}}
+#!/bin/bash
+
+# ============================================
+# Windows Terminal 安装脚本（chezmoi run_once_）
+# 仅 Windows；通过 winget 安装 Microsoft.WindowsTerminal
+# 替代 Alacritty 作为 Windows 默认终端
+# ============================================
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="${CHEZMOI_PROJECT_ROOT:-$(cd "${SCRIPT_DIR}/../../.." && pwd 2>/dev/null || echo "$HOME")}"
+COMMON_INSTALL="${PROJECT_ROOT}/scripts/chezmoi/common_install.sh"
+
+if [ ! -f "$COMMON_INSTALL" ]; then
+    COMMON_INSTALL="$HOME/.local/share/chezmoi/scripts/chezmoi/common_install.sh"
+fi
+
+if [ -f "$COMMON_INSTALL" ]; then
+    source "$COMMON_INSTALL"
+else
+    echo "[WARNING] 未找到 common_install.sh，使用基本函数"
+    function log_info() { echo "[INFO] $*"; }
+    function log_success() { echo "[SUCCESS] $*"; }
+    function log_warning() { echo "[WARNING] $*"; }
+    function setup_proxy() { :; }
+    function detect_os_and_package_manager() {
+        PLATFORM="windows"
+        if command -v winget &> /dev/null; then
+            PACKAGE_MANAGER="winget"
+        else
+            PACKAGE_MANAGER=""
+        fi
+    }
+    function install_package() { winget install --id="$1" -e --accept-source-agreements --accept-package-agreements; }
+fi
+
+if [[ "$(uname -s)" =~ ^(MINGW|MSYS|CYGWIN) ]]; then
+    PLATFORM="windows"
+else
+    echo "[ERROR] 此脚本仅支持 Windows"
+    exit 1
+fi
+
+setup_proxy "${PROXY:-{{ env "http_proxy" | default "http://127.0.0.1:7890" }}}"
+detect_os_and_package_manager 2>/dev/null || true
+
+# 检查 Windows Terminal 是否已安装
+WT_APP_DIR="${LOCALAPPDATA:-$HOME/AppData/Local}/Microsoft/Windows Terminal"
+if command -v wt.exe &> /dev/null; then
+    log_info "Windows Terminal 已安装: $(wt.exe --version 2>/dev/null || echo '已安装')"
+    exit 0
+fi
+
+# 也检查经典路径
+WT_CLASSIC_DIR="${LOCALAPPDATA:-$HOME/AppData/Local}/Packages/Microsoft.WindowsTerminal_8wekyb3d8bbwe"
+if [ -d "$WT_CLASSIC_DIR" ]; then
+    log_info "Windows Terminal 已安装（经典路径）"
+    exit 0
+fi
+
+log_info "安装 Windows Terminal..."
+
+if [[ "$PACKAGE_MANAGER" != "winget" ]]; then
+    log_warning "需要 winget 包管理器，请确保 Windows 10 1809+ 已安装 App Installer"
+    log_info "可通过 Microsoft Store 安装: https://aka.ms/getwinget"
+    exit 1
+fi
+
+install_package "Microsoft.WindowsTerminal"
+
+if command -v wt.exe &> /dev/null; then
+    log_success "Windows Terminal 安装成功"
+elif [ -d "$WT_APP_DIR" ] || [ -d "$WT_CLASSIC_DIR" ]; then
+    log_success "Windows Terminal 已安装"
+else
+    log_warning "Windows Terminal 可能未正确安装，请手动检查"
+fi
+{{ "\n" -}}
+{{- end -}}

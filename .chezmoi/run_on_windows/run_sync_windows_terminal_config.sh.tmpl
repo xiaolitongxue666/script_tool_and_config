@@ -1,0 +1,59 @@
+#!/bin/bash
+{{- if eq .chezmoi.os "windows" }}
+# ============================================
+# 每次 chezmoi apply 后将 Windows Terminal 配置同步到实际路径
+# 源：~/.config/windows-terminal/settings.json
+# 目标：Windows Terminal 实际读取的 settings.json（优先新路径，回退经典路径）
+# ============================================
+set -e
+
+SRC=""
+[[ -f "$HOME/run_on_windows/.config/windows-terminal/settings.json" ]] && SRC="$HOME/run_on_windows/.config/windows-terminal/settings.json"
+[[ -z "$SRC" ]] && [[ -f "$HOME/.config/windows-terminal/settings.json" ]] && SRC="$HOME/.config/windows-terminal/settings.json"
+if [[ -z "$SRC" ]] || [[ ! -f "$SRC" ]]; then
+    echo "[INFO] 源文件不存在: ${SRC:-}"，跳过同步
+    exit 0
+fi
+
+LOCALAPPDATA="${LOCALAPPDATA:-$HOME/AppData/Local}"
+
+# 新路径（WT 1.21+）
+WT_NEW_DIR="$LOCALAPPDATA/Microsoft/Windows Terminal"
+
+# 经典路径（传统 WT，Win10 默认路径）
+WT_CLASSIC_DIR="$LOCALAPPDATA/Packages/Microsoft.WindowsTerminal_8wekyb3d8bbwe/LocalState"
+
+sync_to() {
+    local dest_dir="$1"
+    if [ -d "$dest_dir" ]; then
+        local dest="$dest_dir/settings.json"
+        cp "$SRC" "$dest"
+        echo "[INFO] 已同步到: ${dest}"
+        local backup="${dest}.backup.$(date +%Y%m%d_%H%M%S)"
+        cp "$dest" "$backup" 2>/dev/null || true
+        return 0
+    fi
+    return 1
+}
+
+synced=false
+
+# 优先同步到经典路径（如果已存在 settings.json，说明 WT 正在使用此路径）
+if [ -f "$WT_CLASSIC_DIR/settings.json" ]; then
+    sync_to "$WT_CLASSIC_DIR" && synced=true
+fi
+
+# 同步到新路径（如果目录存在）
+if sync_to "$WT_NEW_DIR"; then
+    synced=true
+fi
+
+# 如果都不存在，创建新路径
+if [ "$synced" = false ]; then
+    mkdir -p "$WT_NEW_DIR"
+    cp "$SRC" "$WT_NEW_DIR/settings.json"
+    echo "[INFO] 创建并同步到: ${WT_NEW_DIR}/settings.json"
+fi
+{{- else }}
+exit 0
+{{- end }}

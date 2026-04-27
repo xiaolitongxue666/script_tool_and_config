@@ -1,0 +1,102 @@
+{{- if eq .chezmoi.os "windows" -}}
+{
+    "$help": "https://aka.ms/terminal-documentation",
+    "$schema": "https://aka.ms/terminal-profiles-schema",
+    "defaultProfile": "{b453ae62-4e3d-5e58-b989-0a996ec6e90f}",
+    "copyOnSelect": true,
+    "initialRows": 35,
+    "initialCols": 120,
+    "useAcrylic": true,
+    "opacity": 85,
+    "alwaysShowTabs": true,
+    "showTabsInTitlebar": true,
+    "themes": [],
+    "profiles":
+    {
+        "defaults":
+        {
+            "colorScheme": "Catppuccin Mocha",
+            "font":
+            {
+                "face": "CaskaydiaCove NFM",
+                "size": 14,
+                "weight": "normal"
+            },
+            "cursorShape": "bar",
+            "padding": "5, 5, 5, 5",
+            "intenseTextStyle": "bold",
+            "useAcrylic": true,
+            "opacity": 85,
+            "bellStyle": "none"
+        },
+        "list":
+        [
+            {
+                "guid": "{b453ae62-4e3d-5e58-b989-0a996ec6e90f}",
+                "name": "Git Bash",
+                "commandline": "\"D:\\Program Files\\Git\\usr\\bin\\bash.exe\" --login",
+                "icon": "D:\\Program Files\\Git\\mingw64\\share\\git\\git-for-windows.ico",
+                "startingDirectory": "%USERPROFILE%",
+                "hidden": false,
+                "tabTitle": "Git Bash",
+                "suppressApplicationTitle": false,
+                "closeOnExit": "graceful"
+            }
+        ]
+    },
+    "schemes":
+    [
+        {
+            "name": "Catppuccin Mocha",
+            "cursorColor": "#f5e0dc",
+            "selectionBackground": "#585b70",
+            "background": "#1e1e2e",
+            "foreground": "#cdd6f4",
+            "black": "#45475a",
+            "red": "#f38ba8",
+            "green": "#a6e3a1",
+            "yellow": "#f9e2af",
+            "blue": "#89b4fa",
+            "purple": "#f5c2e7",
+            "cyan": "#94e2d5",
+            "white": "#bac2de",
+            "brightBlack": "#585b70",
+            "brightRed": "#f38ba8",
+            "brightGreen": "#a6e3a1",
+            "brightYellow": "#f9e2af",
+            "brightBlue": "#89b4fa",
+            "brightPurple": "#f5c2e7",
+            "brightCyan": "#94e2d5",
+            "brightWhite": "#a6adc8"
+        }
+    ],
+    "actions":
+    [
+        {
+            "command":
+            {
+                "action": "copy",
+                "singleLine": false
+            },
+            "keys": "ctrl+c"
+        },
+        {
+            "command": "paste",
+            "keys": "ctrl+v"
+        },
+        {
+            "command": "find",
+            "keys": "ctrl+shift+f"
+        },
+        {
+            "command":
+            {
+                "action": "splitPane",
+                "split": "auto",
+                "splitMode": "duplicate"
+            },
+            "keys": "alt+shift+d"
+        }
+    ]
+}
+{{- end -}}
