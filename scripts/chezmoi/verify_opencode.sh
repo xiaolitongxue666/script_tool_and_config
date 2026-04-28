@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # ============================================
 # OpenCode 安装验证脚本
-# 检查：opencode 在 PATH、版本、基础配置文件是否存在
+# 检查：opencode 在 PATH、版本、基础配置文件、agents/skills 目录
 # 可单独运行或供 verify_installation.sh 复用
 # ============================================
 
@@ -45,20 +45,59 @@ else
 fi
 
 # ~/.config/opencode/opencode.json 是否存在
-OC_JSON="${HOME}/.config/opencode/opencode.json"
+OPENCODE_HOME="${HOME}/.config/opencode"
+OC_JSON="${OPENCODE_HOME}/opencode.json"
+
 # MSYS2/Git Bash 子进程中 HOME 可能为 /home/xxx，尝试用 USERPROFILE 修正
 if [[ ! -f "$OC_JSON" ]]; then
     local_win_home="${USERPROFILE:-$(cmd.exe /c 'echo %USERPROFILE%' 2>/dev/null | tr -d '\r\n' || true)}"
     if [[ -n "${local_win_home:-}" ]]; then
         local_win_home="$(cygpath -u "${local_win_home}" 2>/dev/null || echo "${local_win_home}")"
-        OC_JSON="${local_win_home}/.config/opencode/opencode.json"
+        OPENCODE_HOME="${local_win_home}/.config/opencode"
+        OC_JSON="${OPENCODE_HOME}/opencode.json"
     fi
 fi
+
 if [[ ! -f "$OC_JSON" ]]; then
     log_warning "配置文件不存在: ${OC_JSON}"
     EXIT_CODE=1
 else
     log_success "opencode 配置文件存在: ${OC_JSON}"
+fi
+
+# 检查 .opencode 目录结构
+AGENTS_DIR="${OPENCODE_HOME}/.opencode/agents"
+SKILLS_DIR="${OPENCODE_HOME}/.opencode/skills"
+
+if [[ ! -d "${AGENTS_DIR}" ]]; then
+    log_warning "agents 目录不存在: ${AGENTS_DIR}"
+    EXIT_CODE=1
+else
+    if [[ -n "$(ls -A "${AGENTS_DIR}" 2>/dev/null)" ]]; then
+        log_success "agents 目录存在且非空: ${AGENTS_DIR}"
+    else
+        log_warning "agents 目录为空: ${AGENTS_DIR}"
+        EXIT_CODE=1
+    fi
+fi
+
+if [[ ! -d "${SKILLS_DIR}" ]]; then
+    log_warning "skills 目录不存在: ${SKILLS_DIR}"
+    EXIT_CODE=1
+else
+    if [[ -n "$(ls -A "${SKILLS_DIR}" 2>/dev/null)" ]]; then
+        log_success "skills 目录存在且非空: ${SKILLS_DIR}"
+    else
+        log_warning "skills 目录为空: ${SKILLS_DIR}"
+        EXIT_CODE=1
+    fi
+fi
+
+if [[ -f "${AGENTS_DIR}/orchestrator-core.md" ]]; then
+    log_success "关键 agent 文件可读: ${AGENTS_DIR}/orchestrator-core.md"
+else
+    log_warning "缺少关键 agent 文件: ${AGENTS_DIR}/orchestrator-core.md"
+    EXIT_CODE=1
 fi
 
 exit "$EXIT_CODE"

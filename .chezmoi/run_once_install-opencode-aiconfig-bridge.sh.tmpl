@@ -1,0 +1,45 @@
+{{- if or (eq .chezmoi.os "linux") (eq .chezmoi.os "darwin") (eq .chezmoi.os "windows") -}}
+#!/usr/bin/env bash
+set -euo pipefail
+
+# ============================================
+# OpenCode/Cursor/Codex 与 aiconfig 桥接脚本
+# 由 chezmoi run_once 调用，复用仓库脚本完成同步
+# ============================================
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="${CHEZMOI_PROJECT_ROOT:-$(cd "${SCRIPT_DIR}/../.." && pwd 2>/dev/null || echo "$HOME/.local/share/chezmoi")}"
+SYNC_OPENCODE_SCRIPT="${PROJECT_ROOT}/ai-unified-config/scripts/sync-opencode.sh"
+SYNC_CURSOR_SCRIPT="${PROJECT_ROOT}/ai-unified-config/scripts/sync-cursor.sh"
+SYNC_CODEX_SCRIPT="${PROJECT_ROOT}/ai-unified-config/scripts/sync-codex.sh"
+SYNC_PROJECT_CONSTRAINTS_SCRIPT="${PROJECT_ROOT}/ai-unified-config/scripts/sync-project-agent-constraints.sh"
+
+if [[ -x "${SYNC_OPENCODE_SCRIPT}" ]]; then
+    bash "${SYNC_OPENCODE_SCRIPT}"
+else
+    echo "[WARNING] 未找到同步脚本: ${SYNC_OPENCODE_SCRIPT}"
+fi
+
+if [[ -x "${SYNC_CURSOR_SCRIPT}" ]]; then
+    bash "${SYNC_CURSOR_SCRIPT}"
+else
+    echo "[WARNING] 未找到同步脚本: ${SYNC_CURSOR_SCRIPT}"
+fi
+
+if [[ -x "${SYNC_CODEX_SCRIPT}" ]]; then
+    bash "${SYNC_CODEX_SCRIPT}"
+else
+    echo "[WARNING] 未找到同步脚本: ${SYNC_CODEX_SCRIPT}"
+fi
+
+if [[ -x "${SYNC_PROJECT_CONSTRAINTS_SCRIPT}" ]]; then
+    bash "${SYNC_PROJECT_CONSTRAINTS_SCRIPT}"
+else
+    echo "[WARNING] 未找到同步脚本: ${SYNC_PROJECT_CONSTRAINTS_SCRIPT}"
+fi
+
+# 项目约束仅在项目目录生效，清理误写入的全局约束文档
+rm -f "${HOME}/.config/aiconfig/agent-shared-principles.md"
+rm -f "${HOME}/.cursor/rules/ai-project-principles.mdc"
+rm -f "${HOME}/.config/codex/AGENTS.md"
+{{- end -}}

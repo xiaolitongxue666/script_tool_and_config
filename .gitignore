@@ -11,7 +11,6 @@
 .idea/**/usage.statistics.xml
 .idea/**/dictionaries
 .idea/**/shelf
-.DS_Store
 
 # 生成的文件
 .idea/**/contentModel.xml
@@ -104,9 +103,6 @@ $RECYCLE.BIN/
 *.backup.*
 *.old
 *.orig
-*.swp
-*.swo
-*~
 
 # ============================================
 # 编译和构建文件
@@ -152,7 +148,6 @@ obj/
 # 临时文件
 *.tmp
 *.temp
-*.log
 *.pid
 *.lock
 
@@ -332,15 +327,7 @@ scripts/**/*_test_*.sh
 # ============================================
 # 项目特定临时文件
 # ============================================
-# Windows 安装脚本生成的临时文件
-scripts/windows/system_basic_env/path.bak
-scripts/windows/system_basic_env/InstallationLog.txt
-scripts/windows/system_basic_env/*.backup
-
-# 项目生成的文件
-*.bak
-*.backup
-*.tmp
+# 项目生成的文件（由上方通用规则覆盖）
 
 # 安装/验证报告（脚本输出到项目根目录时忽略；VERIFICATION_RESULT.md 为仓库内保留的示例/模板，不忽略）
 /.audit_configs_report.txt
@@ -350,7 +337,6 @@ scripts/windows/system_basic_env/*.backup
 /install_*.log
 
 # 容器开发环境临时文件
-scripts/common/container_dev_env/test_*.sh
 scripts/common/container_dev_env/*.tmp
 scripts/common/container_dev_env/*.log
 

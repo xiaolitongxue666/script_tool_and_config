@@ -138,3 +138,31 @@ install.sh
 
 项目在 `~/.gitconfig` 中为 GitHub 配置了 proxy（由 dot_gitconfig 模板写入），默认 `http://127.0.0.1:7890`。在 WSL 中 **127.0.0.1 指 WSL 本机**，无法连到 Windows 宿主机上的代理，且 Git 的 URL 作用域配置 `http.https://github.com.proxy` **优先于** 环境变量 `http_proxy`，因此即使 shell 里设置了宿主机代理，`git clone` 访问 GitHub 仍可能走 127.0.0.1:7890 导致失败。  
 **建议**：WSL 用户要么在 apply 前通过 data 设置 `proxy` 为宿主机地址（见上文），要么 apply 后在 WSL 内执行 `git config --global --unset http.https://github.com.proxy` 与 `https.https://github.com.proxy`，再执行需访问 GitHub 的 git 操作（如插件 clone、nvim 配置克隆等）。
+
+## OpenCode agents/skills 目录化加载
+
+项目已通过 chezmoi 提供 OpenCode 轻量配置模板与桥接同步脚本，所有配置均通过模板链路下发：
+
+- `~/.config/opencode/opencode.json` 由 `.chezmoi/dot_config/opencode/opencode.json.tmpl` 渲染。
+- `~/.config/opencode/oh-my-opencode/config.json` 由 `.chezmoi/dot_config/opencode/oh-my-opencode/config.json.tmpl` 渲染。
+- `~/.config/opencode/.opencode/agents` 与 `~/.config/opencode/.opencode/skills` 由 `run_once_install-opencode-aiconfig-bridge.sh.tmpl` 调用 `sync-opencode.sh` 同步。
+- OpenCode 特化配置固定为：主题 `Catppuccin Mocha`、`Ctrl+J` 换行、`Ctrl+C` 清空输入。
+
+### 手动排查
+
+```bash
+# 查看 OpenCode 合并后的配置
+opencode debug config
+
+# 手动触发同步
+./ai-unified-config/scripts/sync-opencode.sh
+
+# 验证 OpenCode 与目录化资源
+./scripts/chezmoi/verify_opencode.sh
+```
+
+若 `opencode debug config` 中 `agent` 为空，优先检查：
+
+1. `~/.config/opencode/opencode.json` 是否存在并由 chezmoi 下发。
+2. `~/.config/opencode/.opencode/agents`、`skills` 是否存在且非空。
+3. 是否已执行过 `./install.sh` 或 `chezmoi apply -v`。

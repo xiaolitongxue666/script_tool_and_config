@@ -1,0 +1,11 @@
+---
+description: 当前项目 AI 约束（Template-First）
+globs:
+alwaysApply: true
+---
+
+请遵循 `./.aiconfig/templates/project-agent-shared-principles.md` 或项目同等约束文档，核心规则如下：
+
+1. 项目有一部分独立工具脚本。
+2. 项目主要功能是通过 chezmoi + 模板 + 辅助脚本，在不同 OS/WSL 安装和配置所需软件。
+3. 部署只能通过 chezmoi 应用模板的方式进行。

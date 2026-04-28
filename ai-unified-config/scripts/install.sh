@@ -32,6 +32,8 @@ fi
 
 readonly GLOBAL_AICONFIG_DIR="${HOME}/.config/aiconfig"
 readonly SOURCE_AICONFIG_DIR="${MODULE_ROOT}/.aiconfig"
+readonly SYNC_CURSOR_SCRIPT="${SCRIPT_DIR}/sync-cursor.sh"
+readonly SYNC_CODEX_SCRIPT="${SCRIPT_DIR}/sync-codex.sh"
 
 function ensure_required_source() {
     [[ -d "${SOURCE_AICONFIG_DIR}" ]] || error_exit "缺少目录: ${SOURCE_AICONFIG_DIR}"
@@ -50,8 +52,23 @@ function sync_global_content() {
     cp -R "${SOURCE_AICONFIG_DIR}/templates" "${GLOBAL_AICONFIG_DIR}/templates"
 }
 
+function sync_cursor_and_codex() {
+    if [[ -x "${SYNC_CURSOR_SCRIPT}" ]]; then
+        bash "${SYNC_CURSOR_SCRIPT}"
+    else
+        log_warning "未找到 Cursor 同步脚本: ${SYNC_CURSOR_SCRIPT}"
+    fi
+
+    if [[ -x "${SYNC_CODEX_SCRIPT}" ]]; then
+        bash "${SYNC_CODEX_SCRIPT}"
+    else
+        log_warning "未找到 Codex 同步脚本: ${SYNC_CODEX_SCRIPT}"
+    fi
+}
+
 start_script "AI 配置模块安装"
 ensure_required_source
 sync_global_content
+sync_cursor_and_codex
 log_success "AI 配置模块已安装到全局目录"
 end_script
