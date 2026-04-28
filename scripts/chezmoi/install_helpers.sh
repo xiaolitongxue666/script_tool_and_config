@@ -230,7 +230,7 @@ get_platform_display_name() {
     local pkg="${2:-}"
     case "$platform" in
         windows)  echo "Windows" ;;
-        macos)    echo "macOS" ;;
+        darwin|macos)    echo "macOS" ;;
         linux)
             if grep -qEi "Microsoft|WSL" /proc/version 2>/dev/null || [[ -n "${WSL_DISTRO_NAME:-}" ]]; then
                 echo "Linux (WSL, ${pkg:-apt})"
@@ -252,16 +252,20 @@ script_applicable_to_platform() {
     if [[ -z "$platform" ]]; then
         return 0
     fi
+    # 统一 darwin/macos 为 darwin
+    local plat="$platform"
+    [[ "$plat" == "macos" ]] && plat="darwin"
     if [[ "$script_path" == *"/run_on_linux/"* ]]; then
-        [[ "$platform" != "linux" ]] && return 1
+        [[ "$plat" != "darwin" && "$plat" != "linux" ]] && return 1
+        [[ "$plat" == "darwin" ]] && return 1
         return 0
     fi
     if [[ "$script_path" == *"/run_on_darwin/"* ]]; then
-        [[ "$platform" != "macos" ]] && return 1
+        [[ "$plat" != "darwin" ]] && return 1
         return 0
     fi
     if [[ "$script_path" == *"/run_on_windows/"* ]]; then
-        [[ "$platform" != "windows" ]] && return 1
+        [[ "$plat" != "windows" ]] && return 1
         return 0
     fi
     local software_name
@@ -269,19 +273,19 @@ script_applicable_to_platform() {
     case "$software_name" in
         # 仅 Linux（含 WSL 原生环境）
         i3wm|alacritty|dwm|lazyssh)
-            [[ "$platform" != "linux" ]] && return 1
+            [[ "$plat" != "linux" ]] && return 1
             ;;
         # 仅 Linux + macOS（不在 Windows 安装，与 SOFTWARE_LIST 一致）
         tmux|fish)
-            [[ "$platform" != "linux" && "$platform" != "macos" ]] && return 1
+            [[ "$plat" != "linux" && "$plat" != "darwin" ]] && return 1
             ;;
         # 仅 macOS
         maccy|skhd|yabai)
-            [[ "$platform" != "macos" ]] && return 1
+            [[ "$plat" != "darwin" ]] && return 1
             ;;
         # 仅 Windows
         oh-my-posh)
-            [[ "$platform" != "windows" ]] && return 1
+            [[ "$plat" != "windows" ]] && return 1
             ;;
     esac
     return 0

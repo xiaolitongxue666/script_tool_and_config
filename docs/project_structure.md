@@ -23,15 +23,18 @@ script_tool_and_config/
 │   ├── .chezmoidata.toml            # 静态默认数据
 │   ├── dot_*.tmpl                   # 跨平台配置模板
 │   ├── dot_config/                  # ~/.config/ 配置模板
+│   ├── run_once_00-*.sh.tmpl        # 优先安装脚本（版本管理器等，字母序最先执行）
 │   ├── run_once_install-*.sh.tmpl   # 一次性安装脚本模板
-│   ├── run_on_linux/                # Linux 特定配置
-│   ├── run_on_darwin/               # macOS 特定配置
-│   └── run_on_windows/              # Windows 特定配置
+│   ├── run_sync_*.sh.tmpl           # 同步脚本（如 Windows Terminal、Ghostty 配置同步）
+│   ├── run_on_linux/                # Linux 特定配置（含 run_once_*、dot_config/）
+│   ├── run_on_darwin/               # macOS 特定配置（含 run_once_*、dot_config/）
+│   └── run_on_windows/              # Windows 特定配置（含 run_once_*、dot_config/）
 │
-├── .chezmoi.toml                    # chezmoi 用户级配置（根目录，定义模板数据）
+├── .chezmoi.toml                    # chezmoi 用户级配置参考（实际运行时由 install.sh 覆盖写入 ~/.config/chezmoi/chezmoi.toml）
 ├── .chezmoiignore                   # chezmoi 忽略规则
 ├── .vscode/                         # VS Code 配置
 │   └── settings.json
+├── .opencode/                       # OpenCode 插件配置（openspec 命令）
 ├── LICENSE                           # 许可证 (MIT)
 │
 ├── install.sh                        # 一键安装入口
@@ -47,7 +50,6 @@ script_tool_and_config/
 │   ├── chezmoi_use_guide.md          # chezmoi 使用指南
 │   ├── os_setup_guide.md             # 操作系统设置指南
 │   ├── INSTALL_GUIDE.md              # 一键安装与首次配置入口
-│   ├── VERIFICATION_RESULT.md        # 验证结果示例/模板
 │   ├── TEST_PLAN_NVIM_INDEPENDENT.md # Neovim 独立化测试计划
 │   └── ...
 │
@@ -65,11 +67,7 @@ script_tool_and_config/
 │   │   ├── verify_installation.sh   # 安装后验证脚本
 │   │   ├── diagnose_chezmoi.sh      # chezmoi 诊断脚本
 │   │   ├── ensure_ssh_prereqs.sh    # SSH 前置依赖检查
-│   │   ├── helpers.sh               # chezmoi 辅助函数
-│   │   └── verify_opencode.sh       # OpenCode 验证脚本
-│   │
-│   ├── migration/                    # 迁移脚本
-│   │   └── migrate_to_chezmoi.sh    # 从旧 dotfiles 迁移到 chezmoi
+│   │   └── helpers.sh               # chezmoi 辅助函数
 │   │
 │   ├── common/                       # 跨平台通用脚本
 │   │   ├── deploy_utils/            # 部署辅助脚本
@@ -152,7 +150,6 @@ script_tool_and_config/
 │   │   │   ├── README.md             # 使用说明
 │   │   │   ├── configure_china_mirrors.sh    # 国内镜像源配置
 │   │   │   ├── test_mirrors.sh              # 镜像源可用性测试
-│   │   │   ├── install_neovim.sh            # Neovim 安装
 │   │   │   ├── get_wsl_system_info.sh       # WSL 系统信息
 │   │   │   ├── verify_wsl_ssh.sh            # WSL SSH 验证
 │   │   │   ├── INSTALL_STATUS.md            # 安装状态清单
@@ -161,10 +158,6 @@ script_tool_and_config/
 │   │   └── network/                  # 网络配置脚本
 │   │       ├── configure_ethernet_mac.sh
 │   │       └── deploy_openresty.sh
-│   │
-│   ├── darwin/                       # macOS 专用脚本
-│   │   └── system_basic_env/
-│   │       └── README.md
 │   │
 │   └── windows/                      # Windows 专用脚本
 │       ├── install_with_chezmoi.bat  # Windows chezmoi 安装入口 (BAT)
@@ -178,32 +171,128 @@ script_tool_and_config/
 │       │   ├── configure_btop4win_path.ps1   # btop4win PATH 配置
 │       │   ├── set_xdg_config_home.ps1       # XDG_CONFIG_HOME 设置
 │       │   ├── set_xdg_config_home.bat       # XDG 设置入口 (BAT)
-│       │   └── fix_encoding_simple.ps1       # 编码修复
 │       └── windows_scripts/
 │           ├── open_multi_vlc.bat
 │           └── open_16_vlc.bat
 │
-└── openspec/                         # OpenSpec 规范驱动开发
-    ├── AGENTS.md
-    └── project.md
+├── openspec/                         # OpenSpec 规范驱动开发
+│   ├── AGENTS.md
+│   └── project.md
+│
+├── ai-unified-config/                 # AI 代理统一配置（如 OpenCode、Claude Code）
+├── graphify-out/                      # Graphify 知识图谱分析缓存
+│
+├── temp/                              # 临时文件目录（common_install.sh 使用）
+└── logs/                              # 安装日志目录（.gitignore 忽略）
 ```
 
 ## 目录说明
 
 ### 根目录与文档
 
-- **install.sh**: 一键安装入口脚本（安装 chezmoi → 初始化环境 → 检查配置 → 软件检查 → 验证）
-- **deploy.sh**: 快速部署入口脚本（检查配置 → Zsh/OMZ → 应用配置 → 验证）
+- **install.sh**: 一键安装入口脚本。完整调用链见下方流程图
+- **deploy.sh**: 快速部署入口脚本（需 chezmoi 已安装，含 Zsh/OMZ 预安装）
 - **README.md**: 项目主文档，包含快速开始、使用说明等
 - **AGENTS.md**: 代理与编码规范，包含代码风格、命名规范、最佳实践
 - **docs/**: 文档目录，含 project_structure.md（本文件）、SOFTWARE_LIST.md、INSTALL_GUIDE.md 等
+- **.opencode/**: OpenCode 插件命令（openspec-apply、openspec-archive、openspec-proposal）
+- **ai-unified-config/**: AI 代理统一配置（跨 OpenCode、Claude Code 等）
+- **graphify-out/**: Graphify 知识图谱分析输出缓存
+
+### install.sh 调用链（核心安装流程）
+
+```
+install.sh
+  ├─ 解析参数（--proxy、--test-remote、--commit）
+  ├─ 检测 OS（Linux/macOS/Windows）与代理（WSL 自动检测宿主机 IP）
+  │
+  ├─ [1/5] 安装 chezmoi
+  │   └─ scripts/chezmoi/install_chezmoi.sh
+  │       ├─ macOS: brew install chezmoi 或官方安装脚本
+  │       ├─ Linux: pacman/apt-get/dnf 或官方安装脚本
+  │       └─ Windows: winget 或官方安装脚本
+  │
+  ├─ [2/5] 初始化 chezmoi 环境
+  │   ├─ 创建 ~/.local/bin、~/.local/share/chezmoi
+  │   ├─ 写入 ~/.config/chezmoi/chezmoi.toml（sourceDir 绝对路径）
+  │   └─ Windows: 设置 [interpreters.sh]（bash 解释器）
+  │
+  ├─ [3/5] 检查配置并应用（chezmoi 核心流程）
+  │   ├─ chezmoi status  → 检查未同步项（M/A/D/R）
+  │   ├─ chezmoi diff    → 检查模板与本地差异
+  │   ├─ ensure_ssh_prereqs.sh → 确保 SSH ProxyCommand 依赖
+  │   └─ chezmoi apply -v --force → 触发所有 run_once_*.sh.tmpl 脚本
+  │       ├─ run_once_00-install-version-managers.sh.tmpl (fnm, uv, rustup)
+  │       ├─ run_once_install-common-tools.sh.tmpl (bat, eza, fd, rg, fzf 等)
+  │       ├─ run_once_install-zsh.sh.tmpl (zsh, oh-my-zsh, 插件)
+  │       ├─ run_once_install-git.sh.tmpl
+  │       ├─ run_once_install-neovim.sh.tmpl (>= 0.11.0)
+  │       ├─ run_once_install-neovim-config.sh.tmpl (克隆到 ~/.config/nvim)
+  │       ├─ run_once_install-starship.sh.tmpl
+  │       ├─ run_once_install-nerd-fonts.sh.tmpl (FiraMono Nerd Font)
+  │       ├─ run_once_install-tmux.sh.tmpl (Linux/macOS)
+  │       ├─ run_once_install-fish.sh.tmpl (Linux/macOS)
+  │       ├─ run_once_install-opencode.sh.tmpl
+  │       ├─ run_once_install-system-basic-env.sh.tmpl
+  │       ├─ run_once_install-ai-unified-config.sh.tmpl
+  │       ├─ run_on_linux/run_once_*.sh.tmpl (仅 Linux)
+  │       ├─ run_on_darwin/run_once_*.sh.tmpl (仅 macOS)
+  │       └─ run_on_windows/run_once_*.sh.tmpl (仅 Windows)
+  │
+  ├─ [4/5] 软件安装状态检查
+  │   └─ report_install_status_by_platform()
+  │       扫描所有 run_once_*.sh.tmpl，按 OS 列出已安装/未安装
+  │
+  └─ [5/5] 验证与确认
+      ├─ verify_installation.sh → 字体、Shell、PATH、通用工具、SSH/connect
+      ├─ (可选) test_tmux_remote.sh → 远程 tmux 测试
+      └─ (可选) git add + commit + push → 自动提交（--commit）
 
 ### .chezmoi/ 目录
 
 所有配置文件模板由 chezmoi 统一管理。目录结构按 chezmoi 约定：
 - 根目录下的 `dot_*.tmpl` → 对应 `~/.` 下的配置文件
-- `run_once_install-*.sh.tmpl` → 一次性安装脚本
+- `run_once_00-install-*.sh.tmpl` → 优先安装脚本（按字母序最先执行，如版本管理器）
+- `run_once_install-*.sh.tmpl` → 一次性安装脚本（按目标名字母序执行）
+- `run_sync_*.sh.tmpl` → 每次 apply 均执行的同步脚本（如 Windows Terminal 配置同步）
 - `run_on_linux/`、`run_on_darwin/`、`run_on_windows/` → 平台特定配置
+
+**run_once 脚本按执行顺序：**
+
+| 脚本 | 安装内容 | 平台 |
+|------|---------|------|
+| `run_once_00-install-version-managers.sh.tmpl` | fnm, uv, rustup | 多平台 |
+| `run_once_install-ai-unified-config.sh.tmpl` | AI 代理统一配置 | 多平台 |
+| `run_once_install-common-tools.sh.tmpl` | bat, eza, fd, rg, fzf, lazygit, git-delta, gh, trash-cli, btop, fastfetch | 多平台 |
+| `run_once_install-fish.sh.tmpl` | fish shell | Linux, macOS |
+| `run_once_install-git.sh.tmpl` | git, connect-proxy | 多平台 |
+| `run_once_install-neovim.sh.tmpl` | neovim (>= 0.11.0) | 多平台 |
+| `run_once_install-neovim-config.sh.tmpl` | 克隆 nvim 配置到 ~/.config/nvim | 多平台 |
+| `run_once_install-nerd-fonts.sh.tmpl` | FiraMono Nerd Font | 多平台 |
+| `run_once_install-opencode.sh.tmpl` | OpenCode CLI | 多平台 |
+| `run_once_install-starship.sh.tmpl` | starship 提示符 | 多平台 |
+| `run_once_install-system-basic-env.sh.tmpl` | 系统基础环境 | 多平台 |
+| `run_once_install-tmux.sh.tmpl` | tmux, TPM 插件 | Linux, macOS |
+| `run_once_install-zsh.sh.tmpl` | zsh, oh-my-zsh, 插件 | Linux, macOS, Windows(MSYS2) |
+| `run_once_install-alacritty.sh.tmpl` | alacritty 终端 | 仅 Linux |
+| `run_once_install-dwm.sh.tmpl` | dwm 窗口管理器 | 仅 Linux |
+| `run_once_install-i3wm.sh.tmpl` | i3wm 窗口管理器 | 仅 Linux |
+| `run_once_install-lazyssh.sh.tmpl` | lazyssh | 仅 Linux |
+| `run_once_install-maccy.sh.tmpl` | maccy 剪贴板 | 仅 macOS |
+| `run_once_install-skhd.sh.tmpl` | skhd 快捷键 | 仅 macOS |
+| `run_once_install-yabai.sh.tmpl` | yabai 窗口管理器 | 仅 macOS |
+| `run_once_install-oh-my-posh.sh.tmpl` | oh-my-posh | 仅 Windows |
+| `run_on_linux/run_once_configure-pacman.sh.tmpl` | Arch 镜像与 pacman 配置 | 仅 Linux(Arch) |
+| `run_on_linux/run_once_install-arch-base-packages.sh.tmpl` | base-devel, gcc 等 | 仅 Linux(Arch) |
+| `run_on_linux/run_once_install-aur-helper.sh.tmpl` | yay/paru AUR 助手 | 仅 Linux |
+| `run_on_darwin/run_once_configure-homebrew.sh.tmpl` | Homebrew 配置 | 仅 macOS |
+| `run_on_darwin/run_once_install-connect.sh.tmpl` | connect (SSH 代理) | 仅 macOS |
+| `run_on_darwin/run_once_install-ghostty.sh.tmpl` | Ghostty 终端 | 仅 macOS |
+| `run_on_darwin/run_sync_ghostty_config_to_app_support.sh.tmpl` | Ghostty 配置同步 | 仅 macOS |
+| `run_on_windows/run_once_install-windows-terminal.sh.tmpl` | Windows Terminal | 仅 Windows |
+| `run_on_windows/run_sync_windows_terminal_config.sh.tmpl` | WT 配置同步 | 仅 Windows |
+
+**注意**：`run_sync_*` 类型的脚本每次 `chezmoi apply` 都会执行（非 run_once），用于确保配置文件同步到应用实际路径。
 
 ### scripts/ 目录
 
@@ -214,7 +303,6 @@ script_tool_and_config/
 | `common.sh` | 通用函数库（颜色、日志、错误处理），所有脚本共享 |
 | `manage_dotfiles.sh` | dotfiles 管理入口（status/diff/apply/edit） |
 | `chezmoi/` | chezmoi 安装、验证、诊断脚本 |
-| `migration/` | 从旧 dotfiles 迁移到 chezmoi |
 | `common/deploy_utils/` | 部署辅助脚本（SSH/Zsh/OMZ 备份、诊断、同步） |
 | `common/standalone_tool_script/` | 独立工具脚本（文本处理、编码检查、文件操作） |
 | `common/container_dev_env/` | Docker 容器开发环境 |
@@ -230,7 +318,7 @@ script_tool_and_config/
 
 ### 脚本分类
 
-- **系统基础环境安装**：`scripts/linux/system_basic_env/`、`scripts/darwin/system_basic_env/`、`scripts/windows/system_basic_env/`
+- **系统基础环境安装**：`scripts/linux/system_basic_env/`、`scripts/windows/system_basic_env/`
 - **部署辅助**：`scripts/common/deploy_utils/`（备份、诊断、同步、SSH/Zsh 配置）
 - **独立工具**：`scripts/common/standalone_tool_script/`、`scripts/common/project_tools/`、`scripts/common/ffmpeg-magic/` 等
 - **平台特定**：Linux network、Windows windows_scripts

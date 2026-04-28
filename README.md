@@ -74,7 +74,6 @@ install.sh
 | [docs/chezmoi_use_guide.md](docs/chezmoi_use_guide.md) | chezmoi 详细使用指南 |
 | [docs/SOFTWARE_LIST.md](docs/SOFTWARE_LIST.md) | 完整软件清单与 run_once 对应关系 |
 | [scripts/linux/system_basic_env/INSTALL_STATUS.md](scripts/linux/system_basic_env/INSTALL_STATUS.md) | 所需软件安装与配置状态清单（验证项与命令） |
-| [docs/VERIFICATION_RESULT.md](docs/VERIFICATION_RESULT.md) | 当前环境验证结果摘要；安装后可用 `scripts/chezmoi/verify_installation.sh` 生成报告；SSH 验证见 [INSTALL_GUIDE.md](docs/INSTALL_GUIDE.md) 或 WSL/Linux 下运行 `scripts/linux/system_basic_env/verify_wsl_ssh.sh` |
 | [docs/project_structure.md](docs/project_structure.md) | 详细项目结构说明 |
 | [AGENTS.md](AGENTS.md) | 代码代理开发指南 |
 | [docs/ENCODING_AND_LINE_ENDINGS.md](docs/ENCODING_AND_LINE_ENDINGS.md) | 文件编码与换行符规范 |

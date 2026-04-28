@@ -143,13 +143,24 @@ log_success "已设置 CHEZMOI_SOURCE_DIR: $CHEZMOI_SOURCE_DIR"
 # ============================================
 # 设置代理（如果提供）
 # ============================================
-# 优先使用环境变量，然后是默认值
-PROXY="${PROXY:-192.168.1.76:7890}"
+# 与 install.sh 保持一致：仅在明确设置或 WSL 下默认使用代理
+# macOS/原生 Linux 不默认启用代理
+PROXY="${PROXY:-}"
 
-if [ -n "$PROXY" ] && [ "$PROXY" != "none" ] && [ "$PROXY" != "false" ]; then
+# WSL 下检测宿主机代理
+if [ -z "${PROXY:-}" ] && [ -z "${http_proxy:-}" ] && [ "$PLATFORM" = "linux" ]; then
+    if grep -qEi "Microsoft|WSL" /proc/version 2>/dev/null || [ -n "${WSL_DISTRO_NAME:-}" ]; then
+        _hostip=$(awk '/^nameserver / {print $2; exit}' /etc/resolv.conf 2>/dev/null)
+        if [ -n "$_hostip" ]; then
+            PROXY="http://${_hostip}:7890"
+            log_info "检测到 WSL，使用宿主机代理: $PROXY"
+        fi
+    fi
+fi
+if [ -n "${PROXY:-}" ] && [ "${PROXY:-}" != "none" ] && [ "${PROXY:-}" != "false" ]; then
     # 确保代理格式正确（添加 http:// 前缀如果没有）
-    if [[ ! "$PROXY" =~ ^https?:// ]]; then
-        PROXY="http://$PROXY"
+    if [[ ! "${PROXY:-}" =~ ^https?:// ]]; then
+        PROXY="http://${PROXY}"
     fi
     export http_proxy="$PROXY"
     export https_proxy="$PROXY"
@@ -160,7 +171,7 @@ if [ -n "$PROXY" ] && [ "$PROXY" != "none" ] && [ "$PROXY" != "false" ]; then
     log_info "已设置代理: $PROXY"
 else
     log_info "未设置代理，使用直连"
-    unset PROXY
+    unset PROXY http_proxy https_proxy HTTP_PROXY HTTPS_PROXY GIT_HTTP_PROXY GIT_HTTPS_PROXY 2>/dev/null || true
 fi
 
 # ============================================
@@ -179,7 +190,6 @@ if [ -z "$(ls -A $CHEZMOI_DIR 2>/dev/null)" ]; then
     log_info "如果需要添加配置，可以："
     log_info "  1. 从 Windows 同步 .chezmoi 目录（如果 Windows 上有配置）"
     log_info "  2. 手动添加配置: export CHEZMOI_SOURCE_DIR=\"\$(pwd)/.chezmoi\" && chezmoi add ~/.zshrc"
-    log_info "  3. 运行迁移脚本: ./scripts/migration/migrate_to_chezmoi.sh"
     log_info ""
     log_warning "当前没有配置需要应用，退出"
     end_script
@@ -526,6 +536,19 @@ for plugin_entry in "${PLUGINS[@]}"; do
 done
 
 log_info "已安装插件: $INSTALLED_COUNT/$TOTAL_PLUGINS"
+
+# ============================================
+# 确保 SSH ProxyCommand 依赖就绪（与 install.sh 保持一致）
+# ============================================
+ENSURE_SSH_PREREQS="${SCRIPT_DIR}/scripts/chezmoi/ensure_ssh_prereqs.sh"
+if [[ -f "$ENSURE_SSH_PREREQS" ]] && [[ -x "$ENSURE_SSH_PREREQS" ]]; then
+    log_info "确保 SSH 前置依赖就绪..."
+    bash "$ENSURE_SSH_PREREQS" || true
+elif [[ -f "$ENSURE_SSH_PREREQS" ]]; then
+    chmod +x "$ENSURE_SSH_PREREQS" 2>/dev/null || true
+    log_info "确保 SSH 前置依赖就绪..."
+    bash "$ENSURE_SSH_PREREQS" || true
+fi
 
 # ============================================
 # 应用配置

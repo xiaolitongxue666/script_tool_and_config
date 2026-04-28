@@ -161,7 +161,7 @@ case "${PLATFORM:-unknown}" in
     linux)
         ensure_linux
         ;;
-    macos)
+    darwin|macos)
         ensure_darwin
         ;;
     windows)

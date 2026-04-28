@@ -134,12 +134,9 @@ function check_directory() {
     fi
 }
 
-# 检查是否为 root 用户
-function check_root() {
-    if [[ $EUID -ne 0 ]]; then
-        error_exit "This script requires root privileges, please run with sudo"
-    fi
-}
+# ============================================
+# 工具函数
+# ============================================
 
 # ============================================
 # 工具函数

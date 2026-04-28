@@ -7,9 +7,14 @@
 # 两份配置服务于不同目的，均需保留
 # ============================================
 
+# 注意：此文件为 chezmoi 配置参考模板，实际运行时 install.sh 会
+# 将 ~/.config/chezmoi/chezmoi.toml 中的 sourceDir 覆盖为项目绝对路径。
+# 此处 sourceDir 为相对路径，chezmoi 会相对于 ~/.config/chezmoi/ 解析，
+# 因此不应直接使用此文件，而应通过 install.sh 部署。
 [source]
     # 源状态目录：使用项目内目录模式
     # 配置文件存储在项目根目录的 .chezmoi/ 目录中
+    # （install.sh 会将此值覆盖为绝对路径写入 ~/.config/chezmoi/chezmoi.toml）
     sourceDir = ".chezmoi"
 
 [data]

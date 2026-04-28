@@ -8,7 +8,7 @@
 
 | 序号 | 项 | 命令/方法 | 通过标准 |
 |------|----|-----------|----------|
-| 1.1 | 修改过的 shell 脚本语法 | `bash -n scripts/darwin/system_basic_env/install_common_tools.sh`，同法检查 `scripts/linux/system_basic_env/install_common_tools.sh`、`install_neovim.sh`、`scripts/common/container_dev_env/container_install.sh`、`scripts/chezmoi/audit_configs.sh` | 全部 exit 0 |
+| 1.1 | 修改过的 shell 脚本语法 | `bash -n scripts/linux/system_basic_env/install_common_tools.sh`、`scripts/common/container_dev_env/container_install.sh`、`scripts/chezmoi/audit_configs.sh` | 全部 exit 0 |
 | 1.2 | run_once 模板渲染后语法 | 在项目根执行 `chezmoi execute-template < .chezmoi/run_once_install-neovim-config.sh.tmpl > /tmp/run_once_nvim.sh && bash -n /tmp/run_once_nvim.sh`（可选：对 linux/darwin/windows 各渲染一次） | `bash -n` 通过 |
 | 1.3 | 编码与换行符（可选） | `./scripts/common/standalone_tool_script/check_and_fix_encoding.sh`、`./scripts/common/standalone_tool_script/ensure_lf_line_endings.sh` | 无新增告警 |
 
@@ -47,9 +47,7 @@
 
 | 脚本 | 建议验证方式 | 通过标准 |
 |------|----------------|----------|
-| `scripts/darwin/system_basic_env/install_common_tools.sh`（install_neovim） | 阅读代码或 grep：无 `PROJECT_ROOT`/`COMMON_LIB` 传入 `env` 或 `bash install.sh` | 仅代理等环境变量 |
 | `scripts/linux/system_basic_env/install_common_tools.sh`（install_neovim） | 同上 | 仅代理、USE_SYSTEM_NVIM_VENV、INSTALL_USER 等 |
-| `scripts/linux/system_basic_env/install_neovim.sh` | 同上 | 仅 `bash "$NEOVIM_INSTALL_SCRIPT"`，无 PROJECT_ROOT/COMMON_LIB |
 | `scripts/common/container_dev_env/container_install.sh`（install_neovim_config） | 同上 | 仅 PATH、代理、USE_SYSTEM_NVIM_VENV、INSTALL_USER |
 
 可选：在测试环境实际执行上述脚本之一，确认 `~/.config/nvim/install.sh` 被调用且无本仓库路径注入（如在上游 nvim 的 install.sh 中临时 `echo "PROJECT_ROOT=$PROJECT_ROOT"` 验证为空或未设置）。
@@ -98,9 +96,7 @@
 
 ```bash
 # 1. 语法
-bash -n scripts/darwin/system_basic_env/install_common_tools.sh
 bash -n scripts/linux/system_basic_env/install_common_tools.sh
-bash -n scripts/linux/system_basic_env/install_neovim.sh
 bash -n scripts/common/container_dev_env/container_install.sh
 bash -n scripts/chezmoi/audit_configs.sh
 
@@ -108,7 +104,7 @@ bash -n scripts/chezmoi/audit_configs.sh
 chezmoi execute-template < .chezmoi/run_once_install-neovim-config.sh.tmpl > /tmp/run_once_nvim.sh && bash -n /tmp/run_once_nvim.sh
 
 # 3. 确认无注入
-grep -n "PROJECT_ROOT\|COMMON_LIB" .chezmoi/run_once_install-neovim-config.sh.tmpl scripts/darwin/system_basic_env/install_common_tools.sh scripts/linux/system_basic_env/install_common_tools.sh scripts/linux/system_basic_env/install_neovim.sh scripts/common/container_dev_env/container_install.sh
+grep -n "PROJECT_ROOT\|COMMON_LIB" .chezmoi/run_once_install-neovim-config.sh.tmpl scripts/linux/system_basic_env/install_common_tools.sh scripts/common/container_dev_env/container_install.sh
 # 预期：run_once 与 4 个脚本中均无向 nvim install 传递 PROJECT_ROOT/COMMON_LIB 的代码
 
 # 4. audit

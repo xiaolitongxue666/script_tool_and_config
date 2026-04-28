@@ -220,7 +220,7 @@
 | 配置文件 | 目标位置 | 源文件 |
 |----------|----------|--------|
 | **Bash 配置** | `~/.bashrc` | `.chezmoi/dot_bashrc.tmpl` |
-| **Zsh 配置** | `~/.zshrc` | `.chezmoi/dot_zshrc` |
+| **Zsh 配置** | `~/.zshrc` | `.chezmoi/dot_zshrc.tmpl` |
 | **Zsh Profile** | `~/.zprofile` | `.chezmoi/dot_zprofile` |
 | **Tmux 配置** | `~/.tmux.conf` | `.chezmoi/dot_tmux.conf` |
 | **Starship 配置** | `~/.config/starship/starship.toml` | `.chezmoi/dot_config/starship/starship.toml` |

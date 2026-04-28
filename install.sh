@@ -363,10 +363,9 @@ log_info "━━━━━━━━━━━━━━━━━━━━━━━�
 log_info "[3/5] 检查配置状态和差异"
 log_info "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
-if [ ! -d "$CHEZMOI_DIR" ] || [ -z "$(ls -A $CHEZMOI_DIR 2>/dev/null)" ]; then
+if [ ! -d "$CHEZMOI_DIR" ] || [ -z "$(ls -A "$CHEZMOI_DIR" 2>/dev/null)" ]; then
     log_warning "chezmoi 源状态目录为空"
-    log_info "请先运行迁移脚本: ./scripts/migration/migrate_to_chezmoi.sh"
-    log_info "或手动添加配置: chezmoi add ~/.zshrc"
+    log_info "请手动添加配置: chezmoi add ~/.zshrc"
     exit 0
 fi
 

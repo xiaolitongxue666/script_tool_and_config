@@ -728,7 +728,7 @@ git push
 
 | 类别         | 目录                         | 命名模式                 | 示例                            |
 | ---------- | -------------------------- | -------------------- | ----------------------------- |
-| 系统安装       | `linux/system_basic_env/`  | `install_<软件名>.sh`   | `install_neovim.sh`           |
+| 系统安装       | `linux/system_basic_env/`  | `install_<软件名>.sh`   | `configure_china_mirrors.sh`  |
 | 系统配置       | `linux/system_basic_env/`  | `configure_<配置名>.sh` | `configure_china_mirrors.sh`  |
 | 工具脚本       | `common/standalone_tool_script/` | `<动作>_<对象>.sh`       | `get_directory_name.sh`       |
 | 项目工具       | `common/project_tools/`    | `<动作>_<对象>.sh`       | `generate_cmake_lists.sh`     |
