@@ -137,9 +137,15 @@ check_homebrew() {
 }
 
 # ============================================
-# 更新 Homebrew
+# 更新 Homebrew（默认关闭，可显式开启）
 # ============================================
 update_homebrew() {
+    local should_update_homebrew="${UPDATE_HOMEBREW:-false}"
+    if [[ "${should_update_homebrew}" != "true" ]]; then
+        log_info "默认跳过 Homebrew 更新（设置 UPDATE_HOMEBREW=true 可开启）"
+        return 0
+    fi
+
     log_info "更新 Homebrew..."
     if brew update; then
         log_success "Homebrew 更新成功"

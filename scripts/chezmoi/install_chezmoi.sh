@@ -59,12 +59,12 @@ fi
 if command -v chezmoi &> /dev/null; then
     CHEZMOI_VERSION=$(chezmoi --version | head -n 1)
     log_success "chezmoi 已安装: $CHEZMOI_VERSION"
-    read -p "是否重新安装？(y/n) " -n 1 -r
-    echo
-    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-        log_info "跳过安装"
+    FORCE_REINSTALL_CHEZMOI="${FORCE_REINSTALL_CHEZMOI:-false}"
+    if [[ "$FORCE_REINSTALL_CHEZMOI" != "true" ]]; then
+        log_info "默认跳过已安装的 chezmoi（设置 FORCE_REINSTALL_CHEZMOI=true 可强制重装）"
         end_script
     fi
+    log_info "检测到 FORCE_REINSTALL_CHEZMOI=true，继续执行重装流程"
 fi
 
 # ============================================
