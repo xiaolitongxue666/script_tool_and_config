@@ -23,19 +23,19 @@ readonly TARGET_OPENCODE_DIR="${PROJECT_ROOT}/.opencode"
 readonly TARGET_CODEX_DIR="${PROJECT_ROOT}/.codex"
 
 function ensure_templates() {
-    [[ -f "${TEMPLATE_DIR}/project-agent-shared-principles.md" ]] || error_exit "缺少模板: project-agent-shared-principles.md"
+    [[ -f "${TEMPLATE_DIR}/PROJECT-AGENT-SHARED-PRINCIPLES.md" ]] || error_exit "缺少模板: PROJECT-AGENT-SHARED-PRINCIPLES.md"
     [[ -f "${TEMPLATE_DIR}/project-cursor-rule.mdc" ]] || error_exit "缺少模板: project-cursor-rule.mdc"
-    [[ -f "${TEMPLATE_DIR}/project-opencode-agents.md" ]] || error_exit "缺少模板: project-opencode-agents.md"
-    [[ -f "${TEMPLATE_DIR}/project-codex-agents.md" ]] || error_exit "缺少模板: project-codex-agents.md"
+    [[ -f "${TEMPLATE_DIR}/PROJECT-OPENCODE-AGENTS.md" ]] || error_exit "缺少模板: PROJECT-OPENCODE-AGENTS.md"
+    [[ -f "${TEMPLATE_DIR}/PROJECT-CODEX-AGENTS.md" ]] || error_exit "缺少模板: PROJECT-CODEX-AGENTS.md"
 }
 
 function sync_project_constraints() {
     mkdir -p "${TARGET_CURSOR_RULES_DIR}" "${TARGET_OPENCODE_DIR}" "${TARGET_CODEX_DIR}" "${PROJECT_ROOT}/.aiconfig/templates"
 
-    cp "${TEMPLATE_DIR}/project-agent-shared-principles.md" "${PROJECT_ROOT}/.aiconfig/templates/project-agent-shared-principles.md"
+    cp "${TEMPLATE_DIR}/PROJECT-AGENT-SHARED-PRINCIPLES.md" "${PROJECT_ROOT}/.aiconfig/templates/PROJECT-AGENT-SHARED-PRINCIPLES.md"
     cp "${TEMPLATE_DIR}/project-cursor-rule.mdc" "${TARGET_CURSOR_RULES_DIR}/ai-project-principles.mdc"
-    cp "${TEMPLATE_DIR}/project-opencode-agents.md" "${TARGET_OPENCODE_DIR}/AGENTS.md"
-    cp "${TEMPLATE_DIR}/project-codex-agents.md" "${TARGET_CODEX_DIR}/AGENTS.md"
+    cp "${TEMPLATE_DIR}/PROJECT-OPENCODE-AGENTS.md" "${TARGET_OPENCODE_DIR}/AGENTS.md"
+    cp "${TEMPLATE_DIR}/PROJECT-CODEX-AGENTS.md" "${TARGET_CODEX_DIR}/AGENTS.md"
 }
 
 start_script "同步项目级 AI 约束文档"

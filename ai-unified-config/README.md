@@ -76,5 +76,5 @@ ai-unified-config/
 - 新增领域 skill：放到 `.aiconfig/skills/special/`。
 - 新增 prompt 模板：放到 `.aiconfig/templates/`，文件名建议 `kebab-case.md`。
 - 多 skill 占位统一使用 `{{skills}}`，输入格式为逗号分隔（例如 `common/code-review,special/bash-devops`）。
-- Cursor/Codex/OpenCode 推荐显式引用模板文件路径，例如 `~/.config/aiconfig/templates/multi-skill-review-template.md`。
+- Cursor/Codex/OpenCode 推荐显式引用模板文件路径，例如 `~/.config/aiconfig/templates/MULTI-SKILL-REVIEW-TEMPLATE.md`。
 - 可复用模板统一放到 `.aiconfig/resources/`，避免在 agent/skill 内重复定义。

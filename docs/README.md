@@ -2,21 +2,27 @@
 
 本目录集中存放项目说明与指南，根目录仅保留 [README.md](../README.md) 与 [AGENTS.md](../AGENTS.md)。
 
+## 文档清理审计结论（2026-04）
+
+- `docs/README.md`：保留，作为 docs 目录索引；由根目录 `README.md` 显式链接。
+- `docs/patches/archive/README.md`：保留，当前仍被 `docs/TEST_PLAN_NVIM_INDEPENDENT.md` 引用作为历史补丁说明。
+- 删除策略：仅在“无外部引用 + 不再承担测试/流程证据”同时满足时再删除。
+
 ## 安装与配置
 
 | 文档 | 说明 |
 |------|------|
 | [INSTALL_GUIDE.md](INSTALL_GUIDE.md) | 一键安装与首次配置入口（推荐先看）；各平台分步与故障排除 |
-| [os_setup_guide.md](os_setup_guide.md) | Windows / macOS / Linux 分步安装指南与前置条件 |
+| [OS_SETUP_GUIDE.md](OS_SETUP_GUIDE.md) | Windows / macOS / Linux 分步安装指南与前置条件 |
 | [SOFTWARE_LIST.md](SOFTWARE_LIST.md) | 完整软件清单与 run_once 脚本对应关系（按 OS / WSL 区分） |
-| [project_structure.md](project_structure.md) | 项目结构说明 |
+| [PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md) | 项目结构说明 |
 
 ## Chezmoi 与项目结构
 
 | 文档 | 说明 |
 |------|------|
-| [chezmoi_use_guide.md](chezmoi_use_guide.md) | chezmoi 详细使用指南（SSH、lazyssh、配置管理） |
-| [project_structure.md](project_structure.md) | 项目目录结构说明（权威来源） |
+| [CHEZMOI_USE_GUIDE.md](CHEZMOI_USE_GUIDE.md) | chezmoi 详细使用指南（SSH、lazyssh、配置管理） |
+| [PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md) | 项目目录结构说明（权威来源） |
 
 ## 规范与编码
 

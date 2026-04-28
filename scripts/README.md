@@ -11,7 +11,7 @@
 - **windows/**：Windows 专用（windows_scripts、system_basic_env）
 - **chezmoi/**、**migration/**
 
-完整目录树与脚本列表见 [project_structure.md](../docs/project_structure.md)。
+完整目录树与脚本列表见 [PROJECT_STRUCTURE.md](../docs/PROJECT_STRUCTURE.md)。
 
 ## 脚本分类说明
 

@@ -93,10 +93,10 @@ else
     fi
 fi
 
-if [[ -f "${AGENTS_DIR}/orchestrator-core.md" ]]; then
-    log_success "关键 agent 文件可读: ${AGENTS_DIR}/orchestrator-core.md"
+if [[ -f "${AGENTS_DIR}/ORCHESTRATOR-CORE.md" ]]; then
+    log_success "关键 agent 文件可读: ${AGENTS_DIR}/ORCHESTRATOR-CORE.md"
 else
-    log_warning "缺少关键 agent 文件: ${AGENTS_DIR}/orchestrator-core.md"
+    log_warning "缺少关键 agent 文件: ${AGENTS_DIR}/ORCHESTRATOR-CORE.md"
     EXIT_CODE=1
 fi
 

@@ -328,8 +328,8 @@ brew --version
 git clone <your-repo-url> ~/script_tool_and_config
 cd ~/script_tool_and_config
 
-# 如果项目包含 Git Submodule（如 Neovim 配置），需要初始化
-# Neovim 配置由 run_once_install-neovim-config 克隆到 ~/.config/nvim，无需 submodule
+# 本仓库不依赖 Neovim 子模块
+# Neovim 配置由 run_once_install-neovim-config 克隆到 ~/.config/nvim
 ```
 
 #### 步骤 2: 运行一键安装脚本
@@ -560,12 +560,15 @@ brew services start skhd
 # 系统设置 > 隐私与安全性 > 辅助功能 > 添加 Terminal
 ```
 
-#### 2. 配置 Neovim（如果使用 Git Submodule）
+#### 2. 配置 Neovim（独立仓库模式）
 
 ```bash
-# Neovim 配置由 run_once 克隆到 ~/.config/nvim；更新：cd ~/.config/nvim && git pull && ./install.sh
-# 所有其他配置已迁移到 .chezmoi/ 目录，由 chezmoi 统一管理
-# Neovim 配置会自动通过 chezmoi 管理（创建符号链接到 ~/.config/nvim）
+# Neovim 配置由 run_once_install-neovim-config 克隆到 ~/.config/nvim
+# 后续更新在 nvim 仓库内执行
+cd ~/.config/nvim && git pull && ./install.sh
+
+# 本仓库不通过 chezmoi 创建 nvim 符号链接
+# 其他 dotfiles 仍由 .chezmoi 模板统一管理
 ```
 
 #### 3. 配置 Git
@@ -762,7 +765,7 @@ lsof -i:5903
 netstat -an | grep 5903
 ```
 
-详细说明请参考：[chezmoi_use_guide.md](chezmoi_use_guide.md#使用-lazyssh-配置的-host)
+详细说明请参考：[CHEZMOI_USE_GUIDE.md](CHEZMOI_USE_GUIDE.md#使用-lazyssh-配置的-host)
 
 **安全注意事项：**
 - SSH 配置文件权限必须为 600
@@ -791,9 +794,9 @@ chezmoi apply -v
 ## 参考文档
 
 - [README.md](../README.md) - 项目主文档
-- [chezmoi_use_guide.md](chezmoi_use_guide.md) - chezmoi 使用指南
+- [CHEZMOI_USE_GUIDE.md](CHEZMOI_USE_GUIDE.md) - chezmoi 使用指南
 - [SOFTWARE_LIST.md](SOFTWARE_LIST.md) - 软件清单
-- [project_structure.md](project_structure.md) - 项目结构说明
+- [PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md) - 项目结构说明
 - [scripts/windows/system_basic_env/README.md](../scripts/windows/system_basic_env/README.md) - Windows 工具安装脚本说明
 - [chezmoi 官方文档](https://www.chezmoi.io/docs/)
 

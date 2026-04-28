@@ -19,7 +19,7 @@
 
 - Docker 或 Podman
 - 项目根目录可访问
-- Git Submodule（Neovim 配置需要）
+- Neovim 独立仓库（由 run_once_install-neovim-config 克隆到 `~/.config/nvim`）
 
 ## 快速开始
 
@@ -243,7 +243,7 @@ export PROXY=192.168.1.76:7890
 
 ## Neovim 配置
 
-本项目中**没有** Neovim 的 git submodule。Neovim 配置的流程是：在系统目标位置（如 `~/.config/nvim`）克隆 nvim 仓库，再执行仓库内的 install.sh 安装前置。
+本项目中 Neovim 采用独立仓库模式。流程是：在系统目标位置（如 `~/.config/nvim`）克隆 nvim 仓库，再执行仓库内的 install.sh 安装前置。
 
 - **宿主机**：由 run_once_install-neovim-config 自动将 `git@github.com:xiaolitongxue666/nvim.git` 克隆到 `~/.config/nvim` 并执行 `install.sh`。
 - **容器内**：若需使用 Neovim 配置，需在目标位置手动克隆并执行安装脚本，例如：
@@ -512,7 +512,7 @@ git clone git@github.com:xiaolitongxue666/nvim.git ~/.config/nvim
    - 或在 Dockerfile 中添加换行符转换
 
 2. **Neovim 配置目录不存在**
-   - 本项目无 submodule；需在目标位置克隆 nvim 仓库并执行 install.sh，例如：`git clone git@github.com:xiaolitongxue666/nvim.git ~/.config/nvim && ~/.config/nvim/install.sh`
+   - 本项目使用 Neovim 独立仓库；需在目标位置克隆 nvim 仓库并执行 install.sh，例如：`git clone git@github.com:xiaolitongxue666/nvim.git ~/.config/nvim && ~/.config/nvim/install.sh`
 
 3. **网络问题**: 安装 Python 包或 Node.js 包时网络超时
    - 解决：使用代理构建镜像

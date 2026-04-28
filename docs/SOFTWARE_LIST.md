@@ -1,382 +1,102 @@
-# 软件清单
+# 软件清单（按 OS / WSL）
 
-本文档列出**项目管理的软件与 run_once 脚本对应关系**，按平台与脚本分类。**一键安装**所需软件与配置均通过 run_once 完成，注意**区分 OS**（linux/darwin/windows）与 **WSL**（Linux 子类型）。环境验证与逐项检查命令见 [INSTALL_STATUS.md](../scripts/linux/system_basic_env/INSTALL_STATUS.md)。
+本文档以仓库内实际安装脚本为准，整理 `install.sh` 触发的 run_once / run_on_* 安装项。
+
+- 事实来源：`install.sh`、`scripts/chezmoi/install_helpers.sh`、`.chezmoi/run_once_*.sh.tmpl`、`.chezmoi/run_on_*/run_once_*.sh.tmpl`
+- 平台口径：`linux`（含 WSL）、`darwin`（macOS）、`windows`
+- 目标：明确跨平台共用项、平台专有项、WSL 差异项，避免重复与冲突描述
 
 ---
 
 ## 按 OS 汇总（一览）
 
-### Linux（含 Arch / Ubuntu·Debian / WSL）
+### 跨平台共用（Linux / macOS / Windows）
 
-| 类别 | 软件 |
-|------|------|
-| 版本管理 | fnm, uv, rustup（可选） |
-| 终端/Shell | starship, tmux, alacritty（可选）, zsh, oh-my-zsh, fish（可选） |
-| 文件/搜索 | bat, eza, fd, ripgrep, fzf, trash-cli |
-| 开发 | git, neovim, lazygit, git-delta, gh, lazyssh |
-| 系统监控 | btop, fastfetch |
-| 字体 | Nerd Fonts (FiraMono) |
-| 仅 Arch | Pacman 镜像与配置、Arch 基础包（base-devel, gcc, make, tree 等）、AUR 助手；窗口管理器 i3wm, dwm（可选） |
+| 类别 | 软件/能力 | 主要脚本 |
+|------|------|------|
+| 版本管理 | fnm, uv, rustup（可选） | `run_once_00-install-version-managers.sh.tmpl` |
+| 文件/搜索与通用 | bat, eza, fd, ripgrep, fzf, lazygit, git-delta, gh（另含平台差异：trash-cli、btop、fastfetch） | `run_once_install-common-tools.sh.tmpl` |
+| 开发 | git, neovim, neovim-config | `run_once_install-git.sh.tmpl`, `run_once_install-neovim.sh.tmpl`, `run_once_install-neovim-config.sh.tmpl` |
+| 终端提示符 | starship | `run_once_install-starship.sh.tmpl` |
+| 字体 | Nerd Fonts (FiraMono) | `run_once_install-nerd-fonts.sh.tmpl` |
+| 系统基础 | system-basic-env | `run_once_install-system-basic-env.sh.tmpl` |
+| OpenCode | opencode | `run_once_install-opencode.sh.tmpl` |
+| AI 配置桥接 | ai-unified-config, opencode-aiconfig-bridge | `run_once_install-ai-unified-config.sh.tmpl`, `run_once_install-opencode-aiconfig-bridge.sh.tmpl` |
 
-说明：**WSL** 在项目中视为 Linux（多为 apt）；通用工具由同一 run_once_install-common-tools 安装，日志中会区分「Linux (WSL, apt)」与「Linux (原生, pacman/apt)」。
+### Linux（含 WSL）
+
+| 类别 | 软件/能力 | 主要脚本 |
+|------|------|------|
+| 终端/Shell | zsh, oh-my-zsh, fish, tmux, TPM, alacritty | `run_once_install-zsh.sh.tmpl`, `run_once_install-fish.sh.tmpl`, `run_once_install-tmux.sh.tmpl`, `run_once_install-alacritty.sh.tmpl` |
+| 开发 | lazyssh | `run_once_install-lazyssh.sh.tmpl` |
+| Linux 专属 | i3wm, dwm | `run_once_install-i3wm.sh.tmpl`, `run_once_install-dwm.sh.tmpl` |
+| Arch 专属 | pacman 配置、arch-base-packages、AUR helper | `run_on_linux/run_once_configure-pacman.sh.tmpl`, `run_on_linux/run_once_install-arch-base-packages.sh.tmpl`, `run_on_linux/run_once_install-aur-helper.sh.tmpl` |
 
 ### macOS
 
-| 类别 | 软件 |
-|------|------|
-| 版本管理 | fnm, uv, rustup（可选） |
-| 终端/Shell | starship, tmux, **Ghostty**（终端）, zsh, oh-my-zsh, fish（可选） |
-| 文件/搜索 | bat, eza, fd, ripgrep, fzf, trash-cli |
-| 开发 | git, neovim, lazygit, git-delta, gh |
-| 系统监控 | btop, fastfetch |
-| 字体 | Nerd Fonts (FiraMono) |
-| macOS 专属 | Homebrew 配置、connect（SSH 代理）, yabai, skhd, maccy（剪贴板） |
+| 类别 | 软件/能力 | 主要脚本 |
+|------|------|------|
+| 终端/Shell | zsh, oh-my-zsh, fish, tmux, TPM, ghostty | `run_once_install-zsh.sh.tmpl`, `run_once_install-fish.sh.tmpl`, `run_once_install-tmux.sh.tmpl`, `run_on_darwin/run_once_install-ghostty.sh.tmpl` |
+| macOS 专属 | homebrew 配置, connect, yabai, skhd, maccy | `run_on_darwin/run_once_configure-homebrew.sh.tmpl`, `run_on_darwin/run_once_install-connect.sh.tmpl`, `run_once_install-yabai.sh.tmpl`, `run_once_install-skhd.sh.tmpl`, `run_once_install-maccy.sh.tmpl` |
 
 ### Windows
 
-| 类别 | 软件 |
-|------|------|
-| 版本管理 | fnm, uv, rustup（可选） |
-| 终端/Shell | starship, **Windows Terminal**（默认终端）, oh-my-posh, zsh（MSYS2 可选） |
-| 文件/搜索 | bat, eza, fd, ripgrep, fzf |
-| 开发 | git, neovim, lazygit, git-delta, gh |
-| 系统监控 | bottom（btop 替代；或单独安装 btop4win） |
-| 字体 | Nerd Fonts (FiraMono) |
-
-**Windows 安装流程简述**：在项目根执行 `./install.sh`（Git Bash）；脚本会写入 `~/.config/chezmoi/chezmoi.toml` 的 `sourceDir`（正斜杠路径）和 `[interpreters.sh]`（bash 解释器），以便 `chezmoi apply` 在 Windows 上通过 bash 执行 run_once_*.sh。仅 Windows 会安装的 run_once：`oh-my-posh`、`windows-terminal`；多平台共用的 run_once（00-install-version-managers、common-tools、starship、git、neovim、nerd-fonts、zsh、opencode 等）在 Windows 上同样执行。**Windows Terminal 作为 Windows 默认终端**（替代 Alacritty），每次 chezmoi apply 后自动同步配置文件到 WT 实际路径。tmux、fish、alacritty、Ghostty 等不在 Windows 下安装（Alacritty 仅 Linux，Ghostty 仅 macOS）。与 WSL 区分：WSL 视为 Linux（apt/pacman），走 Linux 软件列表与 run_on_linux；Windows 本机为 winget 等，走本表。
-
-**Windows 需要安装和配置的 run_once**（与 [4/5] 检查一致）：00-install-version-managers、common-tools、starship、git、neovim、neovim-config、nerd-fonts、zsh（MSYS2 可选）、oh-my-posh、windows-terminal、opencode、system-basic-env。配置（dotfiles）：通用模板（.bashrc、.zshrc、.gitconfig、.ssh/config 等）及 `run_on_windows/` 下的 .bash_profile、.bashrc、Windows Terminal settings.json（同步脚本自动部署到 WT 实际路径）。
+| 类别 | 软件/能力 | 主要脚本 |
+|------|------|------|
+| 终端/Shell | windows-terminal, oh-my-posh, zsh（MSYS2 可选） | `run_on_windows/run_once_install-windows-terminal.sh.tmpl`, `run_once_install-oh-my-posh.sh.tmpl`, `run_once_install-zsh.sh.tmpl` |
+| 配置同步 | Windows Terminal settings 同步到实际路径（内容变化时） | `run_on_windows/run_onchange_sync_windows_terminal_config.sh.tmpl` |
 
 ---
 
-## 按 run_once 脚本索引
+## WSL 特殊说明（相对 Linux 原生）
 
-**执行顺序**：run_once 按目标名字母序执行。Neovim 配置依赖 uv、fnm、nvim，故 **00-install-version-managers**（uv/fnm）→ **install-neovim**（nvim 二进制）→ **install-neovim-config**（将 nvim 仓库克隆到 ~/.config/nvim 并执行 install.sh、Lazy 插件）。
+- WSL 视为 Linux 子类型，复用 Linux 安装脚本与分类。
+- `run_once_install-common-tools.sh.tmpl` 会识别 WSL 并输出 `Linux (WSL, <pkg>)` 日志。
+- `run_once_install-git.sh.tmpl` 与 `scripts/chezmoi/ensure_ssh_prereqs.sh` 对 apt/WSL 场景会处理 `connect-proxy` 依赖。
+- Arch 专属脚本（`run_on_linux/run_once_configure-pacman.sh.tmpl`、`run_once_install-arch-base-packages.sh.tmpl`、`run_once_install-aur-helper.sh.tmpl`）仅在 Arch 语义下执行，不适用于常见 WSL Ubuntu。
 
-**版本要求与验证**：对版本有要求的软件会在对应 run_once 内做检查与升级（例如 Neovim 要求 ≥ 0.11.0，`run_once_install-neovim.sh.tmpl` 会先判断 `is_nvim_version_ge_0_11`，不满足则执行包管理器升级或官方 release 安装）。安装完成后，`install.sh` 会调用 `scripts/chezmoi/verify_installation.sh` 做全局验证（字体、Shell、PATH、通用工具等）。
+---
 
-| run_once 脚本 | 安装的软件/作用 | 适用 OS |
-|---------------|-----------------|--------|
-| `run_once_install-common-tools.sh.tmpl` | bat, eza, fd, ripgrep, fzf, lazygit, git-delta, gh, trash-cli, btop, fastfetch | Linux, macOS, Windows（Windows 无 btop） |
-| `run_once_00-install-version-managers.sh.tmpl` | fnm, uv, rustup（可选）；**执行顺序优先**，为 Neovim 配置前置 | 多平台 |
+## 按 run_once / run_on 脚本索引
+
+| 脚本 | 软件/作用 | 适用平台 |
+|------|------|------|
+| `run_once_00-install-version-managers.sh.tmpl` | fnm, uv, rustup（可选） | Linux, macOS, Windows |
+| `run_once_install-common-tools.sh.tmpl` | bat/eza/fd/rg/fzf/lazygit/git-delta/gh 等通用工具（含平台差异项） | Linux, macOS, Windows |
 | `run_once_install-starship.sh.tmpl` | starship | Linux, macOS, Windows |
-| `run_once_install-tmux.sh.tmpl` | tmux, TPM 及插件 | Linux, macOS |
-| `run_once_install-alacritty.sh.tmpl` | alacritty | 仅 Linux |
-| `run_once_install-git.sh.tmpl` | git, connect-proxy（Linux） | 多平台 |
-| `run_once_install-neovim.sh.tmpl` | neovim | 多平台 |
-| `run_once_install-neovim-config.sh.tmpl` | 克隆 nvim 到 ~/.config/nvim 并执行 install.sh、Lazy 插件 | 多平台 |
-| `run_once_install-nerd-fonts.sh.tmpl` | FiraMono Nerd Font | 多平台 |
-| `run_once_install-zsh.sh.tmpl` | zsh, oh-my-zsh 及插件 | Linux, macOS, Windows(MSYS2) |
+| `run_once_install-git.sh.tmpl` | git（Linux 侧含 connect-proxy 逻辑） | Linux, macOS, Windows |
+| `run_once_install-neovim.sh.tmpl` | neovim | Linux, macOS, Windows |
+| `run_once_install-neovim-config.sh.tmpl` | 克隆并初始化独立 nvim 仓库 | Linux, macOS, Windows |
+| `run_once_install-nerd-fonts.sh.tmpl` | FiraMono Nerd Font | Linux, macOS, Windows |
+| `run_once_install-zsh.sh.tmpl` | zsh / oh-my-zsh（Windows 为 MSYS2 可选） | Linux, macOS, Windows |
+| `run_once_install-system-basic-env.sh.tmpl` | 系统基础环境检查与准备 | Linux, macOS, Windows |
+| `run_once_install-opencode.sh.tmpl` | opencode | Linux, macOS, Windows |
+| `run_once_install-ai-unified-config.sh.tmpl` | 安装 ai-unified-config | Linux, macOS, Windows |
+| `run_once_install-opencode-aiconfig-bridge.sh.tmpl` | 同步/桥接 opencode、cursor、codex 配置 | Linux, macOS, Windows |
 | `run_once_install-fish.sh.tmpl` | fish | Linux, macOS |
-| `run_once_install-lazyssh.sh.tmpl` | lazyssh | 仅 Linux |
-| `run_on_linux/run_once_configure-pacman.sh.tmpl` | Arch 镜像、pacman 配置、archlinuxcn、系统更新 | 仅 Linux 且 ID=arch |
-| `run_on_linux/run_once_install-arch-base-packages.sh.tmpl` | base-devel, gcc, make, tree, openssh 等 | 仅 Linux 且 ID=arch |
-| `run_on_linux/run_once_install-aur-helper.sh.tmpl` | yay/paru（AUR 助手） | 仅 Linux（通常 Arch） |
-| `run_once_install-i3wm.sh.tmpl` | i3wm | 仅 Linux |
-| `run_once_install-dwm.sh.tmpl` | dwm | 仅 Linux |
-| `run_once_install-oh-my-posh.sh.tmpl` | oh-my-posh | 仅 Windows |
-| `run_on_windows/run_once_install-windows-terminal.sh.tmpl` | Windows Terminal（winget） | 仅 Windows |
-| `run_on_windows/run_sync_windows_terminal_config.sh.tmpl` | 同步 Windows Terminal 配置到实际路径（每次 apply） | 仅 Windows |
-| `run_on_darwin/run_once_configure-homebrew.sh.tmpl` | Homebrew 配置 | 仅 macOS |
-| `run_on_darwin/run_once_install-connect.sh.tmpl` | connect（SSH 代理） | 仅 macOS |
-| `run_on_darwin/run_once_install-ghostty.sh.tmpl` | Ghostty 终端（使用 zsh） | 仅 macOS |
-| `run_once_install-yabai.sh.tmpl` | yabai | 仅 macOS |
-| `run_once_install-skhd.sh.tmpl` | skhd | 仅 macOS |
-| `run_once_install-maccy.sh.tmpl` | maccy（剪贴板） | 仅 macOS |
+| `run_once_install-tmux.sh.tmpl` | tmux + TPM | Linux, macOS |
+| `run_once_install-alacritty.sh.tmpl` | alacritty | Linux |
+| `run_once_install-lazyssh.sh.tmpl` | lazyssh | Linux |
+| `run_once_install-i3wm.sh.tmpl` | i3wm | Linux |
+| `run_once_install-dwm.sh.tmpl` | dwm | Linux |
+| `run_on_linux/run_once_configure-pacman.sh.tmpl` | pacman 与 archlinuxcn 配置 | Linux（Arch） |
+| `run_on_linux/run_once_install-arch-base-packages.sh.tmpl` | Arch 基础包 | Linux（Arch） |
+| `run_on_linux/run_once_install-aur-helper.sh.tmpl` | AUR helper | Linux（Arch） |
+| `run_on_darwin/run_once_configure-homebrew.sh.tmpl` | Homebrew 配置 | macOS |
+| `run_on_darwin/run_once_install-connect.sh.tmpl` | connect（SSH 代理） | macOS |
+| `run_on_darwin/run_once_install-ghostty.sh.tmpl` | ghostty | macOS |
+| `run_on_darwin/run_onchange_sync_ghostty_config_to_app_support.sh.tmpl` | Ghostty 配置同步（内容变化时） | macOS |
+| `run_once_install-yabai.sh.tmpl` | yabai | macOS |
+| `run_once_install-skhd.sh.tmpl` | skhd | macOS |
+| `run_once_install-maccy.sh.tmpl` | maccy | macOS |
+| `run_on_windows/run_once_install-windows-terminal.sh.tmpl` | Windows Terminal | Windows |
+| `run_on_windows/run_onchange_sync_windows_terminal_config.sh.tmpl` | Windows Terminal 配置同步（内容变化时） | Windows |
+| `run_once_install-oh-my-posh.sh.tmpl` | oh-my-posh | Windows |
 
 ---
 
-## 多系统共有软件
-
-### 版本管理器
-
-| 软件 | 描述 | 安装脚本 |
-|------|------|----------|
-| **fnm** | Fast Node Manager (Node.js 版本管理) | `run_once_00-install-version-managers.sh.tmpl` |
-| **uv** | Python 包管理器 | `run_once_00-install-version-managers.sh.tmpl` |
-| **rustup** | Rust 工具链（可选） | `run_once_00-install-version-managers.sh.tmpl` |
-
-### 终端工具
-
-| 软件 | 描述 | 支持平台 | 安装脚本 |
-|------|------|----------|----------|
-| **starship** | 跨 shell 提示符 | Linux, macOS, Windows | `run_once_install-starship.sh.tmpl` |
-| **tmux** | 终端复用器 | Linux, macOS | `run_once_install-tmux.sh.tmpl` |
-| **TPM** | Tmux Plugin Manager（tmux 插件管理器） | Linux, macOS | `run_once_install-tmux.sh.tmpl` |
-| **alacritty** | GPU 加速终端模拟器 | 仅 Linux | `run_once_install-alacritty.sh.tmpl` |
-| **ghostty** | 跨平台终端（原生 UI + GPU 加速，使用 zsh）；安装到 /Applications 以便启动台显示 | 仅 macOS | `run_on_darwin/run_once_install-ghostty.sh.tmpl` |
-| **windows-terminal** | Windows 默认终端（使用 Git Bash），配置 Catppuccin Mocha 主题 + CaskaydiaCove Nerd Font | 仅 Windows | `run_on_windows/run_once_install-windows-terminal.sh.tmpl` |
-
-### 文件工具
-
-| 软件 | 描述 | 安装脚本 |
-|------|------|----------|
-| **bat** | cat 替代工具（语法高亮） | `run_once_install-common-tools.sh.tmpl` |
-| **eza** | ls 替代工具 | `run_once_install-common-tools.sh.tmpl` |
-| **fd** | find 替代工具（快速文件查找） | `run_once_install-common-tools.sh.tmpl` |
-| **ripgrep (rg)** | grep 替代工具（快速文本搜索） | `run_once_install-common-tools.sh.tmpl` |
-| **fzf** | 模糊查找工具 | `run_once_install-common-tools.sh.tmpl` |
-| **trash-cli** | 命令行回收站工具 | `run_once_install-common-tools.sh.tmpl` (Linux/macOS) |
-
-### 开发工具
-
-| 软件 | 描述 | 安装脚本 |
-|------|------|----------|
-| **git** | 版本控制系统 | `run_once_install-git.sh.tmpl` |
-| **neovim** | 现代文本编辑器 | `run_once_install-neovim.sh.tmpl` |
-| **lazygit** | Git TUI 工具 | `run_once_install-common-tools.sh.tmpl` |
-| **git-delta** | Git diff 增强工具 | `run_once_install-common-tools.sh.tmpl` |
-| **gh** | GitHub CLI | `run_once_install-common-tools.sh.tmpl` |
-| **lazyssh** | 终端 SSH 管理器 | `run_once_install-lazyssh.sh.tmpl`（仅 Linux，按包管理器） |
-
-### 系统工具
-
-| 软件 | 描述 | 安装脚本 |
-|------|------|----------|
-| **curl** | 网络传输工具 | 系统自带或包管理器 |
-| **wget** | 文件下载工具 | 系统自带或包管理器 |
-| **aria2** | 多线程下载工具 | 系统自带或包管理器 |
-| **tree** | 目录树显示工具 | 系统自带或包管理器 |
-| **which** | 查找命令位置工具 | 系统自带或包管理器 |
-
-### 字体
-
-| 软件 | 描述 | 支持平台 | 安装脚本 |
-|------|------|----------|----------|
-| **Nerd Fonts (FiraMono)** | 编程字体（支持图标显示） | Linux, macOS, Windows | `run_once_install-nerd-fonts.sh.tmpl` |
-
-## Linux 特有软件
-
-### Shell 环境
-
-| 软件 | 描述 | 安装脚本 |
-|------|------|----------|
-| **zsh** | Z shell | `run_once_install-zsh.sh.tmpl` |
-| **oh-my-zsh** | Zsh 配置框架 | `run_once_install-zsh.sh.tmpl` |
-| **fish** | Fish Shell | `run_once_install-fish.sh.tmpl` |
-
-### 窗口管理器
-
-| 软件 | 描述 | 安装脚本 |
-|------|------|----------|
-| **i3wm** | 平铺式窗口管理器 | `run_once_install-i3wm.sh.tmpl` |
-| **dwm** | 动态窗口管理器 | `run_once_install-dwm.sh.tmpl` |
-
-### 系统监控工具
-
-| 软件 | 描述 | 安装脚本 |
-|------|------|----------|
-| **btop** | 系统监控工具（htop 替代） | `run_once_install-common-tools.sh.tmpl` |
-| **fastfetch** | 系统信息展示工具（neofetch 替代） | `run_once_install-common-tools.sh.tmpl`；Ubuntu &lt; 24.10 无官方包，脚本依次尝试 apt → PPA → Snap → .deb |
-
-## macOS 特有软件
-
-### Shell 环境
-
-| 软件 | 描述 | 安装脚本 |
-|------|------|----------|
-| **zsh** | Z shell（macOS 默认） | `run_once_install-zsh.sh.tmpl` |
-| **oh-my-zsh** | Zsh 配置框架 | `run_once_install-zsh.sh.tmpl` |
-| **fish** | Fish Shell | `run_once_install-fish.sh.tmpl` |
-
-### 窗口管理器
-
-| 软件 | 描述 | 安装脚本 |
-|------|------|----------|
-| **yabai** | 平铺式窗口管理器 | `run_once_install-yabai.sh.tmpl` |
-| **skhd** | 快捷键守护进程 | `run_once_install-skhd.sh.tmpl` |
-
-### 系统监控工具
-
-| 软件 | 描述 | 安装脚本 |
-|------|------|----------|
-| **btop** | 系统监控工具（htop 替代） | `run_once_install-common-tools.sh.tmpl` |
-| **fastfetch** | 系统信息展示工具（neofetch 替代） | `run_once_install-common-tools.sh.tmpl`；Ubuntu &lt; 24.10 为 PPA/Snap/.deb 回退 |
-
-## Windows 特有软件
-
-### 终端
-| 软件 | 描述 | 安装脚本 |
-|------|------|----------|
-| **Windows Terminal** | Windows 默认终端（替代 Alacritty），使用 Git Bash + Catppuccin Mocha 主题 + CaskaydiaCove Nerd Font | `run_on_windows/run_once_install-windows-terminal.sh.tmpl` |
-
-### Shell 环境
-
-| 软件 | 描述 | 安装脚本 |
-|------|------|----------|
-| **zsh** | Z shell（通过 MSYS2，可选） | `run_once_install-zsh.sh.tmpl` |
-| **oh-my-posh** | PowerShell 提示符工具 | `run_once_install-oh-my-posh.sh.tmpl` |
-
-### 系统监控工具
-
-| 软件 | 描述 | 安装脚本 |
-|------|------|----------|
-| **bottom** | 系统监控工具（btop 的 Windows 替代） | `run_once_install-common-tools.sh.tmpl` |
-
-## 配置文件
-
-### 通用配置
-
-| 配置文件 | 目标位置 | 源文件 |
-|----------|----------|--------|
-| **Bash 配置** | `~/.bashrc` | `.chezmoi/dot_bashrc.tmpl` |
-| **Zsh 配置** | `~/.zshrc` | `.chezmoi/dot_zshrc.tmpl` |
-| **Zsh Profile** | `~/.zprofile` | `.chezmoi/dot_zprofile` |
-| **Tmux 配置** | `~/.tmux.conf` | `.chezmoi/dot_tmux.conf` |
-| **Starship 配置** | `~/.config/starship/starship.toml` | `.chezmoi/dot_config/starship/starship.toml` |
-
-#### Tmux 插件（通过 TPM 管理）
-
-所有 tmux 插件通过 TPM (Tmux Plugin Manager) 管理，配置在 `~/.tmux.conf` 中声明。
-
-| 插件 | 描述 | 基本用法 |
-|------|------|----------|
-| **tmux-plugins/tpm** | TPM 插件管理器本身 | 必须第一个安装 |
-| **tmux-plugins/tmux-sensible** | 基础 tmux 设置，提供合理的默认配置 | 安装后自动生效 |
-| **catppuccin/tmux** | Catppuccin Mocha 主题 | 通过 `@catppuccin_flavor` 配置 |
-| **tmux-plugins/tmux-yank** | 改进复制粘贴功能，支持系统剪贴板集成 | 复制模式中按 `y` 复制到剪贴板 |
-| **tmux-plugins/tmux-resurrect** | 保存和恢复 tmux 会话状态 | `prefix + Ctrl-s` 保存，`prefix + Ctrl-r` 恢复 |
-| **tmux-plugins/tmux-continuum** | 自动保存和恢复会话 | 自动定期保存，tmux 启动时自动恢复 |
-
-**插件管理快捷键**：
-- 安装插件：`prefix + I`（大写 I）
-- 更新插件：`prefix + U`（大写 U）
-- 卸载插件：`prefix + alt + u`（小写 u）
-
-| 配置文件 | 目标位置 | 源文件 |
-|----------|----------|--------|
-| **Windows Terminal 配置** | `~/.config/windows-terminal/settings.json` | `.chezmoi/run_on_windows/dot_config/windows-terminal/settings.json.tmpl`（仅 Windows；同步脚本自动部署到 WT 实际路径） |
-| **Fish 配置** | `~/.config/fish/config.fish` | `.chezmoi/dot_config/fish/config.fish` |
-| **SSH 配置** | `~/.ssh/config` | `.chezmoi/dot_ssh/config.tmpl` |
-
-### Linux 特定配置
-
-| 配置文件 | 目标位置 | 源文件 |
-|----------|----------|--------|
-| **i3wm 配置** | `~/.config/i3/config` | `.chezmoi/run_on_linux/dot_config/i3/config` |
-
-### macOS 特定配置
-
-| 配置文件 | 目标位置 | 源文件 |
-|----------|----------|--------|
-| **Ghostty 配置** | `~/.config/ghostty/config` | `.chezmoi/run_on_darwin/dot_config/ghostty/config.tmpl` |
-| **Yabai 配置** | `~/.yabairc` | `.chezmoi/run_on_darwin/dot_yabairc` |
-| **skhd 配置** | `~/.skhdrc` | `.chezmoi/run_on_darwin/dot_skhdrc` |
-
-### Windows 特定配置
-
-| 配置文件 | 目标位置 | 源文件 |
-|----------|----------|--------|
-| **Git Bash Profile** | `~/.bash_profile` | `.chezmoi/run_on_windows/dot_bash_profile` |
-| **Git Bash RC** | `~/.bashrc` | `.chezmoi/run_on_windows/dot_bashrc` |
-| **Windows Terminal 配置** | `~/.config/windows-terminal/settings.json`（同步脚本自动部署到 WT 实际路径） | `.chezmoi/run_on_windows/dot_config/windows-terminal/settings.json.tmpl` |
-
-## 安装方式说明
-
-### 使用 chezmoi 自动安装
-
-所有软件通过 chezmoi 的 `run_once_` 脚本机制自动安装。首次运行 `chezmoi apply` 时，这些脚本会自动执行。
-
-```bash
-# 应用所有配置（包括安装脚本）
-chezmoi apply -v
-```
-
-### 手动安装
-
-如果需要手动安装某个软件，可以：
-
-1. **查看安装脚本**：
-   ```bash
-   chezmoi cat .chezmoi/run_once_install-[tool].sh.tmpl
-   ```
-
-2. **直接运行脚本**（不推荐，因为脚本可能依赖 chezmoi 环境）：
-   ```bash
-   bash .chezmoi/run_once_install-[tool].sh.tmpl
-   ```
-
-3. **使用包管理器**：
-   - Linux: `pacman -S`, `apt-get install`, `dnf install`
-   - macOS: `brew install`
-   - Windows: `winget install`
-
-## 包管理器映射
-
-### Linux
-
-| 发行版 | 包管理器 | 示例命令 |
-|--------|----------|----------|
-| Arch Linux | pacman | `sudo pacman -S package` |
-| Ubuntu/Debian | apt | `sudo apt-get install package` |
-| Fedora/CentOS/RHEL | dnf/yum | `sudo dnf install package` |
-
-### macOS
-
-| 包管理器 | 示例命令 |
-|----------|----------|
-| Homebrew | `brew install package` |
-
-### Windows
-
-| 包管理器 | 示例命令 |
-|----------|----------|
-| winget | `winget install --id=package.id` |
-| MSYS2 pacman | `pacman.exe -S package` |
-
-## SSH 配置管理
-
-### lazyssh
-
-**lazyssh** 是一个终端 SSH 管理器，可以方便地管理 SSH 配置：
-
-- **功能**：查看、添加、编辑、删除 SSH 服务器配置
-- **安装**：通过 `run_once_install-lazyssh.sh.tmpl` 一键安装（仅 Linux，按包管理器）
-- **使用**：运行 `lazyssh` 启动交互式界面
-- **配置同步**：修改后使用 `chezmoi re-add ~/.ssh/config` 同步到 chezmoi
-
-### SSH 配置文件管理
-
-SSH 配置文件（`~/.ssh/config`）已纳入 chezmoi 管理；Git 全局配置（`~/.gitconfig`）由 `dot_gitconfig.tmpl` 管理：
-
-- **SSH 源文件**：`.chezmoi/dot_ssh/config.tmpl`（模板，含 GitHub 443 及可选 ProxyCommand）
-- **Git 源文件**：`.chezmoi/dot_gitconfig.tmpl`
-- **目标位置**：`~/.ssh/config`、`~/.gitconfig`
-- **ProxyCommand 前置**：Windows 使用 Git 自带 connect.exe（绝对路径）；macOS 需 `brew install connect` 且 **必须写 connect 的绝对路径**（`/opt/homebrew/bin/connect` 或 `/usr/local/bin/connect`），否则 GUI 如 Obsidian Git 会报 connect: not found；Linux 需 nc/netcat-openbsd
-- **权限**：SSH config 自动设置为 600
-- **备份**：部署/修改前建议备份 `~/.ssh/config` 与 `~/.gitconfig`，使用 `scripts/common/deploy_utils/backup_ssh_config.sh`、`scripts/common/deploy_utils/backup_git_config.sh`
-- **部署**：使用 `scripts/common/deploy_utils/setup_ssh_config.sh` 部署 SSH 配置
-
-**首次纳入管理：**
-```bash
-# 1. 备份现有配置
-./scripts/common/deploy_utils/backup_ssh_config.sh
-
-# 2. 纳入 chezmoi 管理
-export CHEZMOI_SOURCE_DIR="$(pwd)/.chezmoi"
-chezmoi add ~/.ssh/config
-
-# 3. 应用配置
-chezmoi apply ~/.ssh/config
-chmod 600 ~/.ssh/config
-```
-
-**安全注意事项：**
-- SSH 配置文件不包含私钥，相对安全
-- 私钥文件（`id_*`）已在 `.gitignore` 和 `.chezmoiignore` 中排除
-- 保持仓库私有，不要公开包含 SSH 配置的仓库
-
-详细说明请参考：[chezmoi_use_guide.md](chezmoi_use_guide.md#ssh-配置管理)
-
-## 注意事项
-
-1. **首次安装**：所有 `run_once_` 脚本只会在首次 `chezmoi apply` 时执行一次
-2. **代理配置**：安装脚本支持通过环境变量 `PROXY` 配置代理
-3. **平台检测**：脚本会自动检测操作系统和包管理器
-4. **错误处理**：如果某个软件安装失败，脚本会继续安装其他软件
-5. **已安装检查**：脚本会检查软件是否已安装，避免重复安装
-6. **SSH 配置**：SSH 配置文件通过 chezmoi 管理，私钥文件不会被纳入管理
-
-## 更新日志
-
-- 2024-12-XX: 初始版本，整理所有软件清单
+## 维护规则
+
+- 新增/删除安装脚本时，必须同步更新本文档与 `scripts/chezmoi/install_helpers.sh` 的分类逻辑。
+- 涉及平台差异时，优先写“同一脚本内分支”与“run_on_* 目录约束”，避免重复列出同一软件。
+- `run_onchange_` 脚本属于配置同步行为，不计入“首次安装软件”统计，但需保留在脚本索引中。

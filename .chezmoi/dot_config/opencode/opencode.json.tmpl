@@ -2,41 +2,41 @@
     "$schema": "https://opencode.ai/config.json",
     "default_agent": "orchestrator-core",
     "instructions": [
-        "{file:.opencode/skills/common/code-review.md}",
-        "{file:.opencode/skills/common/secure-coding-basics.md}",
-        "{file:.opencode/skills/common/debug-troubleshoot.md}",
-        "{file:.opencode/skills/common/git-workflow.md}"
+        "{file:.opencode/skills/common/CODE-REVIEW.md}",
+        "{file:.opencode/skills/common/SECURE-CODING-BASICS.md}",
+        "{file:.opencode/skills/common/DEBUG-TROUBLESHOOT.md}",
+        "{file:.opencode/skills/common/GIT-WORKFLOW.md}"
     ],
     "agent": {
         "orchestrator-core": {
             "description": "核心编排 agent，负责任务拆解与结果汇总",
             "mode": "primary",
-            "prompt": "{file:.opencode/agents/orchestrator-core.md}"
+            "prompt": "{file:.opencode/agents/ORCHESTRATOR-CORE.md}"
         },
         "architect": {
             "description": "负责模块边界与架构决策",
             "mode": "subagent",
-            "prompt": "{file:.opencode/agents/architect.md}"
+            "prompt": "{file:.opencode/agents/ARCHITECT.md}"
         },
         "code-reviewer": {
             "description": "负责质量、安全与回归检查",
             "mode": "subagent",
-            "prompt": "{file:.opencode/agents/code-reviewer.md}"
+            "prompt": "{file:.opencode/agents/CODE-REVIEWER.md}"
         },
         "python-expert": {
             "description": "Python 自动化实现专家",
             "mode": "subagent",
-            "prompt": "{file:.opencode/agents/python-expert.md}"
+            "prompt": "{file:.opencode/agents/PYTHON-EXPERT.md}"
         },
         "rust-expert": {
             "description": "Rust 系统编程实现专家",
             "mode": "subagent",
-            "prompt": "{file:.opencode/agents/rust-expert.md}"
+            "prompt": "{file:.opencode/agents/RUST-EXPERT.md}"
         },
         "c-expert": {
             "description": "C 与嵌入式实现专家",
             "mode": "subagent",
-            "prompt": "{file:.opencode/agents/c-expert.md}"
+            "prompt": "{file:.opencode/agents/C-EXPERT.md}"
         }
     }
 }

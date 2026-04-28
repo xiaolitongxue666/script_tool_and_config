@@ -13,7 +13,7 @@ Personal software configuration and scripts collection for cross-platform develo
 ### Core Technologies
 - **Bash Scripting**: Primary scripting language for all automation
 - **chezmoi**: Dotfiles management and configuration deployment system
-- **Git Submodule**: For managing external configuration repositories (Neovim)
+- **Independent Neovim Repo**: Neovim config is cloned by run_once to `~/.config/nvim` (independent from this repository)
 
 ### Platform Support
 - **Windows 10/11**: Git Bash, MSYS2, winget, PowerShell
@@ -183,7 +183,7 @@ git config --global core.safecrlf true
 ```
 
 #### Neovim Config
-- Neovim config is cloned by run_once to `~/.config/nvim` (no submodule in repo)
+- Neovim config is cloned by run_once to `~/.config/nvim` and managed as an independent repository
 - Update: `cd ~/.config/nvim && git pull && ./install.sh`
 
 ## Domain Context

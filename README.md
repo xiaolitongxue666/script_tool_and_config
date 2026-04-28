@@ -70,11 +70,12 @@ install.sh
 | 文档 | 说明 |
 |------|------|
 | [docs/INSTALL_GUIDE.md](docs/INSTALL_GUIDE.md) | 一键安装与配置入口（推荐先看） |
-| [docs/os_setup_guide.md](docs/os_setup_guide.md) | Windows/macOS/Linux 分步安装指南 |
-| [docs/chezmoi_use_guide.md](docs/chezmoi_use_guide.md) | chezmoi 详细使用指南 |
+| [docs/README.md](docs/README.md) | docs 目录文档索引与维护说明 |
+| [docs/OS_SETUP_GUIDE.md](docs/OS_SETUP_GUIDE.md) | Windows/macOS/Linux 分步安装指南 |
+| [docs/CHEZMOI_USE_GUIDE.md](docs/CHEZMOI_USE_GUIDE.md) | chezmoi 详细使用指南 |
 | [docs/SOFTWARE_LIST.md](docs/SOFTWARE_LIST.md) | 完整软件清单与 run_once 对应关系 |
 | [scripts/linux/system_basic_env/INSTALL_STATUS.md](scripts/linux/system_basic_env/INSTALL_STATUS.md) | 所需软件安装与配置状态清单（验证项与命令） |
-| [docs/project_structure.md](docs/project_structure.md) | 详细项目结构说明 |
+| [docs/PROJECT_STRUCTURE.md](docs/PROJECT_STRUCTURE.md) | 详细项目结构说明 |
 | [AGENTS.md](AGENTS.md) | 代码代理开发指南 |
 | [docs/ENCODING_AND_LINE_ENDINGS.md](docs/ENCODING_AND_LINE_ENDINGS.md) | 文件编码与换行符规范 |
 | [scripts/common/deploy_utils/DEPLOYMENT_GUIDE.md](scripts/common/deploy_utils/DEPLOYMENT_GUIDE.md) | 部署流程（Windows/Arch） |
@@ -186,12 +187,12 @@ script_tool_and_config/
 ├── docs/                           # 文档目录
 │   ├── INSTALL_GUIDE.md            # 一键安装与首次配置
 │   ├── SOFTWARE_LIST.md            # 软件清单
-│   ├── project_structure.md        # 项目结构说明
+│   ├── PROJECT_STRUCTURE.md        # 项目结构说明
 │   └── ...
 └── logs/                           # 安装/部署日志（统一）
 ```
 
-详细结构见 [docs/project_structure.md](docs/project_structure.md)。
+详细结构见 [docs/PROJECT_STRUCTURE.md](docs/PROJECT_STRUCTURE.md)。
 
 ## 🔧 常用命令
 
@@ -299,9 +300,9 @@ git push
 - **软件安装检查**：已安装的软件跳过，未安装的软件自动安装
 - **详细日志输出**：显示每个步骤的详细状态和进度
 
-### Git Submodule 管理
+### Neovim 独立仓库管理
 
-Neovim 配置使用 Git Submodule 管理：
+Neovim 配置采用独立仓库方式，由 run_once_install-neovim-config 自动克隆到 `~/.config/nvim`：
 
 ```bash
 # 更新 Neovim 配置（配置位于 ~/.config/nvim）

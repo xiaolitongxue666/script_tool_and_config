@@ -300,7 +300,7 @@ ensure_directory() {
 │   ├── windows/                # Windows 特定脚本
 │   └── migration/              # 迁移脚本
 ├── docs/                       # 文档目录
-│   └── project_structure.md    # 项目结构权威文档
+│   └── PROJECT_STRUCTURE.md    # 项目结构权威文档
 └── openspec/                   # OpenSpec 规范驱动开发
 ```
 
@@ -731,7 +731,7 @@ git push
 
 ## 详细目录结构
 
-项目完整目录结构见 [docs/project_structure.md](docs/project_structure.md)。
+项目完整目录结构见 [docs/PROJECT_STRUCTURE.md](docs/PROJECT_STRUCTURE.md)。
 
 脚本目录概览：`scripts/` 下为 `common/`（deploy_utils、standalone_tool_script、project_tools、ffmpeg-magic、git_templates 等）、`linux/`、`darwin/`、`windows/`、`chezmoi/`、`migration/`。
 

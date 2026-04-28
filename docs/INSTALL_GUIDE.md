@@ -1,6 +1,6 @@
 # 安装与配置指南
 
-本指南为一键安装与首次配置的入口，各平台分步说明见 [os_setup_guide.md](os_setup_guide.md)。
+本指南为一键安装与首次配置的入口，各平台分步说明见 [OS_SETUP_GUIDE.md](OS_SETUP_GUIDE.md)。
 
 ## 各系统安装入口
 

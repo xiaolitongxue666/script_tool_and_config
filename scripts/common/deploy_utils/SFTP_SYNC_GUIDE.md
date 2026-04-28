@@ -220,7 +220,7 @@ cd /home/leonli/Code/DotfilesAndScript/script_tool_and_config
 
 **脚本功能**：
 - ✅ 检查操作系统
-- ✅ 初始化 Git Submodule（如果需要）
+- ✅ 初始化 Neovim 独立仓库（如需在远端使用 Neovim：克隆到 `~/.config/nvim` 并执行 install.sh）
 - ✅ 运行 `install.sh` 安装 chezmoi 等工具
 - ✅ 验证安装结果
 - ✅ 检查配置状态

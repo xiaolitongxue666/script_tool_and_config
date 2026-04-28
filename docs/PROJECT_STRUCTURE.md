@@ -44,11 +44,11 @@ script_tool_and_config/
 ├── README.md                         # 项目主文档
 ├── AGENTS.md                         # 代理/编码规范
 ├── docs/                             # 文档目录
-│   ├── project_structure.md          # 项目结构说明（本文件）
+│   ├── PROJECT_STRUCTURE.md          # 项目结构说明（本文件）
 │   ├── SOFTWARE_LIST.md              # 软件清单
 │   ├── ENCODING_AND_LINE_ENDINGS.md  # 编码和换行符规范
-│   ├── chezmoi_use_guide.md          # chezmoi 使用指南
-│   ├── os_setup_guide.md             # 操作系统设置指南
+│   ├── CHEZMOI_USE_GUIDE.md          # chezmoi 使用指南
+│   ├── OS_SETUP_GUIDE.md             # 操作系统设置指南
 │   ├── INSTALL_GUIDE.md              # 一键安装与首次配置入口
 │   ├── TEST_PLAN_NVIM_INDEPENDENT.md # Neovim 独立化测试计划
 │   └── ...
@@ -177,7 +177,7 @@ script_tool_and_config/
 │
 ├── openspec/                         # OpenSpec 规范驱动开发
 │   ├── AGENTS.md
-│   └── project.md
+│   └── PROJECT.md
 │
 ├── ai-unified-config/                 # AI 代理统一配置（如 OpenCode、Claude Code）
 ├── graphify-out/                      # Graphify 知识图谱分析缓存
@@ -194,7 +194,7 @@ script_tool_and_config/
 - **deploy.sh**: 快速部署入口脚本（需 chezmoi 已安装，含 Zsh/OMZ 预安装）
 - **README.md**: 项目主文档，包含快速开始、使用说明等
 - **AGENTS.md**: 代理与编码规范，包含代码风格、命名规范、最佳实践
-- **docs/**: 文档目录，含 project_structure.md（本文件）、SOFTWARE_LIST.md、INSTALL_GUIDE.md 等
+- **docs/**: 文档目录，含 PROJECT_STRUCTURE.md（本文件）、SOFTWARE_LIST.md、INSTALL_GUIDE.md 等
 - **.opencode/**: OpenCode 插件命令（openspec-apply、openspec-archive、openspec-proposal）
 - **ai-unified-config/**: AI 代理统一配置（跨 OpenCode、Claude Code 等）
 - **graphify-out/**: Graphify 知识图谱分析输出缓存
@@ -288,11 +288,11 @@ install.sh
 | `run_on_darwin/run_once_configure-homebrew.sh.tmpl` | Homebrew 配置 | 仅 macOS |
 | `run_on_darwin/run_once_install-connect.sh.tmpl` | connect (SSH 代理) | 仅 macOS |
 | `run_on_darwin/run_once_install-ghostty.sh.tmpl` | Ghostty 终端 | 仅 macOS |
-| `run_on_darwin/run_sync_ghostty_config_to_app_support.sh.tmpl` | Ghostty 配置同步 | 仅 macOS |
+| `run_on_darwin/run_onchange_sync_ghostty_config_to_app_support.sh.tmpl` | Ghostty 配置同步 | 仅 macOS |
 | `run_on_windows/run_once_install-windows-terminal.sh.tmpl` | Windows Terminal | 仅 Windows |
-| `run_on_windows/run_sync_windows_terminal_config.sh.tmpl` | WT 配置同步 | 仅 Windows |
+| `run_on_windows/run_onchange_sync_windows_terminal_config.sh.tmpl` | WT 配置同步 | 仅 Windows |
 
-**注意**：`run_sync_*` 类型的脚本每次 `chezmoi apply` 都会执行（非 run_once），用于确保配置文件同步到应用实际路径。
+**注意**：`run_onchange_*` 类型的脚本仅在脚本内容变化时执行（非 run_once），用于确保配置文件同步到应用实际路径并减少 `chezmoi status` 噪音。
 
 ### scripts/ 目录
 
