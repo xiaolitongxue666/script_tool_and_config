@@ -344,13 +344,13 @@ SSH 配置文件（`~/.ssh/config`）已纳入 chezmoi 管理；Git 全局配置
 - **目标位置**：`~/.ssh/config`、`~/.gitconfig`
 - **ProxyCommand 前置**：Windows 使用 Git 自带 connect.exe（绝对路径）；macOS 需 `brew install connect` 且 **必须写 connect 的绝对路径**（`/opt/homebrew/bin/connect` 或 `/usr/local/bin/connect`），否则 GUI 如 Obsidian Git 会报 connect: not found；Linux 需 nc/netcat-openbsd
 - **权限**：SSH config 自动设置为 600
-- **备份**：部署/修改前建议备份 `~/.ssh/config` 与 `~/.gitconfig`，使用 `scripts/common/utils/backup_ssh_config.sh`、`scripts/common/utils/backup_git_config.sh`
-- **部署**：使用 `scripts/common/utils/setup_ssh_config.sh` 部署 SSH 配置
+- **备份**：部署/修改前建议备份 `~/.ssh/config` 与 `~/.gitconfig`，使用 `scripts/common/deploy_utils/backup_ssh_config.sh`、`scripts/common/deploy_utils/backup_git_config.sh`
+- **部署**：使用 `scripts/common/deploy_utils/setup_ssh_config.sh` 部署 SSH 配置
 
 **首次纳入管理：**
 ```bash
 # 1. 备份现有配置
-./scripts/common/utils/backup_ssh_config.sh
+./scripts/common/deploy_utils/backup_ssh_config.sh
 
 # 2. 纳入 chezmoi 管理
 export CHEZMOI_SOURCE_DIR="$(pwd)/.chezmoi"

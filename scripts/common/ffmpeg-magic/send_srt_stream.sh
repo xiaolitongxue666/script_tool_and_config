@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # 设置默认参数值
 DEVICE_IP="192.168.10.11"

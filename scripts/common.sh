@@ -1,12 +1,12 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # ============================================
 # 通用脚本函数库
 # 提供颜色输出、日志记录、错误处理等功能
 # ============================================
 
-readonly PROGNAME=$(basename $0)
-readonly PROGDIR=$(readlink -m $(dirname $0) 2>/dev/null || cd "$(dirname "$0")" && pwd)
+readonly PROGNAME=$(basename "$0")
+readonly PROGDIR=$(cd "$(dirname "$0")" && pwd)
 readonly ARGS="$@"
 
 # ============================================

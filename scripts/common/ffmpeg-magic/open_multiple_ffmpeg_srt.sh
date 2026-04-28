@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # 默认值
 NUM_CHANNELS=5  # 要启动的 ffmpeg 进程数量

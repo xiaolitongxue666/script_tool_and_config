@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # ============================================
 # 通用安装函数库
@@ -66,7 +66,7 @@ detect_os_and_package_manager() {
     OS="$(uname -s)"
 
     if [[ "$OS" == "Darwin" ]]; then
-        PLATFORM="macos"
+        PLATFORM="darwin"
         if command -v brew &> /dev/null; then
             PACKAGE_MANAGER="brew"
         else
@@ -103,6 +103,25 @@ detect_os_and_package_manager() {
     fi
 
     echo "[INFO] 平台: $PLATFORM, 包管理器: $PACKAGE_MANAGER"
+}
+
+# 仅检测操作系统平台（不检测包管理器）
+detect_platform() {
+    OS="$(uname -s)"
+    if [[ "$OS" == "Darwin" ]]; then
+        PLATFORM="darwin"
+        PLATFORM_NAME="macOS"
+    elif [[ "$OS" == "Linux" ]]; then
+        PLATFORM="linux"
+        PLATFORM_NAME="Linux"
+    elif [[ "$OS" =~ ^(MINGW|MSYS|CYGWIN) ]]; then
+        PLATFORM="windows"
+        PLATFORM_NAME="Windows"
+    else
+        echo "[ERROR] Unsupported OS: $OS"
+        return 1
+    fi
+    echo "[INFO] Platform: $PLATFORM_NAME ($OS)"
 }
 
 # ============================================

@@ -39,14 +39,14 @@
 
 ```bash
 # 检查所有文件的编码和换行符
-./scripts/common/utils/check_and_fix_encoding.sh
+./scripts/common/standalone_tool_script/check_and_fix_encoding.sh
 ```
 
 ### 2. 规范化换行符脚本
 
 ```bash
 # 确保所有文件使用 LF 换行符
-./scripts/common/utils/ensure_lf_line_endings.sh
+./scripts/common/standalone_tool_script/ensure_lf_line_endings.sh
 ```
 
 ### 3. Git 规范化
@@ -155,6 +155,6 @@ find . -type f -name "*.sh" -exec grep -l $'\r' {} \;
 - `.gitattributes` - Git 换行符配置
 - `.editorconfig` - 编辑器配置
 - `.vscode/settings.json` - VS Code 配置
-- `scripts/common/utils/check_and_fix_encoding.sh` - 检查脚本
-- `scripts/common/utils/ensure_lf_line_endings.sh` - 规范化脚本
+- `scripts/common/standalone_tool_script/check_and_fix_encoding.sh` - 检查脚本
+- `scripts/common/standalone_tool_script/ensure_lf_line_endings.sh` - 规范化脚本
 

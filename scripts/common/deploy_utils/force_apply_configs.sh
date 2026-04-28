@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # ============================================
 # 强制应用配置文件
@@ -249,7 +249,7 @@ if [ "$all_exist" = true ]; then
     log_success "所有关键配置文件都已存在！"
 else
     log_warning "部分配置文件仍缺失"
-    log_info "建议运行: ./scripts/common/utils/diagnose_deployment.sh 进行诊断"
+    log_info "建议运行: ./scripts/common/deploy_utils/diagnose_deployment.sh 进行诊断"
 fi
 
 end_script

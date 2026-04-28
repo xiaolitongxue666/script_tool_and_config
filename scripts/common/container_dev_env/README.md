@@ -508,7 +508,7 @@ git clone git@github.com:xiaolitongxue666/nvim.git ~/.config/nvim
 如果 Neovim 配置安装失败，可能的原因：
 
 1. **换行符问题**: 文件包含 CRLF 换行符
-   - 解决：运行 `./scripts/common/utils/ensure_lf_line_endings.sh` 规范化换行符
+   - 解决：运行 `./scripts/common/standalone_tool_script/ensure_lf_line_endings.sh` 规范化换行符
    - 或在 Dockerfile 中添加换行符转换
 
 2. **Neovim 配置目录不存在**

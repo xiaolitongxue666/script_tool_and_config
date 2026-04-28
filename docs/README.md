@@ -38,8 +38,8 @@
 以下文档位于各脚本目录，从本目录可快速跳转：
 
 - [scripts/linux/system_basic_env/INSTALL_STATUS.md](../scripts/linux/system_basic_env/INSTALL_STATUS.md) — 当前环境验证清单与检查命令（WSL/Ubuntu、Arch）
-- [scripts/common/utils/DEPLOYMENT_GUIDE.md](../scripts/common/utils/DEPLOYMENT_GUIDE.md) — 部署流程（Windows / Arch）
-- [scripts/common/utils/MANUAL_ZSH_SETUP_GUIDE.md](../scripts/common/utils/MANUAL_ZSH_SETUP_GUIDE.md) — 手动 Zsh/Oh My Zsh 配置指南
+- [scripts/common/deploy_utils/DEPLOYMENT_GUIDE.md](../scripts/common/deploy_utils/DEPLOYMENT_GUIDE.md) — 部署流程（Windows / Arch）
+- [scripts/common/deploy_utils/MANUAL_ZSH_SETUP_GUIDE.md](../scripts/common/deploy_utils/MANUAL_ZSH_SETUP_GUIDE.md) — 手动 Zsh/Oh My Zsh 配置指南
 
 ## 多 OS 与 WSL
 

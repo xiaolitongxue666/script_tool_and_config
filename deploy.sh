@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # ============================================
 # 快速部署脚本
@@ -21,18 +21,23 @@ else
     function error_exit() { log_error "$1"; exit "${2:-1}"; }
 fi
 
+# 加载通用安装函数库（提供 detect_platform 等）
+COMMON_INSTALL_SH="${SCRIPT_DIR}/scripts/chezmoi/common_install.sh"
+if [ -f "$COMMON_INSTALL_SH" ]; then
+    source "$COMMON_INSTALL_SH"
+fi
+
 start_script "快速部署"
 
 # ============================================
 # 确保子脚本有执行权限
 # ============================================
-log_info "检查并设置子脚本执行权限..."
+log_info "Checking and setting execute permissions for sub-scripts..."
 
-DIAGNOSE_SCRIPT="${SCRIPT_DIR}/scripts/common/utils/diagnose_deployment.sh"
-FORCE_APPLY_SCRIPT="${SCRIPT_DIR}/scripts/common/utils/force_apply_configs.sh"
-CHECK_ZSH_OMZ_SCRIPT="${SCRIPT_DIR}/scripts/common/utils/check_zsh_omz.sh"
-FIX_ZSH_OMZ_SCRIPT="${SCRIPT_DIR}/scripts/common/utils/fix_zsh_omz.sh"
-FIX_LOCK_SCRIPT="${SCRIPT_DIR}/scripts/common/utils/fix_chezmoi_lock.sh"
+DIAGNOSE_SCRIPT="${SCRIPT_DIR}/scripts/common/deploy_utils/diagnose_deployment.sh"
+FORCE_APPLY_SCRIPT="${SCRIPT_DIR}/scripts/common/deploy_utils/force_apply_configs.sh"
+CHECK_ZSH_OMZ_SCRIPT="${SCRIPT_DIR}/scripts/common/deploy_utils/check_zsh_omz.sh"
+FIX_LOCK_SCRIPT="${SCRIPT_DIR}/scripts/common/deploy_utils/fix_chezmoi_lock.sh"
 
 if [ -f "$DIAGNOSE_SCRIPT" ]; then
     if [ ! -x "$DIAGNOSE_SCRIPT" ]; then
@@ -61,23 +66,6 @@ else
     log_warning "Zsh/OMZ 检查脚本不存在: $CHECK_ZSH_OMZ_SCRIPT"
 fi
 
-if [ -f "$FIX_ZSH_OMZ_SCRIPT" ]; then
-    if [ ! -x "$FIX_ZSH_OMZ_SCRIPT" ]; then
-        log_info "设置执行权限: $FIX_ZSH_OMZ_SCRIPT"
-        chmod +x "$FIX_ZSH_OMZ_SCRIPT"
-    fi
-else
-    log_warning "Zsh/OMZ 修复脚本不存在: $FIX_ZSH_OMZ_SCRIPT"
-fi
-
-FIX_ZSH_OMZ_COMPLETE_SCRIPT="${SCRIPT_DIR}/scripts/common/utils/fix_zsh_omz_complete.sh"
-if [ -f "$FIX_ZSH_OMZ_COMPLETE_SCRIPT" ]; then
-    if [ ! -x "$FIX_ZSH_OMZ_COMPLETE_SCRIPT" ]; then
-        log_info "设置执行权限: $FIX_ZSH_OMZ_COMPLETE_SCRIPT"
-        chmod +x "$FIX_ZSH_OMZ_COMPLETE_SCRIPT"
-    fi
-fi
-
 if [ -f "$FIX_LOCK_SCRIPT" ]; then
     if [ ! -x "$FIX_LOCK_SCRIPT" ]; then
         log_info "设置执行权限: $FIX_LOCK_SCRIPT"
@@ -95,7 +83,7 @@ fi
 # ============================================
 # 确保 chezmoi 未占用（非交互，与 install.sh 一致）
 # ============================================
-ENSURE_UNLOCKED="${SCRIPT_DIR}/scripts/common/utils/ensure_chezmoi_unlocked.sh"
+ENSURE_UNLOCKED="${SCRIPT_DIR}/scripts/common/deploy_utils/ensure_chezmoi_unlocked.sh"
 if [ -f "$ENSURE_UNLOCKED" ]; then
     [ ! -x "$ENSURE_UNLOCKED" ] && chmod +x "$ENSURE_UNLOCKED"
     bash "$ENSURE_UNLOCKED" || true
@@ -104,19 +92,23 @@ fi
 # ============================================
 # 检测操作系统
 # ============================================
-OS="$(uname -s)"
-if [[ "$OS" == "Darwin" ]]; then
-    PLATFORM="darwin"
-    PLATFORM_NAME="macOS"
-elif [[ "$OS" == "Linux" ]]; then
-    PLATFORM="linux"
-    PLATFORM_NAME="Linux"
-elif [[ "$OS" =~ ^(MINGW|MSYS|CYGWIN) ]]; then
-    PLATFORM="windows"
-    PLATFORM_NAME="Windows"
+if type detect_platform &> /dev/null; then
+    detect_platform || error_exit "Unsupported operating system"
 else
-    PLATFORM="unknown"
-    PLATFORM_NAME="Unknown"
+    OS="$(uname -s)"
+    if [[ "$OS" == "Darwin" ]]; then
+        PLATFORM="darwin"
+        PLATFORM_NAME="macOS"
+    elif [[ "$OS" == "Linux" ]]; then
+        PLATFORM="linux"
+        PLATFORM_NAME="Linux"
+    elif [[ "$OS" =~ ^(MINGW|MSYS|CYGWIN) ]]; then
+        PLATFORM="windows"
+        PLATFORM_NAME="Windows"
+    else
+        PLATFORM="unknown"
+        PLATFORM_NAME="Unknown"
+    fi
 fi
 
 log_info "检测到操作系统: $PLATFORM_NAME ($OS)"
@@ -751,18 +743,8 @@ if [ -f "$CHECK_ZSH_OMZ_SCRIPT" ] && [ -x "$CHECK_ZSH_OMZ_SCRIPT" ]; then
     fi
 
     if [ "$NEEDS_FIX" = true ]; then
-        log_warning "检查发现问题，自动运行修复脚本..."
-
-        # 优先使用完整修复脚本
-        if [ -f "$FIX_ZSH_OMZ_COMPLETE_SCRIPT" ] && [ -x "$FIX_ZSH_OMZ_COMPLETE_SCRIPT" ]; then
-            log_info "使用完整修复脚本..."
-            "$FIX_ZSH_OMZ_COMPLETE_SCRIPT" || log_warning "完整修复脚本执行失败"
-        elif [ -f "$FIX_ZSH_OMZ_SCRIPT" ] && [ -x "$FIX_ZSH_OMZ_SCRIPT" ]; then
-            log_info "使用标准修复脚本..."
-            "$FIX_ZSH_OMZ_SCRIPT" || log_warning "修复脚本执行失败"
-        else
-            log_warning "修复脚本不可用"
-        fi
+        log_warning "检查发现问题"
+        log_info "请运行 ./scripts/common/deploy_utils/manual_zsh_setup.sh 进行手动修复"
 
         # 修复后再次检查
         log_info "修复后再次检查..."
@@ -796,7 +778,7 @@ log_info "  - 如果修改了 Shell 配置（如 ~/.zshrc），运行: source ~/
 log_info "  - 切换到 zsh: chsh -s \$(which zsh) 然后重新打开终端"
 log_info "  - 查看配置状态: ./scripts/manage_dotfiles.sh status"
 log_info "  - 查看配置差异: ./scripts/manage_dotfiles.sh diff"
-log_info "  - 检查 Zsh/OMZ: ./scripts/common/utils/check_zsh_omz.sh"
+log_info "  - 检查 Zsh/OMZ: ./scripts/common/deploy_utils/check_zsh_omz.sh"
 
 end_script
 

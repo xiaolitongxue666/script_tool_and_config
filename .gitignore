@@ -177,10 +177,10 @@ scripts/common/project_tools/cpp_project_generator/CMakeLists.txt
 scripts/common/project_tools/cpp_project_generator/.gitignore
 
 # 补丁示例的备份文件
-scripts/linux/patch_examples/*.bak
+scripts/common/patch_examples/*.bak
 
 # Redis 配置备份
-scripts/linux/auto_edit_redis_config/redis.conf.bak
+scripts/common/auto_edit_redis_config/redis.conf.bak
 
 # Windows 基础工具安装脚本生成的文件
 scripts/windows/system_basic_env/log
@@ -316,7 +316,7 @@ temp/
 # - nvim 测试在 ~/.config/nvim 或临时目录，不涉及本仓库路径
 # 其他临时测试脚本应被忽略：
 scripts/common/container_dev_env/test_*.sh
-scripts/common/utils/test_*.sh
+scripts/common/deploy_utils/test_*.sh
 scripts/**/TEST_*.md
 scripts/**/*_test_*.sh
 # VS Code SFTP 配置（可能包含敏感信息）
@@ -355,8 +355,8 @@ scripts/common/container_dev_env/*.tmp
 scripts/common/container_dev_env/*.log
 
 # 编码检查和修复脚本生成的临时文件
-scripts/common/utils/*.tmp
-scripts/common/utils/*.bak
+scripts/common/deploy_utils/*.tmp
+scripts/common/deploy_utils/*.bak
 
 # 误产生的根目录文件名为 -（如重定向或保存错误）
 /-

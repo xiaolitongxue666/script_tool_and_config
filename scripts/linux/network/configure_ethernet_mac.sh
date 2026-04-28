@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # 根据产品名称获取 MAC 地址的函数
 get_mac_address() {

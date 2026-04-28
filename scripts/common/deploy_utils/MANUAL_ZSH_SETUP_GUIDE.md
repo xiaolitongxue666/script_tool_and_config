@@ -10,7 +10,7 @@
 
 ```bash
 # 在项目根目录运行
-./scripts/common/utils/manual_zsh_setup.sh
+./scripts/common/deploy_utils/manual_zsh_setup.sh
 ```
 
 ### 方法 2: 手动执行步骤
@@ -185,6 +185,6 @@ cp .chezmoi/dot_zshrc.tmpl ~/.zshrc
 ## 参考
 
 - `deploy.sh` - 主部署脚本
-- `scripts/common/utils/check_zsh_omz.sh` - 检查脚本
+- `scripts/common/deploy_utils/check_zsh_omz.sh` - 检查脚本
 - [INSTALL_GUIDE.md](../../../docs/INSTALL_GUIDE.md) - Oh My Zsh 插件未安装时的故障排除与补救命令（手动 clone 四插件）
 

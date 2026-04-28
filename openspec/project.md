@@ -138,8 +138,8 @@ end_script
 bash -n script.sh
 
 # Verify encoding and line endings
-./scripts/common/utils/check_and_fix_encoding.sh
-./scripts/common/utils/ensure_lf_line_endings.sh
+./scripts/common/standalone_tool_script/check_and_fix_encoding.sh
+./scripts/common/standalone_tool_script/ensure_lf_line_endings.sh
 
 # Test specific functionality
 ./scripts/linux/system_basic_env/test_mirrors.sh

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # 参考链接:
 # https://stackoverflow.com/questions/71483708/shell-script-output-formatting-echo

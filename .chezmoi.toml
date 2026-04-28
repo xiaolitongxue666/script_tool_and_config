@@ -1,3 +1,12 @@
+# ============================================
+# chezmoi 用户级配置文件（根目录）
+# 此文件定义 chezmoi 的用户级配置，包括 sourceDir 和模板数据（data）
+# 与 .chezmoi/chezmoi.toml（chezmoi source repo 配置）不同：
+# - 本文件是 chezmoi 运行时读取的用户配置
+# - .chezmoi/chezmoi.toml 是 chezmoi source repo 自身的配置
+# 两份配置服务于不同目的，均需保留
+# ============================================
+
 [source]
     # 源状态目录：使用项目内目录模式
     # 配置文件存储在项目根目录的 .chezmoi/ 目录中

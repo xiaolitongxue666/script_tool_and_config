@@ -28,7 +28,7 @@
 
 ```bash
 # 在 Git Bash 中运行
-./scripts/common/utils/sync_to_remote.sh
+./scripts/common/deploy_utils/sync_to_remote.sh
 ```
 
 若提示 rsync 未安装：脚本会自动使用备用方案（tar + ssh），或在 MSYS2 中运行 `pacman -S rsync`。
@@ -37,7 +37,7 @@
 
 ```bash
 # 确保已安装 rsync（Arch: sudo pacman -S rsync，Ubuntu/Debian: sudo apt-get install rsync，macOS: brew install rsync）
-./scripts/common/utils/sync_to_remote.sh
+./scripts/common/deploy_utils/sync_to_remote.sh
 ```
 
 ### 配置参数
@@ -48,7 +48,7 @@
 export REMOTE_HOST="192.168.1.109"
 export REMOTE_USER="leonli"
 export REMOTE_PATH="/home/leonli/Code/DotfilesAndScript/script_tool_and_config"
-./scripts/common/utils/sync_to_remote.sh
+./scripts/common/deploy_utils/sync_to_remote.sh
 ```
 
 ### 远端初始化
@@ -57,7 +57,7 @@ export REMOTE_PATH="/home/leonli/Code/DotfilesAndScript/script_tool_and_config"
 
 ```bash
 cd /home/leonli/Code/DotfilesAndScript/script_tool_and_config
-./scripts/common/utils/remote_init.sh
+./scripts/common/deploy_utils/remote_init.sh
 # 或直接运行
 ./install.sh
 ```
@@ -144,7 +144,7 @@ SFTP 配置已优化，自动忽略以下文件：
 
 ```bash
 # 在项目根目录运行
-./scripts/common/utils/sync_to_remote.sh
+./scripts/common/deploy_utils/sync_to_remote.sh
 ```
 
 **脚本功能**：
@@ -159,7 +159,7 @@ export REMOTE_HOST="192.168.1.109"
 export REMOTE_USER="leonli"
 export REMOTE_PATH="/home/leonli/Code/DotfilesAndScript/script_tool_and_config"
 
-./scripts/common/utils/sync_to_remote.sh
+./scripts/common/deploy_utils/sync_to_remote.sh
 ```
 
 ## 同步脚本
@@ -171,7 +171,7 @@ export REMOTE_PATH="/home/leonli/Code/DotfilesAndScript/script_tool_and_config"
 **使用方法**：
 ```bash
 cd /path/to/script_tool_and_config
-./scripts/common/utils/sync_to_remote.sh
+./scripts/common/deploy_utils/sync_to_remote.sh
 ```
 
 **特点**：
@@ -215,7 +215,7 @@ cd /path/to/script_tool_and_config
 ```bash
 # 在远端 Arch Linux 上
 cd /home/leonli/Code/DotfilesAndScript/script_tool_and_config
-./scripts/common/utils/remote_init.sh
+./scripts/common/deploy_utils/remote_init.sh
 ```
 
 **脚本功能**：
@@ -241,14 +241,14 @@ cd /home/leonli/Code/DotfilesAndScript/script_tool_and_config
    # Ctrl+Shift+P -> SFTP: Upload Project
 
    # 方法二：使用同步脚本
-   ./scripts/common/utils/sync_to_remote.sh
+   ./scripts/common/deploy_utils/sync_to_remote.sh
    ```
 
 2. **在远端 Arch Linux 上初始化**
    ```bash
    ssh leonli@192.168.1.109
    cd /home/leonli/Code/DotfilesAndScript/script_tool_and_config
-   ./scripts/common/utils/remote_init.sh
+   ./scripts/common/deploy_utils/remote_init.sh
    # 或直接运行
    ./install.sh
    ```
@@ -306,7 +306,7 @@ cd /home/leonli/Code/DotfilesAndScript/script_tool_and_config
 **解决**：
 1. 确认 `.chezmoi/` 不在 ignore 列表中
 2. 使用 `SFTP: Upload Folder` 手动上传 `.chezmoi/` 目录
-3. 或使用同步脚本：`./scripts/common/utils/sync_to_remote.sh`
+3. 或使用同步脚本：`./scripts/common/deploy_utils/sync_to_remote.sh`
 
 ### Q4: 远端初始化失败
 

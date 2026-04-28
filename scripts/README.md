@@ -5,9 +5,9 @@
 ## 目录结构
 
 - **common.sh**、**README.md**（本文件）
-- **common/**：跨平台脚本（utils、project_tools、ffmpeg-magic、git_templates、patch_examples、shc、auto_edit_redis_config、container_dev_env 等）
-- **linux/**：Linux 专用（system_basic_env、network、hardware）
-- **macos/**：macOS 专用
+- **common/**：跨平台脚本（deploy_utils、standalone_tool_script、project_tools、ffmpeg-magic、git_templates、patch_examples、shc、auto_edit_redis_config、container_dev_env 等）
+- **linux/**：Linux 专用（system_basic_env、network）
+- **darwin/**：macOS 专用
 - **windows/**：Windows 专用（windows_scripts、system_basic_env）
 - **chezmoi/**、**migration/**
 
@@ -21,7 +21,7 @@
 
 ### macOS 专用脚本
 
-位于 `macos/` 目录（预留，目前为空）。
+位于 `darwin/` 目录（预留，目前为空）。
 
 ### Linux 专用脚本
 
@@ -33,7 +33,8 @@
 ### 跨平台脚本
 
 跨平台脚本位于 `common/` 目录下，可在多个系统使用：
-- **utils/**: 通用工具脚本
+- **deploy_utils/**: 部署辅助脚本
+- **standalone_tool_script/**: 独立工具脚本
 - **project_tools/**: 项目生成和管理工具
 - **ffmpeg-magic/**: FFmpeg 相关脚本（多路推流、音频拼接/混音、SRT 推流、Netint 安装等）
 - **git_templates/**: Git 模板和配置

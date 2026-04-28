@@ -8,8 +8,8 @@
 
 ```bash
 # 1. 备份现有配置（SSH + Git）
-./scripts/common/utils/backup_ssh_config.sh
-./scripts/common/utils/backup_git_config.sh
+./scripts/common/deploy_utils/backup_ssh_config.sh
+./scripts/common/deploy_utils/backup_git_config.sh
 
 # 2. 将配置纳入 chezmoi 管理
 export CHEZMOI_SOURCE_DIR="$(pwd)/.chezmoi"
@@ -34,7 +34,7 @@ git push
 
 ```bash
 # 使用部署脚本（推荐）
-./scripts/common/utils/setup_ssh_config.sh
+./scripts/common/deploy_utils/setup_ssh_config.sh
 
 # 或手动部署
 mkdir -p ~/.ssh
@@ -75,7 +75,7 @@ chezmoi apply ~/.ssh/config
 - **macOS**：系统 nc 无代理转发能力，需先安装 `connect`（`brew install connect`，或首次 `chezmoi apply` 时由 `run_once_install-connect` 自动安装）。**必须使用 connect 的绝对路径**（由 `macos_connect_path` 指定）：Apple Silicon 多为 `/opt/homebrew/bin/connect`，Intel/旧 Homebrew 多为 `/usr/local/bin/connect`。若写为 `connect` 而不写路径，从 Dock/Spotlight 启动的 GUI 应用（如 Obsidian Git 插件）因 PATH 不含该目录会报 `exec: connect: not found` 导致 push 失败。代理类型由 `macos_proxy_connect_opt` 控制：`-H` 为 HTTP 代理（如 Clash），`-S` 为 SOCKS。
 - **Linux**：ProxyCommand 使用 `nc -X connect -x ...`，需安装 netcat-openbsd（或发行版等价包）；若报错请安装后重试。
 
-若当前已有 `~/.ssh/config`，请先备份再应用或手动合并模板内容。Git 全局配置由 `dot_gitconfig.tmpl` 管理，应用前建议备份 `~/.gitconfig`（可使用 `./scripts/common/utils/backup_git_config.sh`）。
+若当前已有 `~/.ssh/config`，请先备份再应用或手动合并模板内容。Git 全局配置由 `dot_gitconfig.tmpl` 管理，应用前建议备份 `~/.gitconfig`（可使用 `./scripts/common/deploy_utils/backup_git_config.sh`）。
 
 ## 更多信息
 

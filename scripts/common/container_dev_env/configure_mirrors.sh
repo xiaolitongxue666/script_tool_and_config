@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # 配置镜像源脚本（用于 Dockerfile）
 
 PROXY="${PROXY:-}"

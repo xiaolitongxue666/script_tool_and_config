@@ -1,3 +1,12 @@
+# ============================================
+# chezmoi source repo 配置文件（.chezmoi/ 目录内）
+# 此文件是 chezmoi source repo 自身的配置，包含 sourceDir、data、git 设置
+# 与根目录 .chezmoi.toml（chezmoi 用户级配置）不同：
+# - 本文件在 chezmoi source repo 中，随仓库版本控制
+# - 根目录 .chezmoi.toml 是 chezmoi 运行时读取的用户级配置
+# 两份配置服务于不同目的，均需保留
+# ============================================
+
 [source]
     sourceDir = ".chezmoi"
 

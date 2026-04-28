@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # 运行命令的次数
 NUM_CHANNELS=5

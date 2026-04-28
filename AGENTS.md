@@ -2,6 +2,31 @@
 
 本文件包含面向该 shell 脚本和 dotfiles 仓库的编码代理指南。
 
+## 项目两大组成部分
+
+本项目包含两类完全不同的脚本，修改时必须严格区分：
+
+### 一、独立工具脚本 (Standalone Tools)
+
+位置：`scripts/common/standalone_tool_script/`、`project_tools/`、`ffmpeg-magic/`、`git_templates/`、`shc/`、`patch_examples/`、`auto_edit_redis_config/`
+
+- 通用独立工具，与项目部署/配置无关，每个脚本可单独使用
+- 不依赖 chezmoi 或项目其他部署设施
+- **永远不要删除** — 它们是项目的核心资产之一，不是冗余代码
+
+### 二、多系统部署和配置工具 (Deployment & Configuration)
+
+位置：`install.sh`、`deploy.sh`、`scripts/chezmoi/`、`scripts/common/deploy_utils/`、`.chezmoi/`
+
+- 自动检测 OS，安装该 OS 所需的工具软件
+- 通过 chezmoi 模板生成配置文件并部署到正确位置
+- 中间使用 `deploy_utils/` 辅助脚本完成备份、诊断、同步等操作
+- **删除冗余仅限此类**：废弃安装脚本、重复逻辑、死引用
+
+### 核心使用场景
+
+新操作系统 → `./install.sh` 安装该 OS 所需工具软件 → chezmoi 模板渲染配置文件 → 部署到 `~/` 正确位置 → 使用 `deploy_utils/` 完成备份、诊断、同步
+
 ## 构建/检查/测试命令
 
 ### 脚本验证
@@ -11,10 +36,10 @@
 bash -n <script>.sh
 
 # 验证编码和换行符
-./scripts/common/utils/check_and_fix_encoding.sh
+./scripts/common/standalone_tool_script/check_and_fix_encoding.sh
 
 # 规范化换行符为 LF（Windows 脚本除外）
-./scripts/common/utils/ensure_lf_line_endings.sh
+./scripts/common/standalone_tool_script/ensure_lf_line_endings.sh
 
 # 测试特定功能
 ./scripts/linux/system_basic_env/test_mirrors.sh
@@ -33,13 +58,48 @@ chezmoi apply -v           # 应用更改
 一键安装后可选生成 checkhealth 日志并据此修复：
 
 ```bash
-./scripts/common/utils/nvim_checkhealth_to_log.sh   # 生成 nvim_checkhealth.log
+./scripts/common/deploy_utils/nvim_checkhealth_to_log.sh   # 生成 nvim_checkhealth.log
 # 查看 log 中 ERROR/WARNING，按 ~/.config/nvim 内 README 或上游 nvim 仓库「常见 checkhealth 问题与处理」修复
 ```
 
 ### 测试
 
 无自动化测试。手动运行 `test_*.sh` 脚本。nvim 独立化相关改动后，可按 [docs/TEST_PLAN_NVIM_INDEPENDENT.md](docs/TEST_PLAN_NVIM_INDEPENDENT.md) 做手动验证。
+
+## 安装流程
+
+### 各系统入口
+
+| 系统 | 入口脚本 | 说明 |
+|------|---------|------|
+| Linux | `./install.sh` | 自动检测发行版和 WSL |
+| macOS | `./install.sh` | 需先安装 Homebrew |
+| Windows | `./install.sh`（Git Bash）或 `scripts/windows/install_with_chezmoi.bat` | BAT 需管理员权限 |
+
+### `./install.sh` 调用链
+
+```
+install.sh
+  [1/5] scripts/chezmoi/install_chezmoi.sh      安装 chezmoi
+  [2/5] 写入 ~/.config/chezmoi/chezmoi.toml      初始化 chezmoi 环境
+  [3/5] chezmoi apply -v --force                 核心部署
+         执行 .chezmoi/run_once_install-*.sh.tmpl （跨平台软件）
+         执行 .chezmoi/run_on_{linux,darwin,windows}/ （平台特定软件）
+  [4/5] scripts/chezmoi/install_helpers.sh       检查软件安装状态
+  [5/5] scripts/chezmoi/verify_installation.sh   验证安装结果
+```
+
+### run_once 脚本分类
+
+- **跨平台**：`run_once_install-common-tools`、`-neovim`、`-zsh`、`-tmux`、`-starship`、`-nerd-fonts` 等
+- **Arch Linux 独有**：`run_on_linux/run_once_configure-pacman`、`run_once_install-arch-base-packages`、`run_once_install-aur-helper`
+- **macOS 独有**：`run_on_darwin/run_once_configure-homebrew`、`run_once_install-ghostty`、`run_once_install-yabai` 等
+- **Windows 独有**：`run_on_windows/run_once_install-windows-terminal`、`run_once_install-oh-my-posh`
+
+### 辅助部署
+
+- `./deploy.sh`：快速重新部署，要求 chezmoi 已安装，包含 Zsh/OMZ 安装和诊断
+- `scripts/manage_dotfiles.sh`：配置管理入口（status/diff/apply/edit）
 
 ## 代码风格指南
 
@@ -206,24 +266,30 @@ ensure_directory() {
 .
 ├── AGENTS.md                   # 本文件
 ├── README.md                   # 项目说明
-├── chezmoi.yaml               # Chezmoi 主配置
-├── scripts/                   # 所有脚本
-│   ├── common.sh              # 公共函数库
-│   ├── linux/                 # Linux 特定脚本
-│   │   ├── system_basic_env/  # 系统基础环境配置
-│   │   ├── dev_tools/         # 开发工具安装
-│   │   └── user_config/       # 用户配置
-│   ├── darwin/                # macOS 特定脚本
-│   ├── windows/               # Windows 特定脚本
-│   ├── chezmoi/               # Chezmoi 相关工具
-│   └── common/                # 平台无关通用脚本
-│       └── utils/             # 工具函数
-├── dotfiles/                  # 点文件（通过 chezmoi 管理）
-│   ├── run_on_linux/          # Linux 特定配置
-│   ├── run_on_darwin/         # macOS 特定配置
-│   ├── run_on_windows/        # Windows 特定配置
-│   └── nvim/                  # Neovim 为独立项目，由 run_once 克隆到 ~/.config/nvim，不在此仓库
-└── docs/                      # 文档目录
+├── install.sh                  # 一键安装入口
+├── deploy.sh                   # 快速部署入口
+├── .chezmoi/                   # chezmoi 源状态（配置模板）
+├── .chezmoi.toml               # chezmoi 用户级配置（根目录）
+├── scripts/                    # 所有脚本
+│   ├── common.sh               # 公共函数库
+│   ├── manage_dotfiles.sh      # dotfiles 管理入口
+│   ├── chezmoi/                # chezmoi 相关工具（安装、验证、诊断）
+│   ├── common/                 # 跨平台通用脚本
+│   │   ├── deploy_utils/       # 部署辅助（备份、诊断、SSH/Zsh 配置）
+│   │   ├── standalone_tool_script/  # 独立工具脚本
+│   │   ├── container_dev_env/  # Docker 容器开发环境
+│   │   ├── project_tools/      # 项目生成和管理工具
+│   │   ├── ffmpeg-magic/       # FFmpeg 相关脚本
+│   │   └── ...
+│   ├── linux/                  # Linux 特定脚本
+│   │   ├── system_basic_env/   # 系统基础环境配置
+│   │   └── network/            # 网络配置
+│   ├── darwin/                 # macOS 特定脚本
+│   ├── windows/                # Windows 特定脚本
+│   └── migration/              # 迁移脚本
+├── docs/                       # 文档目录
+│   └── project_structure.md    # 项目结构权威文档
+└── openspec/                   # OpenSpec 规范驱动开发
 ```
 
 ## 常用工具函数
@@ -639,8 +705,8 @@ sudo ./scripts/linux/system_basic_env/install_new_software.sh
 ### 4. 验证编码和换行符
 
 ```bash
-./scripts/common/utils/check_and_fix_encoding.sh
-./scripts/common/utils/ensure_lf_line_endings.sh
+./scripts/common/standalone_tool_script/check_and_fix_encoding.sh
+./scripts/common/standalone_tool_script/ensure_lf_line_endings.sh
 ```
 
 ### 5. 提交更改
@@ -655,7 +721,7 @@ git push
 
 项目完整目录结构见 [docs/project_structure.md](docs/project_structure.md)。
 
-脚本目录概览：`scripts/` 下为 `common/`（utils、project_tools、ffmpeg-magic、git_templates 等）、`linux/`、`macos/`、`windows/`、`chezmoi/`、`migration/`。
+脚本目录概览：`scripts/` 下为 `common/`（deploy_utils、standalone_tool_script、project_tools、ffmpeg-magic、git_templates 等）、`linux/`、`darwin/`、`windows/`、`chezmoi/`、`migration/`。
 
 ## 脚本分类和命名规范
 
@@ -664,7 +730,7 @@ git push
 | ---------- | -------------------------- | -------------------- | ----------------------------- |
 | 系统安装       | `linux/system_basic_env/`  | `install_<软件名>.sh`   | `install_neovim.sh`           |
 | 系统配置       | `linux/system_basic_env/`  | `configure_<配置名>.sh` | `configure_china_mirrors.sh`  |
-| 工具脚本       | `common/utils/`            | `<动作>_<对象>.sh`       | `get_directory_name.sh`       |
+| 工具脚本       | `common/standalone_tool_script/` | `<动作>_<对象>.sh`       | `get_directory_name.sh`       |
 | 项目工具       | `common/project_tools/`    | `<动作>_<对象>.sh`       | `generate_cmake_lists.sh`     |
 | FFmpeg 工具    | `common/ffmpeg-magic/`     | 见目录内脚本               | `open_multiple_ffmpeg_srt.sh`  |
 | 测试脚本       | 各目录                        | `test_<功能>.sh`       | `test_mirrors.sh`             |

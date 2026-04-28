@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # ============================================
 # 一键安装脚本
@@ -108,20 +108,25 @@ done
 # ============================================
 # 检测操作系统
 # ============================================
-OS="$(uname -s)"
-log_info "检测到操作系统: $OS"
-
-if [[ "$OS" == "Darwin" ]]; then
-    PLATFORM="macos"
-elif [[ "$OS" == "Linux" ]]; then
-    PLATFORM="linux"
-elif [[ "$OS" =~ ^(MINGW|MSYS|CYGWIN) ]]; then
-    PLATFORM="windows"
+if [ -f "$COMMON_INSTALL_SH" ] && type detect_platform &> /dev/null; then
+    detect_platform || error_exit "Unsupported operating system"
 else
-    error_exit "不支持的操作系统: $OS"
+    OS="$(uname -s)"
+    if [[ "$OS" == "Darwin" ]]; then
+        PLATFORM="darwin"
+        PLATFORM_NAME="macOS"
+    elif [[ "$OS" == "Linux" ]]; then
+        PLATFORM="linux"
+        PLATFORM_NAME="Linux"
+    elif [[ "$OS" =~ ^(MINGW|MSYS|CYGWIN) ]]; then
+        PLATFORM="windows"
+        PLATFORM_NAME="Windows"
+    else
+        error_exit "Unsupported operating system: $OS"
+    fi
 fi
 
-log_success "平台: $PLATFORM"
+log_success "Platform: $PLATFORM_NAME ($PLATFORM)"
 
 # ============================================
 # 代理配置（可选）
@@ -314,7 +319,7 @@ log_success "chezmoi 环境初始化完成"
 # ============================================
 # 确保 chezmoi 未占用（锁检测与释放，非交互）
 # ============================================
-ENSURE_UNLOCKED="${SCRIPT_DIR}/scripts/common/utils/ensure_chezmoi_unlocked.sh"
+ENSURE_UNLOCKED="${SCRIPT_DIR}/scripts/common/deploy_utils/ensure_chezmoi_unlocked.sh"
 if [[ -f "$ENSURE_UNLOCKED" ]] && [[ -x "$ENSURE_UNLOCKED" ]]; then
     bash "$ENSURE_UNLOCKED" || true
 elif [[ -f "$ENSURE_UNLOCKED" ]]; then
@@ -439,7 +444,7 @@ $VERIFY_DIFF"
                 case "$PLATFORM" in
                     windows) PATTERN='run_on_(darwin|linux)/' ;;
                     linux)   PATTERN='run_on_(darwin|windows)/' ;;
-                    macos)   PATTERN='run_on_(linux|windows)/' ;;
+                    darwin)  PATTERN='run_on_(linux|windows)/' ;;
                     *)       PATTERN='' ;;
                 esac
                 if [ -n "$PATTERN" ]; then
@@ -529,7 +534,7 @@ if [ "$TEST_REMOTE" = true ]; then
     log_info "执行远程测试"
     log_info "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
-    TEST_SCRIPT="${SCRIPT_DIR}/scripts/common/utils/test_tmux_remote.sh"
+    TEST_SCRIPT="${SCRIPT_DIR}/scripts/common/deploy_utils/test_tmux_remote.sh"
 
     if [ ! -f "$TEST_SCRIPT" ]; then
         log_error "远程测试脚本不存在: $TEST_SCRIPT"
@@ -578,9 +583,9 @@ if [ "$AUTO_COMMIT" = true ]; then
                 git add -A
 
                 # 生成提交信息
-                COMMIT_MSG="feat: 添加 Catppuccin Tmux 主题配置 (Mocha)"
+                COMMIT_MSG="chore: auto-apply configuration changes"
                 if [ "$TEST_REMOTE" = true ]; then
-                    COMMIT_MSG="${COMMIT_MSG} - 远程测试通过"
+                    COMMIT_MSG="${COMMIT_MSG} - remote test passed"
                 fi
 
                 # 提交
@@ -619,4 +624,4 @@ log_info "  查看差异: ./scripts/manage_dotfiles.sh diff"
 log_info "  编辑配置: ./scripts/manage_dotfiles.sh edit ~/.zshrc"
 log_info ""
 log_info "使用帮助: ./scripts/manage_dotfiles.sh help"
-log_info "部署指南: scripts/common/utils/DEPLOYMENT_GUIDE.md"
+log_info "部署指南: scripts/common/deploy_utils/DEPLOYMENT_GUIDE.md"

@@ -2,6 +2,16 @@
 
 本指南适用于在全新的操作系统上使用 chezmoi 管理 dotfiles 配置，支持 Windows、macOS 和 Linux。
 
+**各系统安装入口**：
+
+| 系统 | 新建系统第一次运行 |
+|------|-------------------|
+| Linux | `./install.sh` |
+| macOS | `./install.sh` |
+| Windows | `./install.sh`（Git Bash）或 `scripts/windows/install_with_chezmoi.bat` |
+
+`./install.sh` 自动检测 OS，安装 chezmoi，执行 `chezmoi apply` 触发所有跨平台 + 平台特定的 run_once 脚本。完整调用链与软件清单见 [INSTALL_GUIDE.md](INSTALL_GUIDE.md) 和 [SOFTWARE_LIST.md](SOFTWARE_LIST.md)。
+
 **一键安装入口**：推荐优先阅读 [INSTALL_GUIDE.md](INSTALL_GUIDE.md)，在项目根目录执行 `./install.sh` 即可完成安装与验证。  
 **本指南**：仅保留各平台分步操作与前置条件（如 Windows 管理员、macOS Homebrew、Linux 发行版与 WSL）；一键安装命令、代理与 WSL 说明、故障排除等见 [INSTALL_GUIDE.md](INSTALL_GUIDE.md)。
 
@@ -657,8 +667,8 @@ SSH 配置文件（`~/.ssh/config`）已纳入 chezmoi 管理，可以通过 laz
 
 ```bash
 # 1. 备份现有配置（SSH + Git）
-./scripts/common/utils/backup_ssh_config.sh
-./scripts/common/utils/backup_git_config.sh
+./scripts/common/deploy_utils/backup_ssh_config.sh
+./scripts/common/deploy_utils/backup_git_config.sh
 
 # 2. 将配置纳入 chezmoi 管理
 export CHEZMOI_SOURCE_DIR="$(pwd)/.chezmoi"
@@ -687,7 +697,7 @@ mkdir -p ~/.ssh
 chmod 700 ~/.ssh
 
 # 2. 使用部署脚本（推荐）
-./scripts/common/utils/setup_ssh_config.sh
+./scripts/common/deploy_utils/setup_ssh_config.sh
 
 # 或手动应用配置
 export CHEZMOI_SOURCE_DIR="$(pwd)/.chezmoi"
@@ -785,7 +795,7 @@ chezmoi apply -v
 - [SOFTWARE_LIST.md](SOFTWARE_LIST.md) - 软件清单
 - [project_structure.md](project_structure.md) - 项目结构说明
 - [scripts/windows/system_basic_env/README.md](../scripts/windows/system_basic_env/README.md) - Windows 工具安装脚本说明
-- [scripts/macos/system_basic_env/README.md](../scripts/macos/system_basic_env/README.md) - macOS 工具安装脚本说明
+- [scripts/darwin/system_basic_env/README.md](../scripts/darwin/system_basic_env/README.md) - macOS 工具安装脚本说明
 - [chezmoi 官方文档](https://www.chezmoi.io/docs/)
 
 ---

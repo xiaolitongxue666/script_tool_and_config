@@ -122,7 +122,7 @@ getent passwd "$(id -un)" | cut -d: -f7
 
 ### Oh My Zsh 插件
 
-- 检查：`bash scripts/common/utils/check_zsh_omz.sh`。若显示已安装插件 0/4，多为 **WSL 下** Git 的 `http.https://github.com.proxy` 指向 127.0.0.1 导致 clone 失败。取消该配置后重试 clone 或执行 [INSTALL_GUIDE.md](../../../docs/INSTALL_GUIDE.md) 中的「Oh My Zsh 插件未安装 故障排除」补救命令。
+- 检查：`bash scripts/common/deploy_utils/check_zsh_omz.sh`。若显示已安装插件 0/4，多为 **WSL 下** Git 的 `http.https://github.com.proxy` 指向 127.0.0.1 导致 clone 失败。取消该配置后重试 clone 或执行 [INSTALL_GUIDE.md](../../../docs/INSTALL_GUIDE.md) 中的「Oh My Zsh 插件未安装 故障排除」补救命令。
 
 ---
 

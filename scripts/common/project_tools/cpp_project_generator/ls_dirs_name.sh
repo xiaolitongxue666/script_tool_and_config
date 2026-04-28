@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 function getdir(){
     for element in `ls $1`
     do  

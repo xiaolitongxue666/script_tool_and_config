@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # 生成随机数示例脚本
 echo -n "您想生成多少个随机数？ "

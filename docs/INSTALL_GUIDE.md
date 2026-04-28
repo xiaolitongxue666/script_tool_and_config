@@ -2,6 +2,33 @@
 
 本指南为一键安装与首次配置的入口，各平台分步说明见 [os_setup_guide.md](os_setup_guide.md)。
 
+## 各系统安装入口
+
+| 系统 | 新建系统第一次运行 | 说明 |
+|------|-------------------|------|
+| **Linux** | `./install.sh` | 自动检测发行版（Arch/Ubuntu/...），区分 WSL |
+| **macOS** | `./install.sh` | 自动检测 macOS，用于 Homebrew/Ghostty/yabai 安装 |
+| **Windows** | `./install.sh`（在 Git Bash 中）或双击 `scripts/windows/install_with_chezmoi.bat` | BAT 需管理员权限 |
+
+## `./install.sh` 执行流程
+
+```
+install.sh
+  ├── [1/5] 安装 chezmoi
+  │         └── scripts/chezmoi/install_chezmoi.sh （按发行版选择安装方式）
+  ├── [2/5] 初始化 chezmoi 环境
+  │         └── 写入 ~/.config/chezmoi/chezmoi.toml (sourceDir)
+  ├── [3/5] chezmoi apply -v --force           ← 核心：执行所有匹配的 run_once 脚本
+  │         ├── 跨平台 (run_once_install-common-tools, -neovim, -zsh, -tmux, ...)
+  │         ├── Linux 独有 (run_on_linux/: pacman 配置, base-devel, i3wm, dwm)
+  │         ├── macOS 独有 (run_on_darwin/: Homebrew, Ghostty, yabai, skhd)
+  │         └── Windows 独有 (run_on_windows/: Windows Terminal, Oh My Posh)
+  ├── [4/5] 检查软件安装状态
+  │         └── scripts/chezmoi/install_helpers.sh
+  └── [5/5] 验证安装结果
+            └── scripts/chezmoi/verify_installation.sh
+```
+
 ## 一键安装（推荐）
 
 在项目根目录执行：
@@ -78,7 +105,7 @@
 ### Linux 默认 Shell 与字体
 
 - **默认 Shell**：项目期望 Linux 下默认使用 **zsh + Oh My Zsh**。`run_once_install-zsh.sh` 会在安装后尝试执行 `chsh -s $(command -v zsh)`；若因权限/交互未生效，请**手动执行** `chsh -s $(command -v zsh)` 后**重新登录**（或新开 WSL 窗口），登录 shell 才会变为 zsh。
-- **Oh My Zsh 插件**：同一 run_once 脚本会安装 zsh-autosuggestions、zsh-syntax-highlighting、zsh-completions、zsh-history-substring-search（需可访问 GitHub）。若首次 apply 时网络失败导致插件未装上，脚本会自动用「临时清空 GitHub proxy」重试一次；仍失败时可按下方故障排除处理。检查：`bash scripts/common/utils/check_zsh_omz.sh`。
+- **Oh My Zsh 插件**：同一 run_once 脚本会安装 zsh-autosuggestions、zsh-syntax-highlighting、zsh-completions、zsh-history-substring-search（需可访问 GitHub）。若首次 apply 时网络失败导致插件未装上，脚本会自动用「临时清空 GitHub proxy」重试一次；仍失败时可按下方故障排除处理。检查：`bash scripts/common/deploy_utils/check_zsh_omz.sh`。
 
   **Oh My Zsh 插件未安装（0/4）故障排除**  
   - **现象**：run_once 已执行但 `check_zsh_omz.sh` 显示 4 个插件 0/4。  

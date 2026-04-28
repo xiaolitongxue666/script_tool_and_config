@@ -137,7 +137,7 @@ chezmoi edit ~/.zshrc
 
 ```bash
 # 在 Windows Git Bash 中
-./scripts/common/utils/sync_to_remote.sh
+./scripts/common/deploy_utils/sync_to_remote.sh
 ```
 
 #### 步骤 3：在 Arch Linux 上应用配置

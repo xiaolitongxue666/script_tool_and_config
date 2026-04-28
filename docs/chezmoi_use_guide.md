@@ -403,7 +403,7 @@ SSH 配置文件（`~/.ssh/config`）已纳入 chezmoi 管理，可以通过 laz
 - **macOS**：必须使用 **connect 的绝对路径**（`macos_connect_path`）：Apple Silicon 多为 `/opt/homebrew/bin/connect`，Intel 多为 `/usr/local/bin/connect`。若只写 `connect`，从 Dock/Spotlight 启动的 GUI（如 Obsidian Git）会因 PATH 不含该目录而报 `exec: connect: not found` 导致 push 失败。代理类型由 `macos_proxy_connect_opt` 控制（`-H` HTTP / `-S` SOCKS）。
 - **Linux**：使用 `nc -X connect -x ...`，需 netcat-openbsd。
 
-详见 `scripts/common/utils/SSH_CONFIG_SETUP.md`。
+详见 `scripts/common/deploy_utils/SSH_CONFIG_SETUP.md`。
 
 ### 首次纳入管理
 
@@ -411,8 +411,8 @@ SSH 配置文件（`~/.ssh/config`）已纳入 chezmoi 管理，可以通过 laz
 
 ```bash
 # 1. 备份现有配置（SSH + Git）
-./scripts/common/utils/backup_ssh_config.sh
-./scripts/common/utils/backup_git_config.sh
+./scripts/common/deploy_utils/backup_ssh_config.sh
+./scripts/common/deploy_utils/backup_git_config.sh
 
 # 2. 将配置纳入 chezmoi 管理
 export CHEZMOI_SOURCE_DIR="$(pwd)/.chezmoi"
@@ -437,7 +437,7 @@ git push
 
 ```bash
 # 方法一：使用部署脚本（推荐）
-./scripts/common/utils/setup_ssh_config.sh
+./scripts/common/deploy_utils/setup_ssh_config.sh
 
 # 方法二：手动部署
 # 1. 确保 ~/.ssh 目录存在
@@ -491,8 +491,8 @@ chezmoi status ~/.ssh/config
 
 ```bash
 # 使用备份脚本（SSH + Git）
-./scripts/common/utils/backup_ssh_config.sh
-./scripts/common/utils/backup_git_config.sh
+./scripts/common/deploy_utils/backup_ssh_config.sh
+./scripts/common/deploy_utils/backup_git_config.sh
 
 # 或手动备份
 cp ~/.ssh/config ~/.ssh/config.backup.$(date +%Y%m%d_%H%M%S)
