@@ -217,7 +217,7 @@ get_software_category() {
         system-basic-env)             echo "系统基础" ;;
         yabai|skhd|maccy)             echo "macOS 专属" ;;
         i3wm|dwm|arch-base-packages|aur-helper|configure-pacman)  echo "Linux 专属" ;;
-        opencode|opencode-omo)        echo "OpenCode" ;;
+        opencode)                    echo "OpenCode" ;;
         *)                            echo "其他" ;;
     esac
 }
@@ -320,17 +320,6 @@ check_script_software_installed() {
         system-basic-env)
             # 系统基础环境，通常已安装
             return 0
-            ;;
-        opencode-omo)
-            # Oh My OpenAgent：检查 opencode 存在且 opencode.json 含 oh-my-openagent 插件
-            if ! check_command_exists "opencode"; then
-                return 1
-            fi
-            local oc_json="${HOME}/.config/opencode/opencode.json"
-            if [[ -f "$oc_json" ]] && grep -qE '"oh-my-openagent"|"oh-my-opencode"' "$oc_json" 2>/dev/null; then
-                return 0
-            fi
-            return 1
             ;;
         *)
             # 默认使用软件名作为命令名

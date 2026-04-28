@@ -31,19 +31,14 @@ else
 fi
 
 readonly GLOBAL_AICONFIG_DIR="${HOME}/.config/aiconfig"
-readonly GLOBAL_OPENCODE_DIR="${HOME}/.config/opencode/oh-my-opencode"
 readonly SOURCE_AICONFIG_DIR="${MODULE_ROOT}/.aiconfig"
-readonly SOURCE_OPENCODE_CONFIG="${MODULE_ROOT}/opencode/oh-my-opencode/config.json"
 
 function ensure_required_source() {
     [[ -d "${SOURCE_AICONFIG_DIR}" ]] || error_exit "缺少目录: ${SOURCE_AICONFIG_DIR}"
-    [[ -f "${SOURCE_OPENCODE_CONFIG}" ]] || error_exit "缺少文件: ${SOURCE_OPENCODE_CONFIG}"
 }
 
 function sync_global_content() {
     mkdir -p "${GLOBAL_AICONFIG_DIR}"
-    mkdir -p "${GLOBAL_OPENCODE_DIR}"
-
     rm -rf "${GLOBAL_AICONFIG_DIR}/agents" \
         "${GLOBAL_AICONFIG_DIR}/skills" \
         "${GLOBAL_AICONFIG_DIR}/resources" \
@@ -53,7 +48,6 @@ function sync_global_content() {
     cp -R "${SOURCE_AICONFIG_DIR}/skills" "${GLOBAL_AICONFIG_DIR}/skills"
     cp -R "${SOURCE_AICONFIG_DIR}/resources" "${GLOBAL_AICONFIG_DIR}/resources"
     cp -R "${SOURCE_AICONFIG_DIR}/templates" "${GLOBAL_AICONFIG_DIR}/templates"
-    cp "${SOURCE_OPENCODE_CONFIG}" "${GLOBAL_OPENCODE_DIR}/config.json"
 }
 
 start_script "AI 配置模块安装"

@@ -1,9 +1,8 @@
 #!/usr/bin/env bash
 # ============================================
-# OpenCode 与 Oh My OpenAgent 安装验证脚本
-# 检查：opencode 在 PATH、版本、opencode.json 是否含 oh-my-openagent
+# OpenCode 安装验证脚本
+# 检查：opencode 在 PATH、版本、基础配置文件是否存在
 # 可单独运行或供 verify_installation.sh 复用
-# （oh-my-opencode 已重命名为 oh-my-openagent，同时兼容旧名）
 # ============================================
 
 set -euo pipefail
@@ -34,7 +33,7 @@ else
     version_line="$(echo "${version_line}" | head -n1)"
     if [[ -n "${version_line:-}" ]]; then
         log_info "版本: ${version_line}"
-        # 建议 >= 1.0.150（与 OMO 文档一致）
+        # 建议 >= 1.0.150
         if echo "$version_line" | grep -qE "1\.[0-9]+\.[0-9]+"; then
             log_success "版本格式正常"
         else
@@ -45,7 +44,7 @@ else
     fi
 fi
 
-# ~/.config/opencode/opencode.json 是否包含 oh-my-openagent 或 oh-my-opencode
+# ~/.config/opencode/opencode.json 是否存在
 OC_JSON="${HOME}/.config/opencode/opencode.json"
 # MSYS2/Git Bash 子进程中 HOME 可能为 /home/xxx，尝试用 USERPROFILE 修正
 if [[ ! -f "$OC_JSON" ]]; then
@@ -58,11 +57,8 @@ fi
 if [[ ! -f "$OC_JSON" ]]; then
     log_warning "配置文件不存在: ${OC_JSON}"
     EXIT_CODE=1
-elif ! grep -qE '"oh-my-openagent"|"oh-my-opencode"' "$OC_JSON" 2>/dev/null; then
-    log_warning "opencode.json 中未找到 oh-my-openagent/oh-my-opencode 插件"
-    EXIT_CODE=1
 else
-    log_success "Oh My OpenAgent 已配置 (plugin 含 $(grep -oE '"oh-my-openagent"|"oh-my-opencode"' "$OC_JSON" 2>/dev/null | head -n1))"
+    log_success "opencode 配置文件存在: ${OC_JSON}"
 fi
 
 exit "$EXIT_CODE"

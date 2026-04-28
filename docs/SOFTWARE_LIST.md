@@ -45,7 +45,7 @@
 
 **Windows 安装流程简述**：在项目根执行 `./install.sh`（Git Bash）；脚本会写入 `~/.config/chezmoi/chezmoi.toml` 的 `sourceDir`（正斜杠路径）和 `[interpreters.sh]`（bash 解释器），以便 `chezmoi apply` 在 Windows 上通过 bash 执行 run_once_*.sh。仅 Windows 会安装的 run_once：`oh-my-posh`、`windows-terminal`；多平台共用的 run_once（00-install-version-managers、common-tools、starship、git、neovim、nerd-fonts、zsh、opencode 等）在 Windows 上同样执行。**Windows Terminal 作为 Windows 默认终端**（替代 Alacritty），每次 chezmoi apply 后自动同步配置文件到 WT 实际路径。tmux、fish、alacritty、Ghostty 等不在 Windows 下安装（Alacritty 仅 Linux，Ghostty 仅 macOS）。与 WSL 区分：WSL 视为 Linux（apt/pacman），走 Linux 软件列表与 run_on_linux；Windows 本机为 winget 等，走本表。
 
-**Windows 需要安装和配置的 run_once**（与 [4/5] 检查一致）：00-install-version-managers、common-tools、starship、git、neovim、neovim-config、nerd-fonts、zsh（MSYS2 可选）、oh-my-posh、windows-terminal、opencode、opencode-omo、system-basic-env。配置（dotfiles）：通用模板（.bashrc、.zshrc、.gitconfig、.ssh/config 等）及 `run_on_windows/` 下的 .bash_profile、.bashrc、Windows Terminal settings.json（同步脚本自动部署到 WT 实际路径）。
+**Windows 需要安装和配置的 run_once**（与 [4/5] 检查一致）：00-install-version-managers、common-tools、starship、git、neovim、neovim-config、nerd-fonts、zsh（MSYS2 可选）、oh-my-posh、windows-terminal、opencode、system-basic-env。配置（dotfiles）：通用模板（.bashrc、.zshrc、.gitconfig、.ssh/config 等）及 `run_on_windows/` 下的 .bash_profile、.bashrc、Windows Terminal settings.json（同步脚本自动部署到 WT 实际路径）。
 
 ---
 

@@ -15,9 +15,6 @@ ai-unified-config/
 │   └── resources/
 │       ├── langs/
 │       └── shared/
-├── opencode/
-│   └── oh-my-opencode/
-│       └── config.json
 └── scripts/
     ├── install.sh
     ├── sync-global.sh
@@ -27,21 +24,17 @@ ai-unified-config/
 ## 部署目标落点
 
 - 全局公共配置：`~/.config/aiconfig/`
-- OpenCode 差异配置：`~/.config/opencode/oh-my-opencode/config.json`
 - 项目级下发（按需）：`<project>/.aiconfig/`
 
 ## 与 chezmoi 的映射关系
 
 - 源目录：
   - `ai-unified-config/.aiconfig`
-  - `ai-unified-config/opencode/oh-my-opencode/config.json`
 - chezmoi 入口：
   - `.chezmoi/run_once_install-ai-unified-config.sh.tmpl`（调用安装脚本）
   - `.chezmoi/dot_config/aiconfig/manifest.json.tmpl`（模板化元信息）
-  - `.chezmoi/dot_config/opencode/oh-my-opencode/config.json.tmpl`（OpenCode 差异模板）
 - 渲染目标：
   - `~/.config/aiconfig/manifest.json`
-  - `~/.config/opencode/oh-my-opencode/config.json`
 
 ## 使用方式
 
