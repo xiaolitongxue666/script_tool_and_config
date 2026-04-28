@@ -322,12 +322,12 @@ check_script_software_installed() {
             return 0
             ;;
         opencode-omo)
-            # Oh My OpenCode：检查 opencode 存在且 opencode.json 含 oh-my-opencode 插件
+            # Oh My OpenAgent：检查 opencode 存在且 opencode.json 含 oh-my-openagent 插件
             if ! check_command_exists "opencode"; then
                 return 1
             fi
             local oc_json="${HOME}/.config/opencode/opencode.json"
-            if [[ -f "$oc_json" ]] && grep -q '"oh-my-opencode"' "$oc_json" 2>/dev/null; then
+            if [[ -f "$oc_json" ]] && grep -qE '"oh-my-openagent"|"oh-my-opencode"' "$oc_json" 2>/dev/null; then
                 return 0
             fi
             return 1

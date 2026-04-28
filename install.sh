@@ -23,6 +23,18 @@ if [[ "$(uname -s)" =~ ^(MINGW|MSYS|CYGWIN) ]]; then
         fi
         export USERPROFILE
     fi
+
+    # 统一 Windows Git Bash 下的 HOME，避免子 shell 回落到 /home/<user>
+    # 目标：优先使用 USERPROFILE 对应的 /c/Users/<user>
+    if command -v cygpath &>/dev/null; then
+        _normalized_home="$(cygpath -u "${USERPROFILE}")"
+    else
+        _normalized_home="/c/Users/${USERNAME:-$USER}"
+    fi
+    if [[ -n "${_normalized_home}" ]]; then
+        export HOME="${_normalized_home}"
+    fi
+    unset _normalized_home
 fi
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

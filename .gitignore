@@ -369,3 +369,9 @@ scripts/common/deploy_utils/*.bak
 # graphify outputs
 graphify-out/
 .graphify_old.json
+temp_plan.md
+
+# AI template smoke test 临时目录/文件
+/tmp_template_test_project/
+/tmp_template_test_*/
+/tmp_template_test_file.txt

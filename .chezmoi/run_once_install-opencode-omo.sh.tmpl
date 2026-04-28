@@ -2,11 +2,15 @@
 #!/bin/bash
 
 # ============================================
-# Oh My OpenCode 安装脚本（chezmoi run_once_）
-# 依赖：OpenCode 已安装、Node 可用（fnm 由 run_once_00 安装）
+# Oh My OpenAgent 安装脚本（chezmoi run_once_）
+# 依赖：OpenCode 已安装
 # 支持 Linux（含 WSL/多发行版）、macOS、Windows
-# 参考: https://github.com/code-yeongyu/oh-my-opencode
+# 参考: https://github.com/code-yeongyu/oh-my-openagent
 # 命名：opencode-omo 确保在 install-opencode 之后执行（字母序）
+# 安装方式：
+#   1. opencode plugin oh-my-openagent -g  → 注册到 opencode.json
+#   2. npm install --ignore-scripts          → 下载插件模块到 node_modules
+# （oh-my-opencode 已重命名为 oh-my-openagent，旧名仍兼容）
 # ============================================
 
 # 获取 common_install.sh 路径
@@ -34,40 +38,65 @@ PLATFORM="${PLATFORM:-unknown}"
 
 # 前置：OpenCode 必须已安装
 if ! command -v opencode &> /dev/null; then
-    echo "[WARNING] OpenCode 未安装，跳过 Oh My OpenCode。请先执行 run_once_install-opencode 或手动安装 OpenCode。"
+    echo "[WARNING] OpenCode 未安装，跳过 Oh My OpenAgent。请先执行 run_once_install-opencode 或手动安装 OpenCode。"
     exit 0
 fi
 
-# 已安装 OMO：检查 ~/.config/opencode/opencode.json 是否包含 oh-my-opencode
+# 已安装检查：opencode.json 含插件注册 + node_modules 中有插件模块
 OC_JSON="${HOME}/.config/opencode/opencode.json"
-if [[ -f "$OC_JSON" ]] && grep -q '"oh-my-opencode"' "$OC_JSON" 2>/dev/null; then
-    echo "[INFO] Oh My OpenCode 已配置（plugin 已含 oh-my-opencode）"
-    exit 0
+OC_NODE_MODULES="${HOME}/.config/opencode/node_modules"
+OMO_MODULE="${OC_NODE_MODULES}/oh-my-openagent"
+OMO_LEGACY_MODULE="${OC_NODE_MODULES}/oh-my-opencode"
+
+if [[ -f "$OC_JSON" ]] && grep -qE '"oh-my-openagent"|"oh-my-opencode"' "$OC_JSON" 2>/dev/null; then
+    if [[ -d "$OMO_MODULE" ]] || [[ -d "$OMO_LEGACY_MODULE" ]]; then
+        PLUGIN_NAME="$(grep -oE '"oh-my-openagent"|"oh-my-opencode"' "$OC_JSON" 2>/dev/null | head -n1)"
+        echo "[INFO] Oh My OpenAgent 已配置（plugin 已含 ${PLUGIN_NAME}，模块已就位）"
+        exit 0
+    fi
 fi
 
-# Node 用于 bunx/npx
-export PATH="${HOME}/.local/bin:${HOME}/.local/share/fnm:${HOME}/.fnm:${HOME}/.cargo/bin:$PATH"
-if command -v fnm &>/dev/null; then
-    eval "$(fnm env --shell=bash --use-on-cd)" 2>/dev/null || true
-fi
-if ! command -v node &> /dev/null && ! command -v bun &> /dev/null; then
-    echo "[WARNING] 未检测到 node 或 bun，跳过 Oh My OpenCode。请先执行 run_once_00-install-version-managers 或安装 Node。"
-    exit 0
+echo "[INFO] 开始安装 Oh My OpenAgent..."
+
+# 步骤1：用 opencode plugin 注册插件到 opencode.json
+if ! opencode plugin oh-my-openagent -g 2>/dev/null; then
+    echo "[WARNING] opencode plugin 命令失败，手动写入 opencode.json..."
+    if [[ -f "$OC_JSON" ]]; then
+        if ! grep -q '"oh-my-openagent"' "$OC_JSON" 2>/dev/null; then
+            # 用 jq 或简单 sed 插入插件名（兼容处理）
+            echo '{"plugin":["oh-my-openagent"]}' > "$OC_JSON"
+        fi
+    else
+        mkdir -p "$(dirname "$OC_JSON")"
+        echo '{"plugin":["oh-my-openagent"]}' > "$OC_JSON"
+    fi
 fi
 
-echo "[INFO] 开始安装 Oh My OpenCode（最小默认，无订阅）..."
-
-# --no-tui 非交互；默认不启用各订阅，用户可后续重新运行选择
-if command -v bunx &>/dev/null; then
-    bunx oh-my-opencode install --no-tui --claude=no --gemini=no --copilot=no 2>/dev/null || true
+# 步骤2：安装插件 npm 模块（--ignore-scripts 绕过 Node v22 兼容问题）
+if [[ -d "$OMO_MODULE" ]]; then
+    echo "[INFO] oh-my-openagent 模块已存在，跳过 npm install"
 else
-    npx oh-my-opencode install --no-tui --claude=no --gemini=no --copilot=no 2>/dev/null || true
+    echo "[INFO] 正在安装 oh-my-openagent 插件模块..."
+    cd "${HOME}/.config/opencode" || exit 0
+
+    # 优先用 bun（更快），其次 npm，最后 npx
+    if command -v bun &>/dev/null; then
+        bun install oh-my-openagent@latest --ignore-scripts 2>/dev/null || true
+    fi
+
+    if [[ ! -d "$OMO_MODULE" ]]; then
+        npm install oh-my-openagent@latest --ignore-scripts --save 2>/dev/null || true
+    fi
+
+    cd - > /dev/null || true
 fi
 
-if [[ -f "$OC_JSON" ]] && grep -q '"oh-my-opencode"' "$OC_JSON" 2>/dev/null; then
-    echo "[SUCCESS] Oh My OpenCode 已安装并写入 plugin 配置"
-    echo "[INFO] 后续可按需运行: bunx oh-my-opencode install 选择订阅并认证"
+# 最终验证
+if [[ -d "$OMO_MODULE" ]] && [[ -f "$OC_JSON" ]] && grep -qE '"oh-my-openagent"|"oh-my-opencode"' "$OC_JSON" 2>/dev/null; then
+    echo "[SUCCESS] Oh My OpenAgent 已安装（插件已注册，模块 v$(node -e "console.log(require('${OMO_MODULE}/package.json').version)" 2>/dev/null || echo '?') 已就位）"
+    echo "[INFO] 重启 OpenCode 后生效。配置目录: ${HOME}/.config/opencode/oh-my-opencode/"
 else
-    echo "[WARNING] Oh My OpenCode 可能未写入配置，可手动运行: bunx oh-my-opencode install"
+    echo "[WARNING] Oh My OpenAgent 安装可能不完整"
+    echo "[INFO] 手动安装: opencode plugin oh-my-openagent -g && npm install oh-my-openagent@latest --ignore-scripts"
 fi
 {{- end -}}

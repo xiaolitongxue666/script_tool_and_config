@@ -1,0 +1,21 @@
+{{- if or (eq .chezmoi.os "linux") (eq .chezmoi.os "darwin") (eq .chezmoi.os "windows") -}}
+#!/usr/bin/env bash
+set -euo pipefail
+
+# ============================================
+# AI Unified Config 安装入口
+# 由 chezmoi run_once 调用，复用仓库脚本完成部署
+# ============================================
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="${CHEZMOI_PROJECT_ROOT:-$(cd "${SCRIPT_DIR}/../.." && pwd 2>/dev/null || echo "$HOME/.local/share/chezmoi")}"
+INSTALL_SCRIPT="${PROJECT_ROOT}/ai-unified-config/scripts/install.sh"
+
+if [[ -f "${INSTALL_SCRIPT}" ]]; then
+    bash "${INSTALL_SCRIPT}"
+    exit 0
+fi
+
+echo "[WARNING] 未找到安装脚本: ${INSTALL_SCRIPT}"
+echo "[INFO] 跳过 AI Unified Config 安装"
+{{- end }}

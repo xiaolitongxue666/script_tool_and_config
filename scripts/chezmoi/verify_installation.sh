@@ -220,9 +220,9 @@ check_common_tools() {
     report_append ""
 }
 
-# 5. OpenCode / Oh My OpenCode
+# 5. OpenCode / Oh My OpenAgent
 check_opencode() {
-    report_append "========== 5. OpenCode / Oh My OpenCode =========="
+    report_append "========== 5. OpenCode / Oh My OpenAgent =========="
     if ! command -v opencode &>/dev/null; then
         report_append "  opencode: 未在 PATH 中"
         report_append "  说明: 可由 run_once_install-opencode.sh 安装"
@@ -233,12 +233,12 @@ check_opencode() {
         ver="$(opencode --version 2>/dev/null | head -n1)"
         report_append "  版本: ${ver:-未知}"
         local oc_json="${HOME}/.config/opencode/opencode.json"
-        if [[ -f "$oc_json" ]] && grep -q '"oh-my-opencode"' "$oc_json" 2>/dev/null; then
-            report_append "  Oh My OpenCode: 已配置"
+        if [[ -f "$oc_json" ]] && grep -qE '"oh-my-openagent"|"oh-my-opencode"' "$oc_json" 2>/dev/null; then
+            report_append "  Oh My OpenAgent: 已配置"
             ((SUMMARY_PASS++)) || true
         else
-            report_append "  Oh My OpenCode: 未配置或未找到 plugin"
-            report_append "  说明: 可由 run_once_install-opencode-omo.sh 安装；或手动运行: bunx oh-my-opencode install"
+            report_append "  Oh My OpenAgent: 未配置或未找到 plugin"
+            report_append "  说明: 可由 run_once_install-opencode-omo.sh 安装；或手动运行: opencode plugin oh-my-openagent -g"
             ((SUMMARY_WARN++)) || true
         fi
     fi
