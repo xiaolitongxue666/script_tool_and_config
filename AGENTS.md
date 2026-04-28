@@ -8,7 +8,7 @@
 
 ### 一、独立工具脚本 (Standalone Tools)
 
-位置：`scripts/common/standalone_tool_script/`、`project_tools/`、`ffmpeg-magic/`、`git_templates/`、`shc/`、`patch_examples/`、`auto_edit_redis_config/`
+位置：`scripts/common/standalone_tool_script/`、`scripts/common/project_tools/`、`scripts/common/ffmpeg-magic/`、`scripts/common/git_templates/`、`scripts/common/shc/`、`scripts/common/patch_examples/`、`scripts/common/auto_edit_redis_config/`
 
 - 通用独立工具，与项目部署/配置无关，每个脚本可单独使用
 - 不依赖 chezmoi 或项目其他部署设施
@@ -102,6 +102,16 @@ install.sh
 
 - `./deploy.sh`：快速重新部署，要求 chezmoi 已安装，包含 Zsh/OMZ 安装和诊断
 - `scripts/manage_dotfiles.sh`：配置管理入口（status/diff/apply/edit）
+
+### 部署入口职责矩阵（必须遵守）
+
+| 入口脚本 | 定位 | 应该做 | 不应该做 |
+|------|------|------|------|
+| `install.sh` | 首次安装入口 | 安装/检查 chezmoi、初始化环境、执行 `chezmoi apply -v --force`、调用安装验证脚本 | 承担日常运维命令分发 |
+| `deploy.sh` | 增量部署入口 | 在 chezmoi 已可用前提下执行增量部署与修复流程（含锁处理、诊断、必要校验） | 替代首次安装流程、扩展为通用命令分发器 |
+| `scripts/manage_dotfiles.sh` | 运维命令入口 | 提供 `status/diff/apply/edit/list` 等操作封装 | 内置复杂平台安装逻辑 |
+
+- 三个入口都可触达 chezmoi，但必须保持以上职责边界，避免重复实现和分叉修复。
 
 ## 代码风格指南
 
@@ -730,13 +740,27 @@ git push
 
 | 类别         | 目录                         | 命名模式                 | 示例                            |
 | ---------- | -------------------------- | -------------------- | ----------------------------- |
-| 系统安装       | `linux/system_basic_env/`  | `install_<软件名>.sh`   | `configure_china_mirrors.sh`  |
+| 系统安装       | `linux/system_basic_env/`  | `install_<软件名>.sh`   | `install_new_software.sh`  |
 | 系统配置       | `linux/system_basic_env/`  | `configure_<配置名>.sh` | `configure_china_mirrors.sh`  |
 | 工具脚本       | `common/standalone_tool_script/` | `<动作>_<对象>.sh`       | `get_directory_name.sh`       |
 | 项目工具       | `common/project_tools/`    | `<动作>_<对象>.sh`       | `generate_cmake_lists.sh`     |
 | FFmpeg 工具    | `common/ffmpeg-magic/`     | 见目录内脚本               | `open_multiple_ffmpeg_srt.sh`  |
 | 测试脚本       | 各目录                        | `test_<功能>.sh`       | `test_mirrors.sh`             |
 | Windows 脚本 | `windows/windows_scripts/` | `<功能描述>.bat`         | `open_multi_vlc.bat`          |
+
+### 命名边界（普通脚本区 vs 模板区）
+
+- 普通脚本区（`scripts/**`、`ai-unified-config/scripts/**`）统一使用 snake_case 文件名，不新增 kebab-case 脚本名。
+- 普通脚本推荐前缀：`install_`、`configure_`、`test_`、`verify_`、`sync_`、`backup_`。
+- 模板执行区（`.chezmoi/run_once*`、`.chezmoi/run_on_*`）可保留现有 `run_once_install-xxx.sh.tmpl` 风格；是否改为下划线需统一迁移后再落地。
+- 普通脚本区与模板区命名规则分离管理，禁止跨区混用。
+
+### 命名治理落地节奏
+
+1. **第 1 阶段（文档约束）**：先固化命名规则与边界，不改历史文件名。
+2. **第 2 阶段（新增止血）**：仅对新脚本启用命名检查（告警模式）。
+3. **第 3 阶段（分批迁移）**：按目录小批量重命名历史文件，并同步调用路径与文档引用。
+4. **第 4 阶段（规则收敛）**：命名检查从告警升级为阻断，防止回归。
 
 
 ## 参考资源

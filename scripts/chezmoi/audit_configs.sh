@@ -92,7 +92,7 @@ fi
 
 # Windows 特定配置
 if [[ "$PLATFORM" == "windows" ]]; then
-    CONFIG_MAPPINGS["~/.bash_profile"]=".chezmoi/run_on_windows/dot_bash_profile"
+    CONFIG_MAPPINGS["~/.bash_profile"]=".chezmoi/dot_bash_profile.tmpl"
     CONFIG_MAPPINGS["~/.bashrc"]=".chezmoi/run_on_windows/dot_bashrc"
 fi
 
