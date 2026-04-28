@@ -7,6 +7,21 @@
 
 set -e
 
+# 在 Windows (Git Bash/MSYS2) 下显式导出 USERPROFILE
+if [[ "$(uname -s)" =~ ^(MINGW|MSYS|CYGWIN) ]]; then
+    export LANG=C.UTF-8
+    export LC_ALL=C.UTF-8
+    if [[ -z "${USERPROFILE:-}" ]]; then
+        _up_user="${HOME##*/}"
+        if [[ -n "$_up_user" && "$_up_user" != "$HOME" ]]; then
+            USERPROFILE="C:/Users/${_up_user}"
+        else
+            USERPROFILE="C:/Users/${USERNAME:-$USER}"
+        fi
+        export USERPROFILE
+    fi
+fi
+
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 COMMON_SH="${SCRIPT_DIR}/scripts/common.sh"
 

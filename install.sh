@@ -9,9 +9,20 @@
 set -e
 
 # 在 Windows (Git Bash/MSYS2) 下强制 UTF-8，避免 tee 写入的安装日志出现乱码
+# 显式导出 USERPROFILE 避免 chezmoi.exe (Go 二进制) 在新 bash 进程中找不到该变量
 if [[ "$(uname -s)" =~ ^(MINGW|MSYS|CYGWIN) ]]; then
     export LANG=C.UTF-8
     export LC_ALL=C.UTF-8
+    if [[ -z "${USERPROFILE:-}" ]]; then
+        # 尝试从 HOME 推导: /home/Administrator → C:/Users/Administrator
+        _up_user="${HOME##*/}"
+        if [[ -n "$_up_user" && "$_up_user" != "$HOME" ]]; then
+            USERPROFILE="C:/Users/${_up_user}"
+        else
+            USERPROFILE="C:/Users/${USERNAME:-$USER}"
+        fi
+        export USERPROFILE
+    fi
 fi
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
