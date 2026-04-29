@@ -127,9 +127,10 @@ elif [[ "$OS" == "windows" ]]; then
     export all_proxy="$PROXY_URL"
     export ALL_PROXY="$PROXY_URL"
 
-    # opencode 配置
-    # 如果 opencode 已安装，添加到 PATH
-    if [ -d "/c/opencode" ]; then
+    # opencode 配置（兼容官方新路径 ~/.opencode/bin 与历史路径 /c/opencode）
+    if [ -d "$HOME/.opencode/bin" ] && [[ ":$PATH:" != *":$HOME/.opencode/bin:"* ]]; then
+        export PATH="$HOME/.opencode/bin:$PATH"
+    elif [ -d "/c/opencode" ] && [[ ":$PATH:" != *":/c/opencode:"* ]]; then
         export PATH="/c/opencode:$PATH"
     fi
 

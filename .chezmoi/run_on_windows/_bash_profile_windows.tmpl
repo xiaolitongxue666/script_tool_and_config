@@ -46,8 +46,10 @@ if [ -d "/c/Program Files/btop4win" ]; then
     PATH_DIRS+=("/c/Program Files/btop4win")
 fi
 
-# opencode（如果已安装）
-if [ -d "/c/opencode" ]; then
+# opencode（如果已安装，优先官方新路径）
+if [ -d "$HOME/.opencode/bin" ]; then
+    PATH_DIRS+=("$HOME/.opencode/bin")
+elif [ -d "/c/opencode" ]; then
     PATH_DIRS+=("/c/opencode")
 fi
 

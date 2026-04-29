@@ -1,6 +1,6 @@
 {
     "$schema": "https://opencode.ai/config.json",
-    "default_agent": "orchestrator-core",
+    "default_agent": "build",
     "instructions": [
         "{file:.opencode/skills/common/code-review.md}",
         "{file:.opencode/skills/common/secure-coding-basics.md}",
@@ -10,7 +10,7 @@
     "agent": {
         "orchestrator-core": {
             "description": "核心编排 agent，负责任务拆解与结果汇总",
-            "mode": "primary",
+            "mode": "subagent",
             "prompt": "{file:.opencode/agents/orchestrator-core.md}"
         },
         "architect": {
