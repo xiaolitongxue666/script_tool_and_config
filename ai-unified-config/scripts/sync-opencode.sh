@@ -2,6 +2,19 @@
 set -euo pipefail
 umask 022
 
+# Git Bash/MSYS 默认 HOME 可能与 Windows 用户配置目录不一致，OpenCode 读取后者；与 install.sh 对齐
+if [[ "$(uname -s)" =~ ^(MINGW|MSYS|CYGWIN) ]]; then
+    if [[ -z "${USERPROFILE:-}" ]]; then
+        current_user_name="${USERNAME:-${USER:-$(whoami 2>/dev/null || echo Administrator)}}"
+        USERPROFILE="C:/Users/${current_user_name}"
+        export USERPROFILE
+        unset current_user_name
+    fi
+    if command -v cygpath &>/dev/null; then
+        export HOME="$(cygpath -u "${USERPROFILE}")"
+    fi
+fi
+
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 MODULE_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 PROJECT_ROOT="$(cd "${MODULE_ROOT}/.." && pwd)"
@@ -19,16 +32,38 @@ else
 fi
 
 readonly SOURCE_AICONFIG_DIR="${HOME}/.config/aiconfig"
-readonly SOURCE_AGENTS_DIR="${SOURCE_AICONFIG_DIR}/agents"
-readonly SOURCE_SKILLS_DIR="${SOURCE_AICONFIG_DIR}/skills"
+readonly FALLBACK_SOURCE_AICONFIG_DIR="${MODULE_ROOT}/.aiconfig"
 readonly TARGET_OPENCODE_DIR="${HOME}/.config/opencode"
 readonly TARGET_OPENCODE_META_DIR="${TARGET_OPENCODE_DIR}/.opencode"
 readonly TARGET_AGENTS_DIR="${TARGET_OPENCODE_META_DIR}/agents"
 readonly TARGET_SKILLS_DIR="${TARGET_OPENCODE_META_DIR}/skills"
 
-function ensure_source_dirs() {
-    [[ -d "${SOURCE_AGENTS_DIR}" ]] || error_exit "缺少 agents 目录: ${SOURCE_AGENTS_DIR}"
-    [[ -d "${SOURCE_SKILLS_DIR}" ]] || error_exit "缺少 skills 目录: ${SOURCE_SKILLS_DIR}"
+source_aiconfig_dir=""
+source_agents_dir=""
+source_skills_dir=""
+
+function resolve_source_dirs() {
+    local preferred_agents_dir="${SOURCE_AICONFIG_DIR}/agents"
+    local preferred_skills_dir="${SOURCE_AICONFIG_DIR}/skills"
+    local fallback_agents_dir="${FALLBACK_SOURCE_AICONFIG_DIR}/agents"
+    local fallback_skills_dir="${FALLBACK_SOURCE_AICONFIG_DIR}/skills"
+
+    if [[ -d "${preferred_agents_dir}" && -d "${preferred_skills_dir}" ]]; then
+        source_aiconfig_dir="${SOURCE_AICONFIG_DIR}"
+        source_agents_dir="${preferred_agents_dir}"
+        source_skills_dir="${preferred_skills_dir}"
+        return 0
+    fi
+
+    if [[ -d "${fallback_agents_dir}" && -d "${fallback_skills_dir}" ]]; then
+        source_aiconfig_dir="${FALLBACK_SOURCE_AICONFIG_DIR}"
+        source_agents_dir="${fallback_agents_dir}"
+        source_skills_dir="${fallback_skills_dir}"
+        log_warning "未检测到全局 aiconfig，改用仓库内置模板源: ${source_aiconfig_dir}"
+        return 0
+    fi
+
+    error_exit "缺少可用的 aiconfig 源目录（已检查: ${SOURCE_AICONFIG_DIR} 与 ${FALLBACK_SOURCE_AICONFIG_DIR}）"
 }
 
 function backup_target_dir_if_exists() {
@@ -55,12 +90,15 @@ function sync_tree_dir() {
 
 function sync_opencode_content() {
     mkdir -p "${TARGET_OPENCODE_DIR}" "${TARGET_OPENCODE_META_DIR}"
-    sync_tree_dir "${SOURCE_AGENTS_DIR}" "${TARGET_AGENTS_DIR}"
-    sync_tree_dir "${SOURCE_SKILLS_DIR}" "${TARGET_SKILLS_DIR}"
+    sync_tree_dir "${source_agents_dir}" "${TARGET_AGENTS_DIR}"
+    sync_tree_dir "${source_skills_dir}" "${TARGET_SKILLS_DIR}"
 }
 
 start_script "同步 OpenCode agents/skills"
-ensure_source_dirs
+resolve_source_dirs
 sync_opencode_content
 log_success "OpenCode 已同步: ${TARGET_OPENCODE_META_DIR}"
 end_script
+
+
+

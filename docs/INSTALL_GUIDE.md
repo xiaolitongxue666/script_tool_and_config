@@ -89,7 +89,7 @@ install.sh
 在 Win10 上使用 Cursor、终端为 Git Bash 时，若希望「在项目中打开终端即位于项目根目录」：
 
 - **原因**：若在 `~/.bashrc` 中有无条件的 `cd /d/Code` 或 `cd ~`，每次启动终端都会执行，覆盖 Cursor 传入的工作目录。
-- **解决**：本项目在 dot_bashrc 的 Windows 分支中，用环境变量 `TERM_PROGRAM` 区分是否在编辑器内：Cursor/VS Code 会设置 `TERM_PROGRAM`，此时**不**执行默认目录的 `cd`，终端保持在工作区根目录；单独打开 Git Bash 时未设置 `TERM_PROGRAM`，仍会执行 `cd /d/Code` 或 `cd ~`。
+- **解决**：本项目在 `run_on_windows/dot_bashrc.tmpl` 的 Windows 分支中，用环境变量 `TERM_PROGRAM` 区分是否在编辑器内：Cursor/VS Code 会设置 `TERM_PROGRAM`，此时**不**执行默认目录的 `cd`，终端保持在工作区根目录；单独打开 Git Bash 时未设置 `TERM_PROGRAM`，仍会执行 `cd /d/Code` 或 `cd ~`。
 - **生效**：执行 `chezmoi apply` 或 `./install.sh` 应用配置后，重新打开 Cursor 终端即可（`pwd` 应为项目根目录）。
 
 - **macOS**：Homebrew、connect 路径、yabai/skhd 等见 run_on_darwin 与 os_setup_guide。
@@ -141,12 +141,24 @@ install.sh
 
 ## OpenCode agents/skills 目录化加载
 
+### 与上游文档一致的配置位置（对照）
+
+依据 [OpenCode 文档 · 配置 · 位置](https://opencode.ai/docs/zh-cn/config/)：
+
+| 类型 | 路径或变量 |
+|------|-------------|
+| 全局 JSON（用户偏好） | `~/.config/opencode/opencode.json` |
+| 自定义单文件 | 环境变量 `OPENCODE_CONFIG` |
+| 自定义目录 / 扩展目录 | `OPENCODE_CONFIG_DIR`；默认还可以在全局配置旁使用 `.opencode/`（含 `agents/`、`skills/` 等） |
+| 项目级 | 项目根 `opencode.json`，与 Git 根向上合并 |
+
+本仓库通过 chezmoi 渲染 `opencode.json`，并用 `sync-opencode.sh` 填充 `~/.config/opencode/.opencode/`，与上述「目录扩展」一致，**不是**已废弃的 `oh-my-opencode` 目录。
+
 项目已通过 chezmoi 提供 OpenCode 轻量配置模板与桥接同步脚本，所有配置均通过模板链路下发：
 
 - `~/.config/opencode/opencode.json` 由 `.chezmoi/dot_config/opencode/opencode.json.tmpl` 渲染。
-- `~/.config/opencode/oh-my-opencode/config.json` 由 `.chezmoi/dot_config/opencode/oh-my-opencode/config.json.tmpl` 渲染。
 - `~/.config/opencode/.opencode/agents` 与 `~/.config/opencode/.opencode/skills` 由 `run_once_install-opencode-aiconfig-bridge.sh.tmpl` 调用 `sync-opencode.sh` 同步。
-- OpenCode 特化配置固定为：主题 `Catppuccin Mocha`、`Ctrl+J` 换行、`Ctrl+C` 清空输入。
+- OpenCode 上游已移除 `oh-my-opencode`；本仓库不再下发该目录。若本机仍保留旧路径 `~/.config/opencode/oh-my-opencode`，可手动删除；`./scripts/chezmoi/verify_opencode.sh` 会检查该遗留路径是否已清除。
 
 ### 手动排查
 

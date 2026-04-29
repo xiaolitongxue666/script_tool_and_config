@@ -1,9 +1,11 @@
 # ============================================
 # chezmoi source repo 配置文件（.chezmoi/ 目录内）
+# 命名约定：本仓库软件配置源文件统一以 .tmpl 结尾；本文件为 chezmoi 规定的
+# 运行 config 名，须保持为 chezmoi.toml（见 `chezmoi apply -c` / 源内 [data] 解析），故不加 .tmpl 后缀。
 # 此文件是 chezmoi source repo 自身的配置，包含 sourceDir、data、git 设置
-# 与根目录 .chezmoi.toml（chezmoi 用户级配置）不同：
+# 与根目录 .chezmoi.toml.tmpl（chezmoi 用户级配置参考）不同：
 # - 本文件在 chezmoi source repo 中，随仓库版本控制
-# - 根目录 .chezmoi.toml 是 chezmoi 运行时读取的用户级配置
+# - 根目录 .chezmoi.toml.tmpl 为模板参考；运行时 install.sh 写入 ~/.config/chezmoi/chezmoi.toml
 # 两份配置服务于不同目的，均需保留
 # ============================================
 

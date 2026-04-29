@@ -15,8 +15,6 @@ ai-unified-config/
 │   └── resources/
 │       ├── langs/
 │       └── shared/
-├── opencode/
-│   └── oh-my-opencode/
 └── scripts/
     ├── install.sh
     ├── sync-global.sh
@@ -39,20 +37,16 @@ ai-unified-config/
   - `.chezmoi/run_once_install-opencode-aiconfig-bridge.sh.tmpl`
   - `.chezmoi/dot_config/aiconfig/manifest.json.tmpl`
   - `.chezmoi/dot_config/opencode/opencode.json.tmpl`
-  - `.chezmoi/dot_config/opencode/oh-my-opencode/config.json.tmpl`
 - 渲染目标：
   - `~/.config/aiconfig/manifest.json`
   - `~/.config/opencode/opencode.json`
-  - `~/.config/opencode/oh-my-opencode/config.json`
 
 ## OpenCode 轻量配置策略
 
+- **与上游路径对齐**（参见 [OpenCode 文档 · 配置](https://opencode.ai/docs/zh-cn/config/)）：全局 `~/.config/opencode/opencode.json`；可选 `OPENCODE_CONFIG` / `OPENCODE_CONFIG_DIR`；扩展目录 `.opencode/`（本仓库落在 `~/.config/opencode/.opencode/`，含 `agents/`、`skills/`）。
 - `opencode.json` 保持精简，仅保留 `$schema`、`default_agent`、基础 `instructions` 与 agent 映射。
 - agent/skill 正文文件不内联在 JSON 中，通过 `.opencode/agents`、`.opencode/skills` 目录分发。
-- OpenCode 特化配置（主题与快捷键）通过 `oh-my-opencode/config.json.tmpl` 下发：
-  - 主题：`Catppuccin Mocha`
-  - 换行：`Ctrl+J`
-  - 清空输入：`Ctrl+C`
+- OpenCode 已移除 `oh-my-opencode` 配置通道；主题与快捷键请在应用内设置。若本机仍有 `~/.config/opencode/oh-my-opencode`，可删除，并由 `scripts/chezmoi/verify_opencode.sh` 做遗留检查。
 - `sync-opencode.sh` 负责把 `~/.config/aiconfig` 中的 agents/skills 同步到 OpenCode 可识别目录。
 
 ## 使用方式

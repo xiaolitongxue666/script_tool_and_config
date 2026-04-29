@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # ============================================
 # OpenCode 安装验证脚本
-# 检查：opencode 在 PATH、版本、基础配置文件、agents/skills 目录
+# 检查：opencode 在 PATH、版本、基础配置文件、oh-my-opencode 遗留路径、agents/skills 目录
 # 可单独运行或供 verify_installation.sh 复用
 # ============================================
 
@@ -65,6 +65,29 @@ else
     log_success "opencode 配置文件存在: ${OC_JSON}"
 fi
 
+# OpenCode 新版本已移除 oh-my-opencode；Git Bash 下 HOME 与 USERPROFILE 可能对应两套路径，需都检查
+LEGACY_CHECK_ROOTS=("${OPENCODE_HOME}")
+if [[ -n "${USERPROFILE:-}" ]]; then
+    profile_unix="$(cygpath -u "${USERPROFILE}" 2>/dev/null)" || profile_unix=""
+    if [[ -n "${profile_unix}" ]]; then
+        alt_oc="${profile_unix}/.config/opencode"
+        if [[ "${alt_oc}" != "${OPENCODE_HOME}" ]]; then
+            LEGACY_CHECK_ROOTS+=("${alt_oc}")
+        fi
+    fi
+fi
+legacy_omo_ok=1
+for legacy_oc_root in "${LEGACY_CHECK_ROOTS[@]}"; do
+    if [[ -e "${legacy_oc_root}/oh-my-opencode" ]]; then
+        log_error "遗留路径仍存在，请删除: ${legacy_oc_root}/oh-my-opencode"
+        EXIT_CODE=1
+        legacy_omo_ok=0
+    fi
+done
+if [[ "${legacy_omo_ok}" -eq 1 ]]; then
+    log_success "未检测到 oh-my-opencode 遗留路径"
+fi
+
 # 检查 .opencode 目录结构
 AGENTS_DIR="${OPENCODE_HOME}/.opencode/agents"
 SKILLS_DIR="${OPENCODE_HOME}/.opencode/skills"
@@ -96,8 +119,7 @@ fi
 if [[ -f "${AGENTS_DIR}/ORCHESTRATOR-CORE.md" ]]; then
     log_success "关键 agent 文件可读: ${AGENTS_DIR}/ORCHESTRATOR-CORE.md"
 else
-    log_warning "缺少关键 agent 文件: ${AGENTS_DIR}/ORCHESTRATOR-CORE.md"
-    EXIT_CODE=1
+    log_warning "缺少可选 agent 文件（未同步或自定义布局时可忽略）: ${AGENTS_DIR}/ORCHESTRATOR-CORE.md"
 fi
 
 exit "$EXIT_CODE"

@@ -35,6 +35,19 @@ if [[ "$(uname -s)" =~ ^(MINGW|MSYS|CYGWIN) ]]; then
         export HOME="${_normalized_home}"
     fi
     unset _normalized_home
+
+    # chezmoi.exe、MSYS 子进程依赖 USERNAME/USER；从 USERPROFILE 补全避免未定义
+    if [[ -z "${USERNAME:-}" ]]; then
+        if [[ -n "${USERPROFILE:-}" ]]; then
+            USERNAME="${USERPROFILE##*[/\\]}"
+        else
+            USERNAME="${USER:-$(whoami 2>/dev/null || echo '')}"
+        fi
+        export USERNAME
+    fi
+    if [[ -z "${USER:-}" ]]; then
+        export USER="${USERNAME:-$(whoami 2>/dev/null || echo Administrator)}"
+    fi
 fi
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

@@ -1,4 +1,15 @@
 # ============================================
+# HOME 与 Windows 用户目录对齐（与仓库 install.sh 策略一致，避免仅开 Bash 时落在 /home/<user>）
+# ============================================
+if [[ "$(uname -s)" =~ ^(MINGW|MSYS|CYGWIN) ]] && command -v cygpath &>/dev/null && [[ -n "${USERPROFILE:-}" ]]; then
+    _dotbash_win_home="$(cygpath -u "${USERPROFILE}")"
+    if [[ -n "${_dotbash_win_home}" && "${HOME}" != "${_dotbash_win_home}" ]]; then
+        export HOME="${_dotbash_win_home}"
+    fi
+    unset _dotbash_win_home
+fi
+
+# ============================================
 # XDG 环境变量修复（Windows）
 # ============================================
 # 修复 XDG 路径中的引号问题

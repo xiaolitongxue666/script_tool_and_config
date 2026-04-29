@@ -80,20 +80,20 @@ CONFIG_MAPPINGS["~/.ssh/config"]=".chezmoi/dot_ssh/config.tmpl"
 # Linux 特定配置
 if [[ "$PLATFORM" == "linux" ]]; then
     CONFIG_MAPPINGS["~/.config/alacritty/alacritty.toml"]=".chezmoi/run_on_linux/dot_config/alacritty/alacritty.toml.tmpl"
-    CONFIG_MAPPINGS["~/.config/i3/config"]=".chezmoi/run_on_linux/dot_config/i3/config"
+    CONFIG_MAPPINGS["~/.config/i3/config"]=".chezmoi/run_on_linux/dot_config/i3/config.tmpl"
 fi
 
 # macOS 特定配置
 if [[ "$PLATFORM" == "darwin" ]]; then
     CONFIG_MAPPINGS["~/.config/ghostty/config"]=".chezmoi/run_on_darwin/dot_config/ghostty/config.tmpl"
-    CONFIG_MAPPINGS["~/.yabairc"]=".chezmoi/run_on_darwin/dot_yabairc"
-    CONFIG_MAPPINGS["~/.skhdrc"]=".chezmoi/run_on_darwin/dot_skhdrc"
+    CONFIG_MAPPINGS["~/.yabairc"]=".chezmoi/run_on_darwin/dot_yabairc.tmpl"
+    CONFIG_MAPPINGS["~/.skhdrc"]=".chezmoi/run_on_darwin/dot_skhdrc.tmpl"
 fi
 
 # Windows 特定配置
 if [[ "$PLATFORM" == "windows" ]]; then
     CONFIG_MAPPINGS["~/.bash_profile"]=".chezmoi/dot_bash_profile.tmpl"
-    CONFIG_MAPPINGS["~/.bashrc"]=".chezmoi/run_on_windows/dot_bashrc"
+    CONFIG_MAPPINGS["~/.bashrc"]=".chezmoi/run_on_windows/dot_bashrc.tmpl"
 fi
 
 # ============================================
@@ -144,8 +144,11 @@ OK_COUNT=0
 for target_path in "${!CONFIG_MAPPINGS[@]}"; do
     source_path="${CONFIG_MAPPINGS[$target_path]}"
 
+    # audit_config 在 MISSING/NOT_TEMPLATE 时返回非 0；命令替换在 set -e 下会误触发退出
+    set +e
     audit_result=$(audit_config "$target_path" "$source_path" 2>&1)
     exit_code=$?
+    set -e
 
     case $exit_code in
         1)

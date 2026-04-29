@@ -19,8 +19,8 @@ script_tool_and_config/
 ├── .gitattributes                   # Git 换行符规则
 ├── .gitignore                       # Git 忽略规则
 ├── .chezmoi/                        # chezmoi 源状态目录（配置模板）
-│   ├── chezmoi.toml                 # chezmoi source repo 配置
-│   ├── .chezmoidata.toml            # 静态默认数据
+│   ├── chezmoi.toml                 # 源内 config（`apply -c` 指定；chezmoi 规定名，内容模板化）
+│   ├── .chezmoidata.toml            # 静态默认数据（chezmoi 规定名）
 │   ├── dot_*.tmpl                   # 跨平台配置模板
 │   ├── dot_config/                  # ~/.config/ 配置模板
 │   ├── run_once_00-*.sh.tmpl        # 优先安装脚本（版本管理器等，字母序最先执行）
@@ -30,7 +30,7 @@ script_tool_and_config/
 │   ├── run_on_darwin/               # macOS 特定配置（含 run_once_*、dot_config/）
 │   └── run_on_windows/              # Windows 特定配置（含 run_once_*、dot_config/）
 │
-├── .chezmoi.toml                    # chezmoi 用户级配置参考（实际运行时由 install.sh 覆盖写入 ~/.config/chezmoi/chezmoi.toml）
+├── .chezmoi.toml.tmpl               # chezmoi 用户级配置参考模板（实际运行时由 install.sh 覆盖写入 ~/.config/chezmoi/chezmoi.toml）
 ├── .chezmoiignore                   # chezmoi 忽略规则
 ├── .vscode/                         # VS Code 配置
 │   └── settings.json

@@ -163,7 +163,7 @@ chezmoi 会将以下配置文件应用到系统：
 
 **Windows 特定配置**（`.chezmoi/run_on_windows/`）：
 - `dot_bash_profile` → `~/.bash_profile`（Git Bash 登录配置）
-- `dot_bashrc` → `~/.bashrc`（Git Bash 非登录配置）
+- `dot_bashrc.tmpl` → `~/.bashrc`（Git Bash 非登录配置）
 
 **通用配置**（`.chezmoi/`）：
 - `run_on_linux/dot_config/alacritty/alacritty.toml.tmpl` → `~/.config/alacritty/alacritty.toml`（仅 Linux）

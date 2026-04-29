@@ -281,7 +281,7 @@ ensure_directory() {
 ├── install.sh                  # 一键安装入口
 ├── deploy.sh                   # 快速部署入口
 ├── .chezmoi/                   # chezmoi 源状态（配置模板）
-├── .chezmoi.toml               # chezmoi 用户级配置（根目录）
+├── .chezmoi.toml.tmpl          # chezmoi 用户级配置参考模板（根目录）
 ├── scripts/                    # 所有脚本
 │   ├── common.sh               # 公共函数库
 │   ├── manage_dotfiles.sh      # dotfiles 管理入口

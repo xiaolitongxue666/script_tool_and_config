@@ -1,10 +1,10 @@
 # ============================================
 # chezmoi 用户级配置文件（根目录）
 # 此文件定义 chezmoi 的用户级配置，包括 sourceDir 和模板数据（data）
-# 与 .chezmoi/chezmoi.toml（chezmoi source repo 配置）不同：
-# - 本文件是 chezmoi 运行时读取的用户配置
-# - .chezmoi/chezmoi.toml 是 chezmoi source repo 自身的配置
-# 两份配置服务于不同目的，均需保留
+# 与 .chezmoi/chezmoi.toml（chezmoi source repo 的 [data] 等）不同：
+# - 本文件是仓库内用户级配置参考模板；install.sh 会生成 ~/.config/chezmoi/chezmoi.toml
+# - .chezmoi/chezmoi.toml 是源状态内供 `chezmoi apply -c` 使用的配置，文件名由 chezmoi 约定
+# 两份文件用途不同，均需保留
 # ============================================
 
 # 注意：此文件为 chezmoi 配置参考模板，实际运行时 install.sh 会

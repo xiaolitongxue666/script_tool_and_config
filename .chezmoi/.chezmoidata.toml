@@ -1,4 +1,5 @@
 # 静态默认数据（供模板使用；config 中的 [data] 会覆盖此处）
+# 文件名须为 .chezmoidata.toml（chezmoi 特殊文件约定），不得改为 .tmpl。
 # 详见 .chezmoi/chezmoi.toml 的 [data]
 proxy = "http://127.0.0.1:7890"
 proxy_host = "127.0.0.1"
