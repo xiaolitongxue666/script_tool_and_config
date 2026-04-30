@@ -72,6 +72,7 @@
 | `run_once_install-system-basic-env.sh.tmpl` | 系统基础环境检查与准备 | Linux, macOS, Windows |
 | `run_once_install-opencode.sh.tmpl` | opencode | Linux, macOS, Windows |
 | `run_once_install-ai-unified-config.sh.tmpl` | 安装 ai-unified-config | Linux, macOS, Windows |
+| `run_once_install-claude-code.sh.tmpl` | Claude Code CLI（`npm i -g @anthropic-ai/claude-code`，在 `run_once_00` 之后） | Linux, macOS, Windows |
 | `run_once_install-opencode-aiconfig-bridge.sh.tmpl` | 同步/桥接 opencode、cursor、codex 配置 | Linux, macOS, Windows |
 | `run_once_install-fish.sh.tmpl` | fish | Linux, macOS |
 | `run_once_install-tmux.sh.tmpl` | tmux + TPM | Linux, macOS |

@@ -3,8 +3,9 @@
 #!/usr/bin/env bash
 
 # ============================================
-# Claude Code 安装（chezmoi run_once_before_）
-# 必须在 modify ~/.claude/settings.json 之前执行，确保 node/npm 可用
+# Claude Code 安装（chezmoi run_once_）
+# 必须排在 run_once_00-install-version-managers 之后（字母序），以便 fnm/node 已就绪
+# 须在 run_after_claude-code-settings 合并 ~/.claude/settings.json 之前完成 npm 全局安装
 # 参考: npm install -g @anthropic-ai/claude-code
 # ============================================
 
@@ -72,7 +73,7 @@ elif [[ "${PLATFORM:-}" == "linux" ]]; then
     fi
 fi
 
-# fnm / node 常见安装路径（run_once_00 可能尚未写入当前 shell 的 PATH）
+# fnm / node 常见路径（本脚本为独立子 shell，需自行加入 PATH）
 export PATH="${HOME}/.local/share/fnm:${HOME}/.local/bin:${PATH}"
 
 if command -v fnm &>/dev/null; then
@@ -87,7 +88,7 @@ if command -v claude &>/dev/null; then
 fi
 
 if ! command -v fnm &>/dev/null; then
-    echo "[ERROR] 未找到 fnm。请先成功执行 run_once_00-install-version-managers.sh（安装 fnm）后再 apply。"
+    echo "[ERROR] 未找到 fnm。请确认 run_once_00-install-version-managers 已成功执行后再 apply。"
     exit 1
 fi
 

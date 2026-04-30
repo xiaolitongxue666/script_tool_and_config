@@ -115,7 +115,7 @@ if [[ -f "${CLAUDE_SETTINGS_JSON}" ]]; then
 fi
 
 if ! command -v node &>/dev/null; then
-    log_warning "未找到 node，跳过 ${CLAUDE_SETTINGS_JSON} 的合并（请确保已安装 run_once_before_install-claude-code 中的 Node）"
+    log_warning "未找到 node，跳过 ${CLAUDE_SETTINGS_JSON} 的合并（请确保已安装 run_once_install-claude-code 中的 Node）"
     exit 0
 fi
 

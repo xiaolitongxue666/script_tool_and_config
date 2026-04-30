@@ -218,6 +218,7 @@ get_software_category() {
         yabai|skhd|maccy)             echo "macOS 专属" ;;
         i3wm|dwm|arch-base-packages|aur-helper|configure-pacman)  echo "Linux 专属" ;;
         opencode)                    echo "OpenCode" ;;
+        claude-code)                 echo "Claude Code" ;;
         *)                            echo "其他" ;;
     esac
 }
@@ -324,6 +325,12 @@ check_script_software_installed() {
         system-basic-env)
             # 系统基础环境，通常已安装
             return 0
+            ;;
+        claude-code)
+            if check_command_exists "claude"; then
+                return 0
+            fi
+            return 1
             ;;
         *)
             # 默认使用软件名作为命令名
