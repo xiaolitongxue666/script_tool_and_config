@@ -1,4 +1,46 @@
 # ============================================
+# Claude Code：与 ~/.bashrc（dot_bashrc.tmpl）Windows 段一致；候选 Git\bin\bash.exe，勿用 msys64 的 command -v bash
+# ============================================
+if [[ "$(uname -s)" =~ ^(MINGW|MSYS|CYGWIN) ]] && [[ -n "${CLAUDE_CODE_GIT_BASH_PATH:-}" ]]; then
+    _ccgbp_slash="${CLAUDE_CODE_GIT_BASH_PATH//\\//}"
+    case "${_ccgbp_slash}" in
+        */usr/bin/bash|*/usr/bin/bash.exe) unset CLAUDE_CODE_GIT_BASH_PATH ;;
+    esac
+    if [[ -n "${CLAUDE_CODE_GIT_BASH_PATH:-}" ]]; then
+        _cc_lc="${CLAUDE_CODE_GIT_BASH_PATH,,}"
+        if [[ "${_cc_lc}" == *msys64* ]] || [[ "${_cc_lc}" == *msys2* ]] || [[ "${_cc_lc}" == *cygwin* ]]; then
+            unset CLAUDE_CODE_GIT_BASH_PATH
+        fi
+    fi
+    unset _cc_lc _ccgbp_slash
+fi
+if [[ "$(uname -s)" =~ ^(MINGW|MSYS|CYGWIN) ]] && [[ -z "${CLAUDE_CODE_GIT_BASH_PATH:-}" ]] && command -v cygpath &>/dev/null; then
+    _claude_git_bash_exe=""
+    while IFS= read -r _cc_cand; do
+        _cc_cand="${_cc_cand//$'\r'/}"
+        [[ -z "${_cc_cand}" ]] && continue
+        if [[ -x "${_cc_cand}" ]]; then
+            _claude_git_bash_exe="${_cc_cand}"
+            break
+        fi
+    done <<'CC_GIT_BASH_CANDS'
+/d/Program Files/Git/bin/bash.exe
+/d/Program Files (x86)/Git/bin/bash.exe
+/c/Program Files/Git/bin/bash.exe
+/c/Program Files (x86)/Git/bin/bash.exe
+CC_GIT_BASH_CANDS
+    if [[ -z "${_claude_git_bash_exe}" ]] && [[ -n "${LOCALAPPDATA:-}" ]]; then
+        _cc_lp="$(cygpath -u "${LOCALAPPDATA}" 2>/dev/null)/Programs/Git/bin/bash.exe"
+        [[ -x "${_cc_lp}" ]] && _claude_git_bash_exe="${_cc_lp}"
+        unset _cc_lp
+    fi
+    if [[ -n "${_claude_git_bash_exe}" ]]; then
+        export CLAUDE_CODE_GIT_BASH_PATH="$(cygpath -w "${_claude_git_bash_exe}" 2>/dev/null | sed 's|\\|/|g')"
+    fi
+    unset _cc_cand _claude_git_bash_exe
+fi
+
+# ============================================
 # HOME 与 Windows 用户目录对齐（与仓库 install.sh 策略一致，避免仅开 Bash 时落在 /home/<user>）
 # ============================================
 if [[ "$(uname -s)" =~ ^(MINGW|MSYS|CYGWIN) ]] && command -v cygpath &>/dev/null && [[ -n "${USERPROFILE:-}" ]]; then

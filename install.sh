@@ -468,13 +468,25 @@ else
         log_info "验证配置应用结果..."
         VERIFY_STATUS=$(chezmoi status 2>&1 || true)
         VERIFY_DIFF=$(chezmoi diff 2>&1 || true)
-        if [ -z "$VERIFY_STATUS" ] && [ -z "$VERIFY_DIFF" ]; then
+        # chezmoi status 对 run_before/run_after 等「仅执行」的脚本可能仍显示 R 行，apply 已成功时与真实不同步无关
+        VERIFY_STATUS_NO_RUN=$(echo "$VERIFY_STATUS" | grep -vE '^[[:space:]]*R[[:space:]]' || true)
+        # Windows：run_after 落盘的 *.sh 若曾为 CRLF，diff 可能仅剩该文件；模板已设 line-endings=lf，此处作兜底避免误报
+        VERIFY_DIFF_ONLY_CLAUDE_RUN=false
+        if [ -z "$VERIFY_STATUS_NO_RUN" ] && [ -n "$VERIFY_DIFF" ]; then
+            _diff_git_count=$(echo "$VERIFY_DIFF" | grep -c '^diff --git' || echo 0)
+            # shellcheck disable=SC2086
+            if [ "${_diff_git_count:-0}" -eq 1 ] && echo "$VERIFY_DIFF" | grep -q '^diff --git a/claude-code-settings\.sh '; then
+                VERIFY_DIFF_ONLY_CLAUDE_RUN=true
+            fi
+            unset _diff_git_count
+        fi
+        if [ -z "$VERIFY_STATUS_NO_RUN" ] && [ -z "$VERIFY_DIFF" ]; then
             log_success "配置已完全同步"
         else
             # 若剩余差异仅包含其他平台的 run_on_* 项（当前 OS 不会应用），属预期
             ONLY_OTHER_OS=false
-            if [ -n "$VERIFY_STATUS" ] || [ -n "$VERIFY_DIFF" ]; then
-                COMBINED="$VERIFY_STATUS
+            if [ -n "$VERIFY_STATUS_NO_RUN" ] || [ -n "$VERIFY_DIFF" ]; then
+                COMBINED="$VERIFY_STATUS_NO_RUN
 $VERIFY_DIFF"
                 case "$PLATFORM" in
                     windows) PATTERN='run_on_(darwin|linux)/' ;;
@@ -489,6 +501,8 @@ $VERIFY_DIFF"
             fi
             if [ "$ONLY_OTHER_OS" = true ]; then
                 log_info "当前平台配置已同步；剩余差异仅为其他 OS 的 run_on_* 项，属预期"
+            elif [ "$VERIFY_DIFF_ONLY_CLAUDE_RUN" = true ]; then
+                log_info "配置已应用；chezmoi diff 仅剩 ~/claude-code-settings.sh（run_after 脚本）。模板已强制 LF；若仍报错请删除该文件后重新 apply"
             else
                 log_warning "配置应用后仍有差异，请检查"
             fi

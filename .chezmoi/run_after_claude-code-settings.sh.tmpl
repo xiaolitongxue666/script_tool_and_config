@@ -1,0 +1,233 @@
+{{- if or (eq .chezmoi.os "linux") (eq .chezmoi.os "darwin") (eq .chezmoi.os "windows") -}}
+{{/* chezmoi:template:line-endings=lf — Windows 默认 native(CRLF) 会导致 apply 后 chezmoi diff 仍显示 run 脚本差异 */}}
+#!/usr/bin/env bash
+# ============================================
+# Claude Code：合并 ~/.claude/settings.json（DeepSeek / env）
+#
+# 说明：不在此使用 chezmoi modify_ 脚本。Windows 上 chezmoi 对目标名 *.settings.json
+# 的临时文件执行 fork/exec，无法像 .sh 一样走 [interpreters.sh] 的 bash，会报
+# “%1 is not a valid Win32 application”。故在 run_after_ 中读取/合并/写回文件。
+# ============================================
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="${CHEZMOI_PROJECT_ROOT:-$(cd "${SCRIPT_DIR}/../.." && pwd 2>/dev/null || echo "$HOME/.local/share/chezmoi")}"
+COMMON_SH="${PROJECT_ROOT}/scripts/common.sh"
+
+if [[ -f "${COMMON_SH}" ]]; then
+    # shellcheck disable=SC1090
+    source "${COMMON_SH}"
+else
+    function log_info() { printf "\e[0;34m[INFO] %s\e[0m\n" "$*"; }
+    function log_warning() { printf "\e[1;33m[WARNING] %s\e[0m\n" "$*"; }
+fi
+
+if [[ "$(uname -s)" =~ ^(MINGW|MSYS|CYGWIN) ]]; then
+    if [[ -z "${USERPROFILE:-}" ]]; then
+        current_user_name="${USERNAME:-${USER:-$(whoami 2>/dev/null || echo Administrator)}}"
+        USERPROFILE="C:/Users/${current_user_name}"
+        export USERPROFILE
+        unset current_user_name
+    fi
+    if command -v cygpath &>/dev/null; then
+        export HOME="$(cygpath -u "${USERPROFILE}")"
+    fi
+fi
+
+readonly CLAUDE_DIR="${HOME}/.claude"
+readonly CLAUDE_SETTINGS_JSON="${CLAUDE_DIR}/settings.json"
+readonly PLACEHOLDER="your_deepseek_api_key"
+
+# Claude Code CLI 在非 Git Bash 终端（如 pwsh、Cursor 内置终端）需指向 bash.exe；chezmoi.os 供 node 判断是否写入
+export _CHEZMOI_OS_FOR_JSON="{{ .chezmoi.os }}"
+export CLAUDE_CODE_GIT_BASH_PATH_DETECTED=""
+if [[ "$(uname -s)" =~ ^(MINGW|MSYS|CYGWIN) ]]; then
+    # 只接受 Git for Windows 的 bin\bash.exe；勿用 msys64/msys2/cygwin 的 bash 作兜底（command -v 常指向它们）
+    while IFS= read -r _git_bash_candidate; do
+        _git_bash_candidate="${_git_bash_candidate//$'\r'/}"
+        [[ -z "${_git_bash_candidate}" ]] && continue
+        if [[ -x "${_git_bash_candidate}" ]]; then
+            if command -v cygpath &>/dev/null; then
+                CLAUDE_CODE_GIT_BASH_PATH_DETECTED="$(cygpath -w "${_git_bash_candidate}" 2>/dev/null | sed 's|\\|/|g')"
+            else
+                CLAUDE_CODE_GIT_BASH_PATH_DETECTED="${_git_bash_candidate}"
+            fi
+            export CLAUDE_CODE_GIT_BASH_PATH_DETECTED
+            break
+        fi
+    done <<EOF
+/d/Program Files/Git/bin/bash.exe
+/d/Program Files (x86)/Git/bin/bash.exe
+/c/Program Files/Git/bin/bash.exe
+/c/Program Files (x86)/Git/bin/bash.exe
+EOF
+    if [[ -z "${CLAUDE_CODE_GIT_BASH_PATH_DETECTED}" ]] && [[ -n "${LOCALAPPDATA:-}" ]] && command -v cygpath &>/dev/null; then
+        _portable_git_bash="$(cygpath -u "${LOCALAPPDATA}" 2>/dev/null)/Programs/Git/bin/bash.exe"
+        if [[ -x "${_portable_git_bash}" ]]; then
+            CLAUDE_CODE_GIT_BASH_PATH_DETECTED="$(cygpath -w "${_portable_git_bash}" 2>/dev/null | sed 's|\\|/|g')"
+            export CLAUDE_CODE_GIT_BASH_PATH_DETECTED
+        fi
+        unset _portable_git_bash
+    fi
+    if [[ -z "${CLAUDE_CODE_GIT_BASH_PATH_DETECTED}" ]] && command -v bash &>/dev/null; then
+        _resolved_bash="$(command -v bash)"
+        _rb_lc="${_resolved_bash,,}"
+        if [[ "${_rb_lc}" == *msys64* ]] || [[ "${_rb_lc}" == *msys2* ]] || [[ "${_rb_lc}" == *cygwin* ]]; then
+            _resolved_bash=""
+        fi
+        if [[ -n "${_resolved_bash}" ]]; then
+            case "${_resolved_bash}" in
+                */usr/bin/bash|*/usr/bin/bash.exe)
+                    _git_install_root="$(dirname "$(dirname "$(dirname "${_resolved_bash}")")")"
+                    if [[ -x "${_git_install_root}/bin/bash.exe" ]]; then
+                        _resolved_bash="${_git_install_root}/bin/bash.exe"
+                    elif [[ -x "${_git_install_root}/bin/bash" ]]; then
+                        _resolved_bash="${_git_install_root}/bin/bash"
+                    else
+                        _resolved_bash=""
+                    fi
+                    unset _git_install_root
+                    ;;
+            esac
+        fi
+        if [[ -n "${_resolved_bash}" ]] && [[ -x "${_resolved_bash}" ]] && command -v cygpath &>/dev/null; then
+            CLAUDE_CODE_GIT_BASH_PATH_DETECTED="$(cygpath -w "${_resolved_bash}" 2>/dev/null | sed 's|\\|/|g')"
+            export CLAUDE_CODE_GIT_BASH_PATH_DETECTED
+        fi
+        unset _resolved_bash _rb_lc
+    fi
+    unset _git_bash_candidate
+fi
+
+export PATH="${HOME}/.local/share/fnm:${HOME}/.local/bin:${PATH}"
+
+_saved_claude_deepseek_api_key="${CLAUDE_DEEPSEEK_API_KEY:-}"
+if command -v fnm &>/dev/null; then
+    eval "$(fnm env 2>/dev/null)" || true
+fi
+export CLAUDE_DEEPSEEK_API_KEY="${_saved_claude_deepseek_api_key}"
+unset _saved_claude_deepseek_api_key
+
+INPUT=""
+if [[ -f "${CLAUDE_SETTINGS_JSON}" ]]; then
+    INPUT="$(cat "${CLAUDE_SETTINGS_JSON}" || true)"
+fi
+
+if ! command -v node &>/dev/null; then
+    log_warning "未找到 node，跳过 ${CLAUDE_SETTINGS_JSON} 的合并（请确保已安装 run_once_before_install-claude-code 中的 Node）"
+    exit 0
+fi
+
+mkdir -p "${CLAUDE_DIR}"
+readonly tmp_out="${CLAUDE_SETTINGS_JSON}.chezmoi.tmp.$$"
+
+# shellcheck disable=SC2016
+if printf '%s' "${INPUT}" | node -e '
+const fs = require("fs");
+const raw = fs.readFileSync(0, "utf8").trim();
+let cur;
+try {
+    cur = raw ? JSON.parse(raw) : {};
+} catch (e) {
+    process.stderr.write(
+        "[WARNING] claude_code_settings: JSON 解析失败，保留原文件内容\n"
+    );
+    process.stdout.write(raw + (raw.endsWith("\n") ? "" : "\n"));
+    process.exit(0);
+}
+if (typeof cur !== "object" || cur === null || Array.isArray(cur)) {
+    cur = {};
+}
+cur.env = cur.env && typeof cur.env === "object" && !Array.isArray(cur.env) ? cur.env : {};
+const PLACEHOLDER = "your_deepseek_api_key";
+const fromEnv = (process.env.CLAUDE_DEEPSEEK_API_KEY || "").trim();
+const existing = String(cur.env.ANTHROPIC_AUTH_TOKEN || "");
+let token;
+if (fromEnv) {
+    token = fromEnv;
+} else if (existing && existing !== PLACEHOLDER) {
+    token = existing;
+} else {
+    token = PLACEHOLDER;
+}
+const managed = {
+    ANTHROPIC_AUTH_TOKEN: token,
+    ANTHROPIC_BASE_URL: "https://api.deepseek.com/anthropic",
+    ANTHROPIC_DEFAULT_OPUS_MODEL: "deepseek-v4-pro[1m]",
+    ANTHROPIC_DEFAULT_SONNET_MODEL: "deepseek-v4-pro[1m]",
+    ANTHROPIC_DEFAULT_HAIKU_MODEL: "deepseek-v4-flash",
+    CLAUDE_CODE_SUBAGENT_MODEL: "deepseek-v4-flash",
+    CLAUDE_CODE_EFFORT_LEVEL: "max",
+    CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC: "1"
+};
+if (process.env._CHEZMOI_OS_FOR_JSON === "windows") {
+    const detected = (process.env.CLAUDE_CODE_GIT_BASH_PATH_DETECTED || "").trim();
+    if (detected) {
+        managed.CLAUDE_CODE_GIT_BASH_PATH = detected;
+    }
+}
+cur.env = Object.assign({}, cur.env, managed);
+if (process.env._CHEZMOI_OS_FOR_JSON === "windows") {
+    const detected = (process.env.CLAUDE_CODE_GIT_BASH_PATH_DETECTED || "").trim();
+    if (!detected) {
+        delete cur.env.CLAUDE_CODE_GIT_BASH_PATH;
+    }
+}
+// Claude Code 无法可靠使用 Git usr\bin\bash，合并后一律改为同目录 bin\bash.exe
+if (process.env._CHEZMOI_OS_FOR_JSON === "windows" && cur.env.CLAUDE_CODE_GIT_BASH_PATH) {
+    const p = String(cur.env.CLAUDE_CODE_GIT_BASH_PATH);
+    const u = p.replace(/\\/g, "/");
+    const m = u.match(/^(.*?)\/usr\/bin\/bash(?:\.exe)?$/i);
+    if (m) {
+        cur.env.CLAUDE_CODE_GIT_BASH_PATH =
+            m[1].replace(/\/+$/, "") + "/bin/bash.exe";
+    }
+}
+process.stdout.write(JSON.stringify(cur, null, 2) + "\n");
+' > "${tmp_out}"; then
+    if mv -f "${tmp_out}" "${CLAUDE_SETTINGS_JSON}" 2>/dev/null; then
+        :
+    else
+        rm -f "${tmp_out}" 2>/dev/null || true
+        log_warning "无法写入 ${CLAUDE_SETTINGS_JSON}"
+        exit 0
+    fi
+else
+    rm -f "${tmp_out}" 2>/dev/null || true
+    log_warning "合并 settings.json 失败（node 异常退出）"
+    exit 0
+fi
+
+# Windows：CLI 常在读 settings 之前就检查 bash；用户级环境变量与 settings 一致（新开终端生效）；无合法路径时清除脏值
+if [[ "$(uname -s)" =~ ^(MINGW|MSYS|CYGWIN) ]] && [[ -f "${CLAUDE_SETTINGS_JSON}" ]] && command -v powershell.exe &>/dev/null; then
+    _bash_from_json="$(CLAUDE_SETTINGS_JSON="${CLAUDE_SETTINGS_JSON}" node -e '
+const fs = require("fs");
+const p = process.env.CLAUDE_SETTINGS_JSON;
+let j = {};
+try {
+    j = JSON.parse(fs.readFileSync(p, "utf8"));
+} catch (e) {
+    process.exit(0);
+}
+const v = j.env && j.env.CLAUDE_CODE_GIT_BASH_PATH;
+process.stdout.write(typeof v === "string" ? v.trim() : "");
+')"
+    if [[ -n "${_bash_from_json}" ]]; then
+        export CLAUDE_CODE_GIT_BASH_PATH_SYNC="${_bash_from_json}"
+        if MSYS2_ARG_CONV_EXCL='*' powershell.exe -NoProfile -NonInteractive -Command '[Environment]::SetEnvironmentVariable("CLAUDE_CODE_GIT_BASH_PATH", $env:CLAUDE_CODE_GIT_BASH_PATH_SYNC, "User")'; then
+            log_info "Windows：已同步 CLAUDE_CODE_GIT_BASH_PATH 到用户环境；请新开终端后再运行 claude。"
+        fi
+        unset CLAUDE_CODE_GIT_BASH_PATH_SYNC
+    else
+        if MSYS2_ARG_CONV_EXCL='*' powershell.exe -NoProfile -NonInteractive -Command '[Environment]::SetEnvironmentVariable("CLAUDE_CODE_GIT_BASH_PATH", $null, "User")'; then
+            log_info "Windows：已清除用户环境变量 CLAUDE_CODE_GIT_BASH_PATH（本次未探测到合法 Git bin\\bash.exe）。"
+        fi
+    fi
+    unset _bash_from_json
+fi
+
+if grep -qF "${PLACEHOLDER}" "${CLAUDE_SETTINGS_JSON}" 2>/dev/null; then
+    log_warning "Claude Code：${CLAUDE_SETTINGS_JSON} 中 ANTHROPIC_AUTH_TOKEN 仍为占位符 ${PLACEHOLDER}"
+    log_warning "请将占位符替换为你的 DeepSeek API Key，或执行: CLAUDE_DEEPSEEK_API_KEY=sk-xxx chezmoi apply -v --force"
+fi
+exit 0{{- printf "\n" -}}{{ end -}}
