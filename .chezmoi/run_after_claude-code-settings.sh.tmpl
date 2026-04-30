@@ -48,7 +48,8 @@ if [[ "$(uname -s)" =~ ^(MINGW|MSYS|CYGWIN) ]]; then
         [[ -z "${_git_bash_candidate}" ]] && continue
         if [[ -x "${_git_bash_candidate}" ]]; then
             if command -v cygpath &>/dev/null; then
-                CLAUDE_CODE_GIT_BASH_PATH_DETECTED="$(cygpath -w "${_git_bash_candidate}" 2>/dev/null | sed 's|\\|/|g')"
+                # 勿改为正斜杠：Claude Code 对 D:/... 的 exists 校验在部分版本会失败，须保留 cygpath -w 的反斜杠
+                CLAUDE_CODE_GIT_BASH_PATH_DETECTED="$(cygpath -w "${_git_bash_candidate}" 2>/dev/null)"
             else
                 CLAUDE_CODE_GIT_BASH_PATH_DETECTED="${_git_bash_candidate}"
             fi
@@ -64,7 +65,7 @@ EOF
     if [[ -z "${CLAUDE_CODE_GIT_BASH_PATH_DETECTED}" ]] && [[ -n "${LOCALAPPDATA:-}" ]] && command -v cygpath &>/dev/null; then
         _portable_git_bash="$(cygpath -u "${LOCALAPPDATA}" 2>/dev/null)/Programs/Git/bin/bash.exe"
         if [[ -x "${_portable_git_bash}" ]]; then
-            CLAUDE_CODE_GIT_BASH_PATH_DETECTED="$(cygpath -w "${_portable_git_bash}" 2>/dev/null | sed 's|\\|/|g')"
+            CLAUDE_CODE_GIT_BASH_PATH_DETECTED="$(cygpath -w "${_portable_git_bash}" 2>/dev/null)"
             export CLAUDE_CODE_GIT_BASH_PATH_DETECTED
         fi
         unset _portable_git_bash
@@ -91,7 +92,7 @@ EOF
             esac
         fi
         if [[ -n "${_resolved_bash}" ]] && [[ -x "${_resolved_bash}" ]] && command -v cygpath &>/dev/null; then
-            CLAUDE_CODE_GIT_BASH_PATH_DETECTED="$(cygpath -w "${_resolved_bash}" 2>/dev/null | sed 's|\\|/|g')"
+            CLAUDE_CODE_GIT_BASH_PATH_DETECTED="$(cygpath -w "${_resolved_bash}" 2>/dev/null)"
             export CLAUDE_CODE_GIT_BASH_PATH_DETECTED
         fi
         unset _resolved_bash _rb_lc
@@ -153,12 +154,14 @@ if (fromEnv) {
 const managed = {
     ANTHROPIC_AUTH_TOKEN: token,
     ANTHROPIC_BASE_URL: "https://api.deepseek.com/anthropic",
-    ANTHROPIC_DEFAULT_OPUS_MODEL: "deepseek-v4-pro[1m]",
-    ANTHROPIC_DEFAULT_SONNET_MODEL: "deepseek-v4-pro[1m]",
+    ANTHROPIC_DEFAULT_OPUS_MODEL: "deepseek-v4-pro",
+    ANTHROPIC_DEFAULT_SONNET_MODEL: "deepseek-v4-pro",
     ANTHROPIC_DEFAULT_HAIKU_MODEL: "deepseek-v4-flash",
     CLAUDE_CODE_SUBAGENT_MODEL: "deepseek-v4-flash",
     CLAUDE_CODE_EFFORT_LEVEL: "max",
-    CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC: "1"
+    CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC: "1",
+    CLAUDE_CODE_MAX_CONTEXT_TOKENS: "200000",
+    CLAUDE_CODE_AUTO_COMPACT_WINDOW: "160000"
 };
 if (process.env._CHEZMOI_OS_FOR_JSON === "windows") {
     const detected = (process.env.CLAUDE_CODE_GIT_BASH_PATH_DETECTED || "").trim();
@@ -175,13 +178,14 @@ if (process.env._CHEZMOI_OS_FOR_JSON === "windows") {
 }
 // Claude Code 无法可靠使用 Git usr\bin\bash，合并后一律改为同目录 bin\bash.exe
 if (process.env._CHEZMOI_OS_FOR_JSON === "windows" && cur.env.CLAUDE_CODE_GIT_BASH_PATH) {
-    const p = String(cur.env.CLAUDE_CODE_GIT_BASH_PATH);
+    let p = String(cur.env.CLAUDE_CODE_GIT_BASH_PATH);
     const u = p.replace(/\\/g, "/");
     const m = u.match(/^(.*?)\/usr\/bin\/bash(?:\.exe)?$/i);
     if (m) {
-        cur.env.CLAUDE_CODE_GIT_BASH_PATH =
-            m[1].replace(/\/+$/, "") + "/bin/bash.exe";
+        p = m[1].replace(/\/+$/, "") + "/bin/bash.exe";
     }
+    // 与官方示例一致，使用反斜杠；正斜杠 D:/... 在部分版本里 existsSync/校验会误报「找不到」
+    cur.env.CLAUDE_CODE_GIT_BASH_PATH = p.replace(/\//g, "\\");
 }
 process.stdout.write(JSON.stringify(cur, null, 2) + "\n");
 ' > "${tmp_out}"; then

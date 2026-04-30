@@ -148,7 +148,7 @@ CC_GIT_BASH_CANDS
             unset _cc_lp
         fi
         if [[ -n "${_claude_git_bash_exe}" ]]; then
-            export CLAUDE_CODE_GIT_BASH_PATH="$(cygpath -w "${_claude_git_bash_exe}" 2>/dev/null | sed 's|\\|/|g')"
+            export CLAUDE_CODE_GIT_BASH_PATH="$(cygpath -w "${_claude_git_bash_exe}" 2>/dev/null)"
         fi
         unset _cc_cand _claude_git_bash_exe
     fi
