@@ -1,4 +1,14 @@
 # ============================================
+# 修复 Claude Code shell snapshot 污染
+# MINGW64 上 snapshot 序列化会丢失 "shopt -" 前缀
+# 在 snapshot 被 source 前修复，避免 "s: command not found" 噪音
+# ============================================
+for __snap_fix in ~/.claude/shell-snapshots/snapshot-bash-*.sh; do
+    [ -f "$__snap_fix" ] && sed -i 's/^s sourcepath/shopt -s sourcepath/' "$__snap_fix" 2>/dev/null || true
+done
+unset __snap_fix
+
+# ============================================
 # Claude Code：与 ~/.bashrc（dot_bashrc.tmpl）Windows 段一致；候选 Git\bin\bash.exe，勿用 msys64 的 command -v bash
 # ============================================
 if [[ "$(uname -s)" =~ ^(MINGW|MSYS|CYGWIN) ]] && [[ -n "${CLAUDE_CODE_GIT_BASH_PATH:-}" ]]; then
@@ -66,3 +76,22 @@ export XDG_CACHE_HOME='C:\Users\Administrator\.local\cache'
 if [ -f ~/.inshellisense/key-bindings.bash ]; then
     source ~/.inshellisense/key-bindings.bash
 fi
+
+# ============================================
+# claude-mem 项目记忆自动检测
+# 从当前目录向上查找 .claude-mem/settings.json
+# 找到则使用项目级记忆，否则用全局 (~/.claude-mem)
+# ============================================
+claude() {
+    local _cm_dir="$PWD"
+    while [[ "$_cm_dir" != "/" ]]; do
+        if [ -f "$_cm_dir/.claude-mem/settings.json" ]; then
+            export CLAUDE_MEM_DATA_DIR="$_cm_dir/.claude-mem"
+            export CLAUDE_MEM_SETTINGS_PATH="$_cm_dir/.claude-mem/settings.json"
+            echo "claude-mem: using project memory at $_cm_dir/.claude-mem" >&2
+            break
+        fi
+        _cm_dir="$(dirname "$_cm_dir")"
+    done
+    command claude "$@"
+}
