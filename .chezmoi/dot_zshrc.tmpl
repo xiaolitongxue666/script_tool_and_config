@@ -448,10 +448,36 @@ fi
 # 自定义函数
 # ============================================
 
-# 快速进入常用目录
-# 示例: cdcode, cdwork 等
-# alias cdcode='cd ~/Code'
-# alias cdwork='cd ~/Work'
+# ============================================
+# claude-mem 项目级记忆自动检测
+# ============================================
+# claude-mem 是 Claude Code 的项目级记忆系统：
+# - 项目目录中存在 .claude-mem/settings.json 时，自动切换到项目记忆
+# - 否则使用全局记忆 (~/.claude-mem)
+# - 原理: 从 $PWD 向上递归查找 .claude-mem/settings.json
+# - 参考: 运行 claude-mem:how-it-works 了解更多
+claude() {
+  local _cm_dir="$PWD"
+  while [[ "$_cm_dir" != "/" ]]; do
+    if [ -f "$_cm_dir/.claude-mem/settings.json" ]; then
+      export CLAUDE_MEM_DATA_DIR="$_cm_dir/.claude-mem"
+      export CLAUDE_MEM_SETTINGS_PATH="$_cm_dir/.claude-mem/settings.json"
+      echo "claude-mem: using project memory at $_cm_dir/.claude-mem" >&2
+      break
+    fi
+    _cm_dir="$(dirname "$_cm_dir")"
+  done
+  command claude "$@"
+}
+
+# 强制使用全局记忆（即使在项目目录内）
+# 用法: claude-global 或 unset CLAUDE_MEM_DATA_DIR && claude
+claude-global() {
+  unset CLAUDE_MEM_DATA_DIR
+  unset CLAUDE_MEM_SETTINGS_PATH
+  echo "claude-mem: using global memory (~/.claude-mem)" >&2
+  command claude "$@"
+}
 
 # ============================================
 # 环境变量（可选，按需取消注释）

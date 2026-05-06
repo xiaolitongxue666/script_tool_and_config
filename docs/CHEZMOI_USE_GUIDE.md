@@ -9,6 +9,7 @@
 - [常用工作流程](#常用工作流程)
 - [高级功能](#高级功能)
 - [平台特定配置](#平台特定配置)
+- [Claude Code 项目记忆自动检测](#claude-code-项目记忆自动检测)
 - [代理配置](#代理配置)
 - [故障排除](#故障排除)
 
@@ -657,6 +658,59 @@ Git 全局配置（`~/.gitconfig`）由 `dot_gitconfig.tmpl` 管理，包含：
 ```
 
 然后执行 `chezmoi apply -v` 即可更新 `~/.gitconfig`。
+
+## Claude Code 项目记忆自动检测
+
+### 功能概述
+
+`dot_zshrc.tmpl` 和 `dot_bashrc.tmpl` 中内置了 **claude-mem** 项目级记忆自动检测功能，在运行 `claude` 命令时自动选择记忆目录：
+
+- **项目级记忆**：如果当前目录（或上级目录）存在 `.claude-mem/settings.json`，`claude` 命令会自动切换到该项目记忆。
+- **全局记忆**：未检测到项目记忆时，使用 `~/.claude-mem` 全局记忆。
+
+### 工作原理
+
+`claude()` 函数覆盖了原始 `claude` 命令，通过从 `$PWD` 向上递归查找 `.claude-mem/settings.json` 来决定使用哪个记忆目录：
+
+```bash
+# 简化逻辑
+claude() {
+  local _cm_dir="$PWD"
+  while [[ "$_cm_dir" != "/" ]]; do
+    if [ -f "$_cm_dir/.claude-mem/settings.json" ]; then
+      export CLAUDE_MEM_DATA_DIR="$_cm_dir/.claude-mem"
+      export CLAUDE_MEM_SETTINGS_PATH="$_cm_dir/.claude-mem/settings.json"
+      echo "claude-mem: using project memory at $_cm_dir/.claude-mem" >&2
+      break
+    fi
+    _cm_dir="$(dirname "$_cm_dir")"
+  done
+  command claude "$@"
+}
+```
+
+### 使用方式
+
+- **正常启动**：直接运行 `claude`，自动检测并使用项目级或全局记忆。
+- **强制使用全局记忆**：在项目目录中需要全局记忆时，使用：
+  ```bash
+  claude-global
+  # 或
+  unset CLAUDE_MEM_DATA_DIR && unset CLAUDE_MEM_SETTINGS_PATH && claude
+  ```
+
+### 配置位置
+
+| 配置文件 | 适用平台 | 源模板 |
+|---------|---------|--------|
+| `~/.zshrc` | macOS / Linux / WSL（zsh 环境） | `.chezmoi/dot_zshrc.tmpl` |
+| `~/.bashrc` | Linux bash 环境 | `.chezmoi/dot_bashrc.tmpl` |
+| `~/.bashrc` | Windows Git Bash 环境 | `.chezmoi/run_on_windows/dot_bashrc.tmpl` |
+
+### 相关参考
+
+- 运行 `claude-mem:how-it-works` 了解更多 claude-mem 工作原理
+- 项目级记忆数据存放在 `.claude-mem/` 目录（被 `.gitignore` 排除，不进版本库）
 
 ## 代理配置
 

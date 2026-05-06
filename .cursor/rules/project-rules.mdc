@@ -1,0 +1,34 @@
+---
+description: Project structure and cross-platform shell strategy
+globs:
+---
+
+# script_tool_and_config 项目规则
+
+## 跨平台 Shell 策略
+
+不同平台使用不同的默认 Shell，模板文件按平台分别维护：
+
+- **macOS / Linux / WSL** → `dot_zshrc.tmpl`（zsh 配置）
+- **Windows Git Bash** → `run_on_windows/dot_bashrc.tmpl`（bash 配置）
+- **Linux bash（备选）** → `dot_bashrc.tmpl`（bash 配置）
+
+修改 Shell 配置时，根据目标平台选择对应的模板文件，不要混淆。
+
+## claude-mem 自动检测
+
+Shell 配置模板中内置了 claude-mem 项目级记忆自动检测：
+
+- `claude()` 命令从 `$PWD` 向上查找 `.claude-mem/settings.json`
+- 找到 → 使用项目级记忆，设置 `CLAUDE_MEM_DATA_DIR` 和 `CLAUDE_MEM_SETTINGS_PATH`
+- 未找到 → 使用 `~/.claude-mem` 全局记忆
+- `claude-global()` → 强制使用全局记忆
+
+各平台模板文件：
+- `.chezmoi/dot_zshrc.tmpl` — macOS / Linux / WSL
+- `.chezmoi/dot_bashrc.tmpl` — Linux bash
+- `.chezmoi/run_on_windows/dot_bashrc.tmpl` — Windows Git Bash
+
+## chezmoi 源目录
+
+所有配置文件模板位于 `.chezmoi/` 目录，使用 chezmoi 管理 dotfiles。

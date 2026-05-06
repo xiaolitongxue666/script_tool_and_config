@@ -90,7 +90,7 @@ install.sh
 
 - **原因**：若在 `~/.bashrc` 中有无条件的 `cd /d/Code` 或 `cd ~`，每次启动终端都会执行，覆盖 Cursor 传入的工作目录。
 - **解决**：本项目在 `run_on_windows/dot_bashrc.tmpl` 的 Windows 分支中，用环境变量 `TERM_PROGRAM` 区分是否在编辑器内：Cursor/VS Code 会设置 `TERM_PROGRAM`，此时**不**执行默认目录的 `cd`，终端保持在工作区根目录；单独打开 Git Bash 时未设置 `TERM_PROGRAM`，仍会执行 `cd /d/Code` 或 `cd ~`。
-- **附加行为**：同一模板还会在 Git Bash 中修复 Claude Code shell snapshot 的 `sourcepath` 污染，并为 `claude` 命令启用 `.claude-mem/settings.json` 的项目级记忆自动发现。
+- **附加行为**：同一模板还会在 Git Bash 中修复 Claude Code shell snapshot 的 `sourcepath` 污染，并为 `claude` 命令启用 `.claude-mem/settings.json` 的项目级记忆自动发现（macOS/Linux 的 zsh 版本见 `dot_zshrc.tmpl`，详见 [CHEZMOI_USE_GUIDE.md](./CHEZMOI_USE_GUIDE.md#claude-code-项目记忆自动检测)）。
 - **生效**：执行 `chezmoi apply` 或 `./install.sh` 应用配置后，重新打开 Cursor 终端即可（`pwd` 应为项目根目录）。
 
 - **macOS**：Homebrew、connect 路径、yabai/skhd 等见 run_on_darwin 与 os_setup_guide。
