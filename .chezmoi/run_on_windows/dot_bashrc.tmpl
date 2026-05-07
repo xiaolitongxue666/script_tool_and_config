@@ -1,15 +1,48 @@
 # ============================================
-# 修复 Claude Code shell snapshot 污染
-# MINGW64 上 snapshot 序列化会丢失 "shopt -" 前缀
-# 在 snapshot 被 source 前修复，避免 "s: command not found" 噪音
+# 修复 Claude Code shell snapshot 污染（增强版）
+# MINGW64 上 snapshot 序列化存在两个 bug:
+#   1. Base64 泄漏：declare -f 输出的函数体 base64 未被 eval 包裹
+#   2. shopt 截断："shopt -s" 丢失前 6 字符 → "s sourcepath"
 # ============================================
 for __snap_fix in ~/.claude/shell-snapshots/snapshot-bash-*.sh; do
-    [ -f "$__snap_fix" ] && sed -i 's/^s sourcepath/shopt -s sourcepath/' "$__snap_fix" 2>/dev/null || true
+  [ -f "$__snap_fix" ] || continue
+  # 清除 base64 泄漏（50+ 字符的纯 base64 行）
+  if grep -qE '^[A-Za-z0-9+/=]{50,}$' "$__snap_fix" 2>/dev/null; then
+    rm -f "$__snap_fix" 2>/dev/null || true
+    continue
+  fi
+  # 修复 shopt 截断
+  sed -i 's/^s sourcepath/shopt -s sourcepath/' "$__snap_fix" 2>/dev/null || true
 done
 unset __snap_fix
 
 # ============================================
-# Claude Code：与 ~/.bashrc（dot_bashrc.tmpl）Windows 段一致；候选 Git\bin\bash.exe，勿用 msys64 的 command -v bash
+# 代理配置
+# ============================================
+PROXY_DEFAULT="http://127.0.0.1:7890"
+PROXY_URL="${PROXY:-${http_proxy:-$PROXY_DEFAULT}}"
+
+# 代理控制别名（同时设置大小写环境变量，确保所有工具都能识别）
+alias h_proxy='export http_proxy='"$PROXY_URL"'; export https_proxy='"$PROXY_URL"'; export HTTP_PROXY='"$PROXY_URL"'; export HTTPS_PROXY='"$PROXY_URL"'; export all_proxy='"$PROXY_URL"'; export ALL_PROXY='"$PROXY_URL"'; echo "代理已启用: $PROXY_URL"'
+alias unset_h='unset http_proxy; unset https_proxy; unset HTTP_PROXY; unset HTTPS_PROXY; unset all_proxy; unset ALL_PROXY; echo "代理已关闭"'
+alias proxy_on='h_proxy'
+alias proxy_off='unset_h'
+
+# net_diag: 网络诊断（出口 IP、GitHub 连通性、下载测速）
+alias net_diag='echo "出口IP信息：" && curl -s -L -k ip-api.com && echo "" && echo "GitHub状态：" && curl -IsLk https://github.com | head -n 1 && echo "" && echo "测速结果：" && curl -s -L -k "https://speed.cloudflare.com/__down?bytes=10000000" -o /dev/null -w "下载速度: %{speed_download} B/s\n"'
+
+# 默认启用代理（可选，取消注释以自动启用）
+# h_proxy
+
+# Bat instead cat
+if command -v bat &> /dev/null; then
+    alias cat='bat'
+fi
+
+# ============================================
+# Claude Code：Git for Windows bash.exe 探测
+# 须用 Git for Windows 的 bin\bash.exe；勿用 msys64 的 command -v bash
+# usr\bin 与脏环境变量一律丢弃后按候选路径探测
 # ============================================
 if [[ "$(uname -s)" =~ ^(MINGW|MSYS|CYGWIN) ]] && [[ -n "${CLAUDE_CODE_GIT_BASH_PATH:-}" ]]; then
     _ccgbp_slash="${CLAUDE_CODE_GIT_BASH_PATH//\\//}"
@@ -51,7 +84,8 @@ CC_GIT_BASH_CANDS
 fi
 
 # ============================================
-# HOME 与 Windows 用户目录对齐（与仓库 install.sh 策略一致，避免仅开 Bash 时落在 /home/<user>）
+# HOME 与 Windows 用户目录对齐
+# 避免仅开 Bash 时落在 /home/<user>
 # ============================================
 if [[ "$(uname -s)" =~ ^(MINGW|MSYS|CYGWIN) ]] && command -v cygpath &>/dev/null && [[ -n "${USERPROFILE:-}" ]]; then
     _dotbash_win_home="$(cygpath -u "${USERPROFILE}")"
@@ -62,17 +96,77 @@ if [[ "$(uname -s)" =~ ^(MINGW|MSYS|CYGWIN) ]] && command -v cygpath &>/dev/null
 fi
 
 # ============================================
-# XDG 环境变量修复（Windows）
+# XDG 环境变量修复
 # ============================================
-# 修复 XDG 路径中的引号问题
 export XDG_DATA_HOME='C:\Users\Administrator\.local\share'
 export XDG_STATE_HOME='C:\Users\Administrator\.local\state'
 export XDG_CACHE_HOME='C:\Users\Administrator\.local\cache'
 
 # ============================================
+# Windows Git Bash 配置
+# ============================================
+
+# History：每次命令执行后追加到文件
+PROMPT_COMMAND='history -a'
+
+# 代理环境变量（自动启用）
+PROXY_URL="${PROXY:-http://127.0.0.1:7890}"
+export http_proxy="$PROXY_URL"
+export https_proxy="$PROXY_URL"
+export HTTP_PROXY="$PROXY_URL"
+export HTTPS_PROXY="$PROXY_URL"
+export all_proxy="$PROXY_URL"
+export ALL_PROXY="$PROXY_URL"
+
+# opencode 配置（兼容官方新路径 ~/.opencode/bin 与历史路径 /c/opencode）
+if [ -d "$HOME/.opencode/bin" ] && [[ ":$PATH:" != *":$HOME/.opencode/bin:"* ]]; then
+    export PATH="$HOME/.opencode/bin:$PATH"
+elif [ -d "/c/opencode" ] && [[ ":$PATH:" != *":/c/opencode:"* ]]; then
+    export PATH="/c/opencode:$PATH"
+fi
+
+# 网络检查别名
+alias check_network='curl -IL https://www.google.com 2>/dev/null | grep -q -E "200 OK|Connection established" && echo "Network is OK" || echo "Network is down"'
+
+# 文件管理器
+alias open='explorer'
+
+# Docker 工作区（Windows Git Bash，避免 MSYS 路径转换）
+docker() {
+    (export MSYS_NO_PATHCONV=1; "docker.exe" "$@")
+}
+docker-compose() {
+    (export MSYS_NO_PATHCONV=1; "docker-compose.exe" "$@")
+}
+
+# 非登录 shell 下确保能找到 oh-my-posh/starship
+for _d in "$HOME/AppData/Local/Microsoft/WinGet/Links" "$HOME/AppData/Local/Programs/oh-my-posh"; do
+    [ -d "$_d" ] && [[ ":$PATH:" != *":$_d:"* ]] && export PATH="$PATH:$_d"
+done
+unset _d
+
+# 提示符：Oh My Posh（优先）/ Starship（备选）
+_omp_config="$HOME/AppData/Local/Programs/oh-my-posh/themes/montys.omp.json"
+if command -v oh-my-posh &> /dev/null; then
+    if [ -f "$_omp_config" ]; then
+        eval "$(oh-my-posh --init --shell bash --config "$_omp_config")"
+    else
+        eval "$(oh-my-posh --init --shell bash)"
+    fi
+elif command -v starship &> /dev/null; then
+    eval "$(starship init bash)"
+fi
+unset _omp_config
+
+# 默认路径：仅在非编辑器终端中执行，避免 Cursor/VS Code 终端被切到固定目录
+if [ -z "${TERM_PROGRAM:-}" ]; then
+    cd /d/Code 2>/dev/null || cd ~
+    echo "Welcome! 😊"
+fi
+
+# ============================================
 # inshellisense 按键绑定
 # ============================================
-# 如果已安装 inshellisense，加载按键绑定
 if [ -f ~/.inshellisense/key-bindings.bash ]; then
     source ~/.inshellisense/key-bindings.bash
 fi
@@ -95,3 +189,6 @@ claude() {
     done
     command claude "$@"
 }
+
+# peon-ping 快捷命令
+alias peon="~/peon-ping/peon.sh"
