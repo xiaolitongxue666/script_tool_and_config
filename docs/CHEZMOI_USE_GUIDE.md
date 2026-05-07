@@ -679,7 +679,6 @@ claude() {
   while [[ "$_cm_dir" != "/" ]]; do
     if [ -f "$_cm_dir/.claude-mem/settings.json" ]; then
       export CLAUDE_MEM_DATA_DIR="$_cm_dir/.claude-mem"
-      export CLAUDE_MEM_SETTINGS_PATH="$_cm_dir/.claude-mem/settings.json"
       echo "claude-mem: using project memory at $_cm_dir/.claude-mem" >&2
       break
     fi
@@ -696,7 +695,7 @@ claude() {
   ```bash
   claude-global
   # 或
-  unset CLAUDE_MEM_DATA_DIR && unset CLAUDE_MEM_SETTINGS_PATH && claude
+  unset CLAUDE_MEM_DATA_DIR && claude
   ```
 
 ### 配置位置

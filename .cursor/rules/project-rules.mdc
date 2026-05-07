@@ -20,7 +20,7 @@ globs:
 Shell 配置模板中内置了 claude-mem 项目级记忆自动检测：
 
 - `claude()` 命令从 `$PWD` 向上查找 `.claude-mem/settings.json`
-- 找到 → 使用项目级记忆，设置 `CLAUDE_MEM_DATA_DIR` 和 `CLAUDE_MEM_SETTINGS_PATH`
+- 找到 → 使用项目级记忆，设置 `CLAUDE_MEM_DATA_DIR`
 - 未找到 → 使用 `~/.claude-mem` 全局记忆
 - `claude-global()` → 强制使用全局记忆
 

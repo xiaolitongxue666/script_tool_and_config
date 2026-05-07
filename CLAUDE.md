@@ -27,7 +27,7 @@
 
 `claude()` 命令被包装为函数，从 `$PWD` 向上递归查找 `.claude-mem/settings.json`：
 
-- 找到 → 设置 `CLAUDE_MEM_DATA_DIR` 和 `CLAUDE_MEM_SETTINGS_PATH`，使用项目级记忆
+- 找到 → 设置 `CLAUDE_MEM_DATA_DIR`，使用项目级记忆
 - 未找到 → 使用 `~/.claude-mem` 全局记忆
 - `claude-global()` → 强制使用全局记忆
 

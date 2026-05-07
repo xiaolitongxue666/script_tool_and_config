@@ -13,7 +13,7 @@ Different platforms use different default shells. Template files are maintained 
 Shell config templates include claude-mem project memory auto-detection:
 
 - `claude()` wraps the original command, searching upward from `$PWD` for `.claude-mem/settings.json`
-- Found → sets `CLAUDE_MEM_DATA_DIR` and `CLAUDE_MEM_SETTINGS_PATH`, uses project memory
+- Found → sets `CLAUDE_MEM_DATA_DIR`, uses project memory
 - Not found → falls back to global `~/.claude-mem`
 - `claude-global()` → forces global memory
 
