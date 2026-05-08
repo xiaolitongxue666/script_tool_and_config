@@ -10,6 +10,7 @@
 	autocrlf = {{ if eq .chezmoi.os "windows" }}true{{ else }}input{{ end }}
 {{- if eq .chezmoi.os "windows" }}
 	longpaths = true
+	ignorecase = false
 {{- end }}
 
 [diff]
