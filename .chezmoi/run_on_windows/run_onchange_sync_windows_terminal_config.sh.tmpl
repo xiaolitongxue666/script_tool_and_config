@@ -8,10 +8,10 @@
 set -e
 
 SRC=""
-[[ -f "$HOME/run_on_windows/.config/windows-terminal/settings.json" ]] && SRC="$HOME/run_on_windows/.config/windows-terminal/settings.json"
-[[ -z "$SRC" ]] && [[ -f "$HOME/.config/windows-terminal/settings.json" ]] && SRC="$HOME/.config/windows-terminal/settings.json"
+[[ -f "$HOME/.config/windows-terminal/settings.json" ]] && SRC="$HOME/.config/windows-terminal/settings.json"
+[[ -z "$SRC" ]] && [[ -f "$HOME/run_on_windows/.config/windows-terminal/settings.json" ]] && SRC="$HOME/run_on_windows/.config/windows-terminal/settings.json"
 if [[ -z "$SRC" ]] || [[ ! -f "$SRC" ]]; then
-    echo "[INFO] 源文件不存在: ${SRC:-}"，跳过同步
+    echo "[INFO] Source settings.json not found (${SRC:-}), skip sync"
     exit 0
 fi
 
@@ -28,7 +28,7 @@ sync_to() {
     if [ -d "$dest_dir" ]; then
         local dest="$dest_dir/settings.json"
         cp "$SRC" "$dest"
-        echo "[INFO] 已同步到: ${dest}"
+        echo "[INFO] Synced to: ${dest}"
         local backup="${dest}.backup.$(date +%Y%m%d_%H%M%S)"
         cp "$dest" "$backup" 2>/dev/null || true
         return 0
@@ -52,7 +52,7 @@ fi
 if [ "$synced" = false ]; then
     mkdir -p "$WT_NEW_DIR"
     cp "$SRC" "$WT_NEW_DIR/settings.json"
-    echo "[INFO] 创建并同步到: ${WT_NEW_DIR}/settings.json"
+    echo "[INFO] Created and synced to: ${WT_NEW_DIR}/settings.json"
 fi
 {{- else }}
 exit 0

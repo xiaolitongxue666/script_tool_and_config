@@ -204,111 +204,78 @@ install_font_linux() {
     fi
 }
 
+# 从已解压目录安装字体到 Windows Fonts（共享逻辑）
+_windows_install_fonts_from_dir() {
+    local temp_dir="$1"
+    local fonts_dir="/c/Windows/Fonts"
+    local installed_count=0
+    local font_file font_name dest_path
+
+    echo "[INFO] Installing fonts to system..."
+    while IFS= read -r -d '' font_file; do
+        font_name=$(basename "${font_file}")
+        dest_path="${fonts_dir}/${font_name}"
+        if [[ ! -f "${dest_path}" ]]; then
+            if cp "${font_file}" "${dest_path}" 2>/dev/null; then
+                echo "[INFO] Installed font: ${font_name}"
+                installed_count=$((installed_count + 1))
+            fi
+        else
+            echo "[INFO] Font already exists: ${font_name}"
+        fi
+    done < <(find "${temp_dir}" -type f \( -name '*.ttf' -o -name '*.otf' \) -print0 2>/dev/null)
+
+    echo "${installed_count}"
+}
+
 # 安装字体（Windows）
 install_font_windows() {
-    echo "[INFO] 检查 FiraMono Nerd Font 是否已安装..."
+    echo "[INFO] Checking FiraMono Nerd Font..."
 
     if check_font_installed_windows; then
-        echo "[SUCCESS] FiraMono Nerd Font 已安装"
+        echo "[SUCCESS] FiraMono Nerd Font already installed"
         return 0
     fi
 
-    local fonts_dir="/c/Windows/Fonts"
-    local temp_dir="/tmp/NerdFonts"
+    local temp_dir="${HOME}/tmp/NerdFonts"
     local zip_file="${temp_dir}/${FONT_NAME}.zip"
+    local fonts_dir="/c/Windows/Fonts"
 
-    # 创建临时目录
     mkdir -p "${temp_dir}" || {
-        echo "[ERROR] 无法创建临时目录: ${temp_dir}"
+        echo "[ERROR] Cannot create temp dir: ${temp_dir}"
         return 1
     }
 
-    echo "[INFO] 下载 FiraMono Nerd Font..."
-    # 使用 download_with_progress 函数（如果可用），否则使用 curl
+    echo "[INFO] Downloading FiraMono Nerd Font..."
+    local download_ok=false
     if type download_with_progress &>/dev/null; then
-        if download_with_progress "${FONT_URL}" "${zip_file}" 300 5; then
-        echo "[INFO] 解压字体文件..."
-        unzip -o "${zip_file}" -d "${temp_dir}" >/dev/null 2>&1 || {
-            echo "[WARNING] 解压可能有问题，但继续..."
-        }
-
-        echo "[INFO] 安装字体到系统..."
-        local installed_count=0
-        for font_file in "${temp_dir}"/*.ttf "${temp_dir}"/*.otf; do
-            if [[ -f "${font_file}" ]]; then
-                local font_name=$(basename "${font_file}")
-                local dest_path="${fonts_dir}/${font_name}"
-
-                if [[ ! -f "${dest_path}" ]]; then
-                    cp "${font_file}" "${dest_path}" 2>/dev/null && {
-                        echo "[INFO] 字体已安装: ${font_name}"
-                        ((installed_count++))
-                    }
-                else
-                    echo "[INFO] 字体已存在: ${font_name}"
-                fi
-            fi
-        done
-
-            # 清理临时文件
-            rm -rf "${temp_dir}"
-
-            if [[ ${installed_count} -gt 0 ]]; then
-                echo "[SUCCESS] FiraMono Nerd Font 安装完成 (${installed_count} 个字体文件)"
-                return 0
-            else
-                echo "[INFO] FiraMono Nerd Font 已存在"
-                return 0
-            fi
-        else
-            echo "[WARNING] 下载 FiraMono Nerd Font 失败"
-            echo "[INFO] 可以稍后手动下载安装: ${FONT_URL}"
-            rm -rf "${temp_dir}"
-            return 1
-        fi
-    else
-        # 回退到使用 curl
-        if curl -fsSL --proxy "${http_proxy:-}" "${FONT_URL}" -o "${zip_file}"; then
-            echo "[INFO] 解压字体文件..."
-            unzip -o "${zip_file}" -d "${temp_dir}" >/dev/null 2>&1 || {
-                echo "[WARNING] 解压可能有问题，但继续..."
-            }
-
-            echo "[INFO] 安装字体到系统..."
-            local installed_count=0
-            for font_file in "${temp_dir}"/*.ttf "${temp_dir}"/*.otf; do
-                if [[ -f "${font_file}" ]]; then
-                    local font_name=$(basename "${font_file}")
-                    local dest_path="${fonts_dir}/${font_name}"
-
-                    if [[ ! -f "${dest_path}" ]]; then
-                        cp "${font_file}" "${dest_path}" 2>/dev/null && {
-                            echo "[INFO] 字体已安装: ${font_name}"
-                            ((installed_count++))
-                        }
-                    else
-                        echo "[INFO] 字体已存在: ${font_name}"
-                    fi
-                fi
-            done
-
-            # 清理临时文件
-            rm -rf "${temp_dir}"
-
-            if [[ ${installed_count} -gt 0 ]]; then
-                echo "[SUCCESS] FiraMono Nerd Font 安装完成 (${installed_count} 个字体文件)"
-                return 0
-            else
-                echo "[INFO] FiraMono Nerd Font 已存在"
-                return 0
-            fi
-        else
-            echo "[WARNING] 下载 FiraMono Nerd Font 失败"
-            echo "[INFO] 可以稍后手动下载安装: ${FONT_URL}"
-            rm -rf "${temp_dir}"
-            return 1
-        fi
+        download_with_progress "${FONT_URL}" "${zip_file}" 300 5 && download_ok=true
+    elif curl -fsSL --proxy "${http_proxy:-}" "${FONT_URL}" -o "${zip_file}"; then
+        download_ok=true
     fi
+
+    if [[ "$download_ok" != true ]]; then
+        echo "[WARNING] Download failed: ${FONT_URL}"
+        rm -rf "${temp_dir}"
+        return 1
+    fi
+
+    echo "[INFO] Extracting font archive..."
+    unzip -o "${zip_file}" -d "${temp_dir}" >/dev/null 2>&1 || {
+        echo "[WARNING] Unzip reported issues, continuing..."
+    }
+
+    local installed_count
+    installed_count=$(_windows_install_fonts_from_dir "${temp_dir}")
+    rm -rf "${temp_dir}"
+
+    if [[ "${installed_count:-0}" -gt 0 ]] || check_font_installed_windows; then
+        echo "[SUCCESS] FiraMono Nerd Font install finished (${installed_count:-0} new file(s))"
+        return 0
+    fi
+
+    echo "[WARNING] No new font files detected under ${fonts_dir}"
+    return 1
 }
 
 # ============================================

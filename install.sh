@@ -8,48 +8,6 @@
 
 set -e
 
-# 在 Windows (Git Bash/MSYS2) 下强制 UTF-8，避免 tee 写入的安装日志出现乱码
-# 显式导出 USERPROFILE 避免 chezmoi.exe (Go 二进制) 在新 bash 进程中找不到该变量
-if [[ "$(uname -s)" =~ ^(MINGW|MSYS|CYGWIN) ]]; then
-    export LANG=C.UTF-8
-    export LC_ALL=C.UTF-8
-    if [[ -z "${USERPROFILE:-}" ]]; then
-        # 尝试从 HOME 推导: /home/Administrator → C:/Users/Administrator
-        _up_user="${HOME##*/}"
-        if [[ -n "$_up_user" && "$_up_user" != "$HOME" ]]; then
-            USERPROFILE="C:/Users/${_up_user}"
-        else
-            USERPROFILE="C:/Users/${USERNAME:-$USER}"
-        fi
-        export USERPROFILE
-    fi
-
-    # 统一 Windows Git Bash 下的 HOME，避免子 shell 回落到 /home/<user>
-    # 目标：优先使用 USERPROFILE 对应的 /c/Users/<user>
-    if command -v cygpath &>/dev/null; then
-        _normalized_home="$(cygpath -u "${USERPROFILE}")"
-    else
-        _normalized_home="/c/Users/${USERNAME:-$USER}"
-    fi
-    if [[ -n "${_normalized_home}" ]]; then
-        export HOME="${_normalized_home}"
-    fi
-    unset _normalized_home
-
-    # chezmoi.exe、MSYS 子进程依赖 USERNAME/USER；从 USERPROFILE 补全避免未定义
-    if [[ -z "${USERNAME:-}" ]]; then
-        if [[ -n "${USERPROFILE:-}" ]]; then
-            USERNAME="${USERPROFILE##*[/\\]}"
-        else
-            USERNAME="${USER:-$(whoami 2>/dev/null || echo '')}"
-        fi
-        export USERNAME
-    fi
-    if [[ -z "${USER:-}" ]]; then
-        export USER="${USERNAME:-$(whoami 2>/dev/null || echo Administrator)}"
-    fi
-fi
-
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 COMMON_SH="${SCRIPT_DIR}/scripts/common.sh"
 INSTALL_HELPERS_SH="${SCRIPT_DIR}/scripts/chezmoi/install_helpers.sh"
@@ -80,6 +38,9 @@ fi
 CHEZMOI_CORE_SH="${SCRIPT_DIR}/scripts/chezmoi/chezmoi_core.sh"
 if [ -f "$CHEZMOI_CORE_SH" ]; then
     source "$CHEZMOI_CORE_SH"
+    if type chezmoi_normalize_windows_env &>/dev/null; then
+        chezmoi_normalize_windows_env
+    fi
 fi
 
 # ============================================

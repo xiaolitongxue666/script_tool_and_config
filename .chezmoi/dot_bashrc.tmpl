@@ -200,24 +200,25 @@ CC_GIT_BASH_CANDS
         (export MSYS_NO_PATHCONV=1; "docker-compose.exe" "$@")
     }
 
-    # 非登录 shell 下确保能找到 oh-my-posh/starship（与 run_on_windows/dot_bash_profile 的 PATH 一致）
+    # 非登录 shell 下确保能找到 starship/oh-my-posh（登录 shell 的 PATH 在 _bash_profile_windows）
     for _d in "$HOME/AppData/Local/Microsoft/WinGet/Links" "$HOME/AppData/Local/Programs/oh-my-posh"; do
         [ -d "$_d" ] && [[ ":$PATH:" != *":$_d:"* ]] && export PATH="$PATH:$_d"
     done
     unset _d
 
-    # Windows 提示符：仅用 Oh My Posh（与 run_on_windows/dot_bash_profile 一致，避免登录/非登录显示不同）
-    _omp_config="$HOME/AppData/Local/Programs/oh-my-posh/themes/montys.omp.json"
-    if command -v oh-my-posh &> /dev/null; then
+    # Windows 提示符：Starship（优先，配置完善）/ Oh My Posh（备选）
+    if command -v starship &> /dev/null; then
+        export STARSHIP_CONFIG="$HOME/.config/starship/starship.toml"
+        eval "$(starship init bash)"
+    elif command -v oh-my-posh &> /dev/null; then
+        _omp_config="$HOME/AppData/Local/Programs/oh-my-posh/themes/montys.omp.json"
         if [ -f "$_omp_config" ]; then
             eval "$(oh-my-posh --init --shell bash --config "$_omp_config")"
         else
             eval "$(oh-my-posh --init --shell bash)"
         fi
-    elif command -v starship &> /dev/null; then
-        eval "$(starship init bash)"
+        unset _omp_config
     fi
-    unset _omp_config
 
     # 打开默认路径：仅在非编辑器终端中执行，避免 Cursor/VS Code 终端被切到固定目录（保持项目根目录）
     if [ -z "${TERM_PROGRAM:-}" ]; then

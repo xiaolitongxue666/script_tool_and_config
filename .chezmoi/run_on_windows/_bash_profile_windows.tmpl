@@ -11,7 +11,20 @@ if [[ ! "$OSTYPE" =~ ^(msys|mingw|cygwin) ]]; then
 fi
 
 # ============================================
-# 加载 .bashrc（确保 XDG 等环境变量生效）
+# 登录 shell 工具 PATH（须在 source .bashrc 之前，以便 Starship 可初始化）
+# ============================================
+for _d in \
+    "$HOME/.local/bin" \
+    "$HOME/AppData/Local/Microsoft/WinGet/Links" \
+    "/c/Program Files/starship/bin" \
+    "/d/Program Files/starship/bin" \
+    "$HOME/AppData/Local/Programs/oh-my-posh"; do
+    [ -d "$_d" ] && [[ ":$PATH:" != *":$_d:"* ]] && export PATH="$PATH:$_d"
+done
+unset _d
+
+# ============================================
+# 加载 .bashrc（提示符 Starship/OMP 在 bashrc 中初始化）
 # ============================================
 if [ -f ~/.bashrc ]; then
     source ~/.bashrc
@@ -38,8 +51,11 @@ for msys2_bin in \
 done
 
 # Python 环境（uv）
-PATH_DIRS+=("/c/Users/Administrator/.local/bin")
-PATH_DIRS+=("/c/Users/Administrator/AppData/Roaming/uv/python/cpython-3.10.16-windows-x86_64-none")
+[ -d "$HOME/.local/bin" ] && PATH_DIRS+=("$HOME/.local/bin")
+for _uv_py in "$HOME"/AppData/Roaming/uv/python/cpython-*-windows-x86_64-none; do
+    [ -d "$_uv_py" ] && PATH_DIRS+=("$_uv_py") && break
+done
+unset _uv_py
 
 # btop4win（如果已安装）
 if [ -d "/c/Program Files/btop4win" ]; then
@@ -54,9 +70,7 @@ elif [ -d "/c/opencode" ]; then
 fi
 
 # bun（如果已安装）
-if [ -d "/c/Users/Administrator/.bun/bin" ]; then
-    PATH_DIRS+=("/c/Users/Administrator/.bun/bin")
-fi
+[ -d "$HOME/.bun/bin" ] && PATH_DIRS+=("$HOME/.bun/bin")
 
 # 构建新的 PATH：先添加自定义路径，然后保留系统原有 PATH
 # 去重处理：只添加不存在的路径
@@ -79,8 +93,8 @@ fi
 # ============================================
 # 历史记录配置
 # ============================================
-# 自动追加历史记录到文件
-PROMPT_COMMAND='history -a'
+# 不在此处设置 PROMPT_COMMAND：.bashrc 中已配置 history -a，并由 starship init 链式挂载；
+# 若在此覆盖会冲掉 Starship，导致回退为 Git Bash 默认 PS1。
 
 # 历史记录设置
 export HISTSIZE=10000
@@ -163,20 +177,17 @@ curl() {
 # 确保 HOME 变量正确设置（Windows Git Bash 环境）
 # 在 Git Bash 中，HOME 应该指向 Windows 用户目录
 if [[ "$OSTYPE" =~ ^(msys|mingw|cygwin) ]]; then
-    # 如果 HOME 指向 /home/Administrator，修正为 Windows 实际路径
-    if [ "$HOME" == "/home/Administrator" ] || [ -z "$HOME" ]; then
-        export HOME="/c/Users/Administrator"
-    fi
-    # 确保 HOME 指向正确的 Windows 用户目录
-    if [ ! -d "$HOME" ]; then
-        # 尝试从环境变量获取
-        if [ -n "$USERPROFILE" ]; then
-            # 转换 Windows 路径格式（C:\Users\Administrator -> /c/Users/Administrator）
-            WIN_HOME=$(echo "$USERPROFILE" | sed 's|\\|/|g' | sed 's|^\([A-Za-z]\):|/\1|' | tr '[:upper:]' '[:lower:]' | sed 's|^/\([a-z]\)|/\1|')
-            if [ -d "$WIN_HOME" ]; then
-                export HOME="$WIN_HOME"
-            fi
+    # 确保 HOME 指向 Windows 用户目录（优先 USERPROFILE / cygpath）
+    if [[ "$HOME" == /home/* ]] || [ -z "$HOME" ] || [ ! -d "$HOME" ]; then
+        if command -v cygpath &>/dev/null && [ -n "${USERPROFILE:-}" ]; then
+            _win_home="$(cygpath -u "${USERPROFILE}" 2>/dev/null)"
+        elif [ -n "${USERPROFILE:-}" ]; then
+            _win_home="$(echo "$USERPROFILE" | sed 's|\\|/|g' | sed 's|^\([A-Za-z]\):|/\1|' | tr '[:upper:]' '[:lower:]')"
         fi
+        if [ -n "${_win_home:-}" ] && [ -d "$_win_home" ]; then
+            export HOME="$_win_home"
+        fi
+        unset _win_home
     fi
 fi
 
@@ -226,25 +237,9 @@ alias python='python3.10'
 # }
 
 # ============================================
-# Shell 增强工具
+# 提示符（Starship / Oh My Posh）
+# 由 ~/.bashrc 统一初始化（见 dot_bashrc.tmpl windows 分支）
 # ============================================
-
-# 注意：inshellisense 按键绑定在 .bashrc 中加载
-# 这样可以确保在非登录 shell 中也能使用
-
-# Oh My Posh 主题配置（与 .bashrc 一致，保证登录/非登录、Windows Terminal/Cursor 终端显示相同）
-# 使用 ~ 以便多用户兼容，不写死 Administrator
-_omp_config="$HOME/AppData/Local/Programs/oh-my-posh/themes/montys.omp.json"
-if command -v oh-my-posh &> /dev/null; then
-    if [ -f "$_omp_config" ]; then
-        eval "$(oh-my-posh --init --shell bash --config "$_omp_config")"
-    else
-        eval "$(oh-my-posh --init --shell bash)"
-    fi
-elif command -v starship &> /dev/null; then
-    eval "$(starship init bash)"
-fi
-unset _omp_config
 
 # ============================================
 # 自动启动 Zsh（如果可用）

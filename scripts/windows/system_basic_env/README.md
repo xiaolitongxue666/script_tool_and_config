@@ -43,8 +43,9 @@
 - **注意**：trash-cli 在 Windows 上可能不可用，Windows 有 Recycle Bin
 
 ### 提示符工具
-- **oh-my-posh** - PowerShell 提示符工具
-  - **注意**：Windows 下使用 Windows Terminal + git bash + oh-my-posh，不使用 starship
+- **starship** - 主提示符（Git Bash 层，`~/.config/starship/starship.toml`）
+- **oh-my-posh** - 备选（仅当 starship 不可用时，由 `~/.bashrc` 加载）
+  - **注意**：Windows 默认 **Windows Terminal + Git Bash + Starship**；WT 与 Shell 配置分开维护
 
 ### 开发工具
 - **gcc** - MinGW-w64 GCC 编译器（C/C++ 开发，与 Linux GCC 行为一致）
@@ -265,8 +266,8 @@ powershell -ExecutionPolicy Bypass -File .\install_common_tools.ps1
 
 ### Windows 特定配置
 
-- **提示符工具**：Windows 下使用 **oh-my-posh** 而非 starship
-- **终端组合**：推荐使用 Windows Terminal + git bash + oh-my-posh
+- **提示符工具**：Windows Git Bash 下 **Starship 优先**，oh-my-posh 为备选
+- **终端组合**：Windows Terminal（窗口/字体）+ Git Bash（shell/PATH/提示符），两层配置分离
 - **GitHub CLI**：gh 不作为默认安装工具，如需安装请使用交互式模式
 
 ### 包管理器优先级

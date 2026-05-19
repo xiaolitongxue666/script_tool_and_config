@@ -16,35 +16,18 @@ add_newline = false
 # ============================================
 # 提示符格式
 # ============================================
-# 使用分隔符和背景色创建美观的提示符
-# 适配 Dracula 主题颜色方案
+# 使用 Powerline 分隔符创建分段提示符
+# 样式目标：用户@主机、缩略路径、Git 分支以色块串联显示
 format = """
-[ ](fg:#bd93f9)\
+[](fg:#3b4252)\
 $username\
-[ ](bg:#44475a fg:#bd93f9)\
+$hostname\
+[](fg:#3b4252 bg:#5e81ac)\
 $directory\
-[ ](fg:#44475a bg:#6272a4)\
+[](fg:#5e81ac bg:#a3be8c)\
 $git_branch\
 $git_status\
-[ ](fg:#6272a4 bg:#8be9fd)\
-$c\
-$elixir\
-$elm\
-$golang\
-$gradle\
-$haskell\
-$java\
-$julia\
-$nodejs\
-$nim\
-$python\
-$rust\
-$scala\
-[ ](fg:#8be9fd bg:#50fa7b)\
-$docker_context\
-[ ](fg:#50fa7b bg:#ffb86c)\
-$time\
-[ ](fg:#ffb86c)\
+[](fg:#a3be8c)\
 $character\
 """
 
@@ -54,16 +37,25 @@ $character\
 [username]
 # 是否始终显示用户名（即使与当前用户相同）
 show_always = true
-# 普通用户样式（Dracula 紫色背景）
-style_user = "bg:#bd93f9 fg:#282a36"
-# root 用户样式（红色背景）
-style_root = "bg:#ff5555 fg:#282a36"
+# 普通用户样式
+style_user = "bg:#3b4252 fg:#eceff4 bold"
+# root 用户样式
+style_root = "bg:#bf616a fg:#eceff4 bold"
 # 格式
-format = "[$user ]($style)"
+format = "[ $user]($style)"
 disabled = false
 
 # ============================================
-# 操作系统模块（替代用户名）
+# 主机名模块
+# ============================================
+[hostname]
+ssh_only = false
+style = "bg:#3b4252 fg:#eceff4 bold"
+format = "[@$hostname ]($style)"
+disabled = false
+
+# ============================================
+# 操作系统模块（默认禁用，使用用户名与主机名）
 # ============================================
 [os]
 style = "bg:#bd93f9 fg:#282a36"
@@ -73,14 +65,18 @@ disabled = true  # 默认禁用，使用用户名模块
 # 目录模块
 # ============================================
 [directory]
-# 样式（Dracula 灰色背景）
-style = "bg:#44475a fg:#f8f8f2"
+# 样式
+style = "bg:#5e81ac fg:#eceff4 bold"
 # 格式
 format = "[ $path ]($style)"
 # 路径截断长度（显示最后 N 个目录）
-truncation_length = 3
+truncation_length = 2
 # 截断符号
 truncation_symbol = "…/"
+# 在 Git 仓库中也按路径长度缩略，避免只显示仓库名
+truncate_to_repo = false
+# Windows Git Bash 中也使用 / 作为路径分隔符，贴近类 Unix 终端显示
+use_os_path_sep = false
 
 # 目录路径替换（使用图标简化常见目录名）
 # 注意：顺序很重要，更具体的路径应该放在前面
@@ -98,11 +94,11 @@ truncation_symbol = "…/"
 # ============================================
 [git_branch]
 # Git 分支符号
-symbol = ""
-# 样式（Dracula 蓝灰色背景）
-style = "bg:#6272a4 fg:#f8f8f2"
+symbol = " "
+# 样式
+style = "bg:#a3be8c fg:#2e3440 bold"
 # 格式
-format = "[$symbol$branch]($style)"
+format = "[ $symbol$branch ]($style)"
 disabled = false
 
 # ============================================
@@ -110,7 +106,7 @@ disabled = false
 # ============================================
 [git_status]
 # 样式（与 git_branch 相同）
-style = "bg:#6272a4 fg:#f8f8f2"
+style = "bg:#a3be8c fg:#2e3440 bold"
 # 格式
 format = "[$all_status$ahead_behind ]($style)"
 disabled = false
@@ -121,91 +117,91 @@ disabled = false
 
 # C/C++ 模块
 [c]
-symbol = " "
-style = "bg:#8be9fd fg:#282a36"
+symbol = "C "
+style = "bg:#88c0d0 fg:#2e3440"
 format = "[ $symbol($version) ]($style)"
 disabled = false
 
 # Elixir 模块
 [elixir]
-symbol = " "
-style = "bg:#8be9fd fg:#282a36"
+symbol = "EX "
+style = "bg:#88c0d0 fg:#2e3440"
 format = "[ $symbol($version) ]($style)"
 disabled = false
 
 # Elm 模块
 [elm]
-symbol = " "
-style = "bg:#8be9fd fg:#282a36"
+symbol = "ELM "
+style = "bg:#88c0d0 fg:#2e3440"
 format = "[ $symbol($version) ]($style)"
 disabled = false
 
 # Go 模块
 [golang]
-symbol = " "
-style = "bg:#8be9fd fg:#282a36"
+symbol = "GO "
+style = "bg:#88c0d0 fg:#2e3440"
 format = "[ $symbol($version) ]($style)"
 disabled = false
 
 # Gradle 模块
 [gradle]
-style = "bg:#8be9fd fg:#282a36"
+style = "bg:#88c0d0 fg:#2e3440"
 format = "[ $symbol($version) ]($style)"
 disabled = false
 
 # Haskell 模块
 [haskell]
-symbol = " "
-style = "bg:#8be9fd fg:#282a36"
+symbol = "HS "
+style = "bg:#88c0d0 fg:#2e3440"
 format = "[ $symbol($version) ]($style)"
 disabled = false
 
 # Java 模块
 [java]
-symbol = " "
-style = "bg:#8be9fd fg:#282a36"
+symbol = "JAVA "
+style = "bg:#88c0d0 fg:#2e3440"
 format = "[ $symbol($version) ]($style)"
 disabled = false
 
 # Julia 模块
 [julia]
-symbol = " "
-style = "bg:#8be9fd fg:#282a36"
+symbol = "JL "
+style = "bg:#88c0d0 fg:#2e3440"
 format = "[ $symbol($version) ]($style)"
 disabled = false
 
 # Node.js 模块
 [nodejs]
 symbol = ""
-style = "bg:#8be9fd fg:#282a36"
+style = "bg:#88c0d0 fg:#2e3440"
 format = "[ $symbol($version) ]($style)"
 disabled = false
 
 # Nim 模块
 [nim]
-symbol = " "
-style = "bg:#8be9fd fg:#282a36"
+symbol = "NIM "
+style = "bg:#88c0d0 fg:#2e3440"
 format = "[ $symbol($version) ]($style)"
 disabled = false
 
 # Python 模块
 [python]
-symbol = " "
-style = "bg:#8be9fd fg:#282a36"
+symbol = "PY "
+style = "bg:#88c0d0 fg:#2e3440"
 format = "[ $symbol($version) ]($style)"
 disabled = false
 
 # Rust 模块
 [rust]
 symbol = ""
-style = "bg:#8be9fd fg:#282a36"
+style = "bg:#88c0d0 fg:#2e3440"
 format = "[ $symbol($version) ]($style)"
 disabled = false
 
 # Scala 模块
 [scala]
-symbol = " "
-style = "bg:#8be9fd fg:#282a36"
+symbol = "SC "
+style = "bg:#88c0d0 fg:#2e3440"
 format = "[ $symbol($version) ]($style)"
 disabled = false
 
@@ -216,7 +212,7 @@ disabled = false
 # Docker 上下文模块
 [docker_context]
 symbol = "🐳 "
-style = "bg:#50fa7b fg:#282a36"
+style = "bg:#d08770 fg:#2e3440"
 format = "[ $symbol$context ]($style)"
 disabled = false
 
@@ -226,18 +222,18 @@ disabled = false
 disabled = true
 # 时间格式（24小时制，时:分）
 time_format = "%R"
-# 样式（Dracula 橙色背景）
-style = "bg:#ffb86c fg:#282a36"
+# 样式
+style = "bg:#ebcb8b fg:#2e3440"
 # 格式
-format = "[ ♥ $time ]($style)"
+format = "[ $time ]($style)"
 
 # ============================================
 # 字符模块（提示符符号）
 # ============================================
 [character]
-# 成功命令后的提示符（Dracula 橙色）
-success_symbol = "[ ](fg:#ffb86c)"
-# 失败命令后的提示符（Dracula 红色）
-error_symbol = "[ ](fg:#ff5555)"
+# 成功命令后的提示符
+success_symbol = "[❯](fg:#a3be8c bold)"
+# 失败命令后的提示符
+error_symbol = "[❯](fg:#bf616a bold)"
 # Vim 命令模式提示符
-vimcmd_symbol = "[ ](fg:#ffb86c)"
+vimcmd_symbol = "[❮](fg:#ebcb8b bold)"

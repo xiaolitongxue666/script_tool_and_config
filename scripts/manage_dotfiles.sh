@@ -11,6 +11,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 COMMON_SH="${PROJECT_ROOT}/scripts/common.sh"
 HELPERS_SH="${SCRIPT_DIR}/chezmoi/helpers.sh"
+CHEZMOI_CORE_SH="${SCRIPT_DIR}/chezmoi/chezmoi_core.sh"
 
 # 加载通用函数库
 if [ -f "$COMMON_SH" ]; then
@@ -28,37 +29,52 @@ if [ -f "$HELPERS_SH" ]; then
     source "$HELPERS_SH"
 fi
 
+# 加载 chezmoi 核心封装（apply/lock/Windows 环境）
+if [ -f "$CHEZMOI_CORE_SH" ]; then
+    # shellcheck disable=SC1090
+    source "$CHEZMOI_CORE_SH"
+fi
+
 # ============================================
 # 检查 chezmoi 是否已安装
 # ============================================
 check_chezmoi() {
     if ! command -v chezmoi &> /dev/null; then
-        log_error "chezmoi 未安装"
-        log_info "请先运行: ./scripts/chezmoi/install_chezmoi.sh"
+        log_error "chezmoi is not installed"
+        log_info "Run: ./scripts/chezmoi/install_chezmoi.sh or ./install.sh"
         exit 1
     fi
 }
 
 # ============================================
-# 设置 chezmoi 源状态目录
-# 使用 helpers.sh 中的函数
+# 设置 chezmoi 源状态目录与会话环境（Windows USERPROFILE 等）
 # ============================================
+prepare_chezmoi_session_env() {
+    export CHEZMOI_PROJECT_ROOT="$PROJECT_ROOT"
+    if type chezmoi_export_template_env &>/dev/null; then
+        chezmoi_export_template_env
+    elif type chezmoi_normalize_windows_env &>/dev/null; then
+        chezmoi_normalize_windows_env
+    fi
+    export PAGER=cat
+    export CHEZMOI_PAGER=""
+}
+
 setup_chezmoi_source() {
     if command -v setup_chezmoi_source_dir &> /dev/null; then
-        # 使用 helpers.sh 中的函数
         setup_chezmoi_source_dir
     else
-        # 回退到本地实现
         init_chezmoi_env
         local source_dir="${PROJECT_ROOT}/.chezmoi"
         if [ -d "$source_dir" ]; then
             export CHEZMOI_SOURCE_DIR="$source_dir"
-            log_info "使用源状态目录: $source_dir"
+            log_info "Using source dir: $source_dir"
         else
-            log_warning "源状态目录不存在: $source_dir"
-            log_info "将使用默认源状态目录"
+            log_warning "Source dir not found: $source_dir"
+            log_info "Falling back to default chezmoi source dir"
         fi
     fi
+    prepare_chezmoi_session_env
 }
 
 # ============================================
@@ -105,13 +121,22 @@ cmd_install() {
 cmd_apply() {
     check_chezmoi
     setup_chezmoi_source
-    if command -v export_chezmoi_apply_env &>/dev/null; then
+    if type chezmoi_export_apply_env &>/dev/null; then
+        chezmoi_export_apply_env
+    elif command -v export_chezmoi_apply_env &>/dev/null; then
         export_chezmoi_apply_env
     fi
-    log_info "应用所有配置 (chezmoi apply -v)..."
-    export PAGER=cat
-    export CHEZMOI_PAGER=""
-    chezmoi apply -v
+    if type chezmoi_ensure_unlocked &>/dev/null; then
+        chezmoi_ensure_unlocked 30
+    fi
+    log_info "Applying all configs (chezmoi apply -v)..."
+    if type chezmoi_run_apply &>/dev/null; then
+        chezmoi_run_apply "-v"
+    else
+        export PAGER=cat
+        export CHEZMOI_PAGER=""
+        chezmoi apply -v
+    fi
 }
 
 cmd_update() {
@@ -133,7 +158,7 @@ cmd_diff() {
 cmd_status() {
     check_chezmoi
     setup_chezmoi_source
-    log_info "查看配置状态..."
+    log_info "Config status (chezmoi status)..."
     chezmoi status
 }
 

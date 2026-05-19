@@ -22,7 +22,8 @@ else
     function error_exit() { log_error "$1"; exit "${2:-1}"; }
 fi
 
-start_script "配置审计"
+log_setup "audit_configs"
+start_script "Config audit"
 
 # ============================================
 # 检测当前平台
@@ -42,7 +43,7 @@ else
     PLATFORM_NAME="Unknown"
 fi
 
-log_info "当前平台: $PLATFORM_NAME ($OS)"
+log_info "Platform: $PLATFORM_NAME ($OS)"
 
 # ============================================
 # 设置路径
@@ -52,11 +53,11 @@ SOFTWARE_LIST="${PROJECT_ROOT}/docs/SOFTWARE_LIST.md"
 AUDIT_REPORT="${PROJECT_ROOT}/.audit_configs_report.txt"
 
 if [ ! -f "$SOFTWARE_LIST" ]; then
-    error_exit "软件清单文件不存在: $SOFTWARE_LIST"
+    error_exit "Software list not found: $SOFTWARE_LIST"
 fi
 
 if [ ! -d "$CHEZMOI_DIR" ]; then
-    error_exit "chezmoi 源状态目录不存在: $CHEZMOI_DIR"
+    error_exit "chezmoi source dir not found: $CHEZMOI_DIR"
 fi
 
 # ============================================
@@ -70,7 +71,7 @@ CONFIG_MAPPINGS["~/.zshrc"]=".chezmoi/dot_zshrc.tmpl"
 CONFIG_MAPPINGS["~/.bashrc"]=".chezmoi/dot_bashrc.tmpl"
 CONFIG_MAPPINGS["~/.bash_profile"]=".chezmoi/dot_bash_profile.tmpl"
 CONFIG_MAPPINGS["~/.zprofile"]=".chezmoi/dot_zprofile"
-CONFIG_MAPPINGS["~/.config/starship/starship.toml"]=".chezmoi/dot_config/starship/starship.toml"
+CONFIG_MAPPINGS["~/.config/starship/starship.toml"]=".chezmoi/dot_config/starship/starship.toml.tmpl"
 
 CONFIG_MAPPINGS["~/.ssh/config"]=".chezmoi/dot_ssh/config.tmpl"
 
@@ -87,10 +88,11 @@ if [[ "$PLATFORM" == "darwin" ]]; then
     CONFIG_MAPPINGS["~/.skhdrc"]=".chezmoi/run_on_darwin/dot_skhdrc.tmpl"
 fi
 
-# Windows 特定配置
+# Windows 特定配置（WT 层与 Git Bash 层分开）
 if [[ "$PLATFORM" == "windows" ]]; then
+    CONFIG_MAPPINGS["~/.config/windows-terminal/settings.json"]=".chezmoi/dot_config/windows-terminal/settings.json.tmpl"
     CONFIG_MAPPINGS["~/.bash_profile"]=".chezmoi/dot_bash_profile.tmpl"
-    CONFIG_MAPPINGS["~/.bashrc"]=".chezmoi/run_on_windows/dot_bashrc.tmpl"
+    CONFIG_MAPPINGS["~/.bashrc"]=".chezmoi/dot_bashrc.tmpl"
 fi
 
 # ============================================
@@ -128,7 +130,7 @@ audit_config() {
 # ============================================
 log_info ""
 log_info "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-log_info "开始审计配置"
+log_info "Starting config audit"
 log_info "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
 MISSING_COUNT=0
@@ -193,12 +195,12 @@ fi
 # ============================================
 log_info ""
 log_info "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-log_info "审计结果摘要"
+log_info "Audit summary"
 log_info "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
-log_info "正常配置: $OK_COUNT"
-log_info "缺失源文件: $MISSING_COUNT"
-log_info "非模板格式: $NOT_TEMPLATE_COUNT"
+log_info "OK mappings: $OK_COUNT"
+log_info "Missing source: $MISSING_COUNT"
+log_info "Non-template source: $NOT_TEMPLATE_COUNT"
 
 if [ -f "$AUDIT_REPORT" ] && [ -s "$AUDIT_REPORT" ]; then
     log_info ""
@@ -207,7 +209,7 @@ if [ -f "$AUDIT_REPORT" ] && [ -s "$AUDIT_REPORT" ]; then
     log_info "需要处理的问题:"
     cat "$AUDIT_REPORT"
 else
-    log_success "所有配置都已正确管理！"
+    log_success "All mapped configs are managed correctly"
 fi
 
 end_script

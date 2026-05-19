@@ -8,7 +8,7 @@
 
 | 平台 | 终端 | Shell | 模板文件 |
 |------|------|-------|---------|
-| Windows | Windows Terminal | Git Bash | `.chezmoi/run_on_windows/dot_bashrc.tmpl` |
+| Windows | Windows Terminal | Git Bash | WT：`.chezmoi/dot_config/windows-terminal/settings.json.tmpl`；Shell：`.chezmoi/dot_bashrc.tmpl` + `run_on_windows/_bash_profile_windows.tmpl` |
 | macOS | Ghostty | zsh | `.chezmoi/dot_zshrc.tmpl` |
 | Linux + WSL | Alacritty | zsh | `.chezmoi/dot_zshrc.tmpl` / `.chezmoi/dot_bashrc.tmpl` |
 
@@ -19,8 +19,8 @@
 项目在 Shell 配置模板中内置了 claude-mem 记忆自动检测，覆盖所有平台：
 
 - **`dot_zshrc.tmpl`** — macOS / Linux / WSL 的 zsh 用户
-- **`dot_bashrc.tmpl`** — Linux bash 用户
-- **`run_on_windows/dot_bashrc.tmpl`** — Windows Git Bash 用户
+- **`dot_bashrc.tmpl`** — Linux bash 与 Windows Git Bash（`OS==windows` 分支）
+- **`run_on_windows/_bash_profile_windows.tmpl`** — Windows 登录 shell（include 进 `dot_bash_profile.tmpl`）
 
 ### 功能
 

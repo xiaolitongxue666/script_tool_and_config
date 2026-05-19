@@ -20,7 +20,7 @@ log_setup "test_proxy"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 echo "=========================================="
-echo "代理逻辑测试 - $(date)"
+echo "Proxy detection tests - $(date)"
 echo "=========================================="
 
 PASSED=0
@@ -38,7 +38,7 @@ ${env_vars} chezmoi_detect_proxy
 }
 
 # 测试 1: 环境变量优先
-echo -n "[Test 1] 环境变量 PROXY 优先 ... "
+echo -n "[Test 1] PROXY env takes precedence ... "
 result=$(detect_proxy_in_subshell "PROXY=http://192.168.1.100:8080")
 
 if [[ "$result" == "http://192.168.1.100:8080" ]]; then
@@ -50,7 +50,7 @@ else
 fi
 
 # 测试 2: http_proxy 环境变量
-echo -n "[Test 2] http_proxy 环境变量 ... "
+echo -n "[Test 2] http_proxy env ... "
 result=$(detect_proxy_in_subshell "http_proxy=http://127.0.0.1:7890")
 
 if [[ "$result" == "http://127.0.0.1:7890" ]]; then
@@ -62,7 +62,7 @@ else
 fi
 
 # 测试 3: 无环境变量时默认 127.0.0.1:7890
-echo -n "[Test 3] 默认代理地址 ... "
+echo -n "[Test 3] default proxy when unset ... "
 result=$(detect_proxy_in_subshell "unset http_proxy https_proxy PROXY;")
 
 if [[ "$result" == "http://127.0.0.1:7890" ]]; then
@@ -74,7 +74,7 @@ else
 fi
 
 # 测试 4: 代理补全 http:// 前缀
-echo -n "[Test 4] 代理补全 http:// 前缀 ... "
+echo -n "[Test 4] prepend http:// to proxy URL ... "
 result=$(bash -c "
 source '${CORE_SCRIPT}'
 chezmoi_setup_proxy '127.0.0.1:7890' >/dev/null 2>&1
@@ -90,7 +90,7 @@ else
 fi
 
 # 测试 5: 已有 http:// 前缀不再重复添加
-echo -n "[Test 5] 已有 http:// 前缀不重复添加 ... "
+echo -n "[Test 5] keep existing http:// prefix ... "
 result=$(bash -c "
 source '${CORE_SCRIPT}'
 chezmoi_setup_proxy 'http://192.168.1.1:7890' >/dev/null 2>&1
@@ -107,7 +107,7 @@ fi
 
 echo ""
 echo "=========================================="
-echo "结果: $PASSED 通过, $FAILED 失败"
+echo "Result: $PASSED passed, $FAILED failed"
 echo "=========================================="
 
 exit $FAILED

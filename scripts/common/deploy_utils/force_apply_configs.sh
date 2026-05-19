@@ -55,8 +55,7 @@ declare -A FILE_MAPPINGS=(
     ["$CHEZMOI_DIR/dot_zprofile"]="$HOME/.zprofile"
 
     # 配置目录
-    ["$CHEZMOI_DIR/dot_config/starship/starship.toml"]="$HOME/.config/starship/starship.toml"
-    ["$CHEZMOI_DIR/dot_config/fish/config.fish"]="$HOME/.config/fish/config.fish"
+    ["$CHEZMOI_DIR/dot_config/starship/starship.toml.tmpl"]="$HOME/.config/starship/starship.toml"
 )
 
 # 平台特定配置

@@ -704,7 +704,7 @@ claude() {
 |---------|---------|--------|
 | `~/.zshrc` | macOS / Linux / WSL（zsh 环境） | `.chezmoi/dot_zshrc.tmpl` |
 | `~/.bashrc` | Linux bash 环境 | `.chezmoi/dot_bashrc.tmpl` |
-| `~/.bashrc` | Windows Git Bash 环境 | `.chezmoi/run_on_windows/dot_bashrc.tmpl` |
+| `~/.bashrc` | Windows Git Bash 环境 | `.chezmoi/dot_bashrc.tmpl`（windows 分支） |
 
 ### 相关参考
 

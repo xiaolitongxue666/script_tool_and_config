@@ -21,6 +21,8 @@ else
     function log_error() { echo "[ERROR] $*" >&2; }
 fi
 
+log_setup "verify_installation"
+
 # 报告文件路径（可由调用方传入）
 REPORT_FILE="${VERIFY_REPORT_FILE:-}"
 REPORT_DATE="$(date +%Y%m%d_%H%M%S)"
@@ -106,9 +108,18 @@ check_font() {
             report_append "  说明: 可由 run_once_install-nerd-fonts.sh 安装"
             ((SUMMARY_WARN++)) || true
         fi
+    elif [[ "$os" == "windows" ]]; then
+        local fonts_dir="/c/Windows/Fonts"
+        if [[ -d "${fonts_dir}" ]] && find "${fonts_dir}" -name "*FiraMono*" -type f \( -name "*.ttf" -o -name "*.otf" \) 2>/dev/null | grep -q .; then
+            report_append "  Status: PASS (FiraMono Nerd Font in ${fonts_dir})"
+            ((SUMMARY_PASS++)) || true
+        else
+            report_append "  Status: WARN (FiraMono Nerd Font not detected)"
+            report_append "  Note: run_once_install-nerd-fonts.sh or install manually"
+            ((SUMMARY_WARN++)) || true
+        fi
     else
-        report_append "  状态: 跳过 (Windows/其他平台请手动确认字体)"
-        report_append "  说明: 本项目安装 FiraMono Nerd Font，终端可选用 Nerd Font 以显示图标"
+        report_append "  Status: SKIP (font check not implemented for this OS)"
     fi
     report_append ""
 }

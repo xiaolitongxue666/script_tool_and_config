@@ -20,7 +20,7 @@ log_setup "test_syntax"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 echo "=========================================="
-echo "语法测试 - $(date)"
+echo "Syntax check - $(date)"
 echo "=========================================="
 
 PASSED=0
@@ -29,7 +29,7 @@ FAILED_FILES=""
 
 # 查找所有 .sh 文件（排除 git 目录、node_modules 等）
 while IFS= read -r -d '' file; do
-    echo -n "[检查] $file ... "
+    echo -n "[check] $file ... "
 
     if bash -n "$file" 2>/dev/null; then
         echo "PASS"
@@ -37,7 +37,7 @@ while IFS= read -r -d '' file; do
     else
         echo "FAIL"
         FAILED=$((FAILED + 1))
-        FAILED_FILES="${FAILED_FILES}  - $file (语法错误)\n"
+        FAILED_FILES="${FAILED_FILES}  - $file (syntax error)\n"
     fi
 done < <(find "$PROJECT_ROOT" -name "*.sh" \
     -not -path "*/.git/*" \
@@ -54,7 +54,7 @@ while IFS= read -r -d '' file; do
     if [[ "$first_line" != "#!/bin/bash" ]] && [[ "$first_line" != "#!/usr/bin/env bash" ]]; then
         continue
     fi
-    echo -n "[检查] $file ... "
+    echo -n "[check] $file ... "
 
     # 对 .tmpl 文件，移除 chezmoi 模板语法后检查 bash 语法
     tmp_file=$(mktemp)
@@ -66,18 +66,18 @@ while IFS= read -r -d '' file; do
     else
         echo "FAIL"
         TMPL_FAILED=$((TMPL_FAILED + 1))
-        FAILED_FILES="${FAILED_FILES}  - $file (模板语法错误)\n"
+        FAILED_FILES="${FAILED_FILES}  - $file (template syntax error)\n"
     fi
     rm -f "$tmp_file"
 done < <(find "$PROJECT_ROOT/.chezmoi" -name "*.tmpl" -print0 2>/dev/null || true)
 
 echo ""
 echo "=========================================="
-echo "结果摘要"
+echo "Summary"
 echo "=========================================="
-echo ".sh 文件: $PASSED 通过, $FAILED 失败"
-echo ".tmpl 文件: $TMPL_PASSED 通过, $TMPL_FAILED 失败"
-echo "总: $((PASSED + TMPL_PASSED)) 通过, $((FAILED + TMPL_FAILED)) 失败"
+echo ".sh files: $PASSED passed, $FAILED failed"
+echo ".tmpl files: $TMPL_PASSED passed, $TMPL_FAILED failed"
+echo "Total: $((PASSED + TMPL_PASSED)) passed, $((FAILED + TMPL_FAILED)) failed"
 
 if [ -n "$FAILED_FILES" ]; then
     echo ""

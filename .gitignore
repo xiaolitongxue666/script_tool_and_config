@@ -196,6 +196,10 @@ chezmoistate.boltdb
 # chezmoi 临时文件
 .chezmoi.*.tmp
 
+# chezmoi 用户本地覆盖（机器特定，含敏感 data）
+.chezmoi.toml.local
+.chezmoi.yaml.local
+
 # chezmoi 目录下的嵌套 Git 仓库（不应存在）
 .chezmoi/.git/
 
@@ -369,6 +373,12 @@ temp_plan.md
 # aiconfig 本地缓存状态
 .aiconfig/
 .aiconfig.state
+
+# Agent / Cursor 调试会话 NDJSON 日志（工作区根目录）
+debug-*.log
+
+# 临时 commit 消息草稿（本地编写，不提交）
+commit_msg.txt
 
 # 测试临时目录（测试脚本的输出、快照等）
 tests/tmp/

@@ -7,21 +7,6 @@
 
 set -e
 
-# 在 Windows (Git Bash/MSYS2) 下显式导出 USERPROFILE
-if [[ "$(uname -s)" =~ ^(MINGW|MSYS|CYGWIN) ]]; then
-    export LANG=C.UTF-8
-    export LC_ALL=C.UTF-8
-    if [[ -z "${USERPROFILE:-}" ]]; then
-        _up_user="${HOME##*/}"
-        if [[ -n "$_up_user" && "$_up_user" != "$HOME" ]]; then
-            USERPROFILE="C:/Users/${_up_user}"
-        else
-            USERPROFILE="C:/Users/${USERNAME:-$USER}"
-        fi
-        export USERPROFILE
-    fi
-fi
-
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 COMMON_SH="${SCRIPT_DIR}/scripts/common.sh"
 
@@ -40,6 +25,15 @@ fi
 COMMON_INSTALL_SH="${SCRIPT_DIR}/scripts/chezmoi/common_install.sh"
 if [ -f "$COMMON_INSTALL_SH" ]; then
     source "$COMMON_INSTALL_SH"
+fi
+
+CHEZMOI_CORE_SH="${SCRIPT_DIR}/scripts/chezmoi/chezmoi_core.sh"
+if [ -f "$CHEZMOI_CORE_SH" ]; then
+    # shellcheck disable=SC1090
+    source "$CHEZMOI_CORE_SH"
+    if type chezmoi_normalize_windows_env &>/dev/null; then
+        chezmoi_normalize_windows_env
+    fi
 fi
 
 log_setup "deploy"
@@ -98,12 +92,16 @@ if ! command -v chezmoi &> /dev/null; then
 fi
 
 # ============================================
-# 确保 chezmoi 未占用（非交互，与 install.sh 一致）
+# 确保 chezmoi 未占用（与 install.sh / manage_dotfiles 共用 chezmoi_core）
 # ============================================
-ENSURE_UNLOCKED="${SCRIPT_DIR}/scripts/common/deploy_utils/ensure_chezmoi_unlocked.sh"
-if [ -f "$ENSURE_UNLOCKED" ]; then
-    [ ! -x "$ENSURE_UNLOCKED" ] && chmod +x "$ENSURE_UNLOCKED"
-    bash "$ENSURE_UNLOCKED" || true
+if type chezmoi_ensure_unlocked &>/dev/null; then
+    chezmoi_ensure_unlocked 30
+else
+    ENSURE_UNLOCKED="${SCRIPT_DIR}/scripts/common/deploy_utils/ensure_chezmoi_unlocked.sh"
+    if [ -f "$ENSURE_UNLOCKED" ]; then
+        [ ! -x "$ENSURE_UNLOCKED" ] && chmod +x "$ENSURE_UNLOCKED"
+        bash "$ENSURE_UNLOCKED" || true
+    fi
 fi
 
 # ============================================
@@ -555,9 +553,14 @@ fi
 # ============================================
 # 应用配置
 # ============================================
+export CHEZMOI_PROJECT_ROOT="${SCRIPT_DIR}"
+if type chezmoi_export_apply_env &>/dev/null; then
+    chezmoi_export_apply_env
+fi
+
 log_info ""
 log_info "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-log_info "应用配置"
+log_info "Applying configuration"
 log_info "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
 # 检查是否有文件在管理中
@@ -573,7 +576,7 @@ if [ -z "$MANAGED_FILES" ]; then
     else
         log_warning "强制应用脚本不可用，尝试直接应用..."
         log_info "chezmoi 将根据当前系统（$PLATFORM_NAME）自动应用对应的配置："
-        log_info "  ✓ 跨平台配置（Git, Neovim, Starship, Alacritty, Fish, Tmux 等）"
+        log_info "  ✓ Cross-platform configs (Git, Neovim, Starship, Tmux, etc.)"
         log_info "  ✓ $PLATFORM_NAME 特定配置（仅当前系统）"
         log_info "  ✓ 模板文件会根据系统变量自动生成对应内容"
         log_info ""

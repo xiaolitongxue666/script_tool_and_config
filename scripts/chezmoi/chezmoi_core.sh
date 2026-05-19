@@ -40,6 +40,62 @@ chezmoi_is_wsl() {
     grep -qEi "Microsoft|WSL" /proc/version 2>/dev/null || [[ -n "${WSL_DISTRO_NAME:-}" ]]
 }
 
+# Git Bash / MSYS：规范化 HOME、USERPROFILE、USERNAME（chezmoi.exe 与模板需要）
+chezmoi_normalize_windows_env() {
+    if [[ ! "$(uname -s)" =~ ^(MINGW|MSYS|CYGWIN) ]]; then
+        return 0
+    fi
+
+    export LANG="${LANG:-C.UTF-8}"
+    export LC_ALL="${LC_ALL:-C.UTF-8}"
+
+    if [[ -z "${USERPROFILE:-}" ]]; then
+        local _up_user="${HOME##*/}"
+        if [[ -n "$_up_user" && "$_up_user" != "$HOME" ]]; then
+            USERPROFILE="C:/Users/${_up_user}"
+        else
+            USERPROFILE="C:/Users/${USERNAME:-$USER}"
+        fi
+        export USERPROFILE
+    fi
+
+    local _normalized_home=""
+    if command -v cygpath &>/dev/null; then
+        _normalized_home="$(cygpath -u "${USERPROFILE}")"
+    else
+        _normalized_home="/c/Users/${USERNAME:-$USER}"
+    fi
+    if [[ -n "${_normalized_home}" ]]; then
+        export HOME="${_normalized_home}"
+    fi
+
+    if [[ -z "${USERNAME:-}" ]]; then
+        if [[ -n "${USERPROFILE:-}" ]]; then
+            USERNAME="${USERPROFILE##*[/\\]}"
+        else
+            USERNAME="${USER:-$(whoami 2>/dev/null || echo Administrator)}"
+        fi
+        export USERNAME
+    fi
+    if [[ -z "${USER:-}" ]]; then
+        export USER="${USERNAME:-$(whoami 2>/dev/null || echo Administrator)}"
+    fi
+    unset _normalized_home
+}
+
+# 导出 chezmoi 模板渲染所需环境（避免 %userprofile% is not defined）
+chezmoi_export_template_env() {
+    chezmoi_normalize_windows_env
+
+    if [[ "$(uname -s)" =~ ^(MINGW|MSYS|CYGWIN) ]]; then
+        export USERPROFILE="${USERPROFILE:-}"
+        export USER="${USER:-${USERNAME:-}}"
+        export USERNAME="${USERNAME:-${USER:-}}"
+        # chezmoi.exe (Go) 在部分路径下读取小写 userprofile
+        export userprofile="${USERPROFILE}"
+    fi
+}
+
 # ============================================
 # 代理配置
 # ============================================
@@ -139,6 +195,16 @@ chezmoi_check_lock() {
     return 0
 }
 
+# 清理残留锁文件（.lock 与 .chezmoi.lock）
+_chezmoi_remove_stale_locks() {
+    local state_dir="${HOME}/.local/share/chezmoi"
+    local lock_path
+    for lock_path in "${state_dir}/.lock" "${state_dir}/.chezmoi.lock"; do
+        [[ -f "$lock_path" ]] || continue
+        rm -f "$lock_path" 2>/dev/null || true
+    done
+}
+
 # 确保 chezmoi 未占用（若占用则等待或清理）
 # 参数: max_wait_seconds (可选，默认 30)
 chezmoi_ensure_unlocked() {
@@ -148,12 +214,18 @@ chezmoi_ensure_unlocked() {
     while ! chezmoi_check_lock; do
         if [[ "$waited" -ge "$max_wait" ]]; then
             echo "[WARNING] Lock wait timeout, force releasing..."
-            rm -f "${HOME}/.local/share/chezmoi/.lock" 2>/dev/null || true
+            _chezmoi_remove_stale_locks
             return 0
         fi
         sleep 1
         waited=$((waited + 1))
     done
+
+    # deploy.sh 历史路径：无 PID 的 .chezmoi.lock 也清理
+    if [[ -f "${HOME}/.local/share/chezmoi/.chezmoi.lock" ]]; then
+        rm -f "${HOME}/.local/share/chezmoi/.chezmoi.lock" 2>/dev/null || true
+        echo "[INFO] Removed stale .chezmoi.lock"
+    fi
 
     echo "[INFO] chezmoi is available (not locked)"
 }
@@ -186,6 +258,7 @@ chezmoi_source_dir_ok() {
 
 # 导出 apply 所需的环境变量（macOS connect 路径等）
 chezmoi_export_apply_env() {
+    chezmoi_export_template_env
     export CHEZMOI_PAGER=""
     export PAGER=cat
 
@@ -254,6 +327,16 @@ chezmoi_run_apply() {
 chezmoi_verify_sync() {
     local status_output
     local diff_output
+    local platform="${1:-}"
+
+    if [[ -z "$platform" ]]; then
+        if type chezmoi_detect_platform &>/dev/null; then
+            chezmoi_detect_platform >/dev/null 2>&1 || true
+            platform="${PLATFORM:-$(uname -s)}"
+        else
+            platform="$(uname -s)"
+        fi
+    fi
 
     status_output=$(chezmoi status 2>&1 || true)
     diff_output=$(chezmoi diff 2>&1 || true)
@@ -269,12 +352,24 @@ chezmoi_verify_sync() {
 
     # 检查差异是否仅包含其他平台的 run_on_* 文件
     if [[ -n "$status_clean" ]] || [[ -n "$diff_output" ]]; then
-        local platform="${1:-$(uname -s)}"
         local pattern=""
         case "$platform" in
-            *MINGW*|*MSYS*|*CYGWIN*) pattern='run_on_(darwin|linux)/' ;;
-            Linux)  pattern='run_on_(darwin|windows)/' ;;
-            Darwin) pattern='run_on_(linux|windows)/' ;;
+            windows|*MINGW*|*MSYS*|*CYGWIN*)
+                pattern='run_on_(darwin|linux)/'
+                ;;
+            linux|Linux)
+                pattern='run_on_(darwin|windows)/'
+                ;;
+            darwin|Darwin)
+                pattern='run_on_(linux|windows)/'
+                ;;
+            *)
+                case "$(uname -s)" in
+                    *MINGW*|*MSYS*|*CYGWIN*) pattern='run_on_(darwin|linux)/' ;;
+                    Linux) pattern='run_on_(darwin|windows)/' ;;
+                    Darwin) pattern='run_on_(linux|windows)/' ;;
+                esac
+                ;;
         esac
 
         if [[ -n "$pattern" ]]; then
