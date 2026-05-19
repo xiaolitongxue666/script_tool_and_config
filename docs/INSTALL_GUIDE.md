@@ -1,181 +1,216 @@
-# 安装与配置指南
+# 安装指南
 
-本指南为一键安装与首次配置的入口，各平台分步说明见 [OS_SETUP_GUIDE.md](OS_SETUP_GUIDE.md)。
+本指南是手动操作的一步一步流程。软件安装顺序详情见 [SOFTWARE_LIST.md](SOFTWARE_LIST.md)。
 
-## 各系统安装入口
+---
 
-| 系统 | 新建系统第一次运行 | 说明 |
-|------|-------------------|------|
-| **Linux** | `./install.sh` | 自动检测发行版（Arch/Ubuntu/...），区分 WSL |
-| **macOS** | `./install.sh` | 自动检测 macOS，用于 Homebrew/Ghostty/yabai 安装 |
-| **Windows** | `./install.sh`（在 Git Bash 中）或双击 `scripts/windows/install_with_chezmoi.bat` | BAT 需管理员权限 |
+## 通用流程
 
-## `./install.sh` 执行流程
+### 第一步：克隆项目
 
-```
-install.sh
-  ├── [1/5] 安装 chezmoi
-  │         └── scripts/chezmoi/install_chezmoi.sh （按发行版选择安装方式）
-  ├── [2/5] 初始化 chezmoi 环境
-  │         └── 写入 ~/.config/chezmoi/chezmoi.toml (sourceDir)
-  ├── [3/5] chezmoi apply -v --force           ← 核心：执行所有匹配的 run_once 脚本
-  │         ├── 跨平台 (run_once_install-common-tools, -neovim, -zsh, -tmux, ...)
-  │         ├── Linux 独有 (run_on_linux/: pacman 配置, base-devel, i3wm, dwm)
-  │         ├── macOS 独有 (run_on_darwin/: Homebrew, Ghostty, yabai, skhd)
-  │         └── Windows 独有 (run_on_windows/: Windows Terminal, Oh My Posh)
-  ├── [4/5] 检查软件安装状态
-  │         └── scripts/chezmoi/install_helpers.sh
-  └── [5/5] 验证安装结果
-            └── scripts/chezmoi/verify_installation.sh
+```bash
+git clone <repo-url>
+cd script_tool_and_config
 ```
 
-## 一键安装（推荐）
+### 第二步：设置代理（可选）
 
-在项目根目录执行：
+如果所在网络需要代理：
+
+```bash
+# 方式一：环境变量
+export PROXY=http://127.0.0.1:7890
+
+# 方式二：参数传递
+./install.sh --proxy http://127.0.0.1:7890
+```
+
+**代理规则**：
+- 包管理器操作（pacman/apt/brew）→ 国内源直连，不走代理
+- GitHub/Git 克隆、curl 下载 → 走代理
+- WSL 下自动从 `/etc/resolv.conf` 的 nameserver 推断宿主机 IP
+
+### 第三步：一键安装
 
 ```bash
 ./install.sh
 ```
 
-脚本会：检测 OS、安装 chezmoi（若未安装）、**自动写入** `~/.config/chezmoi/chezmoi.toml` 的 `sourceDir` 指向项目、执行 `chezmoi apply` 并运行各 run_once 安装脚本（Neovim 由 run_once_install-neovim-config 克隆到 ~/.config/nvim）；最后执行 **[5/5] 验证与确认**（字体、默认 Shell、环境变量、开机启动声明）并生成报告文件（默认 `~/install_verification_report_<时间>.txt`）。
+脚本自动执行：
 
-### 代理
+| 步骤 | 说明 |
+|------|------|
+| [1/5] | 安装 chezmoi（若未安装） |
+| [2/5] | 写入 `~/.config/chezmoi/chezmoi.toml`，`sourceDir` 指向项目 `.chezmoi/` |
+| [3/5] | `chezmoi apply -v --force` — 核心部署，执行所有 run_once 脚本 |
+| [4/5] | 检查当前平台软件安装状态 |
+| [5/5] | 运行 `verify_installation.sh` 验证字体/Shell/路径一致性 |
 
-- 使用方式：`./install.sh --proxy http://127.0.0.1:7890` 或 `export PROXY=...` 后执行 `./install.sh`。
-- run_once 脚本通过环境变量 `http_proxy` 使用代理，与 install.sh 导出一致。
-- **Pacman（Arch）**：镜像与 pacman 配置**不使用**代理，直连国内源；其他下载（GitHub、官方安装脚本等）使用上述代理。
-
-**WSL 与代理**：项目会区分 **WSL2 内的 Linux** 与 **原生 Linux**。在 WSL2 中，`127.0.0.1` 无法访问 Windows 宿主机上的代理，因此 `.bashrc`/`.zshrc` 在检测到 WSL 时，会将默认代理地址设为 `http://<宿主机IP>:7890`（宿主机 IP 来自 `/etc/resolv.conf` 的 nameserver）。你只需在 Windows 端代理软件中开启「允许局域网连接」，在 WSL 终端执行 `h_proxy` 或 `proxy_on` 即可启用代理。一键安装前若需代理，可先执行 `h_proxy` 再执行 `./install.sh`，或 `export PROXY=http://$(cat /etc/resolv.conf | grep nameserver | awk '{print $2}'):7890` 后执行 `./install.sh`。
-
-### 安装后验证（含 SSH）
-
-执行 `./install.sh` 后，SSH 配置已通过 chezmoi 应用到 `~/.ssh/config`。建议验证：
-
-- `ssh-add -l`：应列出已加载的密钥
-- `ssh -T git@github.com`：应出现 “Hi xxx! You've successfully authenticated” 或类似成功提示
-- **WSL/Linux**：可运行自检脚本 `./scripts/linux/system_basic_env/verify_wsl_ssh.sh`
-
-若在 WSL 下 ProxyCommand 使用 127.0.0.1 无法连到宿主机代理，需使用宿主机 IP：执行 `./install.sh` 时若已设置 PROXY（如 `export PROXY=http://<宿主机IP>:7890`），脚本会导出 PROXY_HOST，apply 后 config 即使用宿主机地址；或先执行 `export PROXY_HOST=$(awk '/^nameserver / {print $2; exit}' /etc/resolv.conf)` 再执行 `./install.sh`。完整说明见下方「WSL / Linux 建议步骤」中的（WSL）验证 SSH。
-
-## WSL / Linux 建议步骤
-
-1. **（WSL）验证 SSH**：子模块与部分 run_once 使用 `git clone`（SSH）。在 WSL 中执行：
-   - `ssh-add -l`：应列出至少一个密钥；若为 “Could not open a connection to your authentication agent”，说明 agent 未启动或未转发。
-   - `ssh -T git@github.com`：应出现 “Hi xxx! You've successfully authenticated” 或类似成功提示。
-   - 若使用宿主机密钥：软链接 `~/.ssh` → `/mnt/c/Users/<User>/.ssh` 时需在 `/etc/wsl.conf` 设置 `[automount] options = "metadata"` 并执行 `chmod 600 ~/.ssh/id_rsa`；若用 npiperelay，需确保 `.bashrc`/`.zprofile` 中建立 `SSH_AUTH_SOCK` 的 socat 命令在登录时执行。自检脚本：`./scripts/linux/system_basic_env/verify_wsl_ssh.sh`。
-   - **SSH 走 443 与代理**：项目内 `~/.ssh/config` 已配置 GitHub 使用 `ssh.github.com:443`（避免代理/防火墙封 22 端口）。WSL 下代理在宿主机，需：① 安装 `connect-proxy`（`sudo apt install connect-proxy`；或执行 `./install.sh` 时由 run_once_install-git 自动安装）；② 使用 `./install.sh` 时脚本会自动检测 WSL 并设置 PROXY、导出 PROXY_HOST/PROXY_PORT，apply 后 `~/.ssh/config` 会使用宿主机地址；若直接执行 `chezmoi apply` 则需手动 `export PROXY_HOST=$(cat /etc/resolv.conf | grep nameserver | awk '{print $2}')` 或在 `~/.config/chezmoi/chezmoi.toml.local` 中设置 `proxy_host = "192.168.x.x"`（与 `h_proxy` 使用的 IP 一致）；③ Windows 端代理开启「允许局域网连接」。
-   - **提示 "<no hostip for proxy command>"**：经 ProxyCommand 连接时，SSH 可能显示 `The authenticity of host '[ssh.github.com]:443 (<no hostip for proxy command>)'`，多为代理上下文下的显示问题，认证成功可忽略。若 **WSL 内 ~/.ssh 软链接到宿主机**，则读到的 config 为 Windows 版，其中 127.0.0.1 在 WSL 中指向本机无法连到宿主机代理；需在 WSL 内使用独立 config 并设置 ProxyCommand 为宿主机 IP，或运行 `./install.sh` 让 chezmoi 管理 WSL 独立 ~/.ssh。
-
-2. **可选开代理**：`h_proxy`（对 run_once 内 HTTPS、子模块 SSH 失败时的 HTTPS 回退、以及 SSH 经 ProxyCommand 走代理均有帮助）。
-
-3. **一键安装**：  
-   `./install.sh`  
-   若需 root（如 Arch 下配置 Pacman）：`sudo chezmoi apply -v`。  
-   Neovim 配置由 run_once_install-neovim-config 克隆到 ~/.config/nvim；先尝试 SSH，失败则 HTTPS+代理，需已执行 `h_proxy` 时更稳。
-
-4. **获取环境信息**（可选）：  
-   `./scripts/linux/system_basic_env/get_wsl_system_info.sh`  
-   可将输出保存便于排查。
-
-5. **一键安装即覆盖所需软件与配置**：所有软件均通过 **run_once** 脚本安装（通用工具、Arch 镜像与基础包、lazyssh、字体、zsh 等），**不再需要**独立脚本 `install_common_tools.sh`（已废弃，职责已拆分到 run_once，各脚本内区分 **OS** 与 **WSL**）。详见 [SOFTWARE_LIST.md](SOFTWARE_LIST.md) 与 [INSTALL_STATUS.md](../scripts/linux/system_basic_env/INSTALL_STATUS.md)。
-
-## 平台与发行版说明
-
-- **项目主要目标**：一键安装所需软件和配置；**区分不同 OS**（linux/darwin/windows）与 **WSL**（Linux 下通过日志区分 WSL 与原生）。
-- **Windows**：`core.longpaths = true` 仅在本平台生效；SSH 等见 os_setup_guide。**Win10 + Windows Terminal + Git Bash**：请在 **Git Bash** 中执行 `./install.sh`；项目会通过 winget 安装 Windows Terminal 并自动配置（Catppuccin Mocha 主题、CaskaydiaCove Nerd Font、Git Bash profile）。install.sh 会写入正斜杠 Windows 路径与 bash 解释器到 `~/.config/chezmoi/chezmoi.toml`。
-
-### Win10 + Cursor：Git Bash 终端在项目根目录
-
-在 Win10 上使用 Cursor、终端为 Git Bash 时，若希望「在项目中打开终端即位于项目根目录」：
-
-- **原因**：若在 `~/.bashrc` 中有无条件的 `cd /d/Code` 或 `cd ~`，每次启动终端都会执行，覆盖 Cursor 传入的工作目录。
-- **解决**：本项目在 `run_on_windows/dot_bashrc.tmpl` 中用环境变量 `TERM_PROGRAM` 区分是否在编辑器内：Cursor/VS Code 会设置 `TERM_PROGRAM`，此时**不**执行默认目录的 `cd`，终端保持在工作区根目录；单独打开 Git Bash 时未设置 `TERM_PROGRAM`，仍会执行 `cd /d/Code` 或 `cd ~`。
-- **附加行为**：同一模板还会在 Git Bash 中修复 Claude Code shell snapshot 的 `sourcepath` 污染，并为 `claude` 命令启用 `.claude-mem/settings.json` 的项目级记忆自动发现（macOS/Linux 的 zsh 版本见 `dot_zshrc.tmpl`，详见 [CHEZMOI_USE_GUIDE.md](./CHEZMOI_USE_GUIDE.md#claude-code-项目记忆自动检测)）。
-- **生效**：执行 `chezmoi apply` 或 `./install.sh` 应用配置后，重新打开 Cursor 终端即可（`pwd` 应为项目根目录）。
-
-- **macOS**：Homebrew、connect 路径、yabai/skhd 等见 run_on_darwin 与 os_setup_guide。
-- **Linux**（按发行版与是否 WSL 区分）：
-  - **通用工具**（bat, eza, fd, btop, fastfetch, lazygit, gh 等）：由 **run_once_install-common-tools** 安装，适用于**所有** Linux（含 **Arch**、**Ubuntu/Debian**、**WSL**）与 macOS。
-  - **Ubuntu/Debian / WSL**：bat→batcat、fd→fdfind 别名已配置；**fastfetch** 在 Ubuntu 24.10 之前官方源无此包，脚本会依次尝试 **apt → PPA（zhangsongcui3371/fastfetch）→ Snap → GitHub .deb** 安装；Pacman/AUR 等**仅 Arch 执行的** run_once 会**自动跳过**；代理在 WSL 下为宿主机 IP（见上文 WSL SSH 小节）。
-  - **Arch**：run_on_linux 下 Pacman 镜像、Arch 基础包、AUR 助手、dwm/i3wm 等执行；镜像与 pacman 直连国内源、禁用代理。
-
-部分 run_once（如 dwm、i3wm、alacritty）在部分环境下可能未安装成功，会打 WARNING 并继续 apply，属预期；Windows 上 windows-terminal 通过 winget 安装，需确保 winget 可用。
-
-- **macOS 终端**：使用 **Ghostty** + zsh（由 `run_on_darwin/run_once_install-ghostty.sh.tmpl` 安装，配置在 `~/.config/ghostty/config`，指定 zsh 为 shell）。**Windows 终端**：使用 **Windows Terminal** + Git Bash（由 `run_on_windows/run_once_install-windows-terminal.sh.tmpl` 安装，配置在 `~/.config/windows-terminal/settings.json`，每次 apply 自动同步到 WT 实际路径）。Alacritty 仅 Linux 安装。
-
-### Linux 默认 Shell 与字体
-
-- **默认 Shell**：项目期望 Linux 下默认使用 **zsh + Oh My Zsh**。`run_once_install-zsh.sh` 会在安装后尝试执行 `chsh -s $(command -v zsh)`；若因权限/交互未生效，请**手动执行** `chsh -s $(command -v zsh)` 后**重新登录**（或新开 WSL 窗口），登录 shell 才会变为 zsh。
-- **Oh My Zsh 插件**：同一 run_once 脚本会安装 zsh-autosuggestions、zsh-syntax-highlighting、zsh-completions、zsh-history-substring-search（需可访问 GitHub）。若首次 apply 时网络失败导致插件未装上，脚本会自动用「临时清空 GitHub proxy」重试一次；仍失败时可按下方故障排除处理。检查：`bash scripts/common/deploy_utils/check_zsh_omz.sh`。
-
-  **Oh My Zsh 插件未安装（0/4）故障排除**  
-  - **现象**：run_once 已执行但 `check_zsh_omz.sh` 显示 4 个插件 0/4。  
-  - **常见原因**：WSL 下 `~/.gitconfig` 中 `http.https://github.com.proxy` 被设为 `http://127.0.0.1:7890`，WSL 内 127.0.0.1 指本机无法访问宿主机代理，导致 `git clone` GitHub 失败。  
-  - **解决**：  
-    1. 取消 Git 对 GitHub 的代理后再 clone 或重跑 apply：  
-       `git config --global --unset http.https://github.com.proxy`  
-       `git config --global --unset https.https://github.com.proxy`  
-    2. 或在一键安装前在 `.chezmoi.toml.local` 中设置 `proxy` 为宿主机代理（如 `http://$(cat /etc/resolv.conf | grep nameserver | awk '{print $2}'):7890`），使 dot_gitconfig 写入正确地址。  
-    3. **补救**（手动安装 4 个插件，建议先执行上面两条 `--unset` 再执行）：  
-       ```bash
-       ZSH_CUSTOM="${HOME}/.oh-my-zsh/custom/plugins" && mkdir -p "$ZSH_CUSTOM"
-       for name in zsh-autosuggestions zsh-history-substring-search zsh-syntax-highlighting zsh-completions; do
-         [ -d "$ZSH_CUSTOM/$name" ] && continue
-         git clone --depth=1 "https://github.com/zsh-users/$name" "$ZSH_CUSTOM/$name"
-       done
-       ```
-
-- **字体**：FiraMono Nerd Font 由 `run_once_install-nerd-fonts.sh` 安装（Linux 下为 `/usr/local/share/fonts/FiraMono-NerdFont`）。下载自 [GitHub nerd-fonts  releases](https://github.com/ryanoasis/nerd-fonts/releases)，**下载若失败可设置代理**（如 `export http_proxy=http://127.0.0.1:7890` 后再次 `chezmoi apply`，或手动执行渲染后的脚本）。更多字体与安装方式见 [nerd-fonts](https://github.com/ryanoasis/nerd-fonts) 与 [nerdfonts.com 下载页](https://www.nerdfonts.com/font-downloads)。验证：`fc-list | grep -i Fira` 或查看 [INSTALL_STATUS.md](../scripts/linux/system_basic_env/INSTALL_STATUS.md) 第 8 节。
-
-### Cursor/VS Code 连接 WSL 后终端无 Starship 美化
-
-在宿主机 Alacritty 中执行 `wsl` 会得到登录 shell 并加载 zsh/Starship，而 Cursor「Connect to WSL」打开的终端可能默认使用 bash 且为非登录 shell，因此无 Starship。可选做法：
-
-1. **设置默认 Shell 为 zsh**：在 WSL 中执行 `chsh -s $(command -v zsh)` 并重新打开 Cursor 的 WSL 终端；或在该发行版中确保默认 shell 为 zsh，使 Cursor 继承。
-2. **在 Cursor 中指定 WSL 终端 profile**：设置中将 `terminal.integrated.defaultProfile.linux`（或 WSL 对应项）设为 zsh（若已配置 zsh profile）。
-3. **由 .bashrc 在交互式下切到 zsh**：项目 Linux 用 `.bashrc` 模板在「交互式且非 Cursor Agent」时自动 `exec zsh`，这样 Cursor 普通终端会进入 zsh 并加载 Starship；Cursor Agent 模式仍使用 bash 以免影响其脚本行为。
-
-### WSL 下 Git 访问 GitHub 与代理
-
-项目在 `~/.gitconfig` 中为 GitHub 配置了 proxy（由 dot_gitconfig 模板写入），默认 `http://127.0.0.1:7890`。在 WSL 中 **127.0.0.1 指 WSL 本机**，无法连到 Windows 宿主机上的代理，且 Git 的 URL 作用域配置 `http.https://github.com.proxy` **优先于** 环境变量 `http_proxy`，因此即使 shell 里设置了宿主机代理，`git clone` 访问 GitHub 仍可能走 127.0.0.1:7890 导致失败。  
-**建议**：WSL 用户要么在 apply 前通过 data 设置 `proxy` 为宿主机地址（见上文），要么 apply 后在 WSL 内执行 `git config --global --unset http.https://github.com.proxy` 与 `https.https://github.com.proxy`，再执行需访问 GitHub 的 git 操作（如插件 clone、nvim 配置克隆等）。
-
-## OpenCode agents/skills 目录化加载
-
-### 与上游文档一致的配置位置（对照）
-
-依据 [OpenCode 文档 · 配置 · 位置](https://opencode.ai/docs/zh-cn/config/)：
-
-| 类型 | 路径或变量 |
-|------|-------------|
-| 全局 JSON（用户偏好） | `~/.config/opencode/opencode.json` |
-| 自定义单文件 | 环境变量 `OPENCODE_CONFIG` |
-| 自定义目录 / 扩展目录 | `OPENCODE_CONFIG_DIR`；默认还可以在全局配置旁使用 `.opencode/`（含 `agents/`、`skills/` 等） |
-| 项目级 | 项目根 `opencode.json`，与 Git 根向上合并 |
-
-本仓库通过 chezmoi 渲染 `opencode.json`，并用 `sync-opencode.sh` 填充 `~/.config/opencode/.opencode/`，与上述「目录扩展」一致，**不是**已废弃的 `oh-my-opencode` 目录。
-
-项目已通过 chezmoi 提供 OpenCode 轻量配置模板与桥接同步脚本，所有配置均通过模板链路下发：
-
-- `~/.config/opencode/opencode.json` 由 `.chezmoi/dot_config/opencode/opencode.json.tmpl` 渲染。
-- `~/.config/opencode/.opencode/agents` 与 `~/.config/opencode/.opencode/skills` 由 `run_once_install-opencode-aiconfig-bridge.sh.tmpl` 调用 `sync-opencode.sh` 同步。
-- OpenCode 上游已移除 `oh-my-opencode`；本仓库不再下发该目录。若本机仍保留旧路径 `~/.config/opencode/oh-my-opencode`，可手动删除；`./scripts/chezmoi/verify_opencode.sh` 会检查该遗留路径是否已清除。
-
-### 手动排查
+### 第四步：验证
 
 ```bash
-# 查看 OpenCode 合并后的配置
-opencode debug config
+# SSH 验证
+ssh -T git@github.com
 
-# 手动触发同步
-./ai-unified-config/scripts/sync-opencode.sh
+# 配置状态
+./scripts/manage_dotfiles.sh status
+./scripts/manage_dotfiles.sh diff
 
-# 验证 OpenCode 与目录化资源
-./scripts/chezmoi/verify_opencode.sh
+# 语法检查
+bash tests/test_syntax.sh
+bash tests/test_proxy.sh
 ```
 
-若 `opencode debug config` 中 `agent` 为空，优先检查：
+---
 
-1. `~/.config/opencode/opencode.json` 是否存在并由 chezmoi 下发。
-2. `~/.config/opencode/.opencode/agents`、`skills` 是否存在且非空。
-3. 是否已执行过 `./install.sh` 或 `chezmoi apply -v`。
+## 各平台详细步骤
+
+### Linux（含 WSL）
+
+```bash
+# 1. 克隆项目
+git clone <repo-url>
+cd script_tool_and_config
+
+# 2. （WSL 可选）设置代理（宿主机 IP）
+export PROXY=http://$(awk '/^nameserver / {print $2; exit}' /etc/resolv.conf):7890
+
+# 3. 一键安装
+./install.sh
+
+# 4. 验证
+ssh -T git@github.com          # 确认 SSH 认证通过
+./scripts/manage_dotfiles.sh status   # 配置已同步
+```
+
+**WSL 注意**：
+- 代理地址不能是 127.0.0.1（WSL 内指向自身），脚本会自动从 resolv.conf 获取宿主机 IP
+- SSH 代理通过 `connect-proxy`（`apt install connect-proxy`）实现，run_once_install-git 脚本会自动安装
+
+**Arch 注意**：
+- 部分操作需要 root（Pacman 配置、base-devel 安装）
+- 若 install.sh 在普通用户下执行时 Pacman 配置失败，可手动执行：
+
+```bash
+sudo chezmoi apply -v  # 以 root 身份应用 Pacman 配置
+```
+
+### macOS
+
+```bash
+# 1. 确保 Homebrew 已安装
+command -v brew || /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+# 2. 克隆项目
+git clone <repo-url>
+cd script_tool_and_config
+
+# 3. 设置代理（可选）
+export PROXY=http://127.0.0.1:7890
+
+# 4. 一键安装
+./install.sh
+
+# 5. 验证
+ssh -T git@github.com
+./scripts/manage_dotfiles.sh status
+```
+
+**macOS 注意**：
+- Apple Silicon 与 Intel 的 Homebrew 路径不同（`/opt/homebrew/bin` vs `/usr/local/bin`），chezmoi 模板会自动处理
+- connect 由 Homebrew 安装（与 Linux 的 `connect-proxy` 包名不同）
+
+### Windows
+
+```bash
+# 方式一：Git Bash 中执行（推荐）
+./install.sh
+
+# 方式二：双击 scripts/windows/install_with_chezmoi.bat（需管理员权限）
+```
+
+**Windows 注意**：
+- 统一在 **Git Bash** 中执行，不要在 PowerShell 或 CMD 中执行 `install.sh`
+- zsh/starship/nerd-fonts 等跨平台脚本均会在 Git Bash 环境下运行
+- SSH 代理使用 Git for Windows 自带的 `connect.exe`（路径自动检测）
+- 包管理器优先使用 winget，回退 MSYS2 pacman
+
+---
+
+## 增量部署（已有 chezmoi）
+
+当项目更新后，只需重新应用配置：
+
+```bash
+# 方式一：推荐
+./deploy.sh
+
+# 方式二：手动
+./scripts/manage_dotfiles.sh diff   # 查看差异
+./scripts/manage_dotfiles.sh apply  # 应用变更
+```
+
+---
+
+## 常见问题
+
+### chezmoi 锁占用
+
+```bash
+# 检查是否被其他进程占用
+ls -l ~/.local/share/chezmoi/.lock
+
+# 手动清理残留锁
+rm -f ~/.local/share/chezmoi/.lock
+```
+
+### run_once 脚本跳过
+
+chezmoi 对已执行的 run_once 脚本会记录到 `~/.local/share/chezmoi/scriptstate`。如需强制重跑：
+
+```bash
+# 重置单个脚本状态
+rm -f ~/.local/share/chezmoi/scriptstate/run_once_install-xxx.sh
+
+# 重新 apply
+chezmoi apply -v
+```
+
+### fnm/uv 不在 PATH
+
+新安装的版本管理器需要重新登录或 source 配置：
+
+```bash
+# fnm
+eval "$(fnm env)"
+
+# uv
+source ~/.local/bin/env
+```
+
+### 代理不生效
+
+```bash
+# 查看当前代理设置
+echo "$http_proxy"
+
+# WSL：确认宿主机 IP
+awk '/^nameserver / {print $2; exit}' /etc/resolv.conf
+
+# 手动设置
+export http_proxy=http://<正确IP>:7890
+export https_proxy=http://<正确IP>:7890
+```
+
+### 包管理器相关
+
+```bash
+# Pacman（Arch）国内源
+sudo sed -i 's/^#Server/Server/' /etc/pacman.d/mirrorlist
+
+# Homebrew 国内源（macOS）
+export HOMEBREW_BREW_GIT_REMOTE=https://mirrors.tuna.tsinghua.edu.cn/git/homebrew/brew.git
+
+# apt（Ubuntu/Debian）国内源
+sudo sed -i 's|http://archive.ubuntu.com|https://mirrors.tuna.tsinghua.edu.cn|g' /etc/apt/sources.list
+```

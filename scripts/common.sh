@@ -78,6 +78,35 @@ function log_debug() {
 }
 
 # ============================================
+# 日志文件管理
+# 统一日志机制，每个脚本只保留最近一次日志
+# LOG_DIR/log_name.log，覆盖写入（无时间戳）
+# ============================================
+
+# 设置日志输出（可在脚本顶部调用）
+# 参数 1: 日志名称（不含路径和 .log 后缀），如 "install"、"deploy"、"test_syntax"
+# 调用后脚本的所有 stdout/stderr 同时输出到终端和 logs/<name>.log
+log_setup() {
+    local log_name="$1"
+    if [[ -z "$log_name" ]]; then
+        log_name="$(basename "$0" .sh)"
+    fi
+
+    # 确定日志目录
+    local log_dir="${SCRIPT_DIR:-$(cd "$(dirname "$0")" && pwd)}/logs"
+    mkdir -p "$log_dir" 2>/dev/null || {
+        # 尝试 ~/.cache/script_logs 兜底
+        log_dir="${HOME}/.cache/script_logs"
+        mkdir -p "$log_dir" 2>/dev/null || true
+    }
+
+    local log_file="${log_dir}/${log_name}.log"
+    # 覆盖写入（保留最近一次）
+    exec > >(tee "$log_file") 2>&1
+    echo "[INFO] Log: ${log_file}"
+}
+
+# ============================================
 # 脚本生命周期函数
 # ============================================
 

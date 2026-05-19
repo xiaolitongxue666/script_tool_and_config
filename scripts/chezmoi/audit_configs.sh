@@ -71,10 +71,7 @@ CONFIG_MAPPINGS["~/.bashrc"]=".chezmoi/dot_bashrc.tmpl"
 CONFIG_MAPPINGS["~/.bash_profile"]=".chezmoi/dot_bash_profile.tmpl"
 CONFIG_MAPPINGS["~/.zprofile"]=".chezmoi/dot_zprofile"
 CONFIG_MAPPINGS["~/.config/starship/starship.toml"]=".chezmoi/dot_config/starship/starship.toml"
-CONFIG_MAPPINGS["~/.config/fish/config.fish"]=".chezmoi/dot_config/fish/config.fish"
-CONFIG_MAPPINGS["~/.config/fish/completions/alacritty.fish"]=".chezmoi/dot_config/fish/completions/alacritty.fish"
-CONFIG_MAPPINGS["~/.config/fish/conf.d/fnm.fish"]=".chezmoi/dot_config/fish/conf.d/fnm.fish"
-CONFIG_MAPPINGS["~/.config/fish/conf.d/omf.fish"]=".chezmoi/dot_config/fish/conf.d/omf.fish"
+
 CONFIG_MAPPINGS["~/.ssh/config"]=".chezmoi/dot_ssh/config.tmpl"
 
 # Linux 特定配置

@@ -169,7 +169,6 @@ chezmoi 会将以下配置文件应用到系统：
 - `run_on_linux/dot_config/alacritty/alacritty.toml.tmpl` → `~/.config/alacritty/alacritty.toml`（仅 Linux）
 - `run_on_darwin/dot_config/ghostty/config.tmpl` → `~/.config/ghostty/config`（仅 macOS）
 - `dot_config/starship/starship.toml` → `~/.config/starship/starship.toml`
-- `dot_config/fish/config.fish` → `~/.config/fish/config.fish`（如果使用 Fish Shell）
 - `dot_tmux.conf` → `~/.tmux.conf`（如果使用 Tmux）
 - `dot_zshrc` → `~/.zshrc`（如果使用 Zsh）
 
@@ -329,7 +328,7 @@ git clone <your-repo-url> ~/script_tool_and_config
 cd ~/script_tool_and_config
 
 # 本仓库不依赖 Neovim 子模块
-# Neovim 配置由 run_once_install-neovim-config 克隆到 ~/.config/nvim
+# Neovim 配置由其他独立仓库管理，本仓库仅安装 Neovim 二进制
 ```
 
 #### 步骤 2: 运行一键安装脚本
@@ -388,8 +387,6 @@ export https_proxy="$PROXY"
 
 **Shell 环境**
 - zsh + oh-my-zsh
-- fish shell
-
 **窗口管理器（macOS 特有）**
 - yabai (平铺式窗口管理器)
 - skhd (快捷键守护进程)
@@ -423,11 +420,8 @@ uv --version
 
 # 检查 Shell 环境
 zsh --version
-fish --version
-
 # 检查配置文件
 ls -la ~/.zshrc
-ls -la ~/.config/fish/config.fish
 ls -la ~/.config/starship/starship.toml
 ```
 
@@ -465,8 +459,6 @@ chezmoi apply -v
 **Shell 配置**
 - `~/.zshrc` - Zsh 配置（已关闭 `correct`/`correct_all`，输错命令不会出现纠错提示，可直接重新输入）
 - `~/.zprofile` - Zsh 启动配置
-- `~/.config/fish/config.fish` - Fish Shell 配置
-
 **终端和工具配置**
 - `~/.config/alacritty/alacritty.toml` - Alacritty 终端配置（仅 Linux）
 - `~/.config/ghostty/config` - Ghostty 终端配置（仅 macOS）
@@ -563,8 +555,8 @@ brew services start skhd
 #### 2. 配置 Neovim（独立仓库模式）
 
 ```bash
-# Neovim 配置由 run_once_install-neovim-config 克隆到 ~/.config/nvim
-# 后续更新在 nvim 仓库内执行
+# Neovim 配置由其他独立仓库管理，本仓库仅安装 Neovim 二进制
+# 如有自己的 nvim 配置，克隆到 ~/.config/nvim，更新方式：
 cd ~/.config/nvim && git pull && ./install.sh
 
 # 本仓库不通过 chezmoi 创建 nvim 符号链接

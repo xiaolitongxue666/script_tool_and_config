@@ -179,7 +179,7 @@ script_tool_and_config/
 │   ├── AGENTS.md
 │   └── PROJECT.md
 │
-├── ai-unified-config/                 # AI 代理统一配置（如 OpenCode、Claude Code）
+<!-- ai-unified-config/ 已删除（AI 代理配置由其他项目管理） -->
 ├── graphify-out/                      # Graphify 知识图谱分析缓存
 │
 ├── temp/                              # 临时文件目录（common_install.sh 使用）
@@ -196,7 +196,7 @@ script_tool_and_config/
 - **AGENTS.md**: 代理与编码规范，包含代码风格、命名规范、最佳实践
 - **docs/**: 文档目录，含 PROJECT_STRUCTURE.md（本文件）、SOFTWARE_LIST.md、INSTALL_GUIDE.md 等
 - **.opencode/**: OpenCode 插件命令（openspec-apply、openspec-archive、openspec-proposal）
-- **ai-unified-config/**: AI 代理统一配置（跨 OpenCode、Claude Code 等）
+<!-- ai-unified-config/ 已删除 -->
 - **graphify-out/**: Graphify 知识图谱分析输出缓存
 
 ### install.sh 调用链（核心安装流程）
@@ -227,14 +227,11 @@ install.sh
   │       ├─ run_once_install-zsh.sh.tmpl (zsh, oh-my-zsh, 插件)
   │       ├─ run_once_install-git.sh.tmpl
   │       ├─ run_once_install-neovim.sh.tmpl (>= 0.11.0)
-  │       ├─ run_once_install-neovim-config.sh.tmpl (克隆到 ~/.config/nvim)
+│   │       ├─ run_once_install-neovim.sh.tmpl (>= 0.11.0，仅安装二进制)
   │       ├─ run_once_install-starship.sh.tmpl
   │       ├─ run_once_install-nerd-fonts.sh.tmpl (FiraMono Nerd Font)
   │       ├─ run_once_install-tmux.sh.tmpl (Linux/macOS)
-  │       ├─ run_once_install-fish.sh.tmpl (Linux/macOS)
   │       ├─ run_once_install-opencode.sh.tmpl
-  │       ├─ run_once_install-system-basic-env.sh.tmpl
-  │       ├─ run_once_install-ai-unified-config.sh.tmpl
   │       ├─ run_on_linux/run_once_*.sh.tmpl (仅 Linux)
   │       ├─ run_on_darwin/run_once_*.sh.tmpl (仅 macOS)
   │       └─ run_on_windows/run_once_*.sh.tmpl (仅 Windows)
@@ -262,16 +259,14 @@ install.sh
 | 脚本 | 安装内容 | 平台 |
 |------|---------|------|
 | `run_once_00-install-version-managers.sh.tmpl` | fnm, uv, rustup | 多平台 |
-| `run_once_install-ai-unified-config.sh.tmpl` | AI 代理统一配置 | 多平台 |
 | `run_once_install-common-tools.sh.tmpl` | bat, eza, fd, rg, fzf, lazygit, git-delta, gh, trash-cli, btop, fastfetch | 多平台 |
-| `run_once_install-fish.sh.tmpl` | fish shell | Linux, macOS |
+
 | `run_once_install-git.sh.tmpl` | git, connect-proxy | 多平台 |
 | `run_once_install-neovim.sh.tmpl` | neovim (>= 0.11.0) | 多平台 |
-| `run_once_install-neovim-config.sh.tmpl` | 克隆 nvim 配置到 ~/.config/nvim | 多平台 |
+│   │       ├─ run_once_install-neovim.sh.tmpl (>= 0.11.0，仅安装二进制)
 | `run_once_install-nerd-fonts.sh.tmpl` | FiraMono Nerd Font | 多平台 |
 | `run_once_install-opencode.sh.tmpl` | OpenCode CLI | 多平台 |
 | `run_once_install-starship.sh.tmpl` | starship 提示符 | 多平台 |
-| `run_once_install-system-basic-env.sh.tmpl` | 系统基础环境 | 多平台 |
 | `run_once_install-tmux.sh.tmpl` | tmux, TPM 插件 | Linux, macOS |
 | `run_once_install-zsh.sh.tmpl` | zsh, oh-my-zsh, 插件 | Linux, macOS, Windows(MSYS2) |
 | `run_once_install-alacritty.sh.tmpl` | alacritty 终端 | 仅 Linux |
@@ -333,7 +328,7 @@ install.sh
 ## 注意事项
 
 1. `.chezmoi/` 目录包含所有配置文件模板，由 chezmoi 统一管理
-2. Neovim 为独立项目，由 `run_once_install-neovim-config.sh.tmpl` 克隆到 `~/.config/nvim`
+│   │       ├─ run_once_install-neovim.sh.tmpl (>= 0.11.0，仅安装二进制)
 3. 所有配置统一通过 `.chezmoi/*.tmpl` → `chezmoi apply` → `~/.` 流程部署
 4. 跨平台通用脚本位于 `scripts/common/` 目录下
 5. 所有脚本注释使用中文，打印输出使用英文

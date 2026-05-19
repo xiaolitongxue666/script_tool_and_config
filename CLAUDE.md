@@ -4,16 +4,15 @@
 
 ## 跨平台 Shell 策略
 
-不同平台使用不同的默认 Shell，模板文件按平台分别维护：
+不同平台使用不同的终端 + Shell 组合：
 
-| 平台 | 默认 Shell | 模板文件 |
-|------|-----------|---------|
-| macOS | zsh | `.chezmoi/dot_zshrc.tmpl` |
-| Linux | zsh（主）/ bash（备） | `.chezmoi/dot_zshrc.tmpl` / `.chezmoi/dot_bashrc.tmpl` |
-| WSL | zsh | `.chezmoi/dot_zshrc.tmpl` |
-| Windows (Git Bash) | bash | `.chezmoi/run_on_windows/dot_bashrc.tmpl` |
+| 平台 | 终端 | Shell | 模板文件 |
+|------|------|-------|---------|
+| Windows | Windows Terminal | Git Bash | `.chezmoi/run_on_windows/dot_bashrc.tmpl` |
+| macOS | Ghostty | zsh | `.chezmoi/dot_zshrc.tmpl` |
+| Linux + WSL | Alacritty | zsh | `.chezmoi/dot_zshrc.tmpl` / `.chezmoi/dot_bashrc.tmpl` |
 
-修改 Shell 配置时，需要根据目标平台选择对应的模板文件。
+修改 Shell 配置时，需要根据目标平台选择对应的模板文件。Fish Shell 已不再使用。
 
 ## claude-mem 项目级记忆自动检测
 
@@ -49,6 +48,80 @@
 | GitHub Copilot / Codex | `.github/copilot-instructions.md` |
 
 修改项目设计理念或模板策略时，需要同步更新以上所有文件。
+
+## 架构概要
+
+### 入口脚本职责
+
+```
+install.sh  ── 首次安装 ── 装chezmoi→写config→apply→验证         ← 全流程
+deploy.sh   ── 增量部署 ── 锁检测→status→diff→apply               ← 增量
+manage_dotfiles.sh ─ 运维入口 ─ status/diff/apply/edit            ← 日常
+                ↓ 共享封装层 ↓
+       scripts/chezmoi/chezmoi_core.sh
+       ├── chezmoi_detect_proxy()     ← 代理检测（env→WSL→127.0.0.1:7890）
+       ├── chezmoi_ensure_unlocked()  ← 锁检测与释放
+       ├── chezmoi_run_apply()        ← 统一apply调用
+       ├── chezmoi_verify_sync()      ← 同步验证（跨平台过滤）
+```
+
+### run_once 执行排序
+
+层号 0-5，字母序自动排序：
+
+```
+Layer 0: run_once_00-install-version-managers      ← fnm + uv
+Layer 1: install-common-tools, install-git
+Layer 2: install-zsh, install-starship, install-nerd-fonts
+Layer 3: install-neovim                             ← 仅安装二进制
+Layer 4: run_once_90-{claude-code}, _91-{opencode}, _92-{deepseek}
+         run_once_93-install-cursor                 ← 仅 GUI 环境
+Layer 5: install-tmux, install-oh-my-posh + run_on_{linux,darwin,windows}
+```
+
+### connect.exe 检测顺序（Windows）
+
+1. `$WINDOWS_GIT_CONNECT_PATH` 环境变量
+2. `git` 同级目录的 `connect.exe`（`cmd/`）
+3. `git` 根目录的 `mingw64/bin/connect.exe`（Git for Windows 标准路径，本次修复）
+4. `$MINGW_PREFIX/bin/connect.exe`
+5. `cmd //c "if exist ..."` 回退检查 C:/ 和 D:/
+
+## 项目规则（Agent 必须遵守）
+
+### 输出语言
+
+- **注释、文档、函数说明**使用中文（如本文件）
+- **运行时输出**（log_info/log_success/log_warning/log_error/echo 打到屏幕的消息）统一使用**英文**
+
+### Chezmoi 调用规则
+
+- 日常运维通过 `./scripts/manage_dotfiles.sh` 封装调用，不直接调 `chezmoi`
+- `install.sh` 和 `deploy.sh` 共享 `scripts/chezmoi/chezmoi_core.sh` 中的 chezmoi 核心操作
+- 入口职责：install.sh（首次安装）→ deploy.sh（增量）→ manage_dotfiles.sh（运维）
+
+### 代理策略
+
+- 包管理器操作（pacman/apt/brew）：使用国内源，**不**走代理
+- GitHub/Git 克隆、curl 下载：走 7890 代理
+- WSL 下从 `/etc/resolv.conf` 的 nameserver 推断宿主机 IP，补 :7890
+- 统一入口：`chezmoi_core.sh` 的 `chezmoi_detect_proxy()`
+
+### run_once 安装排序
+
+Layer 0: fnm/uv（版本管理器，必须最先）
+Layer 1: git + common-tools
+Layer 2: zsh + OMZ + starship + nerd-fonts
+Layer 3: neovim（仅安装二进制，配置由其他项目管理）
+Layer 4: claude-code + opencode + deepseek（AI agent，最后安装）
+Layer 4+: cursor（仅 GUI 环境，Linux/WSL 检测 DISPLAY）
+Layer 5: tmux + 平台特定（linux/darwin/windows 下的 run_on_*）
+
+### 测试
+
+- `tests/test_syntax.sh` — 批量语法检查，输出到 `logs/`
+- `tests/test_proxy.sh` — 代理检测逻辑测试
+- 所有测试脚本输出到 `logs/` 目录
 
 ## chezmoi 模板说明
 

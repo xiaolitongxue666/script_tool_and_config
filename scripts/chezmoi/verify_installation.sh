@@ -225,7 +225,7 @@ check_opencode() {
     report_append "========== 5. OpenCode =========="
     if ! command -v opencode &>/dev/null; then
         report_append "  opencode: 未在 PATH 中"
-        report_append "  说明: 可由 run_once_install-opencode.sh 安装"
+        report_append "  说明: 可由 run_once_91-install-opencode.sh 安装"
         ((SUMMARY_WARN++)) || true
     else
         report_append "  opencode: $(command -v opencode)"

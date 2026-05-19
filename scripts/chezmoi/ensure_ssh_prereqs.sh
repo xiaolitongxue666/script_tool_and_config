@@ -150,6 +150,25 @@ ensure_windows() {
             connect_exe="$detected"
         fi
     fi
+    # 从 git 所在目录的 mingw64/bin/ 下查找（Git for Windows 标准路径）
+    if [[ -z "$connect_exe" ]] && command -v git &>/dev/null; then
+        local git_root
+        git_root="$(dirname "$(dirname "$(command -v git)")")"
+        local mingw_candidates=(
+            "${git_root}/mingw64/bin/connect.exe"
+            "${git_root}/usr/bin/connect.exe"
+        )
+        # 也尝试 MINGW_PREFIX 环境变量
+        if [[ -n "${MINGW_PREFIX:-}" ]] && [[ -f "${MINGW_PREFIX}/bin/connect.exe" ]]; then
+            mingw_candidates+=("${MINGW_PREFIX}/bin/connect.exe")
+        fi
+        for candidate in "${mingw_candidates[@]}"; do
+            if [[ -f "$candidate" ]]; then
+                connect_exe="$candidate"
+                break
+            fi
+        done
+    fi
     if [[ -n "$connect_exe" ]] && [[ -f "$connect_exe" ]]; then
         log_info "connect.exe 已存在: $connect_exe"
         return 0

@@ -42,7 +42,9 @@ if [ -f "$COMMON_INSTALL_SH" ]; then
     source "$COMMON_INSTALL_SH"
 fi
 
-start_script "快速部署"
+log_setup "deploy"
+
+start_script "Quick Deploy"
 
 # ============================================
 # 确保子脚本有执行权限

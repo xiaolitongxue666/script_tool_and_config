@@ -361,3 +361,33 @@ temp_plan.md
 /tmp_template_test_project/
 /tmp_template_test_*/
 /tmp_template_test_file.txt
+
+# ============================================
+# 项目本地状态与测试产物
+# ============================================
+
+# aiconfig 本地缓存状态
+.aiconfig/
+.aiconfig.state
+
+# 测试临时目录（测试脚本的输出、快照等）
+tests/tmp/
+tests/output/
+tests/*.log
+
+# Literal %SystemDrive% directory (Windows cmd expansion artifact)
+%SystemDrive%/
+
+# ============================================
+# OS / Editor temp files
+# ============================================
+*.bak
+*.backup
+*.tmp
+*.temp
+.*.swp
+.*.swo
+.DS_Store
+Thumbs.db
+__pycache__/
+*.pyc

@@ -161,17 +161,9 @@ else
     echo "[INFO] 跳过 rustup 安装（设置 INSTALL_RUSTUP=1 以启用）"
 fi
 
-# 验证：确保 uv、fnm 可用后再继续（Neovim 配置依赖）
-echo "[INFO] 验证前置：uv、fnm..."
-if ! command -v uv &> /dev/null; then
-    echo "[ERROR] 验证失败：uv 未找到，Neovim 配置将无法安装。请检查 PATH 或重新执行 ./install.sh"
-    exit 1
-fi
-if ! command -v fnm &> /dev/null; then
-    echo "[ERROR] 验证失败：fnm 未找到，Neovim 配置将无法安装。请检查 PATH 或重新执行 ./install.sh"
-    exit 1
-fi
-uv --version &>/dev/null || { echo "[ERROR] uv 不可用"; exit 1; }
-fnm --version &>/dev/null || { echo "[ERROR] fnm 不可用"; exit 1; }
-echo "[SUCCESS] 版本管理器安装并验证完成（uv、fnm 可用）"
+# 验证：输出当前版本（非强制，仅供日志参考）
+echo "[INFO] 验证版本管理器..."
+command -v uv &>/dev/null && echo "[SUCCESS] uv 可用: $(uv --version)" || echo "[WARNING] uv 未在 PATH 中找到（如需 uv 请重新登录或手动加入 PATH）"
+command -v fnm &>/dev/null && echo "[SUCCESS] fnm 可用: $(fnm --version)" || echo "[WARNING] fnm 未在 PATH 中找到（如需 fnm 请重新登录或手动加入 PATH）"
+echo "[SUCCESS] 版本管理器安装完成"
 {{- end -}}

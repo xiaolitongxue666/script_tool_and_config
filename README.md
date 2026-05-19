@@ -121,7 +121,7 @@ install.sh
 | starship | 跨 shell 提示符 | 多平台共有 |
 | tmux | 终端复用器 | 多平台共有（含 TPM 插件） |
 | zsh, oh-my-zsh | Z shell 与配置框架 | 多平台共有 |
-| fish | Fish Shell | 可选 |
+<!-- fish 已移除 -->
 | bat, eza, fd, ripgrep, fzf, trash-cli | 文件/搜索工具（cat/ls/find/grep 替代与模糊查找、回收站） | 多平台共有；Ubuntu 下 bat→batcat、fd→fdfind 已别名 |
 | git, neovim, lazygit, git-delta, gh | 版本控制、编辑器、Git TUI、diff 增强、GitHub CLI | 多平台共有 |
 | btop, fastfetch | 系统监控与信息展示 | 多平台共有；Ubuntu &lt; 24.10 的 fastfetch 可能走 PPA/Snap/.deb |

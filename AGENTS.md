@@ -31,28 +31,36 @@
 
 ## 构建/检查/测试命令
 
-### 脚本验证
+### 语法检查
 
 ```bash
-# 检查脚本语法
+# 单个脚本语法检查
 bash -n <script>.sh
+
+# 批量语法测试（推荐）
+bash tests/test_syntax.sh
+
+# 代理逻辑测试
+bash tests/test_proxy.sh
 
 # 验证编码和换行符
 ./scripts/common/standalone_tool_script/check_and_fix_encoding.sh
 
 # 规范化换行符为 LF（Windows 脚本除外）
 ./scripts/common/standalone_tool_script/ensure_lf_line_endings.sh
-
-# 测试特定功能
-./scripts/linux/system_basic_env/test_mirrors.sh
 ```
 
 ### 配置管理
 
 ```bash
-chezmoi diff              # 预览
-chezmoi apply -v           # 应用更改
+# 推荐：通过脚本封装调用 chezmoi（而非直接 chezmoi 命令）
+./scripts/manage_dotfiles.sh status  # 配置状态
+./scripts/manage_dotfiles.sh diff    # 配置差异
+./scripts/manage_dotfiles.sh apply   # 应用更改
 ./scripts/chezmoi/diagnose_chezmoi.sh  # 验证配置
+
+# Chezmoi 核心操作由 scripts/chezmoi/chezmoi_core.sh 统一封装，
+# install.sh 和 deploy.sh 共享此封装层。
 ```
 
 ### Neovim 健康检查
@@ -66,7 +74,16 @@ chezmoi apply -v           # 应用更改
 
 ### 测试
 
-无自动化测试。手动运行 `test_*.sh` 脚本。nvim 独立化相关改动后，可按 [docs/TEST_PLAN_NVIM_INDEPENDENT.md](docs/TEST_PLAN_NVIM_INDEPENDENT.md) 做手动验证。
+```bash
+# 统一测试：运行 tests/ 目录下的所有测试
+for t in tests/test_*.sh; do bash "$t"; done
+
+# 单测试运行示例
+bash tests/test_syntax.sh   # 所有 .sh 文件语法检查
+bash tests/test_proxy.sh    # 代理地址检测/补全逻辑测试
+```
+
+nvim 独立化相关改动后，可按 [docs/TEST_PLAN_NVIM_INDEPENDENT.md](docs/TEST_PLAN_NVIM_INDEPENDENT.md) 做手动验证。
 
 ## 安装流程
 
@@ -82,13 +99,15 @@ chezmoi apply -v           # 应用更改
 
 ```
 install.sh
-  [1/5] scripts/chezmoi/install_chezmoi.sh      安装 chezmoi
-  [2/5] 写入 ~/.config/chezmoi/chezmoi.toml      初始化 chezmoi 环境
-  [3/5] chezmoi apply -v --force                 核心部署
-         执行 .chezmoi/run_once_install-*.sh.tmpl （跨平台软件）
-         执行 .chezmoi/run_on_{linux,darwin,windows}/ （平台特定软件）
-  [4/5] scripts/chezmoi/install_helpers.sh       检查软件安装状态
-  [5/5] scripts/chezmoi/verify_installation.sh   验证安装结果
+  ├── scripts/chezmoi/install_chezmoi.sh         安装 chezmoi
+  ├── scripts/chezmoi/common_install.sh           OS/平台检测
+  ├── scripts/chezmoi/chezmoi_core.sh             核心封装（锁检测、apply、验证）
+  ├── chezmoi apply -v --force                    核心部署
+  │   ├── .chezmoi/run_once_install-*.sh.tmpl    跨平台软件（git/neovim/zsh/tmux/...）
+  │   ├── .chezmoi/run_on_linux/                  Linux 独有（pacman/AUR/i3wm/...）
+  │   ├── .chezmoi/run_on_darwin/                 macOS 独有（Homebrew/Ghostty/yabai/...）
+  │   └── .chezmoi/run_on_windows/                Windows 独有（Windows Terminal/Oh My Posh）
+  └── scripts/chezmoi/verify_installation.sh      验证安装结果
 ```
 
 ### run_once 脚本分类
@@ -102,6 +121,25 @@ install.sh
 
 - `./deploy.sh`：快速重新部署，要求 chezmoi 已安装，包含 Zsh/OMZ 安装和诊断
 - `scripts/manage_dotfiles.sh`：配置管理入口（status/diff/apply/edit）
+
+### run_once 执行排序规则
+
+run_once 脚本按文件名**字母序**执行，命名规则：
+- `run_once_00-`... → 先执行（版本管理器等前置依赖）
+- `run_once_install-`... → 按字母序安装各工具
+- `run_after_`... → 在所有 run_once 完成后执行配置合并
+
+执行优先层级（在 `run_once_install-system-basic-env.sh.tmpl 已移除`，由 chezmoi 直接排序）：
+
+```
+Layer 0: run_once_00-install-version-managers  ← fnm/uv（必须最先）
+Layer 1: run_once_install-git, run_once_install-common-tools
+Layer 2: run_once_install-zsh, run_once_install-starship, run_once_install-nerd-fonts
+Layer 3: run_once_install-neovim（仅安装二进制，配置由其他项目管理）
+Layer 4: run_once_90-install-claude-code, run_once_91-install-opencode, run_once_92-install-deepseek（AI agent，最后安装）
+Layer 4+: run_once_93-install-cursor（仅 GUI 环境）
+Layer 5: run_once_install-tmux, run_on_linux/*, run_on_darwin/*, run_on_windows/*
+```
 
 ### 部署入口职责矩阵（必须遵守）
 
@@ -246,11 +284,11 @@ ensure_directory() {
 - 引入前检查文件是否存在
 - 优先使用 `${BASH_SOURCE[0]}` 而不是 `$0`
 
-### 注释
+### 注释与输出语言
 
-- 所有注释和文档使用中文
+- **注释、文档、函数说明**使用中文，便于阅读
+- **运行时输出**（log_info/log_success/log_warning/log_error/echo 等打到屏幕的消息）统一使用**英文**
 - 主要章节分隔使用 `# ============================================`
-- 注释说明函数目的，而非实现细节
 
 ### 平台特定代码
 
@@ -272,23 +310,70 @@ ensure_directory() {
 - 提交前使用 `chezmoi apply` 测试配置更改
 - 修改系统配置文件前始终备份
 
+## 架构说明
+
+### 核心操作封装（本次重构新增）
+
+`scripts/chezmoi/chezmoi_core.sh` 统一封装了 chezmoi 的全部核心操作：
+
+| 函数 | 作用 | 使用方 |
+|------|------|--------|
+| `chezmoi_detect_proxy()` | 代理检测（环境变量→WSL→127.0.0.1:7890） | install.sh / deploy.sh |
+| `chezmoi_setup_proxy()` | 设置代理环境变量 | 所有入口脚本 |
+| `chezmoi_ensure_unlocked()` | 等待/释放 chezmoi 锁 | install.sh / deploy.sh |
+| `chezmoi_run_apply()` | chezmoi apply 统一调用 | install.sh / deploy.sh |
+| `chezmoi_run_status()` | chezmoi status | 安装流程 |
+| `chezmoi_run_diff()` | chezmoi diff | 安装流程 |
+| `chezmoi_verify_sync()` | 验证配置同步状态（含跨平台过滤） | install.sh |
+
+三个入口脚本共享这个封装层：install.sh（首次安装）→ deploy.sh（增量）→ manage_dotfiles.sh（运维）。
+
+### connect.exe 路径检测（Windows）
+
+`scripts/chezmoi/ensure_ssh_prereqs.sh` 在 Windows 上检测顺序：
+1. 环境变量 `WINDOWS_GIT_CONNECT_PATH`
+2. `git` 命令同级目录的 `connect.exe`（原逻辑）
+3. **`git` 所在根目录的 `mingw64/bin/connect.exe`（本次修复 — Git for Windows 标准路径）**
+4. `MINGW_PREFIX` 环境变量
+5. `cmd //c "if exist ..."` 回退检查 C:/ 和 D:/ 盘
+
+### 部署入口职责矩阵
+
+| 入口脚本 | 定位 | 应该做 | 不应该做 |
+|------|------|------|------|
+| `install.sh` | 首次安装入口 | 安装/检查 chezmoi、初始化环境、执行 `chezmoi apply -v --force`、调用安装验证脚本 | 承担日常运维命令分发 |
+| `deploy.sh` | 增量部署入口 | 在 chezmoi 已可用前提下执行增量部署与修复流程（含锁处理、诊断、必要校验） | 替代首次安装流程、扩展为通用命令分发器 |
+| `scripts/manage_dotfiles.sh` | 运维命令入口 | 提供 `status/diff/apply/edit/list` 等操作封装 | 内置复杂平台安装逻辑 |
+
+- 三个入口都可触达 chezmoi，但必须保持以上职责边界，避免重复实现和分叉修复。
+
 ## 项目结构
 
 ```
 .
 ├── AGENTS.md                   # 本文件
 ├── README.md                   # 项目说明
-├── install.sh                  # 一键安装入口
-├── deploy.sh                   # 快速部署入口
+├── install.sh                  # 一键安装入口（使用 chezmoi_core.sh）
+├── deploy.sh                   # 快速部署入口（使用 chezmoi_core.sh）
 ├── .chezmoi/                   # chezmoi 源状态（配置模板）
-├── .chezmoi.toml.tmpl          # chezmoi 用户级配置参考模板（根目录）
+│   ├── run_once_*.tmpl         # 跨平台安装脚本（字母序执行）
+│   ├── run_on_linux/           # Linux 平台特定
+│   ├── run_on_darwin/          # macOS 平台特定
+│   ├── run_on_windows/         # Windows 平台特定
+│   └── dot_*.tmpl              # 配置文件模板
+├── .chezmoi.toml.tmpl          # chezmoi 用户级配置参考模板
 ├── scripts/                    # 所有脚本
-│   ├── common.sh               # 公共函数库
+│   ├── common.sh               # 公共函数库（颜色输出、日志）
 │   ├── manage_dotfiles.sh      # dotfiles 管理入口
-│   ├── chezmoi/                # chezmoi 相关工具（安装、验证、诊断）
+│   ├── chezmoi/                # chezmoi 相关工具
+│   │   ├── chezmoi_core.sh     # 【核心】chezmoi 操作统一封装（新增）
+│   │   ├── common_install.sh   # 通用安装函数库（含 load_run_once_context）
+│   │   ├── install_chezmoi.sh  # chezmoi 安装
+│   │   ├── verify_installation.sh  # 安装验证
+│   │   └── ...
 │   ├── common/                 # 跨平台通用脚本
 │   │   ├── deploy_utils/       # 部署辅助（备份、诊断、SSH/Zsh 配置）
-│   │   ├── standalone_tool_script/  # 独立工具脚本
+│   │   ├── standalone_tool_script/  # 独立工具脚本（永不删除）
 │   │   ├── container_dev_env/  # Docker 容器开发环境
 │   │   ├── project_tools/      # 项目生成和管理工具
 │   │   ├── ffmpeg-magic/       # FFmpeg 相关脚本
@@ -297,8 +382,10 @@ ensure_directory() {
 │   │   ├── system_basic_env/   # 系统基础环境配置
 │   │   └── network/            # 网络配置
 │   ├── darwin/                 # macOS 特定脚本
-│   ├── windows/                # Windows 特定脚本
-│   └── migration/              # 迁移脚本
+│   └── windows/                # Windows 特定脚本
+├── tests/                      # 测试目录（新增）
+│   ├── test_syntax.sh          # 批量语法检查
+│   └── test_proxy.sh           # 代理逻辑测试
 ├── docs/                       # 文档目录
 │   └── PROJECT_STRUCTURE.md    # 项目结构权威文档
 └── openspec/                   # OpenSpec 规范驱动开发
@@ -750,7 +837,7 @@ git push
 
 ### 命名边界（普通脚本区 vs 模板区）
 
-- 普通脚本区（`scripts/**`、`ai-unified-config/scripts/**`）统一使用 snake_case 文件名，不新增 kebab-case 脚本名。
+- 普通脚本区（`scripts/**`、`ai-unified-config/scripts/**`（已移除））统一使用 snake_case 文件名，不新增 kebab-case 脚本名。
 - 普通脚本推荐前缀：`install_`、`configure_`、`test_`、`verify_`、`sync_`、`backup_`。
 - 模板执行区（`.chezmoi/run_once*`、`.chezmoi/run_on_*`）可保留现有 `run_once_install-xxx.sh.tmpl` 风格；是否改为下划线需统一迁移后再落地。
 - 普通脚本区与模板区命名规则分离管理，禁止跨区混用。

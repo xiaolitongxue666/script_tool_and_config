@@ -76,6 +76,12 @@ if [ -f "$COMMON_INSTALL_SH" ]; then
     source "$COMMON_INSTALL_SH"
 fi
 
+# 加载 chezmoi 核心操作封装
+CHEZMOI_CORE_SH="${SCRIPT_DIR}/scripts/chezmoi/chezmoi_core.sh"
+if [ -f "$CHEZMOI_CORE_SH" ]; then
+    source "$CHEZMOI_CORE_SH"
+fi
+
 # ============================================
 # 临时文件管理
 # ============================================
@@ -83,15 +89,11 @@ TEMP_DIR=$(mktemp -d)
 trap "rm -rf '$TEMP_DIR'" EXIT INT TERM
 
 # ============================================
-# 安装日志（统一写入 logs/，UTF-8、LF；该目录已由 .gitignore 忽略）
+# 日志：统一 logs/install.log，覆盖写入（仅最近一次）
 # ============================================
-readonly LOG_DIR="${SCRIPT_DIR}/logs"
-mkdir -p "$LOG_DIR"
-INSTALL_LOG="${LOG_DIR}/install_$(date +%Y%m%d_%H%M%S).log"
-exec > >(tee -a "$INSTALL_LOG") 2>&1
-echo "[INFO] 安装日志: ${INSTALL_LOG}"
+log_setup "install"
 
-start_script "一键安装脚本"
+start_script "One-click Install"
 
 # ============================================
 # 解析命令行参数
@@ -114,19 +116,19 @@ while [[ $# -gt 0 ]]; do
             shift
             ;;
         --help|-h)
-            echo "用法: $0 [选项]"
+            echo "Usage: $0 [options]"
             echo ""
-            echo "选项:"
-            echo "  --proxy, -p <地址>    指定代理地址（例如: http://192.168.1.76:7890）"
-            echo "  --test-remote         执行远程测试（测试远端 tmux 配置）"
-            echo "  --commit              测试成功后自动提交并推送到 Git"
-            echo "  --help, -h            显示此帮助信息"
+            echo "Options:"
+            echo "  --proxy, -p <url>     Proxy URL (e.g. http://192.168.1.76:7890)"
+            echo "  --test-remote         Run remote tests (test tmux on remote host)"
+            echo "  --commit              Auto-commit and push after successful test"
+            echo "  --help, -h            Show this help message"
             echo ""
-            echo "环境变量:"
-            echo "  PROXY                 代理地址（例如: http://192.168.1.76:7890）"
-            echo "  http_proxy            代理地址（例如: http://192.168.1.76:7890）"
+            echo "Environment variables:"
+            echo "  PROXY                 Proxy URL (e.g. http://192.168.1.76:7890)"
+            echo "  http_proxy            Proxy URL (e.g. http://192.168.1.76:7890)"
             echo ""
-            echo "示例:"
+            echo "Examples:"
             echo "  $0 --proxy http://192.168.1.76:7890"
             echo "  $0 --test-remote"
             echo "  $0 --test-remote --commit"
@@ -134,8 +136,8 @@ while [[ $# -gt 0 ]]; do
             exit 0
             ;;
         *)
-            log_error "未知参数: $1"
-            log_info "使用 --help 查看帮助信息"
+            log_error "Unknown argument: $1"
+            log_info "Use --help to see available options"
             exit 1
             ;;
     esac
@@ -173,7 +175,7 @@ if [ -z "${PROXY:-}" ] && [ -z "${http_proxy:-}" ] && [ "$PLATFORM" = "linux" ];
         _hostip=$(awk '/^nameserver / {print $2; exit}' /etc/resolv.conf 2>/dev/null)
         if [ -n "$_hostip" ]; then
             PROXY="http://${_hostip}:7890"
-            log_info "检测到 WSL，使用宿主机代理: $PROXY"
+            log_info "WSL detected, using host proxy: $PROXY"
         fi
     fi
 fi
@@ -196,7 +198,7 @@ if [ -n "${PROXY:-}" ]; then
     export https_proxy="$PROXY"
     export HTTP_PROXY="$PROXY"
     export HTTPS_PROXY="$PROXY"
-    log_info "使用代理: $PROXY"
+    log_info "Using proxy: $PROXY"
     # 解析 host:port 供 chezmoi 模板使用（如 dot_ssh/config.tmpl 的 PROXY_HOST/PROXY_PORT，WSL 下 SSH 走宿主机代理）
     _proxy_stripped="${PROXY#*://}"
     _proxy_host="${_proxy_stripped%%:*}"
@@ -216,10 +218,10 @@ fi
 # ============================================
 log_info ""
 log_info "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-log_info "[1/5] 检查并安装 chezmoi"
+log_info "[1/5] Check and install chezmoi"
 log_info "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
-log_info "检查 chezmoi 安装状态..."
+log_info "Checking chezmoi installation status..."
 if ! command -v chezmoi &> /dev/null; then
     log_info "chezmoi 未安装，开始安装..."
     bash "${SCRIPT_DIR}/scripts/chezmoi/install_chezmoi.sh"
@@ -235,14 +237,14 @@ if ! command -v chezmoi &> /dev/null; then
 
     # 最终验证
     if ! command -v chezmoi &> /dev/null; then
-        error_exit "chezmoi 安装后仍不可用，请检查安装过程或手动安装"
+        error_exit "chezmoi still not available after install, please check"
     fi
 
     CHEZMOI_VERSION=$(chezmoi --version | head -n 1)
-    log_success "chezmoi 安装成功: $CHEZMOI_VERSION"
+    log_success "chezmoi installed: $CHEZMOI_VERSION"
 else
     CHEZMOI_VERSION=$(chezmoi --version | head -n 1)
-    log_success "chezmoi 已安装: $CHEZMOI_VERSION"
+    log_success "chezmoi already installed: $CHEZMOI_VERSION"
 fi
 
 # ============================================
@@ -250,25 +252,25 @@ fi
 # ============================================
 log_info ""
 log_info "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-log_info "[2/5] 初始化 chezmoi 环境"
+log_info "[2/5] Initialize chezmoi environment"
 log_info "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
 # 创建必要的目录
 # 1. ~/.local/bin 目录（用于官方安装脚本安装的工具）
 if [ ! -d "$HOME/.local/bin" ]; then
-    log_info "创建目录: $HOME/.local/bin"
+    log_info "Creating directory: $HOME/.local/bin"
     mkdir -p "$HOME/.local/bin"
 else
-    log_info "目录已存在: $HOME/.local/bin"
+    log_info "Directory exists: $HOME/.local/bin"
 fi
 
 # 2. chezmoi 状态目录（chezmoi 需要此目录存储状态信息）
 CHEZMOI_STATE_DIR="$HOME/.local/share/chezmoi"
 if [ ! -d "$CHEZMOI_STATE_DIR" ]; then
-    log_info "创建 chezmoi 状态目录: $CHEZMOI_STATE_DIR"
+    log_info "Creating chezmoi state dir: $CHEZMOI_STATE_DIR"
     mkdir -p "$CHEZMOI_STATE_DIR"
 else
-    log_info "chezmoi 状态目录已存在: $CHEZMOI_STATE_DIR"
+    log_info "chezmoi state dir exists: $CHEZMOI_STATE_DIR"
 fi
 
 # 源状态目录（项目内的 .chezmoi 目录）
@@ -331,7 +333,7 @@ if [ "$NEED_WRITE" = true ]; then
         log_info "已添加 chezmoi 源目录配置: $SOURCE_DIR_ABS"
     else
         printf 'sourceDir = "%s"\n\n[git]\n    autoCommit = false\n    autoPush = false\n' "$SOURCE_DIR_ABS" > "$CHEZMOI_CONFIG_FILE"
-        log_info "已写入 chezmoi 配置: $CHEZMOI_CONFIG_FILE"
+        log_info "Written chezmoi config: $CHEZMOI_CONFIG_FILE"
     fi
 fi
 # Windows 下 .sh 需通过 bash 执行，否则会报「不是有效的 Win32 应用程序」
@@ -346,170 +348,76 @@ if [ "$PLATFORM" = "windows" ]; then
     fi
     if ! grep -q "\[interpreters\.sh\]" "$CHEZMOI_CONFIG_FILE" 2>/dev/null; then
         printf '\n[interpreters.sh]\n    command = "%s"\n' "$BASH_CMD" >> "$CHEZMOI_CONFIG_FILE"
-        log_info "已添加 chezmoi 脚本解释器: [interpreters.sh] command = $BASH_CMD"
+        log_info "Added chezmoi script interpreter: [interpreters.sh] command = $BASH_CMD"
     fi
 fi
 
-log_success "chezmoi 环境初始化完成"
-
-# ============================================
-# 确保 chezmoi 未占用（锁检测与释放，非交互）
-# ============================================
-ENSURE_UNLOCKED="${SCRIPT_DIR}/scripts/common/deploy_utils/ensure_chezmoi_unlocked.sh"
-if [[ -f "$ENSURE_UNLOCKED" ]] && [[ -x "$ENSURE_UNLOCKED" ]]; then
-    bash "$ENSURE_UNLOCKED" || true
-elif [[ -f "$ENSURE_UNLOCKED" ]]; then
-    chmod +x "$ENSURE_UNLOCKED" 2>/dev/null || true
-    bash "$ENSURE_UNLOCKED" || true
-fi
+log_success "chezmoi environment initialized"
 
 # ============================================
 # 配置差异检测和应用（chezmoi 核心流程）
 # ============================================
-# 再次确认 chezmoi 可用
-if ! command -v chezmoi &> /dev/null; then
-    error_exit "chezmoi 命令不可用，无法继续应用配置"
+chezmoi_ensure_unlocked 30
+
+if ! chezmoi_is_installed; then
+    error_exit "chezmoi not available, cannot apply config"
 fi
 
 log_info ""
 log_info "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-log_info "[3/5] 检查配置状态和差异"
+log_info "[3/5] Check config status and diff"
 log_info "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
 if [ ! -d "$CHEZMOI_DIR" ] || [ -z "$(ls -A "$CHEZMOI_DIR" 2>/dev/null)" ]; then
-    log_warning "chezmoi 源状态目录为空"
-    log_info "请手动添加配置: chezmoi add ~/.zshrc"
+    log_warning "chezmoi source dir is empty"
+    log_info "Add config manually: chezmoi add ~/.zshrc"
     exit 0
 fi
 
-# 设置源状态目录和环境变量（run_once 通过 env http_proxy 使用代理）
+# 设置源状态目录和环境变量
 export CHEZMOI_SOURCE_DIR="$CHEZMOI_DIR"
-export PAGER=cat  # 避免 chezmoi 进入交互模式
+export CHEZMOI_PROJECT_ROOT="$(cd "$SCRIPT_DIR" && pwd)"
 [ -d "$HOME/.local/bin" ] && export PATH="$HOME/.local/bin:$PATH"
+chezmoi_export_apply_env
 
-# 步骤 1: 检查配置状态
-log_info "[1/3] 检查配置状态 (chezmoi status)..."
-STATUS_OUTPUT=$(chezmoi status 2>&1 || true)
-if [ -z "$STATUS_OUTPUT" ]; then
-    log_success "所有配置都是最新的"
-    HAS_STATUS_DIFF=false
-else
-    # 统计不同类型的变更
+# apply 前确保 SSH ProxyCommand 依赖就绪（connect/connect.exe）
+ENSURE_SSH_PREREQS="${SCRIPT_DIR}/scripts/chezmoi/ensure_ssh_prereqs.sh"
+if [[ -f "$ENSURE_SSH_PREREQS" ]]; then
+    log_info "Ensuring SSH prerequisites..."
+    bash "$ENSURE_SSH_PREREQS" || true
+fi
+
+# 检查配置状态和差异
+STATUS_OUTPUT=$(chezmoi_run_status)
+HAS_STATUS_DIFF=false
+if [[ -n "$STATUS_OUTPUT" ]] && [[ "$STATUS_OUTPUT" != *"All configs are up-to-date"* ]]; then
+    HAS_STATUS_DIFF=true
     modified=$(echo "$STATUS_OUTPUT" | grep -c "^M" || echo "0")
     added=$(echo "$STATUS_OUTPUT" | grep -c "^A" || echo "0")
     deleted=$(echo "$STATUS_OUTPUT" | grep -c "^D" || echo "0")
     run=$(echo "$STATUS_OUTPUT" | grep -c "^R" || echo "0")
-    log_info "发现未同步配置: M=$modified, A=$added, D=$deleted, R=$run"
-    HAS_STATUS_DIFF=true
-    # 显示详细状态
-    echo "$STATUS_OUTPUT" | head -10 | while IFS= read -r line; do
-        log_info "  $line"
-    done
+    log_info "Config changes: M=$modified, A=$added, D=$deleted, R=$run"
 fi
 
-# 步骤 2: 检查配置差异
-log_info "[2/3] 检查配置差异 (chezmoi diff)..."
-DIFF_OUTPUT=$(chezmoi diff 2>&1 || true)
-if [ -z "$DIFF_OUTPUT" ]; then
-    log_success "模板配置与本地配置一致"
-    HAS_DIFF=false
-else
-    # 统计差异文件数量
-    file_count=$(echo "$DIFF_OUTPUT" | grep -c "^diff --git" || echo "0")
-    log_info "发现 $file_count 个文件存在差异"
+DIFF_OUTPUT=$(chezmoi_run_diff)
+HAS_DIFF=false
+if [[ -n "$DIFF_OUTPUT" ]] && [[ "$DIFF_OUTPUT" != *"template and local config match"* ]]; then
     HAS_DIFF=true
-    # 显示差异摘要
-    echo "$DIFF_OUTPUT" | head -20 | while IFS= read -r line; do
-        log_info "  $line"
-    done
-    diff_lines=$(echo "$DIFF_OUTPUT" | wc -l | tr -d ' ')
-    if [ "$diff_lines" -gt 20 ]; then
-        log_info "  ... (还有更多差异，共 $diff_lines 行)"
-    fi
+    file_count=$(echo "$DIFF_OUTPUT" | grep -c "^diff --git" || echo "0")
+    log_info "$file_count file(s) have differences"
 fi
 
-# 步骤 3: 应用配置（如果有差异）
-log_info "[3/3] 应用配置 (chezmoi apply)..."
+# 应用配置
 if [ "$HAS_STATUS_DIFF" = false ] && [ "$HAS_DIFF" = false ]; then
-    log_success "所有配置都是最新的，无需应用"
+    log_success "All configs are up-to-date, no apply needed"
 else
-    log_info "发现配置差异，开始应用配置..."
-    log_info "执行: chezmoi apply -v --force"
-    log_info ""
-    # 供 run_once 脚本解析 common_install 路径（优先于 SCRIPT_DIR 推导）
-    export CHEZMOI_PROJECT_ROOT="$(cd "$SCRIPT_DIR" && pwd)"
-    [ -d "$HOME/.local/bin" ] && export PATH="$HOME/.local/bin:$PATH"
-    # macOS：供 ~/.ssh/config 模板使用 connect 实际路径（避免 arch 与 Homebrew 路径不一致）
-    if [[ "$(uname)" == "Darwin" ]]; then
-        if command -v connect &>/dev/null; then
-            export CHEZMOI_MACOS_CONNECT_PATH="$(command -v connect)"
-        elif [[ -x /opt/homebrew/bin/connect ]]; then
-            export CHEZMOI_MACOS_CONNECT_PATH="/opt/homebrew/bin/connect"
-        elif [[ -x /usr/local/bin/connect ]]; then
-            export CHEZMOI_MACOS_CONNECT_PATH="/usr/local/bin/connect"
-        fi
-    fi
-
-    # apply 前确保 SSH ProxyCommand 依赖就绪（connect/connect.exe）
-    ENSURE_SSH_PREREQS="${SCRIPT_DIR}/scripts/chezmoi/ensure_ssh_prereqs.sh"
-    if [[ -f "$ENSURE_SSH_PREREQS" ]] && [[ -x "$ENSURE_SSH_PREREQS" ]]; then
-        log_info "确保 SSH 前置依赖就绪..."
-        bash "$ENSURE_SSH_PREREQS" || true
-    elif [[ -f "$ENSURE_SSH_PREREQS" ]]; then
-        chmod +x "$ENSURE_SSH_PREREQS" 2>/dev/null || true
-        log_info "确保 SSH 前置依赖就绪..."
-        bash "$ENSURE_SSH_PREREQS" || true
-    fi
-
-    if chezmoi apply -v --force; then
-        log_success "配置应用成功！"
-
-        # 验证应用结果（当前 OS 下，仅其他平台的 run_on_* 未应用属正常）
-        log_info "验证配置应用结果..."
-        VERIFY_STATUS=$(chezmoi status 2>&1 || true)
-        VERIFY_DIFF=$(chezmoi diff 2>&1 || true)
-        # chezmoi status 对 run_before/run_after 等「仅执行」的脚本可能仍显示 R 行，apply 已成功时与真实不同步无关
-        VERIFY_STATUS_NO_RUN=$(echo "$VERIFY_STATUS" | grep -vE '^[[:space:]]*R[[:space:]]' || true)
-        # Windows：run_after 落盘的 *.sh 若曾为 CRLF，diff 可能仅剩该文件；模板已设 line-endings=lf，此处作兜底避免误报
-        VERIFY_DIFF_ONLY_CLAUDE_RUN=false
-        if [ -z "$VERIFY_STATUS_NO_RUN" ] && [ -n "$VERIFY_DIFF" ]; then
-            _diff_git_count=$(echo "$VERIFY_DIFF" | grep -c '^diff --git' || echo 0)
-            # shellcheck disable=SC2086
-            if [ "${_diff_git_count:-0}" -eq 1 ] && echo "$VERIFY_DIFF" | grep -q '^diff --git a/claude-code-settings\.sh '; then
-                VERIFY_DIFF_ONLY_CLAUDE_RUN=true
-            fi
-            unset _diff_git_count
-        fi
-        if [ -z "$VERIFY_STATUS_NO_RUN" ] && [ -z "$VERIFY_DIFF" ]; then
-            log_success "配置已完全同步"
-        else
-            # 若剩余差异仅包含其他平台的 run_on_* 项（当前 OS 不会应用），属预期
-            ONLY_OTHER_OS=false
-            if [ -n "$VERIFY_STATUS_NO_RUN" ] || [ -n "$VERIFY_DIFF" ]; then
-                COMBINED="$VERIFY_STATUS_NO_RUN
-$VERIFY_DIFF"
-                case "$PLATFORM" in
-                    windows) PATTERN='run_on_(darwin|linux)/' ;;
-                    linux)   PATTERN='run_on_(darwin|windows)/' ;;
-                    darwin)  PATTERN='run_on_(linux|windows)/' ;;
-                    *)       PATTERN='' ;;
-                esac
-                if [ -n "$PATTERN" ]; then
-                    NON_OTHER=$(echo "$COMBINED" | grep -vE "$PATTERN" | grep -v '^[[:space:]]*$' || true)
-                    [[ -z "$NON_OTHER" ]] && ONLY_OTHER_OS=true
-                fi
-            fi
-            if [ "$ONLY_OTHER_OS" = true ]; then
-                log_info "当前平台配置已同步；剩余差异仅为其他 OS 的 run_on_* 项，属预期"
-            elif [ "$VERIFY_DIFF_ONLY_CLAUDE_RUN" = true ]; then
-                log_info "配置已应用；chezmoi diff 仅剩 ~/claude-code-settings.sh（run_after 脚本）。模板已强制 LF；若仍报错请删除该文件后重新 apply"
-            else
-                log_warning "配置应用后仍有差异，请检查"
-            fi
-        fi
+    log_info "Config differences found, applying..."
+    if chezmoi_run_apply "-v --force"; then
+        log_success "Config applied successfully!"
+        # 验证
+        chezmoi_verify_sync "$(uname -s)" && log_success "Config fully synced" || log_warning "Config still has differences after apply"
     else
-        log_error "配置应用失败，请检查错误信息"
-        exit 1
+        error_exit "Config apply failed, check error messages"
     fi
 fi
 
@@ -518,18 +426,18 @@ fi
 # ============================================
 log_info ""
 log_info "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-log_info "[4/5] 检查软件安装状态"
+log_info "[4/5] Check software installation status"
 log_info "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
 # 检测操作系统和包管理器（用于软件检查）
 if [ -f "$COMMON_INSTALL_SH" ]; then
     detect_os_and_package_manager || {
-        log_warning "无法检测操作系统和包管理器，跳过详细软件检查"
+        log_warning "Cannot detect OS/package manager, skipping software check"
         PLATFORM=""
         PACKAGE_MANAGER=""
     }
 else
-    log_warning "未找到 common_install.sh，跳过详细软件检查"
+    log_warning "common_install.sh not found, skipping software check"
     PLATFORM=""
     PACKAGE_MANAGER=""
 fi
@@ -539,36 +447,36 @@ if [ -d "$CHEZMOI_DIR" ]; then
     if [ -n "$PLATFORM" ]; then
         report_install_status_by_platform "$CHEZMOI_DIR" "$PLATFORM" "$PACKAGE_MANAGER"
     else
-        log_info "未检测到平台，跳过软件安装状态检查"
-        log_info "软件将通过 chezmoi apply 自动执行 run_once_ 脚本安装"
+        log_info "Platform not detected, skipping software status check"
+        log_info "Software will be installed via chezmoi apply (run_once_ scripts)"
     fi
 else
-    log_warning "chezmoi 源状态目录不存在，跳过软件检查"
+    log_warning "chezmoi source dir not found, skipping software check"
 fi
 
-log_success "软件检查完成"
+log_success "Software check completed"
 
 # ============================================
 # [5/5] 验证与确认（字体、默认 Shell、环境变量、开机启动声明）
 # ============================================
 log_info ""
 log_info "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-log_info "[5/5] 验证与确认"
+log_info "[5/5] Verification and confirmation"
 log_info "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
 VERIFY_SCRIPT="${SCRIPT_DIR}/scripts/chezmoi/verify_installation.sh"
 if [ -f "$VERIFY_SCRIPT" ] && [ -x "$VERIFY_SCRIPT" ]; then
     if bash "$VERIFY_SCRIPT"; then
-        log_success "验证完成，报告已写入（见上方路径）"
+        log_success "Verification completed, report written"
     else
-        log_warning "验证脚本执行完毕，请查看上方报告摘要"
+        log_warning "Verification script finished, check report above"
     fi
 else
     if [ -f "$VERIFY_SCRIPT" ]; then
         chmod +x "$VERIFY_SCRIPT" 2>/dev/null || true
         bash "$VERIFY_SCRIPT" || true
     else
-        log_warning "验证脚本不存在: $VERIFY_SCRIPT，跳过验证与报告"
+        log_warning "Verify script not found: $VERIFY_SCRIPT, skipping"
     fi
 fi
 
@@ -580,26 +488,26 @@ REMOTE_TEST_PASSED=true
 if [ "$TEST_REMOTE" = true ]; then
     log_info ""
     log_info "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    log_info "执行远程测试"
+    log_info "Running remote tests"
     log_info "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
     TEST_SCRIPT="${SCRIPT_DIR}/scripts/common/deploy_utils/test_tmux_remote.sh"
 
     if [ ! -f "$TEST_SCRIPT" ]; then
-        log_error "远程测试脚本不存在: $TEST_SCRIPT"
+        log_error "Remote test script not found: $TEST_SCRIPT"
         REMOTE_TEST_PASSED=false
     elif [ ! -x "$TEST_SCRIPT" ]; then
-        log_warning "远程测试脚本没有执行权限，正在设置..."
+        log_warning "Remote test script not executable, setting permissions..."
         chmod +x "$TEST_SCRIPT"
     fi
 
     if [ -f "$TEST_SCRIPT" ] && [ -x "$TEST_SCRIPT" ]; then
-        log_info "运行远程测试脚本..."
+        log_info "Running remote test script..."
         if bash "$TEST_SCRIPT"; then
-            log_success "远程测试通过"
+            log_success "Remote test passed"
             REMOTE_TEST_PASSED=true
         else
-            log_error "远程测试失败"
+            log_error "Remote test failed"
             REMOTE_TEST_PASSED=false
         fi
     fi
@@ -610,25 +518,25 @@ fi
 # ============================================
 if [ "$AUTO_COMMIT" = true ]; then
     if [ "$REMOTE_TEST_PASSED" != true ]; then
-        log_warning "远程测试未通过，跳过自动提交"
+        log_warning "Remote test did not pass, skipping auto-commit"
     else
         log_info ""
         log_info "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-        log_info "自动提交和推送"
+        log_info "Auto-commit and push"
         log_info "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
         # 检查是否在 Git 仓库中
         if [ ! -d "${SCRIPT_DIR}/.git" ]; then
-            log_warning "当前目录不是 Git 仓库，跳过提交"
+            log_warning "Not a git repository, skipping commit"
         else
             cd "$SCRIPT_DIR"
 
             # 检查是否有更改
             if [ -z "$(git status --porcelain)" ]; then
-                log_info "没有更改需要提交"
+                log_info "No changes to commit"
             else
                 # 添加所有更改
-                log_info "添加更改到 Git..."
+                log_info "Adding changes to git..."
                 git add -A
 
                 # 生成提交信息
@@ -638,19 +546,19 @@ if [ "$AUTO_COMMIT" = true ]; then
                 fi
 
                 # 提交
-                log_info "提交更改: $COMMIT_MSG"
+                log_info "Committing: $COMMIT_MSG"
                 if git commit -m "$COMMIT_MSG"; then
-                    log_success "提交成功"
+                    log_success "Commit succeeded"
 
                     # 推送到远程
-                    log_info "推送到远程仓库..."
+                    log_info "Pushing to remote..."
                     if git push; then
-                        log_success "推送成功"
+                        log_success "Push succeeded"
                     else
-                        log_warning "推送失败，请手动推送"
+                        log_warning "Push failed, please push manually"
                     fi
                 else
-                    log_warning "提交失败，可能没有需要提交的更改"
+                    log_warning "Commit failed, possibly nothing to commit"
                 fi
             fi
 
@@ -664,13 +572,13 @@ fi
 # ============================================
 end_script
 
-log_success "安装完成！"
+log_success "Installation complete!"
 log_info ""
-log_info "后续操作："
-log_info "  快速部署: ./deploy.sh"
-log_info "  查看状态: ./scripts/manage_dotfiles.sh status"
-log_info "  查看差异: ./scripts/manage_dotfiles.sh diff"
-log_info "  编辑配置: ./scripts/manage_dotfiles.sh edit ~/.zshrc"
+log_info "Next steps:"
+log_info "  Quick deploy:         ./deploy.sh"
+log_info "  Check status:         ./scripts/manage_dotfiles.sh status"
+log_info "  View diff:            ./scripts/manage_dotfiles.sh diff"
+log_info "  Edit config:          ./scripts/manage_dotfiles.sh edit ~/.zshrc"
 log_info ""
-log_info "使用帮助: ./scripts/manage_dotfiles.sh help"
-log_info "部署指南: scripts/common/deploy_utils/DEPLOYMENT_GUIDE.md"
+log_info "  Help:                 ./scripts/manage_dotfiles.sh help"
+log_info "  Deployment guide:     scripts/common/deploy_utils/DEPLOYMENT_GUIDE.md"
