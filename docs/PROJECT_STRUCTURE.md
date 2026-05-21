@@ -34,7 +34,6 @@ script_tool_and_config/
 ├── .chezmoiignore                   # chezmoi 忽略规则
 ├── .vscode/                         # VS Code 配置
 │   └── settings.json
-├── .opencode/                       # OpenCode 插件配置（openspec 命令）
 ├── LICENSE                           # 许可证 (MIT)
 │
 ├── install.sh                        # 一键安装入口
@@ -195,7 +194,7 @@ script_tool_and_config/
 - **README.md**: 项目主文档，包含快速开始、使用说明等
 - **AGENTS.md**: 代理与编码规范，包含代码风格、命名规范、最佳实践
 - **docs/**: 文档目录，含 PROJECT_STRUCTURE.md（本文件）、SOFTWARE_LIST.md、INSTALL_GUIDE.md 等
-- **.opencode/**: OpenCode 插件命令（openspec-apply、openspec-archive、openspec-proposal）
+- **openspec/**: OpenSpec 规范驱动开发（与 chezmoi 部署无关，独立 CLI `openspec`）
 <!-- ai-unified-config/ 已删除 -->
 - **graphify-out/**: Graphify 知识图谱分析输出缓存
 
@@ -226,12 +225,13 @@ install.sh
   │       ├─ run_once_install-common-tools.sh.tmpl (bat, eza, fd, rg, fzf 等)
   │       ├─ run_once_install-zsh.sh.tmpl (zsh, oh-my-zsh, 插件)
   │       ├─ run_once_install-git.sh.tmpl
-  │       ├─ run_once_install-neovim.sh.tmpl (>= 0.11.0)
-│   │       ├─ run_once_install-neovim.sh.tmpl (>= 0.11.0，仅安装二进制)
+  │       ├─ run_once_install-neovim.sh.tmpl (>= 0.11.0，仅安装二进制)
   │       ├─ run_once_install-starship.sh.tmpl
   │       ├─ run_once_install-nerd-fonts.sh.tmpl (FiraMono Nerd Font)
+  │       ├─ run_once_90-install-claude-code.sh.tmpl
+  │       ├─ run_once_92-install-deepseek.sh.tmpl
+  │       ├─ run_once_93-install-cursor.sh.tmpl (GUI 环境)
   │       ├─ run_once_install-tmux.sh.tmpl (Linux/macOS)
-  │       ├─ run_once_install-opencode.sh.tmpl
   │       ├─ run_on_linux/run_once_*.sh.tmpl (仅 Linux)
   │       ├─ run_on_darwin/run_once_*.sh.tmpl (仅 macOS)
   │       └─ run_on_windows/run_once_*.sh.tmpl (仅 Windows)
@@ -260,15 +260,15 @@ install.sh
 |------|---------|------|
 | `run_once_00-install-version-managers.sh.tmpl` | fnm, uv, rustup | 多平台 |
 | `run_once_install-common-tools.sh.tmpl` | bat, eza, fd, rg, fzf, lazygit, git-delta, gh, trash-cli, btop, fastfetch | 多平台 |
-
 | `run_once_install-git.sh.tmpl` | git, connect-proxy | 多平台 |
-| `run_once_install-neovim.sh.tmpl` | neovim (>= 0.11.0) | 多平台 |
-│   │       ├─ run_once_install-neovim.sh.tmpl (>= 0.11.0，仅安装二进制)
-| `run_once_install-nerd-fonts.sh.tmpl` | FiraMono Nerd Font | 多平台 |
-| `run_once_install-opencode.sh.tmpl` | OpenCode CLI | 多平台 |
-| `run_once_install-starship.sh.tmpl` | starship 提示符 | 多平台 |
-| `run_once_install-tmux.sh.tmpl` | tmux, TPM 插件 | Linux, macOS |
 | `run_once_install-zsh.sh.tmpl` | zsh, oh-my-zsh, 插件 | Linux, macOS, Windows(MSYS2) |
+| `run_once_install-starship.sh.tmpl` | starship 提示符 | 多平台 |
+| `run_once_install-nerd-fonts.sh.tmpl` | FiraMono Nerd Font | 多平台 |
+| `run_once_install-neovim.sh.tmpl` | neovim (>= 0.11.0，仅二进制) | 多平台 |
+| `run_once_90-install-claude-code.sh.tmpl` | Claude Code CLI | 多平台 |
+| `run_once_92-install-deepseek.sh.tmpl` | deepseek CLI (cargo) | 多平台 |
+| `run_once_93-install-cursor.sh.tmpl` | Cursor 编辑器 | 有 GUI 时 |
+| `run_once_install-tmux.sh.tmpl` | tmux, TPM 插件 | Linux, macOS |
 | `run_once_install-alacritty.sh.tmpl` | alacritty 终端 | 仅 Linux |
 | `run_once_install-dwm.sh.tmpl` | dwm 窗口管理器 | 仅 Linux |
 | `run_once_install-i3wm.sh.tmpl` | i3wm 窗口管理器 | 仅 Linux |
@@ -328,9 +328,10 @@ install.sh
 ## 注意事项
 
 1. `.chezmoi/` 目录包含所有配置文件模板，由 chezmoi 统一管理
-│   │       ├─ run_once_install-neovim.sh.tmpl (>= 0.11.0，仅安装二进制)
+2. Layer 4 AI 工具脚本使用 `run_once_9x-*` 命名以排在 neovim 之后、tmux 之前
 3. 所有配置统一通过 `.chezmoi/*.tmpl` → `chezmoi apply` → `~/.` 流程部署
 4. 跨平台通用脚本位于 `scripts/common/` 目录下
 5. 所有脚本注释使用中文，打印输出使用英文
-6. 脚本遵循 snake_case 命名规范
-7. `.gitignore` 已忽略 `logs/`、`chezmoistate.boltdb`、`dotfiles/nvim/` 等
+6. 普通脚本区遵循 snake_case；`.chezmoi/run_once_*` 保留既有 kebab-case
+7. `.gitignore` 已忽略 `logs/`、`chezmoistate.boltdb` 等
+8. OpenCode 已从安装链与 Shell PATH 中移除；规范开发见根目录 `openspec/`（独立 CLI）

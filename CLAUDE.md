@@ -74,7 +74,7 @@ Layer 0: run_once_00-install-version-managers      ← fnm + uv
 Layer 1: install-common-tools, install-git
 Layer 2: install-zsh, install-starship, install-nerd-fonts
 Layer 3: install-neovim                             ← 仅安装二进制
-Layer 4: run_once_90-{claude-code}, _91-{opencode}, _92-{deepseek}
+Layer 4: run_once_90-{claude-code}, _92-{deepseek}
          run_once_93-install-cursor                 ← 仅 GUI 环境
 Layer 5: install-tmux, install-oh-my-posh + run_on_{linux,darwin,windows}
 ```
@@ -113,7 +113,7 @@ Layer 0: fnm/uv（版本管理器，必须最先）
 Layer 1: git + common-tools
 Layer 2: zsh + OMZ + starship + nerd-fonts
 Layer 3: neovim（仅安装二进制，配置由其他项目管理）
-Layer 4: claude-code + opencode + deepseek（AI agent，最后安装）
+Layer 4: claude-code + deepseek（AI agent，最后安装）
 Layer 4+: cursor（仅 GUI 环境，Linux/WSL 检测 DISPLAY）
 Layer 5: tmux + 平台特定（linux/darwin/windows 下的 run_on_*）
 

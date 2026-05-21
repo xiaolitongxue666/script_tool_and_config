@@ -177,13 +177,6 @@ CC_GIT_BASH_CANDS
     export all_proxy="$PROXY_URL"
     export ALL_PROXY="$PROXY_URL"
 
-    # opencode 配置（兼容官方新路径 ~/.opencode/bin 与历史路径 /c/opencode）
-    if [ -d "$HOME/.opencode/bin" ] && [[ ":$PATH:" != *":$HOME/.opencode/bin:"* ]]; then
-        export PATH="$HOME/.opencode/bin:$PATH"
-    elif [ -d "/c/opencode" ] && [[ ":$PATH:" != *":/c/opencode:"* ]]; then
-        export PATH="/c/opencode:$PATH"
-    fi
-
     # 网络检查别名
     alias check_network='curl -IL https://www.google.com 2>/dev/null | grep -q -E "200 OK|Connection established" && echo "Network is OK" || echo "Network is down"'
 

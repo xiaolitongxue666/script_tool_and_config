@@ -14,7 +14,6 @@ run_once_install-starship             ← Layer 2
 run_once_install-nerd-fonts           ← Layer 2
 run_once_install-neovim               ← Layer 3（仅安装二进制）
 run_once_90-install-claude-code       ← Layer 4（AI agent，fnm/node 已就绪）
-run_once_91-install-opencode          ← Layer 4（AI agent）
 run_once_92-install-deepseek          ← Layer 4（AI agent，需 cargo）
 run_once_93-install-cursor            ← Layer 4（GUI 检测，有 GUI 才装）
 run_once_install-{tmux,i3wm,...} ← Layer 5（平台特有）
@@ -36,7 +35,6 @@ run_on_windows/*                      ← Layer 5（平台特有）
 | Layer 2 | `run_once_install-nerd-fonts` | FiraMono Nerd Font | all |
 | Layer 3 | `run_once_install-neovim` | Neovim 二进制（>= 0.11.0） | all |
 | Layer 4 | `run_once_90-install-claude-code` | Claude Code CLI（npm i -g @anthropic-ai/claude-code，依赖 fnm/node） | all |
-| Layer 4 | `run_once_91-install-opencode` | opencode | all |
 | Layer 4 | `run_once_92-install-deepseek` | deepseek CLI（cargo install，依赖 rust） | all |
 | Layer 4 | `run_once_93-install-cursor` | Cursor 编辑器（仅 GUI 环境）；User `settings.json`（含 Remote SSH）由 chezmoi 三平台模板管理 | all（检测 GUI） |
 

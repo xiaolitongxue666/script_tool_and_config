@@ -209,6 +209,8 @@ chezmoistate.boltdb
 
 # 环境变量文件
 .env
+.env.*
+.envrc
 .env.local
 .env.*.local
 
@@ -219,20 +221,41 @@ chezmoistate.boltdb
 *.crt
 *.p12
 *.pfx
+*.p8
+*.asc
+*.ovpn
+*.secret
 
-# SSH 私钥和公钥（确保不会被纳入版本控制）
-.ssh/id_*
-.ssh/*_rsa
-.ssh/*_ed25519
-.ssh/*_ecdsa
-.ssh/*_dsa
-.ssh/*.pub
-.ssh/known_hosts
-.ssh/authorized_keys
+# SSH / GPG（仓库内任意路径，防止误 add）
+.ssh/
+**/id_rsa*
+**/id_ed25519*
+**/id_ecdsa*
+**/*_dsa
+**/*.pub
+**/known_hosts
+**/authorized_keys
+**/identity
+**/identity.pub
 
-# 配置文件中的敏感信息（如果包含密码等）
-# config.local.*
-# *.secret
+# 通用凭据与本地配置覆盖（可能含 token、密码、主机信息）
+.netrc
+.credentials
+credentials.json
+config.local.*
+**/settings.local.json
+**/sftp.json
+
+# chezmoi 本地 data（git 邮箱、代理、主机名等机器信息，勿提交）
+.chezmoidata.local.toml
+.chezmoi.toml.local
+.chezmoi.yaml.local
+chezmoi.toml.local
+**/chezmoi.toml.local
+
+# Claude / AI 本地记忆与设置（含会话与项目 data）
+.claude-mem/
+.claude/settings.local.json
 
 # ============================================
 # 包管理器和依赖
@@ -318,8 +341,8 @@ scripts/common/container_dev_env/test_*.sh
 scripts/common/deploy_utils/test_*.sh
 scripts/**/TEST_*.md
 scripts/**/*_test_*.sh
-# VS Code SFTP 配置（可能包含敏感信息）
-.vscode/sftp.json
+# VS Code / SFTP（见上方 **/sftp.json）
+# .vscode/sftp.json
 
 # Cursor IDE 用户态数据（仅 User/settings.json 由 chezmoi 模板管理）
 **/Cursor/User/globalStorage/
@@ -341,10 +364,13 @@ scripts/**/*_test_*.sh
 # ============================================
 # 项目生成的文件（由上方通用规则覆盖）
 
-# 安装/验证报告（脚本输出到项目根目录时忽略；VERIFICATION_RESULT.md 为仓库内保留的示例/模板，不忽略）
+# 安装/验证报告（脚本输出，可能含主机名/路径；VERIFICATION_RESULT.md 为仓库内示例，不忽略）
 /.audit_configs_report.txt
+/.audit_configs_report*.txt
 /install_verification_report_*.txt
 /VERIFICATION_REPORT.txt
+**/install_verification_report_*.txt
+**/.audit_configs_report*.txt
 # 一键安装脚本日志（已统一写入 logs/install_*.log；保留此项兼容旧运行产生的根目录日志）
 /install_*.log
 

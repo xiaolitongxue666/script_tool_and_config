@@ -231,36 +231,19 @@ check_common_tools() {
     report_append ""
 }
 
-# 5. OpenCode
-check_opencode() {
-    report_append "========== 5. OpenCode =========="
-    if ! command -v opencode &>/dev/null; then
-        report_append "  opencode: 未在 PATH 中"
-        report_append "  说明: 可由 run_once_91-install-opencode.sh 安装"
-        ((SUMMARY_WARN++)) || true
-    else
-        report_append "  opencode: $(command -v opencode)"
-        local ver
-        ver="$(opencode --version 2>/dev/null | head -n1)"
-        report_append "  版本: ${ver:-未知}"
-        ((SUMMARY_PASS++)) || true
-    fi
-    report_append ""
-}
-
-# 6. 开机启动声明
+# 5. 开机启动声明
 check_startup_declaration() {
-    report_append "========== 6. 开机启动服务 =========="
+    report_append "========== 5. 开机启动服务 =========="
     report_append "  本项目未配置 systemd 用户服务、~/.config/autostart 等图形自启动。"
     report_append "  环境变量与 PATH 由 shell 配置文件（如 .zprofile、.bashrc）在登录时加载。"
     report_append "  状态: 已确认（无需检测服务列表）"
     report_append ""
 }
 
-# 7. SSH 与 connect（ProxyCommand 依赖，供 GitHub 等经代理走 443）
+# 6. SSH 与 connect（ProxyCommand 依赖，供 GitHub 等经代理走 443）
 check_ssh_and_connect() {
     local os="$1"
-    report_append "========== 7. SSH 与 connect =========="
+    report_append "========== 6. SSH 与 connect =========="
 
     if [[ -f "${HOME}/.ssh/config" ]]; then
         report_append "  ~/.ssh/config: 存在"
@@ -332,7 +315,6 @@ main() {
     check_default_shell "$os"
     check_path_and_commands
     check_common_tools "$os"
-    check_opencode
     check_ssh_and_connect "$os"
     check_startup_declaration
     write_report_and_summary

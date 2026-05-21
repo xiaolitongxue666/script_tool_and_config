@@ -189,14 +189,21 @@ extract_software_name_from_script() {
     local basename=$(basename "$script_path")
     local base
 
-    # 支持 run_once_00-install-* 与 run_once_install-*
+    # 支持 run_once_00-*、run_once_9x-*（Layer 4 AI）与 run_once_install-*
     if [[ "$basename" == run_once_00-* ]]; then
         base="${basename#run_once_}"
         base="${base%.sh.tmpl}"
         base="${base%.sh}"
-    else
+    elif [[ "$basename" == run_once_install-* ]]; then
         base="${basename#run_once_install-}"
         base="${base%.sh.tmpl}"
+        base="${base%.sh}"
+    elif [[ "$basename" == run_once_[0-9]* ]]; then
+        base="${basename#run_once_}"
+        base="${base%.sh.tmpl}"
+        base="${base%.sh}"
+    else
+        base="${basename%.sh.tmpl}"
         base="${base%.sh}"
     fi
     echo "$base"
@@ -217,8 +224,7 @@ get_software_category() {
         system-basic-env)             echo "系统基础" ;;
         yabai|skhd|maccy)             echo "macOS 专属" ;;
         i3wm|dwm|arch-base-packages|aur-helper|configure-pacman)  echo "Linux 专属" ;;
-        opencode)                    echo "OpenCode" ;;
-        claude-code)                 echo "Claude Code" ;;
+        90-install-claude-code|92-install-deepseek|93-install-cursor)  echo "AI 工具" ;;
         *)                            echo "其他" ;;
     esac
 }
@@ -432,7 +438,7 @@ report_install_status_by_platform() {
 
     [[ ! -s "$tmp_list" ]] && { log_info "无适用于当前平台的 run_once 安装项"; return 0; }
 
-    local category_order="版本管理 终端/Shell 文件/搜索与通用 开发 字体 系统基础 macOS 专属 Linux 专属 Windows 专属 OpenCode 其他"
+    local category_order="版本管理 终端/Shell 文件/搜索与通用 开发 字体 系统基础 macOS 专属 Linux 专属 Windows 专属 AI 工具 其他"
     local total_installed=0
     local total_not=0
 
