@@ -40,10 +40,15 @@ Host moicen-vnc
     User leonli
     LocalForward 5904 localhost:5901
 
-Host leonli_ubuntu_vps
-    HostName 123.207.13.22
+# --- 小同学 VPS（Cursor Remote SSH / 日常运维）---
+Host xiaolitongxue-vps
+    HostName xiaolitongxue.com.cn
     User ubuntu
     Port 22
+    IdentityFile ~/.ssh/id_ed25519
+    IdentitiesOnly yes
+    ServerAliveInterval 60
+    ServerAliveCountMax 3
 
 # 其他 Host（如内网 Git 服务器）请在本机或 lazyssh 中单独添加
 # --- 其他 Host 默认 ---
