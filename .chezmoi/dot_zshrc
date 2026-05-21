@@ -453,6 +453,13 @@ fi
 # alias cdcode='cd ~/Code'
 # alias cdwork='cd ~/Work'
 
+# Cursor Remote SSH → 小同学 VPS /home/ubuntu/rss
+# 勿用: cursor -n "vscode-remote://..."（会被当成本地路径）
+# 正确: cursor --remote ssh-remote+<Host> <绝对路径> 或 cursor --folder-uri ...
+cursor-vps-rss() {
+    cursor --remote ssh-remote+xiaolitongxue-vps /home/ubuntu/rss -n "$@"
+}
+
 # ============================================
 # claude-mem 项目级记忆自动检测
 # ============================================
