@@ -41,6 +41,8 @@ Host moicen-vnc
     LocalForward 5904 localhost:5901
 
 # --- 小同学 VPS（Cursor Remote SSH / 日常运维）---
+# CLI: cursor --remote ssh-remote+xiaolitongxue-vps /home/ubuntu/rss -n
+# 勿用 cursor -n "vscode-remote://..."（会被当成本地路径）；详见 Cursor User settings.json 模板注释
 Host xiaolitongxue-vps
     HostName xiaolitongxue.com.cn
     User ubuntu

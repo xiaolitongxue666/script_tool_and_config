@@ -1,0 +1,43 @@
+// Cursor User settings（由 chezmoi 管理，JSONC）
+// Remote SSH CLI（勿用 cursor -n "vscode-remote://..."，会被当成本地路径）:
+//   cursor --remote ssh-remote+{{ .cursor_remote_ssh_host }} {{ .cursor_remote_ssh_path }} -n
+//   cursor --folder-uri "vscode-remote://ssh-remote+{{ .cursor_remote_ssh_host }}{{ .cursor_remote_ssh_path }}"
+// UI: Cmd+Shift+P → Remote-SSH: Connect to Host... → {{ .cursor_remote_ssh_host }}
+{
+    "window.commandCenter": 1,
+    "workbench.editor.enablePreview": false,
+    "terminal.integrated.fontFamily": "CaskaydiaCove Nerd Font Mono",
+    "terminal.integrated.defaultProfile.osx": "zsh",
+    "terminal.integrated.enableMultiLinePasteWarning": "never",
+    "workbench.colorTheme": "Catppuccin Mocha",
+    "workbench.iconTheme": "catppuccin-mocha",
+    "update.releaseTrack": "prerelease",
+    "terminal.external.osxExec": "Ghostty.app",
+    "window.autoDetectColorScheme": false,
+    "makefile.configureOnOpen": true,
+    "explorer.confirmDelete": false,
+    "terminal.integrated.defaultProfile.windows": "Git Bash",
+    "editor.insertSpaces": true,
+    "editor.tabSize": 4,
+    "editor.detectIndentation": false,
+    "editor.lineNumbers": "relative",
+    "editor.cursorSurroundingLines": 8,
+    "editor.rulers": [
+        80
+    ],
+    "editor.wordWrap": "off",
+    "editor.renderLineHighlight": "line",
+    "editor.renderWhitespace": "boundary",
+    "search.smartCase": true,
+    "vscode-neovim.neovimInitVimPaths.win32": "{{ .chezmoi.homeDir }}/.config/nvim/vscode_neovim/vscode_neovim_init.lua",
+    "vscode-neovim.neovimInitVimPaths.darwin": "{{ .chezmoi.homeDir }}/.config/nvim/vscode_neovim/vscode_neovim_init.lua",
+    "vscode-neovim.neovimInitVimPaths.linux": "{{ .chezmoi.homeDir }}/.config/nvim/vscode_neovim/vscode_neovim_init.lua",
+    "extensions.experimental.affinity": {
+        "asvetliakov.vscode-neovim": 1
+    },
+    "remote.SSH.remotePlatform": {
+        "{{ .cursor_remote_ssh_host }}": "linux"
+    },
+    "remote.SSH.connectTimeout": 120,
+    "remote.SSH.serverInstallTimeout": 300
+}

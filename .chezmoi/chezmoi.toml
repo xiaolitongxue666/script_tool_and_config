@@ -38,6 +38,9 @@
     identity_file = "~/.ssh/id_rsa"
     # 是否对 github.com 使用 ProxyCommand（经代理访问）。设为 true 时需要本机有 connect/connect.exe 且代理可用；设为 false 时直连 ssh.github.com:443，无需 connect
     ssh_use_proxy = false
+    # Cursor Remote SSH（与 dot_ssh/config.tmpl Host 名一致）
+    cursor_remote_ssh_host = "xiaolitongxue-vps"
+    cursor_remote_ssh_path = "/home/ubuntu/rss"
 
 [git]
     autoCommit = false

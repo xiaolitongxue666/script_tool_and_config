@@ -38,7 +38,7 @@ run_on_windows/*                      ← Layer 5（平台特有）
 | Layer 4 | `run_once_90-install-claude-code` | Claude Code CLI（npm i -g @anthropic-ai/claude-code，依赖 fnm/node） | all |
 | Layer 4 | `run_once_91-install-opencode` | opencode | all |
 | Layer 4 | `run_once_92-install-deepseek` | deepseek CLI（cargo install，依赖 rust） | all |
-| Layer 4 | `run_once_93-install-cursor` | Cursor 编辑器（仅 GUI 环境） | all（检测 GUI） |
+| Layer 4 | `run_once_93-install-cursor` | Cursor 编辑器（仅 GUI 环境）；User `settings.json`（含 Remote SSH）由 chezmoi 三平台模板管理 | all（检测 GUI） |
 
 ---
 
@@ -76,6 +76,8 @@ run_on_windows/*                      ← Layer 5（平台特有）
 | Layer 5 | `run_on_darwin/run_once_install-ghostty` | Ghostty 终端 | darwin |
 | Layer 5 | `run_on_darwin/run_once_install-connect` | connect（SSH ProxyCommand） | darwin |
 | Layer 5 | `run_on_darwin/run_onchange_sync_ghostty_config_to_app_support` | Ghostty 配置同步到 Application Support | darwin（内容变化触发） |
+| Layer 5 | `run_on_darwin/run_onchange_sync_cursor_settings_to_app_support` | Cursor `settings.json` 同步到 Application Support | darwin（内容变化触发） |
+| Layer 5 | `run_on_windows/run_onchange_sync_cursor_settings_to_appdata` | Cursor `settings.json` 同步到 `%APPDATA%` | windows（内容变化触发） |
 
 ---
 

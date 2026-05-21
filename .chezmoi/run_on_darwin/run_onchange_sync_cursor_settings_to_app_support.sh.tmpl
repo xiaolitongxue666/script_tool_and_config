@@ -1,0 +1,13 @@
+#!/bin/bash
+{{- if eq .chezmoi.os "darwin" }}
+# 将 chezmoi 生成的 Cursor settings 同步到 macOS 实际读取路径
+set -e
+SRC="$HOME/.config/Cursor/User/settings.json"
+if [[ -f "$SRC" ]]; then
+    DEST_DIR="$HOME/Library/Application Support/Cursor/User"
+    mkdir -p "$DEST_DIR"
+    cp "$SRC" "$DEST_DIR/settings.json"
+fi
+{{- else }}
+exit 0
+{{- end }}

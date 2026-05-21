@@ -1,0 +1,13 @@
+#!/bin/bash
+{{- if eq .chezmoi.os "windows" }}
+# 将 run_on_windows 暂存路径同步到 %APPDATA%\Cursor\User
+set -e
+SRC="${HOME}/.config/Cursor/User/settings.json"
+DEST_DIR="${APPDATA:-$HOME/AppData/Roaming}/Cursor/User"
+if [[ -f "$SRC" ]]; then
+    mkdir -p "$DEST_DIR"
+    cp "$SRC" "$DEST_DIR/settings.json"
+fi
+{{- else }}
+exit 0
+{{- end }}

@@ -9,6 +9,7 @@
 - [常用工作流程](#常用工作流程)
 - [高级功能](#高级功能)
 - [平台特定配置](#平台特定配置)
+- [Cursor 用户设置与 Remote SSH](#cursor-用户设置与-remote-ssh)
 - [Claude Code 项目记忆自动检测](#claude-code-项目记忆自动检测)
 - [代理配置](#代理配置)
 - [故障排除](#故障排除)
@@ -658,6 +659,43 @@ Git 全局配置（`~/.gitconfig`）由 `dot_gitconfig.tmpl` 管理，包含：
 ```
 
 然后执行 `chezmoi apply -v` 即可更新 `~/.gitconfig`。
+
+## Cursor 用户设置与 Remote SSH
+
+Cursor 的 `User/settings.json` 由 chezmoi 管理（与 `run_once_93-install-cursor` 的 GUI 安装配套）：
+
+| 平台 | 源模板 | 同步到实际路径 |
+|------|--------|----------------|
+| 共用 | `.chezmoi/dot_config/Cursor/User/settings.json.tmpl` → `~/.config/Cursor/User/settings.json` | Linux 直接使用 |
+| macOS | 同上 | `run_onchange_sync_cursor_settings_to_app_support` → `~/Library/Application Support/Cursor/User/settings.json` |
+| Windows | 同上 | `run_onchange_sync_cursor_settings_to_appdata` → `%APPDATA%\Cursor\User\settings.json` |
+
+VPS Host 名与路径在 `.chezmoi/chezmoi.toml` 的 `cursor_remote_ssh_host` / `cursor_remote_ssh_path`。
+
+应用配置：
+
+```bash
+./scripts/manage_dotfiles.sh apply
+```
+
+### Remote SSH CLI
+
+**勿用**（会被当作本地路径，无法连上 VPS）：
+
+```bash
+cursor -n "vscode-remote://ssh-remote+xiaolitongxue-vps/home/ubuntu/rss"
+```
+
+**正确用法**（Cursor 3.5+ CLI 支持，`--help` 可能未列出）：
+
+```bash
+cursor --remote ssh-remote+xiaolitongxue-vps /home/ubuntu/rss -n
+cursor --folder-uri "vscode-remote://ssh-remote+xiaolitongxue-vps/home/ubuntu/rss" -n
+```
+
+远程路径须为绝对路径（如 `/home/ubuntu/rss`）。UI 连接：`Cmd+Shift+P` → **Remote-SSH: Connect to Host...** → `xiaolitongxue-vps`（勿选 `github.com-personal` 等 Git SSH Host）。
+
+SSH Host 定义见 `.chezmoi/dot_ssh/config.tmpl` 中的 `xiaolitongxue-vps`。
 
 ## Claude Code 项目记忆自动检测
 

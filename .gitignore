@@ -321,6 +321,14 @@ scripts/**/*_test_*.sh
 # VS Code SFTP 配置（可能包含敏感信息）
 .vscode/sftp.json
 
+# Cursor IDE 用户态数据（仅 User/settings.json 由 chezmoi 模板管理）
+**/Cursor/User/globalStorage/
+**/Cursor/User/History/
+**/Cursor/User/workspaceStorage/
+**/Cursor/User/sync/
+**/Cursor/logs/
+**/Cursor/User/*.backup
+
 # ============================================
 # Claude Code 配置
 # ============================================
