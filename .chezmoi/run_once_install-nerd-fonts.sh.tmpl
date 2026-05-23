@@ -5,6 +5,14 @@
 # Nerd Fonts 安装脚本（chezmoi run_once_）
 # 支持 Linux, macOS, Windows
 # 默认安装 FiraMono Nerd Font
+#
+# Windows 策略：使用 powershell.exe 的 Shell.Application COM 对象
+#   Namespace(0x14).CopyHere() 安装字体，无需管理员权限。
+#   不依赖 cp 到 C:\Windows\Fonts（Win11 无管理员禁止写入系统目录）。
+#
+# stdout/stderr 规范：_windows_install_fonts_from_dir() 通过 stdout
+#   返回安装计数，所有日志/提示输出到 stderr（>&2），避免
+#   result=$(_func) 捕获混合文本导致语法错误。
 # ============================================
 
 # 获取 common_install.sh 路径
@@ -204,26 +212,74 @@ install_font_linux() {
     fi
 }
 
-# 从已解压目录安装字体到 Windows Fonts（共享逻辑）
+# 从已解压目录安装字体到 Windows Fonts（使用 PowerShell Shell.Application COM，无需管理员权限）
 _windows_install_fonts_from_dir() {
     local temp_dir="$1"
     local fonts_dir="/c/Windows/Fonts"
     local installed_count=0
     local font_file font_name dest_path
 
-    echo "[INFO] Installing fonts to system..."
+    # 先统计待安装的字体数量
+    local font_list=()
     while IFS= read -r -d '' font_file; do
         font_name=$(basename "${font_file}")
         dest_path="${fonts_dir}/${font_name}"
         if [[ ! -f "${dest_path}" ]]; then
-            if cp "${font_file}" "${dest_path}" 2>/dev/null; then
-                echo "[INFO] Installed font: ${font_name}"
-                installed_count=$((installed_count + 1))
-            fi
+            font_list+=("${font_file}")
         else
-            echo "[INFO] Font already exists: ${font_name}"
+            echo "[INFO] Font already exists: ${font_name}" >&2
         fi
     done < <(find "${temp_dir}" -type f \( -name '*.ttf' -o -name '*.otf' \) -print0 2>/dev/null)
+
+    if [[ ${#font_list[@]} -eq 0 ]]; then
+        echo "0"
+        return 0
+    fi
+
+    echo "[INFO] Installing ${#font_list[@]} font(s) to system..." >&2
+
+    # Windows 上通过 Shell.Application COM 安装字体（无需管理员权限）
+    if command -v powershell.exe &>/dev/null; then
+        local ps_script
+        ps_script='$fonts = (New-Object -ComObject Shell.Application).Namespace(0x14); $count = 0;'
+        for font_file in "${font_list[@]}"; do
+            # 转为 Windows 路径（正斜杠给 PowerShell 用）
+            local _p
+            if command -v cygpath &>/dev/null; then
+                _p="$(cygpath -w "${font_file}")"
+            else
+                _p="${font_file}"
+            fi
+            ps_script+="\$fonts.CopyHere('${_p//\\/\\\\}', 0x10); \$count++;"
+        done
+        ps_script+="Write-Output \$count;"
+
+        local ps_output
+        ps_output=$(powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "${ps_script}" 2>&1)
+        local ps_rc=$?
+
+        # 提取最后一行作为计数
+        installed_count=$(echo "${ps_output}" | tail -n 1 | grep -oE '[0-9]+' || echo "0")
+        if [[ "${ps_rc}" -ne 0 ]] || [[ "${installed_count:-0}" -eq 0 ]]; then
+            echo "[WARNING] PowerShell font install may have failed (rc=${ps_rc}, count=${installed_count:-0})" >&2
+        fi
+        if [[ "${installed_count:-0}" -gt 0 ]]; then
+            echo "[INFO] Installed ${installed_count} font(s) via PowerShell" >&2
+        fi
+    else
+        # 回退：尝试直接 cp（可能需管理员权限）
+        echo "[WARNING] powershell.exe not found, falling back to cp (may need admin)" >&2
+        for font_file in "${font_list[@]}"; do
+            font_name=$(basename "${font_file}")
+            dest_path="${fonts_dir}/${font_name}"
+            if cp "${font_file}" "${dest_path}" 2>/dev/null; then
+                echo "[INFO] Installed font: ${font_name}" >&2
+                installed_count=$((installed_count + 1))
+            else
+                echo "[WARNING] Failed to copy font: ${font_name} (need admin?)" >&2
+            fi
+        done
+    fi
 
     echo "${installed_count}"
 }

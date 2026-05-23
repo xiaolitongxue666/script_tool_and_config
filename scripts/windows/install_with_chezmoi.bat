@@ -2,6 +2,10 @@
 REM ============================================
 REM Windows 新系统完整安装脚本（chezmoi 流程）
 REM 自动执行：安装 chezmoi -> 安装软件 -> 配置软件 -> 纳入管理
+REM
+REM 注意：此脚本需要管理员权限（Win10 通常有，Win11 通常无）。
+REM Win11 无管理员权限时，推荐在 Git Bash 中运行 install.sh：
+REM   bash ./install.sh
 REM ============================================
 
 REM 检查管理员权限

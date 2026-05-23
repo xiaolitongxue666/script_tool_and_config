@@ -93,7 +93,7 @@ nvim 独立化相关改动后，可按 [docs/TEST_PLAN_NVIM_INDEPENDENT.md](docs
 |------|---------|------|
 | Linux | `./install.sh` | 自动检测发行版和 WSL |
 | macOS | `./install.sh` | 需先安装 Homebrew |
-| Windows | `./install.sh`（Git Bash）或 `scripts/windows/install_with_chezmoi.bat` | BAT 需管理员权限 |
+| Windows | `./install.sh`（Git Bash — 推荐，不需要管理员）或 `scripts/windows/install_with_chezmoi.bat` | BAT 需管理员权限（Win10）；Win11 无管理员时推荐 Git Bash 方式 |
 
 ### `./install.sh` 调用链
 
@@ -150,6 +150,31 @@ Layer 5: run_once_install-tmux, run_on_linux/*, run_on_darwin/*, run_on_windows/
 | `scripts/manage_dotfiles.sh` | 运维命令入口 | 提供 `status/diff/apply/edit/list` 等操作封装 | 内置复杂平台安装逻辑 |
 
 - 三个入口都可触达 chezmoi，但必须保持以上职责边界，避免重复实现和分叉修复。
+
+### Windows 安装原则（无管理员权限）
+
+- **Windows 10**：通常拥有管理员权限，BAT/ps1 可以写入系统目录（如 `C:\Windows\Fonts`）
+- **Windows 11**：无管理员权限是常见场景，**所有 run_once 脚本不得依赖管理员权限**
+- **硬性规则**：
+  - 禁止在 run_once 中 `cp`/`move` 文件到 `C:\Windows\Fonts` 或 `C:\Program Files` 等系统保护目录
+  - 字体安装使用 `powershell.exe` 的 `Shell.Application` COM 对象（`Namespace(0x14).CopyHere()`），无需管理员权限
+  - 任何需要管理员权限的操作（如注册字体、修改系统 PATH）必须提供非管理员回退方案（如用户级安装、跳过并提示）
+- **路径原则**：不依赖绝对路径（如 `/c/Users/Administrator/`），使用 `$HOME`、`$LOCALAPPDATA`、`$APPDATA` 等环境变量
+
+### run_once 脚本失败处理规则
+
+- **单个 run_once 脚本失败（exit ≠ 0）会导致整个 `chezmoi apply` 失败，进而触发 `install.sh` 中 `set -e` 的 `error_exit`，终止后续步骤 [4/5] 和 [5/5]**
+- **必须遵守**：
+  1. 平台不适用的功能 → **优雅跳过**（输出 `[INFO]` 日志、`return 0`），**不得 `exit 1`**
+  2. 工具已由系统提供 → 提示并跳过（如 Windows Git Bash 自带 Zsh，无需额外安装）
+  3. 下载/安装失败且非关键 → `return 0` 并输出 `[WARNING]`，**不阻断整体安装流程**
+  4. 只有真实错误（如实为 macOS/Linux 却被判为 Windows）才允许 `exit 1`
+- **关键词区分**：
+  - `[WARNING]` + `return 0` = 非致命，继续安装
+  - `[ERROR]` + `exit 1` = 致命，终止安装
+- **检查清单**：每个 run_once 脚本提交前必须确认：
+  - 每个 `exit 1` 是否确实为致命错误？
+  - 非 Windows 平台是否有误判 Windows 并 exit？
 
 ## 代码风格指南
 
@@ -215,6 +240,27 @@ log_warning "警告消息"       # 黄色（非致命）
 log_error "错误消息"         # 红色
 DEBUG=1 log_debug "调试信息" # 青色（仅 DEBUG=1 时）
 ```
+
+### stdout/stderr 使用规范
+
+- **函数返回值通过 stdout 传递时**（如 `result=$(some_func)`），函数内部的日志/提示信息必须输出到 **stderr**（`>&2`），**确保 stdout 只有纯结果值**
+- **典型错误模式**：
+  ```bash
+  # ❌ 错误：日志混入 stdout，被调用方 $() 捕获
+  _count_fonts() {
+      echo "[INFO] Counting fonts..."  # 混入 stdout
+      echo "${count}"                  # 结果
+  }
+  result=$(_count_fonts)  # result = "[INFO] Counting fonts...\n3"
+
+  # ✅ 正确：日志输出到 stderr
+  _count_fonts() {
+      echo "[INFO] Counting fonts..." >&2
+      echo "${count}"
+  }
+  result=$(_count_fonts)  # result = "3"
+  ```
+- 此规则适用于所有 run_once 脚本和部署辅助脚本
 
 ### Chezmoi 模板语法
 
@@ -489,6 +535,8 @@ check_sudo() {
     fi
 }
 ```
+
+> **Windows 特别说明**：Windows 11 通常无管理员权限，run_once 脚本不得依赖 root/sudo。字体安装等需要系统目录写入的操作，应使用 PowerShell COM 对象（无需管理员）或跳过低权限操作。详见上方「Windows 安装原则（无管理员权限）」。
 
 ### 文件权限设置
 

@@ -203,6 +203,10 @@ chezmoistate.boltdb
 # chezmoi 目录下的嵌套 Git 仓库（不应存在）
 .chezmoi/.git/
 
+# chezmoi apply 过程中 run_once 脚本可能生成的临时目录（如字体下载缓存）
+.chezmoi/**/tmp/
+.chezmoi/**/temp/
+
 # ============================================
 # 环境变量和敏感信息
 # ============================================

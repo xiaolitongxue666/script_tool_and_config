@@ -117,6 +117,25 @@ Layer 4: claude-code + deepseek（AI agent，最后安装）
 Layer 4+: cursor（仅 GUI 环境，Linux/WSL 检测 DISPLAY）
 Layer 5: tmux + 平台特定（linux/darwin/windows 下的 run_on_*）
 
+### Windows 无管理员权限原则
+
+- Windows 11 通常无管理员权限，run_once 脚本**不得依赖管理员权限**
+- 禁止 `cp`/`move` 到 `C:\Windows\Fonts` 或 `C:\Program Files` 等系统保护目录
+- 字体安装：使用 `powershell.exe -Command "$fonts.CopyHere(...)"`（Shell.Application COM 对象），**无需管理员**
+- 路径：使用 `$HOME`、`$LOCALAPPDATA`、`$APPDATA`，**不依赖绝对路径**（如 `/c/Users/Administrator/`）
+
+### run_once 脚本失败处理
+
+- 单个 run_once 失败（exit ≠ 0）→ `chezmoi apply` 失败 → `install.sh` 的 `set -e` 触发的 `error_exit` 终止整个安装
+- **必须**：平台不适用 → `[INFO]` + `return 0`（跳过），不得 `exit 1`
+- **必须**：工具已由系统提供 → 提示跳过（如 Git Bash 自带 Zsh，不重复安装）
+- `[WARNING]` + `return 0` = 非致命；`[ERROR]` + `exit 1` = 致命
+
+### stdout/stderr 规范
+
+- 函数通过 stdout 返回值时（`result=$(func)`），内部日志**必须**输出到 stderr（`>&2`）
+- 典型错误：`echo "[INFO] ..."` 混入 stdout 被 `$()` 捕获，导致变量含混合文本、后续数值比较语法错误
+
 ### 测试
 
 - `tests/test_syntax.sh` — 批量语法检查，输出到 `logs/`

@@ -4,6 +4,12 @@
 # ============================================
 # Zsh 和 Oh My Zsh 安装脚本（chezmoi run_once_）
 # 支持 Linux/macOS/Windows (MSYS2)
+#
+# Windows 策略：
+#   Git for Windows 已内置 Zsh（在 /usr/bin/zsh），无需额外安装。
+#   非 MSYS2（winget 等包管理器）环境跳过安装，不阻断流程。
+#   仅 MSYS2 pacman 环境才通过 pacman 安装。
+#   Oh My Zsh 仅在 Linux/macOS 上安装。
 # ============================================
 
 # 获取 common_install.sh 路径
@@ -84,8 +90,7 @@ else
                 echo "[INFO] 通过 MSYS2 安装 Zsh..."
                 install_package "zsh"
             else
-                echo "[WARNING] Windows 上需要 MSYS2 来安装 Zsh"
-                exit 1
+                echo "[INFO] Windows 上 Zsh 通过 Git Bash 提供（已内置于 Git for Windows），无需额外安装"
             fi
             ;;
         *)
