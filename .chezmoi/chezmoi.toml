@@ -27,6 +27,10 @@
     # Git 全局配置（请在 .chezmoi.toml.local 或 env 中设置真实值，避免敏感信息进仓库）
     git_user_name = ""
     git_user_email = ""
+    # Windows 下 Git Bash 路径（自动检测 C:/ 和 D:/，若均不存在回退到 C:/；可在 .chezmoi.toml.local 中覆盖）
+    windows_git_bash_path = "{{ output "sh" "-c" "test -x '/c/Program Files/Git/bin/bash.exe' && printf 'C:/Program Files/Git/bin/bash.exe' || test -x '/d/Program Files/Git/bin/bash.exe' && printf 'D:/Program Files/Git/bin/bash.exe' || printf 'C:/Program Files/Git/bin/bash.exe'" | trim }}"
+    # Windows 下 Git for Windows 图标路径（同上自动检测）
+    windows_git_icon_path = "{{ output "sh" "-c" "test -f '/c/Program Files/Git/mingw64/share/git/git-for-windows.ico' && printf 'C:/Program Files/Git/mingw64/share/git/git-for-windows.ico' || test -f '/d/Program Files/Git/mingw64/share/git/git-for-windows.ico' && printf 'D:/Program Files/Git/mingw64/share/git/git-for-windows.ico' || printf 'C:/Program Files/Git/mingw64/share/git/git-for-windows.ico'" | trim }}"
     # Windows 下 SSH ProxyCommand 使用的 connect.exe 路径（若 Git 安装在其他盘符请修改）
     windows_git_connect_path = "C:/Program Files/Git/mingw64/bin/connect.exe"
     # macOS 下 SSH ProxyCommand 必须使用 connect 的绝对路径（GUI 如 Obsidian 不继承 shell PATH，否则会 exec: connect: not found）

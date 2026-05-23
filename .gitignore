@@ -418,6 +418,11 @@ debug-*.log
 # 临时 commit 消息草稿（本地编写，不提交）
 commit_msg.txt
 
+# AI agent 临时脚本（调试/修复用，不提交）
+_tmp_*.sh
+_tmp_*.py
+_tmp_*.ps1
+
 # 测试临时目录（测试脚本的输出、快照等）
 tests/tmp/
 tests/output/

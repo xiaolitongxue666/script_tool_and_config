@@ -124,6 +124,20 @@ Layer 5: tmux + 平台特定（linux/darwin/windows 下的 run_on_*）
 - 字体安装：使用 `powershell.exe -Command "$fonts.CopyHere(...)"`（Shell.Application COM 对象），**无需管理员**
 - 路径：使用 `$HOME`、`$LOCALAPPDATA`、`$APPDATA`，**不依赖绝对路径**（如 `/c/Users/Administrator/`）
 
+### Windows Terminal 配置规则（settings.json）
+
+**路径自动检测**：Git Bash 路径**禁止硬编码**。`chezmoi.toml` 的 `[data]` 中通过 `{{ output }}` 自动检测常见安装位置（C:/ → D:/ 回退），`settings.json.tmpl` 通过模板变量引用。用户可在 `.chezmoi.toml.local` 中覆盖。
+
+**JSON 反斜杠转义**：chezmoi 的 `replace "/" "\\"` 只产生单反斜杠，JSON 要求 `\\`。模板中必须用 `replace "/" "\\\\"`（4 个反斜杠 → 输出 2 个 → JSON 解析为 1 个）。
+
+**run_onchange 依赖声明**：`run_onchange_sync_windows_terminal_config.sh.tmpl` 必须声明 `# chezmoi:depends:source:dot_config/windows-terminal/settings.json.tmpl`，否则模板变量变更时不会自动重新同步到 WT 配置目录。
+
+**字体验证**：模板中引用的字体名必须与实际安装的字体族名完全一致。使用 PowerShell 验证：
+```powershell
+[System.Reflection.Assembly]::LoadWithPartialName('System.Drawing')
+(New-Object System.Drawing.Text.InstalledFontCollection).Families | Where-Object { $_.Name -match 'Nerd' }
+```
+
 ### run_once 脚本失败处理
 
 - 单个 run_once 失败（exit ≠ 0）→ `chezmoi apply` 失败 → `install.sh` 的 `set -e` 触发的 `error_exit` 终止整个安装

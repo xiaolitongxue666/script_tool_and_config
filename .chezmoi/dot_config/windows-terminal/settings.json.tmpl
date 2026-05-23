@@ -18,7 +18,7 @@
             "colorScheme": "Catppuccin Mocha",
             "font":
             {
-                "face": "FiraMono Nerd Font",
+                "face": "CaskaydiaCove NFM",
                 "size": 14,
                 "weight": "normal"
             },
@@ -34,8 +34,8 @@
             {
                 "guid": "{b453ae62-4e3d-5e58-b989-0a996ec6e90f}",
                 "name": "Git Bash",
-                "commandline": "\"D:\\Program Files\\Git\\usr\\bin\\bash.exe\" --login",
-                "icon": "D:\\Program Files\\Git\\mingw64\\share\\git\\git-for-windows.ico",
+                "commandline": "\"{{ .windows_git_bash_path | replace "/" "\\\\" }}\" --login",
+                "icon": "{{ .windows_git_icon_path | replace "/" "\\\\" }}",
                 "startingDirectory": "%USERPROFILE%",
                 "hidden": false,
                 "tabTitle": "Git Bash",
