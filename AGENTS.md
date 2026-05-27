@@ -138,7 +138,7 @@ Layer 2: run_once_install-zsh, run_once_install-starship, run_once_install-nerd-
 Layer 3: run_once_install-neovim（仅安装二进制，配置由其他项目管理）
 Layer 4: run_once_90-install-claude-code, run_once_92-install-deepseek（AI agent，最后安装）
 Layer 4+: run_once_93-install-cursor（仅 GUI 环境）
-Layer 5: run_once_install-tmux, run_on_linux/*, run_on_darwin/*, run_on_windows/*
+Layer 5: run_once_install-tmux + run_on_linux/* + run_on_darwin/*；Windows：run_on_windows/install-rmux、install-windows-terminal、install-oh-my-posh
 ```
 
 ### 部署入口职责矩阵（必须遵守）
@@ -373,6 +373,8 @@ ensure_directory() {
 | `chezmoi_verify_sync()` | 验证配置同步状态（含跨平台过滤） | install.sh |
 
 三个入口脚本共享这个封装层：install.sh（首次安装）→ deploy.sh（增量）→ manage_dotfiles.sh（运维）。
+
+**chezmoi 注意**：CLI 不读 `CHEZMOI_SOURCE_DIR`；`sourceDir` 在 `~/.config/chezmoi/chezmoi.toml`（`chezmoi_ensure_user_config`）。配置映射见 `scripts/chezmoi/config_mappings.sh`。Windows rmux 见 `docs/RMUX_WINDOWS.md`。
 
 ### connect.exe 路径检测（Windows）
 

@@ -10,6 +10,7 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../../.." && pwd)"
 COMMON_SH="${PROJECT_ROOT}/scripts/common.sh"
+CONFIG_MAPPINGS_SH="${PROJECT_ROOT}/scripts/chezmoi/config_mappings.sh"
 
 # 加载通用函数库
 if [ -f "$COMMON_SH" ]; then
@@ -82,8 +83,35 @@ check_source_file() {
 
 # 检查几个关键配置文件
 check_source_file "$CHEZMOI_DIR/dot_zshrc.tmpl" "$HOME/.zshrc" "Zsh 配置"
-check_source_file "$CHEZMOI_DIR/dot_tmux.conf" "$HOME/.tmux.conf" "Tmux 配置"
-check_source_file "$CHEZMOI_DIR/dot_config/starship/starship.toml" "$HOME/.config/starship/starship.toml" "Starship 配置"
+check_source_file "$CHEZMOI_DIR/dot_config/starship/starship.toml.tmpl" "$HOME/.config/starship/starship.toml" "Starship 配置"
+
+if [[ -f "$CONFIG_MAPPINGS_SH" ]]; then
+    # shellcheck disable=SC1090
+    source "$CONFIG_MAPPINGS_SH"
+    _diag_platform="$(chezmoi_detect_platform_name)"
+    declare -A _diag_map
+    chezmoi_fill_config_mappings _diag_map "$_diag_platform"
+    for _diag_target in "${!_diag_map[@]}"; do
+        _diag_rel="${_diag_map[$_diag_target]}"
+        _diag_src="${PROJECT_ROOT}/${_diag_rel#./}"
+        check_source_file "$_diag_src" "${_diag_target/#\~/$HOME}" "$(basename "$_diag_target") 配置"
+    done
+    unset _diag_platform _diag_map _diag_target _diag_rel _diag_src
+elif [[ "$OSTYPE" == "msys" ]] || [[ "$OSTYPE" == "cygwin" ]] || [[ "$OSTYPE" == "mingw"* ]]; then
+    check_source_file "$CHEZMOI_DIR/dot_rmux.conf.tmpl" "$HOME/.rmux.conf" "rmux 配置"
+else
+    check_source_file "$CHEZMOI_DIR/dot_tmux.conf.tmpl" "$HOME/.tmux.conf" "Tmux 配置"
+fi
+
+if [[ "$OSTYPE" == "msys" ]] || [[ "$OSTYPE" == "cygwin" ]] || [[ "$OSTYPE" == "mingw"* ]]; then
+    log_info ""
+    log_info "rmux CLI (manual start in Git Bash):"
+    if command -v rmux &>/dev/null; then
+        log_success "  ✓ rmux: $(rmux -V 2>/dev/null | head -n1)"
+    else
+        log_warning "  ✗ rmux not in PATH (run chezmoi apply or install to ~/.local/bin)"
+    fi
+fi
 
 # ============================================
 # 检查 chezmoi 管理状态

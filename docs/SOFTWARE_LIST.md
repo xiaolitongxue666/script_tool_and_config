@@ -84,12 +84,16 @@ run_on_windows/*                      ← Layer 5（平台特有）
 | 层级 | 脚本 | 安装项 | 说明 |
 |------|------|--------|------|
 | Layer 5 | `run_on_windows/run_once_install-windows-terminal` | Windows Terminal | windows |
+| Layer 5 | `run_on_windows/run_once_install-rmux` | rmux v0.3.1（预编译包 → `~/.local/bin`，cargo 回退） | windows |
 | Layer 5 | `run_once_install-oh-my-posh` | Oh My Posh 提示符 | windows |
 | Layer 5 | `run_on_windows/run_onchange_sync_windows_terminal_config` | Windows Terminal 配置同步到实际路径 | windows（内容变化触发） |
+
+配置模板（非 run_once）：`dot_rmux.conf.tmpl` → `~/.rmux.conf`（由 tmux 配置精简，无插件）。
 
 ### Windows 特殊说明
 
 - 安装入口：Git Bash（推荐）或 `scripts/windows/install_with_chezmoi.bat`。
+- **rmux**：Windows Terminal 仍默认进入 Git Bash；需要时在 shell 中手动执行 `rmux new -s <name>` / `rmux a -t <name>`，不修改 WT 默认 profile，也不在 bashrc 中自动 attach。
 - 包管理器优先：winget，回退 MSYS2 pacman。
 - SSH 代理：使用 Git for Windows 自带的 `connect.exe`（路径 `C:/Program Files/Git/mingw64/bin/connect.exe`）。
 - zsh 在 Windows 上为 MSYS2 可选安装。

@@ -65,6 +65,8 @@ script_tool_and_config/
 │   │   ├── audit_configs.sh         # 配置审计脚本
 │   │   ├── verify_installation.sh   # 安装后验证脚本
 │   │   ├── diagnose_chezmoi.sh      # chezmoi 诊断脚本
+│   │   ├── chezmoi_core.sh          # apply/锁/代理/ensure_user_config
+│   │   ├── config_mappings.sh       # 配置路径映射（审计/force_apply 单一来源）
 │   │   ├── ensure_ssh_prereqs.sh    # SSH 前置依赖检查
 │   │   └── helpers.sh               # chezmoi 辅助函数
 │   │
@@ -78,7 +80,7 @@ script_tool_and_config/
 │   │   │   ├── measure_zsh_startup.sh     # Zsh 启动时间测量
 │   │   │   ├── nvim_checkhealth_to_log.sh # Neovim checkhealth 日志
 │   │   │   ├── diagnose_deployment.sh     # 部署诊断
-│   │   │   ├── force_apply_configs.sh     # 强制应用配置
+│   │   │   ├── force_apply_configs.sh     # 强制应用配置（映射见 scripts/chezmoi/config_mappings.sh）
 │   │   │   ├── ensure_chezmoi_unlocked.sh # chezmoi 锁检测
 │   │   │   ├── fix_chezmoi_lock.sh        # chezmoi 锁修复
 │   │   │   ├── remote_init.sh             # 远程项目初始化

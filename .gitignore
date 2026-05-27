@@ -207,6 +207,10 @@ chezmoistate.boltdb
 .chezmoi/**/tmp/
 .chezmoi/**/temp/
 
+# rmux 安装下载/解压缓存（run_once_install-rmux 或本地测试）
+.local/share/rmux-install/
+.local/share/rmux-install-test/
+
 # ============================================
 # 环境变量和敏感信息
 # ============================================
@@ -404,6 +408,10 @@ temp_plan.md
 /tmp_template_test_*/
 /tmp_template_test_file.txt
 
+# Cursor 会话上传附件（本地，非仓库资产）
+.cursor/uploads/
+uploads/
+
 # ============================================
 # 项目本地状态与测试产物
 # ============================================
@@ -430,17 +438,3 @@ tests/*.log
 
 # Literal %SystemDrive% directory (Windows cmd expansion artifact)
 %SystemDrive%/
-
-# ============================================
-# OS / Editor temp files
-# ============================================
-*.bak
-*.backup
-*.tmp
-*.temp
-.*.swp
-.*.swo
-.DS_Store
-Thumbs.db
-__pycache__/
-*.pyc

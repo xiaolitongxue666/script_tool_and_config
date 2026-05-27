@@ -15,6 +15,7 @@
 | [INSTALL_GUIDE.md](INSTALL_GUIDE.md) | 一键安装与首次配置入口（推荐先看）；各平台分步与故障排除 |
 | [OS_SETUP_GUIDE.md](OS_SETUP_GUIDE.md) | Windows / macOS / Linux 分步安装指南与前置条件 |
 | [SOFTWARE_LIST.md](SOFTWARE_LIST.md) | 完整软件清单与 run_once 脚本对应关系（按 OS / WSL 区分） |
+| [RMUX_WINDOWS.md](RMUX_WINDOWS.md) | Windows rmux 安装、手动使用与排错（含 chezmoi 部署陷阱） |
 | [PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md) | 项目结构说明 |
 
 ## Chezmoi 与项目结构

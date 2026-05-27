@@ -8,11 +8,17 @@
 
 | 平台 | 终端 | Shell | 模板文件 |
 |------|------|-------|---------|
-| Windows | Windows Terminal | Git Bash | WT：`.chezmoi/dot_config/windows-terminal/settings.json.tmpl`；Shell：`.chezmoi/dot_bashrc.tmpl` + `run_on_windows/_bash_profile_windows.tmpl` |
+| Windows | Windows Terminal | Git Bash | WT：`.chezmoi/dot_config/windows-terminal/settings.json.tmpl`；Shell：`.chezmoi/dot_bashrc.tmpl` + `run_on_windows/_bash_profile_windows.tmpl`；多路复用：**rmux**（`dot_rmux.conf.tmpl`，手动启动） |
 | macOS | Ghostty | zsh | `.chezmoi/dot_zshrc.tmpl` |
-| Linux + WSL | Alacritty | zsh | `.chezmoi/dot_zshrc.tmpl` / `.chezmoi/dot_bashrc.tmpl` |
+| Linux + WSL | Alacritty | zsh | `.chezmoi/dot_zshrc.tmpl` / `.chezmoi/dot_bashrc.tmpl`；多路复用：**tmux**（`dot_tmux.conf.tmpl` + TPM） |
 
 修改 Shell 配置时，需要根据目标平台选择对应的模板文件。Fish Shell 已不再使用。
+
+### Windows rmux（与 tmux 分工）
+
+- **仅 Windows**：`run_on_windows/run_once_install-rmux.sh.tmpl` 安装 rmux v0.3.1；`dot_rmux.conf.tmpl` → `~/.rmux.conf`（由 tmux 配置精简，**无插件**）。
+- WT 仍默认 Git Bash；**不**改 `settings.json.tmpl` 自动进 rmux；**不**在 bashrc 里 `attach`。
+- 排错与部署陷阱见 [docs/RMUX_WINDOWS.md](docs/RMUX_WINDOWS.md)。
 
 ## claude-mem 项目级记忆自动检测
 
@@ -76,7 +82,7 @@ Layer 2: install-zsh, install-starship, install-nerd-fonts
 Layer 3: install-neovim                             ← 仅安装二进制
 Layer 4: run_once_90-{claude-code}, _92-{deepseek}
          run_once_93-install-cursor                 ← 仅 GUI 环境
-Layer 5: install-tmux, install-oh-my-posh + run_on_{linux,darwin,windows}
+Layer 5: install-tmux + run_on_{linux,darwin}；Windows：`install-rmux`、`install-oh-my-posh`、`install-windows-terminal`
 ```
 
 ### connect.exe 检测顺序（Windows）
@@ -99,6 +105,8 @@ Layer 5: install-tmux, install-oh-my-posh + run_on_{linux,darwin,windows}
 - 日常运维通过 `./scripts/manage_dotfiles.sh` 封装调用，不直接调 `chezmoi`
 - `install.sh` 和 `deploy.sh` 共享 `scripts/chezmoi/chezmoi_core.sh` 中的 chezmoi 核心操作
 - 入口职责：install.sh（首次安装）→ deploy.sh（增量）→ manage_dotfiles.sh（运维）
+- **chezmoi 不读取 `CHEZMOI_SOURCE_DIR` 环境变量**；`sourceDir` 须写在 `~/.config/chezmoi/chezmoi.toml`（`chezmoi_ensure_user_config`）。配置路径映射单一来源：`scripts/chezmoi/config_mappings.sh`
+- Windows：`[interpreters.sh]` 必须指向 Git Bash，否则 run_once 报 `%1 is not a valid Win32 application`
 
 ### 代理策略
 

@@ -256,6 +256,75 @@ chezmoi_source_dir_ok() {
     [[ -d "$source_dir" ]] && [[ -n "$(ls -A "$source_dir" 2>/dev/null)" ]]
 }
 
+# 写入 ~/.config/chezmoi/chezmoi.toml：sourceDir 指向项目 .chezmoi；Windows 下配置 [interpreters.sh]
+# chezmoi 不读取 CHEZMOI_SOURCE_DIR 环境变量，必须通过 config；未配置 [interpreters.sh] 时
+# run_once 会报「%1 is not a valid Win32 application」
+# 参数: project_root（仓库根目录，含 .chezmoi 子目录）
+chezmoi_ensure_user_config() {
+    local project_root="${1:-${CHEZMOI_PROJECT_ROOT:-}}"
+    if [[ -z "$project_root" ]] || [[ ! -d "${project_root}/.chezmoi" ]]; then
+        echo "[WARNING] chezmoi_ensure_user_config: invalid project root, skipped" >&2
+        return 0
+    fi
+
+    local chezmoi_config_dir="${HOME}/.config/chezmoi"
+    local chezmoi_config_file="${chezmoi_config_dir}/chezmoi.toml"
+    local source_dir_abs
+    source_dir_abs="$(cd "${project_root}" && pwd)/.chezmoi"
+
+    if [[ "$(uname -s)" =~ ^(MINGW|MSYS|CYGWIN) ]]; then
+        if command -v cygpath &>/dev/null; then
+            local _win_path
+            _win_path="$(cygpath -w "${source_dir_abs}" 2>/dev/null)"
+            [[ -n "$_win_path" ]] && source_dir_abs="${_win_path//\\//}"
+            unset _win_path
+        elif [[ "${source_dir_abs}" =~ ^/([a-zA-Z])/(.*) ]]; then
+            source_dir_abs="${BASH_REMATCH[1]^^}:/${BASH_REMATCH[2]}"
+        fi
+    fi
+
+    mkdir -p "$chezmoi_config_dir"
+    local need_write=false
+    if [[ ! -f "$chezmoi_config_file" ]]; then
+        need_write=true
+    elif ! grep -qF "sourceDir = \"${source_dir_abs}\"" "$chezmoi_config_file" 2>/dev/null; then
+        if grep -q "^sourceDir = " "$chezmoi_config_file" 2>/dev/null; then
+            sed -i "s|^sourceDir = .*|sourceDir = \"${source_dir_abs}\"|" "$chezmoi_config_file"
+            echo "[INFO] Updated chezmoi sourceDir: ${source_dir_abs}" >&2
+        else
+            need_write=true
+        fi
+    fi
+
+    if [[ "$need_write" == true ]]; then
+        if [[ -f "$chezmoi_config_file" ]]; then
+            printf 'sourceDir = "%s"\n\n' "$source_dir_abs" > "${chezmoi_config_file}.new"
+            cat "$chezmoi_config_file" >> "${chezmoi_config_file}.new"
+            mv "${chezmoi_config_file}.new" "$chezmoi_config_file"
+        else
+            printf 'sourceDir = "%s"\n\n[git]\n    autoCommit = false\n    autoPush = false\n' \
+                "$source_dir_abs" > "$chezmoi_config_file"
+        fi
+        echo "[INFO] Written chezmoi config: ${chezmoi_config_file}" >&2
+    fi
+
+    if [[ "$(uname -s)" =~ ^(MINGW|MSYS|CYGWIN) ]]; then
+        local bash_cmd="bash"
+        if command -v bash &>/dev/null && command -v cygpath &>/dev/null; then
+            local _b
+            _b="$(cygpath -w "$(command -v bash)" 2>/dev/null)"
+            [[ -n "$_b" ]] && bash_cmd="${_b//\\//}"
+            unset _b
+        fi
+        if ! grep -q '\[interpreters\.sh\]' "$chezmoi_config_file" 2>/dev/null; then
+            printf '\n[interpreters.sh]\n    command = "%s"\n' "$bash_cmd" >> "$chezmoi_config_file"
+            echo "[INFO] Added chezmoi [interpreters.sh] command = ${bash_cmd}" >&2
+        fi
+    fi
+
+    export CHEZMOI_SOURCE_DIR="${source_dir_abs}"
+}
+
 # 导出 apply 所需的环境变量（macOS connect 路径等）
 chezmoi_export_apply_env() {
     chezmoi_export_template_env
@@ -312,8 +381,30 @@ chezmoi_run_apply() {
     # 导出环境变量
     chezmoi_export_apply_env
 
-    echo "[INFO] Running: chezmoi apply $extra_args"
-    if chezmoi apply ${extra_args}; then
+    local apply_args=()
+    # shellcheck disable=SC2206
+    read -r -a apply_args <<< "$extra_args"
+
+    local user_config="${HOME}/.config/chezmoi/chezmoi.toml"
+    if [[ -n "${CHEZMOI_PROJECT_ROOT:-}" ]]; then
+        chezmoi_ensure_user_config "${CHEZMOI_PROJECT_ROOT}"
+    fi
+
+    # 优先使用用户 config（含 sourceDir 与 Windows [interpreters.sh]）。
+    # 勿在已有 sourceDir 时再传 --source 为 Git Bash 的 /d/... 路径，否则 chezmoi.exe 可能
+    # 直接 fork/exec .sh 并报「%1 is not a valid Win32 application」。
+    if [[ -f "$user_config" ]]; then
+        apply_args=(--config "$user_config" "${apply_args[@]}")
+    else
+        local source_dir
+        source_dir="$(chezmoi_get_source_dir)"
+        if [[ -d "$source_dir" ]]; then
+            apply_args=(--source "$source_dir" "${apply_args[@]}")
+        fi
+    fi
+
+    echo "[INFO] Running: chezmoi apply ${apply_args[*]}"
+    if chezmoi apply "${apply_args[@]}"; then
         echo "[SUCCESS] Config applied successfully"
         return 0
     else

@@ -252,65 +252,12 @@ else
     log_info "chezmoi 源状态目录已存在: $CHEZMOI_DIR"
 fi
 
-# 3. 确保 chezmoi 使用项目源：写入 ~/.config/chezmoi/chezmoi.toml 的 sourceDir
-#    （chezmoi 不尊重 CHEZMOI_SOURCE_DIR 环境变量，必须通过 config 指定）
-#    run_once 脚本内通过 env http_proxy 使用代理，与 install.sh 导出的环境变量一致
-#    Windows 下写入 sourceDir（正斜杠路径）与 [interpreters.sh]（bash），以便 apply 时 run_once_*.sh 由 bash 执行
-CHEZMOI_CONFIG_DIR="$HOME/.config/chezmoi"
-CHEZMOI_CONFIG_FILE="${CHEZMOI_CONFIG_DIR}/chezmoi.toml"
-SOURCE_DIR_ABS="$(cd "$SCRIPT_DIR" && pwd)/.chezmoi"
-if [ "$PLATFORM" = "windows" ]; then
-    # MINGW/MSYS/Git Bash 中 pwd 为 /e/Code/...，写入 config 后 chezmoi.exe 会解析成 E:/e/Code/... 导致路径错误
-    # 转为 Windows 风格路径；TOML 中反斜杠为转义符会破坏路径，故统一用正斜杠（Windows API 接受）
-    if command -v cygpath &>/dev/null; then
-        _win_path="$(cygpath -w "$(cd "$SCRIPT_DIR" && pwd)/.chezmoi")"
-        SOURCE_DIR_ABS="${_win_path//\\//}"
-    else
-        _unix_path="$(cd "$SCRIPT_DIR" && pwd)/.chezmoi"
-        if [[ "$_unix_path" =~ ^/([a-zA-Z])/(.*) ]]; then
-            SOURCE_DIR_ABS="${BASH_REMATCH[1]^^}:/${BASH_REMATCH[2]}"
-        fi
-        unset _unix_path
-    fi
-    unset _win_path 2>/dev/null || true
-fi
-mkdir -p "$CHEZMOI_CONFIG_DIR"
-NEED_WRITE=false
-if [ ! -f "$CHEZMOI_CONFIG_FILE" ]; then
-    NEED_WRITE=true
-elif ! grep -qF "sourceDir = \"${SOURCE_DIR_ABS}\"" "$CHEZMOI_CONFIG_FILE" 2>/dev/null; then
-    if grep -q "^sourceDir = " "$CHEZMOI_CONFIG_FILE" 2>/dev/null; then
-        sed -i "s|^sourceDir = .*|sourceDir = \"${SOURCE_DIR_ABS}\"|" "$CHEZMOI_CONFIG_FILE"
-        log_info "已更新 chezmoi 源目录配置: $SOURCE_DIR_ABS"
-    else
-        NEED_WRITE=true
-    fi
-fi
-if [ "$NEED_WRITE" = true ]; then
-    if [ -f "$CHEZMOI_CONFIG_FILE" ]; then
-        printf 'sourceDir = "%s"\n\n' "$SOURCE_DIR_ABS" > "${CHEZMOI_CONFIG_FILE}.new"
-        cat "$CHEZMOI_CONFIG_FILE" >> "${CHEZMOI_CONFIG_FILE}.new"
-        mv "${CHEZMOI_CONFIG_FILE}.new" "$CHEZMOI_CONFIG_FILE"
-        log_info "已添加 chezmoi 源目录配置: $SOURCE_DIR_ABS"
-    else
-        printf 'sourceDir = "%s"\n\n[git]\n    autoCommit = false\n    autoPush = false\n' "$SOURCE_DIR_ABS" > "$CHEZMOI_CONFIG_FILE"
-        log_info "Written chezmoi config: $CHEZMOI_CONFIG_FILE"
-    fi
-fi
-# Windows 下 .sh 需通过 bash 执行，否则会报「不是有效的 Win32 应用程序」
-if [ "$PLATFORM" = "windows" ]; then
-    BASH_CMD="bash"
-    if command -v bash &>/dev/null; then
-        if command -v cygpath &>/dev/null; then
-            _b="$(cygpath -w "$(command -v bash)" 2>/dev/null)"
-            [ -n "$_b" ] && BASH_CMD="${_b//\\//}"  # 正斜杠避免 TOML 转义
-            unset _b
-        fi
-    fi
-    if ! grep -q "\[interpreters\.sh\]" "$CHEZMOI_CONFIG_FILE" 2>/dev/null; then
-        printf '\n[interpreters.sh]\n    command = "%s"\n' "$BASH_CMD" >> "$CHEZMOI_CONFIG_FILE"
-        log_info "Added chezmoi script interpreter: [interpreters.sh] command = $BASH_CMD"
-    fi
+# 3. 确保 chezmoi 用户配置（sourceDir + Windows [interpreters.sh]）— 逻辑见 chezmoi_core.sh
+export CHEZMOI_PROJECT_ROOT="$(cd "$SCRIPT_DIR" && pwd)"
+if type chezmoi_ensure_user_config &>/dev/null; then
+    chezmoi_ensure_user_config "$CHEZMOI_PROJECT_ROOT"
+else
+    log_warning "chezmoi_ensure_user_config not available; ensure ~/.config/chezmoi/chezmoi.toml sourceDir points to project .chezmoi"
 fi
 
 log_success "chezmoi environment initialized"

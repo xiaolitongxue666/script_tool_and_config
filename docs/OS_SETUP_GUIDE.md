@@ -169,8 +169,9 @@ chezmoi 会将以下配置文件应用到系统：
 - `run_on_linux/dot_config/alacritty/alacritty.toml.tmpl` → `~/.config/alacritty/alacritty.toml`（仅 Linux）
 - `run_on_darwin/dot_config/ghostty/config.tmpl` → `~/.config/ghostty/config`（仅 macOS）
 - `dot_config/starship/starship.toml` → `~/.config/starship/starship.toml`
-- `dot_tmux.conf` → `~/.tmux.conf`（如果使用 Tmux）
-- `dot_zshrc` → `~/.zshrc`（如果使用 Zsh）
+- `dot_tmux.conf.tmpl` → `~/.tmux.conf`（Linux/macOS，Tmux + TPM）
+- `dot_rmux.conf.tmpl` → `~/.rmux.conf`（**仅 Windows**，手动启动 rmux，见 [RMUX_WINDOWS.md](RMUX_WINDOWS.md)）
+- `dot_zshrc.tmpl` → `~/.zshrc`（如果使用 Zsh）
 
 #### 第五步：纳入 chezmoi 管理
 

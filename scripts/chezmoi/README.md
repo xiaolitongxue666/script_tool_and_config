@@ -107,10 +107,10 @@ install_package "zsh"
 # 1. 安装 chezmoi
 bash scripts/chezmoi/install_chezmoi.sh
 
-# 2. 应用配置（会自动安装软件）
-export CHEZMOI_SOURCE_DIR="$(pwd)/.chezmoi"
-chezmoi apply -v
-# 此时会执行 run_once_install-*.sh，使用 common_install.sh 的函数
+# 2. 应用配置（会自动安装软件；推荐项目入口，会写 chezmoi.toml sourceDir）
+./scripts/manage_dotfiles.sh apply
+# 或：./install.sh / ./deploy.sh
+# 勿仅 export CHEZMOI_SOURCE_DIR 后 chezmoi apply（CLI 不读该变量）
 ```
 
 ### 场景 2：只安装 chezmoi，不安装其他软件

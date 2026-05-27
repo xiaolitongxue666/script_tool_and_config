@@ -795,18 +795,30 @@ chezmoi apply -v
 
 ### 常见问题
 
-#### 1. chezmoi 找不到源状态目录
+#### 1. chezmoi 找不到源状态目录 / 新模板未应用
 
-**问题**：运行 `chezmoi apply` 时提示找不到源状态目录。
+**问题**：运行 `chezmoi apply` 时提示找不到源状态目录，或 `deploy.sh` 后新文件（如 `~/.rmux.conf`）未生成。
+
+**原因**：chezmoi CLI **不读取** `CHEZMOI_SOURCE_DIR` 环境变量；须以 `~/.config/chezmoi/chezmoi.toml` 的 `sourceDir` 指向仓库 `.chezmoi`。
 
 **解决**：
 ```bash
-# 设置源状态目录环境变量
-export CHEZMOI_SOURCE_DIR="$(pwd)/.chezmoi"
-
-# 或使用项目管理脚本
+# 推荐：项目脚本（会调用 chezmoi_ensure_user_config）
 ./scripts/manage_dotfiles.sh apply
+./deploy.sh
+
+# 或首次安装写入用户配置
+./install.sh
+
+# 临时显式指定源（调试用）
+chezmoi --source="$(pwd)/.chezmoi" apply -v --force
 ```
+
+配置路径映射见 `scripts/chezmoi/config_mappings.sh`。Windows rmux 专项见 [RMUX_WINDOWS.md](RMUX_WINDOWS.md)。
+
+#### 1b. Windows run_once 报「%1 is not a valid Win32 application」
+
+**解决**：确保 `~/.config/chezmoi/chezmoi.toml` 含 `[interpreters.sh]` 且 `command` 为 Git Bash（由 `install.sh` / `chezmoi_ensure_user_config` 写入）。勿删除该段后裸跑 `chezmoi apply`。
 
 #### 2. 配置文件冲突
 

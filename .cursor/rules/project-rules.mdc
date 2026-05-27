@@ -13,8 +13,15 @@ globs:
 - **Windows Terminal 层** → `dot_config/windows-terminal/settings.json.tmpl`（窗口/profile/字体，不含 shell 逻辑）
 - **Windows Git Bash 层** → `dot_bashrc.tmpl`（windows 分支）+ `run_on_windows/_bash_profile_windows.tmpl`（登录 PATH/代理）
 - **Linux bash（备选）** → `dot_bashrc.tmpl`（linux 分支）
+- **Windows 多路复用** → rmux（`dot_rmux.conf.tmpl`，手动 `rmux new`/`rmux a`）；Linux/macOS → tmux + TPM
 
-修改配置时 WT 与 Git Bash 分开维护，不要混写提示符或 PATH 到 WT settings。
+修改配置时 WT 与 Git Bash 分开维护，不要混写提示符或 PATH 到 WT settings。rmux 详见 `docs/RMUX_WINDOWS.md` 与 `.cursor/rules/rmux-windows.mdc`。
+
+## chezmoi 部署（Agent）
+
+- 应用配置用 `./scripts/manage_dotfiles.sh apply` 或 `./deploy.sh`，勿仅 `export CHEZMOI_SOURCE_DIR` 后 `chezmoi apply`
+- `scripts/chezmoi/config_mappings.sh` 为审计/force_apply 映射唯一来源
+- `chezmoi_ensure_user_config`（`chezmoi_core.sh`）维护 `sourceDir` 与 Windows `[interpreters.sh]`
 
 ## claude-mem 自动检测
 

@@ -1,0 +1,27 @@
+---
+description: Windows rmux 与 chezmoi 部署要点（Agent 必读）
+globs:
+  - ".chezmoi/dot_rmux.conf.tmpl"
+  - ".chezmoi/run_on_windows/run_once_install-rmux.sh.tmpl"
+  - "docs/RMUX_WINDOWS.md"
+---
+
+# Windows rmux 与 chezmoi
+
+## rmux（仅 Windows）
+
+- Linux/macOS 用 **tmux**（`dot_tmux.conf.tmpl` + TPM）；Windows 用 **rmux**（`dot_rmux.conf.tmpl`），**不要**在 Windows 上维护 tmux 插件配置。
+- WT 默认仍为 Git Bash；**禁止**在 `settings.json.tmpl` 加 rmux 自动启动 profile，**禁止**在 bashrc/bash_profile 里自动 `rmux attach`。
+- 用户手动：`rmux new -s <name>` / `rmux a -t <name>`。
+- 安装：`run_on_windows/run_once_install-rmux.sh.tmpl`（Release zip → `~/.local/bin`，失败则 `cargo install rmux --locked`）。
+
+## chezmoi 部署（易错）
+
+- **必须**通过 `./scripts/manage_dotfiles.sh apply`、`./deploy.sh` 或 `./install.sh`；不要假设 `CHEZMOI_SOURCE_DIR` 对 `chezmoi` CLI 生效。
+- `sourceDir` 写在 `~/.config/chezmoi/chezmoi.toml`，由 `chezmoi_ensure_user_config`（`scripts/chezmoi/chezmoi_core.sh`）维护。
+- Windows `run_once` 需要 `[interpreters.sh]` 指向 Git Bash，否则 `%1 is not a valid Win32 application`。
+- 配置路径映射单一来源：`scripts/chezmoi/config_mappings.sh`（审计、force_apply、诊断共用）。
+
+## 排错文档
+
+详见 [docs/RMUX_WINDOWS.md](docs/RMUX_WINDOWS.md)。

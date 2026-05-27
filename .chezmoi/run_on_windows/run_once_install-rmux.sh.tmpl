@@ -1,0 +1,150 @@
+{{- if eq .chezmoi.os "windows" -}}
+#!/usr/bin/env bash
+
+# ============================================
+# rmux 安装脚本（chezmoi run_once_）
+# 仅 Windows；预编译包安装到 ~/.local/bin，失败时回退 cargo install
+# 参考: https://github.com/Helvesec/rmux/releases/tag/v0.3.1
+# 排错: docs/RMUX_WINDOWS.md
+# ============================================
+
+set -euo pipefail
+
+readonly RMUX_VERSION="0.3.1"
+readonly RMUX_RELEASE_TAG="v${RMUX_VERSION}"
+readonly RMUX_WINDOWS_ZIP="rmux-${RMUX_RELEASE_TAG}-x86_64-pc-windows-msvc.zip"
+readonly RMUX_DOWNLOAD_URL="https://github.com/Helvesec/rmux/releases/download/${RMUX_RELEASE_TAG}/${RMUX_WINDOWS_ZIP}"
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="${CHEZMOI_PROJECT_ROOT:-$(cd "${SCRIPT_DIR}/../../.." && pwd 2>/dev/null || echo "$HOME")}"
+COMMON_INSTALL="${PROJECT_ROOT}/scripts/chezmoi/common_install.sh"
+
+if [[ ! -f "$COMMON_INSTALL" ]]; then
+    COMMON_INSTALL="$HOME/.local/share/chezmoi/scripts/chezmoi/common_install.sh"
+fi
+
+if [[ -f "$COMMON_INSTALL" ]]; then
+    # shellcheck disable=SC1090
+    source "$COMMON_INSTALL"
+else
+    function log_info() { echo "[INFO] $*" >&2; }
+    function log_success() { echo "[SUCCESS] $*" >&2; }
+    function log_warning() { echo "[WARNING] $*" >&2; }
+    function log_error() { echo "[ERROR] $*" >&2; }
+    function setup_proxy() { :; }
+fi
+
+if [[ ! "$(uname -s)" =~ ^(MINGW|MSYS|CYGWIN) ]]; then
+    log_error "This script supports Windows (Git Bash) only"
+    exit 1
+fi
+
+setup_proxy "${PROXY:-{{ env "http_proxy" | default "http://127.0.0.1:7890" }}}"
+
+_rmux_version_ok() {
+    local ver_line
+    ver_line="$(rmux -V 2>/dev/null | head -n1 || true)"
+    [[ "$ver_line" == *"${RMUX_VERSION}"* ]] || [[ "$ver_line" == *"0.3."* ]]
+}
+
+if command -v rmux &>/dev/null && _rmux_version_ok; then
+    log_info "rmux already installed: $(rmux -V 2>/dev/null | head -n1)"
+    exit 0
+fi
+
+BIN_DIR="${HOME}/.local/bin"
+INSTALL_DIR="${HOME}/.local/share/rmux-install"
+mkdir -p "$BIN_DIR" "$INSTALL_DIR"
+
+_install_rmux_from_release() {
+    local zip_path="${INSTALL_DIR}/${RMUX_WINDOWS_ZIP}"
+    local extract_dir="${INSTALL_DIR}/extract"
+
+    log_info "Downloading rmux ${RMUX_RELEASE_TAG} for Windows..."
+    rm -rf "$extract_dir"
+    mkdir -p "$extract_dir"
+
+    if command -v curl &>/dev/null; then
+        curl -fsSL -o "$zip_path" "$RMUX_DOWNLOAD_URL" || return 1
+    elif command -v wget &>/dev/null; then
+        wget -q -O "$zip_path" "$RMUX_DOWNLOAD_URL" || return 1
+    else
+        log_error "curl or wget is required to download rmux"
+        return 1
+    fi
+
+    if command -v unzip &>/dev/null; then
+        unzip -o -q "$zip_path" -d "$extract_dir" || return 1
+    elif command -v powershell.exe &>/dev/null; then
+        local win_zip win_extract
+        win_zip="$(cygpath -w "$zip_path" 2>/dev/null || echo "$zip_path")"
+        win_extract="$(cygpath -w "$extract_dir" 2>/dev/null || echo "$extract_dir")"
+        powershell.exe -NoProfile -Command "Expand-Archive -Path '$win_zip' -DestinationPath '$win_extract' -Force" || return 1
+    else
+        log_error "unzip or powershell.exe is required to extract rmux"
+        return 1
+    fi
+
+    local rmux_exe
+    rmux_exe="$(find "$extract_dir" -name 'rmux.exe' -type f 2>/dev/null | head -n1)"
+    if [[ -z "$rmux_exe" ]]; then
+        log_error "rmux.exe not found in release archive"
+        return 1
+    fi
+
+    cp -f "$rmux_exe" "${BIN_DIR}/rmux.exe"
+    chmod +x "${BIN_DIR}/rmux.exe" 2>/dev/null || true
+    export PATH="${BIN_DIR}:${PATH}"
+    rm -f "$zip_path"
+    return 0
+}
+
+_install_rmux_via_cargo() {
+    log_info "Installing rmux via cargo (fallback)..."
+
+    if ! command -v cargo &>/dev/null; then
+        log_info "cargo not found. Installing rustup first..."
+        if command -v rustup &>/dev/null; then
+            rustup update 2>/dev/null || true
+        else
+            curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+        fi
+        export PATH="${HOME}/.cargo/bin:${PATH}"
+    fi
+
+    if ! command -v cargo &>/dev/null; then
+        log_warning "cargo still not available after rustup install"
+        return 1
+    fi
+
+    cargo install rmux --locked --version "${RMUX_VERSION}" 2>/dev/null \
+        || cargo install rmux --locked
+}
+
+log_info "Installing rmux ${RMUX_VERSION}..."
+
+if _install_rmux_from_release; then
+  :
+elif _install_rmux_via_cargo; then
+  :
+else
+    log_warning "rmux install failed (release download and cargo fallback)"
+    log_info "Retry manually: curl -fsSL ${RMUX_DOWNLOAD_URL} -o rmux.zip && unzip rmux.zip"
+    log_info "Or: cargo install rmux --locked"
+    exit 0
+fi
+
+export PATH="${BIN_DIR}:${HOME}/.cargo/bin:${PATH}"
+
+if command -v rmux &>/dev/null && _rmux_version_ok; then
+    log_success "rmux installed: $(rmux -V 2>/dev/null | head -n1)"
+    log_info "Binary: $(command -v rmux 2>/dev/null || echo "${BIN_DIR}/rmux.exe")"
+    log_info "Start manually: rmux new -s mywork"
+else
+    log_warning "rmux may not be on PATH; ensure ${BIN_DIR} is in PATH"
+    log_info "Start manually after re-login: rmux new -s mywork"
+fi
+
+exit 0
+{{ "\n" -}}
+{{- end -}}

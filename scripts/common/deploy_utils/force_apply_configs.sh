@@ -10,6 +10,7 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../../.." && pwd)"
 COMMON_SH="${PROJECT_ROOT}/scripts/common.sh"
+CHEZMOI_CORE_SH="${PROJECT_ROOT}/scripts/chezmoi/chezmoi_core.sh"
 
 # 加载通用函数库
 if [ -f "$COMMON_SH" ]; then
@@ -19,6 +20,11 @@ else
     function log_success() { echo "[SUCCESS] $*"; }
     function log_warning() { echo "[WARNING] $*"; }
     function log_error() { echo "[ERROR] $*" >&2; }
+fi
+
+if [[ -f "$CHEZMOI_CORE_SH" ]]; then
+    # shellcheck disable=SC1090
+    source "$CHEZMOI_CORE_SH"
 fi
 
 start_script "强制应用配置"
@@ -41,32 +47,34 @@ if [ ! -d "$CHEZMOI_DIR" ]; then
 fi
 
 export CHEZMOI_SOURCE_DIR="$CHEZMOI_DIR"
+export CHEZMOI_PROJECT_ROOT="$PROJECT_ROOT"
 log_info "源状态目录: $CHEZMOI_SOURCE_DIR"
 
-# ============================================
-# 定义文件映射（源文件 -> 目标文件）
-# ============================================
-declare -A FILE_MAPPINGS=(
-    # 通用配置文件
-    ["$CHEZMOI_DIR/dot_tmux.conf"]="$HOME/.tmux.conf"
-    ["$CHEZMOI_DIR/dot_zshrc.tmpl"]="$HOME/.zshrc"
-    ["$CHEZMOI_DIR/dot_bashrc.tmpl"]="$HOME/.bashrc"
-    ["$CHEZMOI_DIR/dot_bash_profile.tmpl"]="$HOME/.bash_profile"
-    ["$CHEZMOI_DIR/dot_zprofile"]="$HOME/.zprofile"
+if type chezmoi_ensure_user_config &>/dev/null; then
+    chezmoi_ensure_user_config "$PROJECT_ROOT"
+fi
 
-    # 配置目录
-    ["$CHEZMOI_DIR/dot_config/starship/starship.toml.tmpl"]="$HOME/.config/starship/starship.toml"
-)
-
-# 平台特定配置
-case "$(uname -s)" in
-    Linux)
-        FILE_MAPPINGS["$CHEZMOI_DIR/run_on_linux/dot_config/alacritty/alacritty.toml.tmpl"]="$HOME/.config/alacritty/alacritty.toml"
-        ;;
-    Darwin)
-        FILE_MAPPINGS["$CHEZMOI_DIR/run_on_darwin/dot_config/ghostty/config.tmpl"]="$HOME/.config/ghostty/config"
-        ;;
-esac
+# ============================================
+# 定义文件映射（源文件 -> 目标文件，来自 config_mappings.sh）
+# ============================================
+declare -A FILE_MAPPINGS
+declare -A CONFIG_MAPPINGS
+CONFIG_MAPPINGS_SH="${PROJECT_ROOT}/scripts/chezmoi/config_mappings.sh"
+if [[ -f "$CONFIG_MAPPINGS_SH" ]]; then
+    # shellcheck disable=SC1090
+    source "$CONFIG_MAPPINGS_SH"
+    _platform="$(chezmoi_detect_platform_name)"
+    chezmoi_fill_config_mappings CONFIG_MAPPINGS "$_platform"
+    for _target in "${!CONFIG_MAPPINGS[@]}"; do
+        _rel="${CONFIG_MAPPINGS[$_target]}"
+        _source="${PROJECT_ROOT}/${_rel#./}"
+        FILE_MAPPINGS["$_source"]="${_target/#\~/$HOME}"
+    done
+    unset _platform _target _rel _source
+else
+    log_warning "config_mappings.sh not found, using legacy minimal map"
+    FILE_MAPPINGS["$CHEZMOI_DIR/dot_bashrc.tmpl"]="$HOME/.bashrc"
+fi
 
 # ============================================
 # 处理文件映射
@@ -201,8 +209,14 @@ log_info "━━━━━━━━━━━━━━━━━━━━━━━�
 log_info "使用 chezmoi apply 应用所有配置"
 log_info "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
-log_info "执行: chezmoi apply -v"
-APPLY_OUTPUT=$(chezmoi apply -v 2>&1)
+USER_CHEZMOI_CONFIG="${HOME}/.config/chezmoi/chezmoi.toml"
+if [[ -f "$USER_CHEZMOI_CONFIG" ]]; then
+    log_info "执行: chezmoi apply -v --config ${USER_CHEZMOI_CONFIG}"
+    APPLY_OUTPUT=$(chezmoi apply -v --config "$USER_CHEZMOI_CONFIG" 2>&1)
+else
+    log_info "执行: chezmoi apply -v --source ${CHEZMOI_SOURCE_DIR}"
+    APPLY_OUTPUT=$(chezmoi apply -v --source "$CHEZMOI_SOURCE_DIR" 2>&1)
+fi
 APPLY_EXIT_CODE=$?
 
 # 显示输出
@@ -229,10 +243,14 @@ log_info "最终验证"
 log_info "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
 check_files=(
-    "$HOME/.zshrc"
-    "$HOME/.tmux.conf"
+    "$HOME/.bashrc"
     "$HOME/.config/starship/starship.toml"
 )
+if [[ "$(uname -s)" =~ ^(MINGW|MSYS|CYGWIN) ]]; then
+    check_files+=("$HOME/.rmux.conf")
+else
+    check_files+=("$HOME/.zshrc" "$HOME/.tmux.conf")
+fi
 
 all_exist=true
 for file in "${check_files[@]}"; do
