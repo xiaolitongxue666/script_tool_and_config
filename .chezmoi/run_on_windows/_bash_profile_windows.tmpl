@@ -15,6 +15,8 @@ fi
 # ============================================
 for _d in \
     "$HOME/.local/bin" \
+    "$HOME/.local/share/fnm" \
+    "$HOME/.cargo/bin" \
     "$HOME/AppData/Roaming/npm" \
     "$HOME/AppData/Local/Microsoft/WinGet/Links" \
     "/c/Program Files/starship/bin" \
@@ -22,7 +24,24 @@ for _d in \
     "$HOME/AppData/Local/Programs/oh-my-posh"; do
     [ -d "$_d" ] && [[ ":$PATH:" != *":$_d:"* ]] && export PATH="$PATH:$_d"
 done
-unset _d
+for _fnm_pkg in "$HOME/AppData/Local/Microsoft/WinGet/Packages"/Schniz.fnm_*; do
+    [ -d "$_fnm_pkg" ] && [[ ":$PATH:" != *":$_fnm_pkg:"* ]] && export PATH="$PATH:$_fnm_pkg"
+done
+for _uv_py in "$HOME"/AppData/Roaming/uv/python/cpython-*-windows-x86_64-none; do
+    [ -d "$_uv_py" ] && [[ ":$PATH:" != *":$_uv_py:"* ]] && export PATH="$_uv_py:$PATH"
+done
+unset _d _fnm_pkg _uv_py
+
+# fnm (Node) + uv preference — login shell
+export UV_PYTHON_PREFERENCE="${UV_PYTHON_PREFERENCE:-only-managed}"
+if command -v fnm &>/dev/null; then
+    eval "$(fnm env --shell=bash --use-on-cd 2>/dev/null)" || eval "$(fnm env --shell=bash 2>/dev/null)" || true
+    if [ -f "$HOME/.node-version" ]; then
+        _node_ver="$(tr -d '\n\r' <"$HOME/.node-version" | sed 's/^v//')"
+        [ -n "$_node_ver" ] && fnm use "$_node_ver" 2>/dev/null || true
+        unset _node_ver
+    fi
+fi
 
 # ============================================
 # 加载 .bashrc（提示符 Starship/OMP 在 bashrc 中初始化）

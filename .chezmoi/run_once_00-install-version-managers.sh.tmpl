@@ -161,6 +161,48 @@ else
     echo "[INFO] 跳过 rustup 安装（设置 INSTALL_RUSTUP=1 以启用）"
 fi
 
+# Windows：bootstrap fnm Node + uv Python（非致命）
+if [[ "${PLATFORM:-}" == "windows" ]]; then
+    echo "[INFO] [00] Windows: bootstrapping Node (fnm) and Python (uv)..."
+    export PATH="$HOME/.local/bin:$HOME/.local/share/fnm:$HOME/.cargo/bin:$PATH"
+    for _fnm_pkg in "$HOME/AppData/Local/Microsoft/WinGet/Packages"/Schniz.fnm_*; do
+        [ -d "$_fnm_pkg" ] && export PATH="$PATH:$_fnm_pkg"
+    done
+
+    if command -v fnm &>/dev/null; then
+        eval "$(fnm env --shell bash 2>/dev/null)" || true
+        if ! command -v node &>/dev/null; then
+            echo "[INFO] Installing Node.js LTS via fnm..."
+            if fnm install 'lts/*' 2>&1; then
+                fnm use 'lts/*' 2>/dev/null || fnm use default 2>/dev/null || true
+                eval "$(fnm env --shell bash 2>/dev/null)" || true
+            else
+                echo "[WARNING] fnm install lts/* failed; Layer 4 npm tools may fail until Node is installed"
+            fi
+        fi
+        command -v node &>/dev/null && echo "[SUCCESS] node: $(node -v)" || echo "[WARNING] node not in PATH after fnm bootstrap"
+    else
+        echo "[WARNING] fnm not in PATH after install; re-login or check WinGet fnm package"
+    fi
+
+    export PATH="$HOME/.local/bin:$PATH"
+    _uv_default_python="${UV_DEFAULT_PYTHON:-3.12}"
+    if command -v uv &>/dev/null; then
+        if ! uv python find "${_uv_default_python}" &>/dev/null 2>&1; then
+            echo "[INFO] Installing Python ${_uv_default_python} via uv..."
+            uv python install "${_uv_default_python}" 2>&1 || echo "[WARNING] uv python install ${_uv_default_python} failed"
+        fi
+        if uv run python --version &>/dev/null 2>&1; then
+            echo "[SUCCESS] python (uv): $(uv run python --version 2>&1)"
+        else
+            echo "[WARNING] uv managed python not verified; re-login after uv python install"
+        fi
+    else
+        echo "[WARNING] uv not in PATH after install"
+    fi
+    unset _fnm_pkg _uv_default_python
+fi
+
 # 验证：输出当前版本（非强制，仅供日志参考）
 echo "[INFO] 验证版本管理器..."
 command -v uv &>/dev/null && echo "[SUCCESS] uv 可用: $(uv --version)" || echo "[WARNING] uv 未在 PATH 中找到（如需 uv 请重新登录或手动加入 PATH）"

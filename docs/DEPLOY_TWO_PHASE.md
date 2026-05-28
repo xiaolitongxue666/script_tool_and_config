@@ -24,3 +24,17 @@ bash scripts/install-tools.sh
 ```
 
 详见 agent-config 仓库 [`docs/DEPLOY_TWO_PHASE.md`](../../AI/agent-config/docs/DEPLOY_TWO_PHASE.md)。
+
+## Windows Git Bash 验收
+
+```bash
+fnm --version && node -v && uv --version && python --version
+command -v codewhale && codewhale --version
+```
+
+- 命令为 **`codewhale`**（小写），非 `CodeWhale`
+- 新开 Git Bash 即可用 fnm/uv，无需手敲 `eval "$(fnm env)"`
+
+## 多 Windows 用户（Administrator + xiaoli 等）
+
+每个账户在**该用户**的 Git Bash 中各执行一遍 Phase 1 与 Phase 2（`AppData` 不共享）。

@@ -28,7 +28,7 @@ run_on_windows/*                      ← Layer 5（平台特有）
 
 | 层级 | 脚本 | 安装项 | 平台 |
 |------|------|--------|------|
-| Layer 0 | `run_once_00-install-version-managers` | fnm (Fast Node Manager), uv (Python 包管理器), rustup（可选） | all |
+| Layer 0 | `run_once_00-install-version-managers` | **fnm**（Node/npm）、**uv**（Python）；Windows 另 bootstrap `fnm install lts/*` + `uv python install`（默认 3.12，`UV_DEFAULT_PYTHON` 可覆盖）；rustup（可选） | all |
 | Layer 1 | `run_once_install-git` | git, connect-proxy（Linux apt 场景） | all |
 | Layer 1 | `run_once_install-common-tools` | bat, eza, fd, ripgrep, fzf, lazygit, git-delta, gh, trash-cli, btop, fastfetch | all |
 | Layer 2 | `run_once_install-zsh` | zsh, Oh My Zsh, zsh 插件（autosuggestions/history-substring-search/syntax-highlighting/completions） | all（Windows 可选） |
@@ -98,11 +98,12 @@ run_on_windows/*                      ← Layer 5（平台特有）
 | Layer 5 | `run_once_install-oh-my-posh` | Oh My Posh 提示符 | windows |
 | Layer 5 | `run_on_windows/run_onchange_sync_windows_terminal_config` | Windows Terminal 配置同步到实际路径 | windows（内容变化触发） |
 
-配置模板（非 run_once）：`dot_rmux.conf.tmpl` → `~/.rmux.conf`（由 tmux 配置精简，无插件）。
+配置模板（非 run_once）：`dot_config/windows-terminal/settings.json.tmpl` → `~/.config/windows-terminal/settings.json`（Git Bash 默认、PowerShell/CMD/WSL2、`keybindings`、`newTabMenu`、Catppuccin Mocha）；`dot_rmux.conf.tmpl` → `~/.rmux.conf`。
 
 ### Windows 特殊说明
 
 - 安装入口：Git Bash（推荐）或 `scripts/windows/install_with_chezmoi.bat`。
+- **Node / Python**：Git Bash 内 `node`/`npm` 由 **fnm** 提供，`python`/`uv` 由 **uv** 管理；`_bash_profile_windows` 与 `dot_bashrc` Windows 分支自动 `eval "$(fnm env)"` 并加入 `Roaming/uv/python` PATH。
 - **rmux**：Windows Terminal 仍默认进入 Git Bash；需要时在 shell 中手动执行 `rmux new -s <name>` / `rmux a -t <name>`，不修改 WT 默认 profile，也不在 bashrc 中自动 attach。
 - 包管理器优先：winget，回退 MSYS2 pacman。
 - SSH 代理：使用 Git for Windows 自带的 `connect.exe`（路径 `C:/Program Files/Git/mingw64/bin/connect.exe`）。

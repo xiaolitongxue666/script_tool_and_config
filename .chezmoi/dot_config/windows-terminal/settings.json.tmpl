@@ -2,101 +2,112 @@
 {
     "$help": "https://aka.ms/terminal-documentation",
     "$schema": "https://aka.ms/terminal-profiles-schema",
-    "defaultProfile": "{b453ae62-4e3d-5e58-b989-0a996ec6e90f}",
-    "copyOnSelect": true,
-    "initialRows": 35,
-    "initialCols": 120,
-    "useAcrylic": true,
-    "opacity": 85,
+    "actions": [],
     "alwaysShowTabs": true,
-    "showTabsInTitlebar": true,
-    "themes": [],
-    "profiles":
-    {
-        "defaults":
+    "copyOnSelect": true,
+    "defaultProfile": "{b453ae62-4e3d-5e58-b989-0a996ec6e90f}",
+    "initialCols": 120,
+    "initialRows": 35,
+    "keybindings": [
         {
+            "id": "Terminal.CopyToClipboard",
+            "keys": "ctrl+c"
+        },
+        {
+            "id": "Terminal.FindText",
+            "keys": "ctrl+shift+f"
+        },
+        {
+            "id": "Terminal.PasteFromClipboard",
+            "keys": "ctrl+v"
+        },
+        {
+            "id": "Terminal.DuplicatePaneAuto",
+            "keys": "alt+shift+d"
+        }
+    ],
+    "newTabMenu": [
+        {
+            "type": "remainingProfiles"
+        }
+    ],
+    "profiles": {
+        "defaults": {
+            "bellStyle": "none",
             "colorScheme": "Catppuccin Mocha",
-            "font":
-            {
+            "cursorShape": "bar",
+            "font": {
                 "face": "CaskaydiaCove NFM",
                 "size": 14,
                 "weight": "normal"
             },
-            "cursorShape": "bar",
-            "padding": "5, 5, 5, 5",
             "intenseTextStyle": "bold",
-            "useAcrylic": true,
             "opacity": 85,
-            "bellStyle": "none"
+            "padding": "5, 5, 5, 5",
+            "useAcrylic": true
         },
-        "list":
-        [
+        "list": [
             {
-                "guid": "{b453ae62-4e3d-5e58-b989-0a996ec6e90f}",
-                "name": "Git Bash",
+                "closeOnExit": "graceful",
                 "commandline": "\"{{ .windows_git_bash_path | replace "/" "\\\\" }}\" --login",
-                "icon": "{{ .windows_git_icon_path | replace "/" "\\\\" }}",
-                "startingDirectory": "%USERPROFILE%",
+                "guid": "{b453ae62-4e3d-5e58-b989-0a996ec6e90f}",
                 "hidden": false,
-                "tabTitle": "Git Bash",
+                "icon": "{{ .windows_git_icon_path | replace "/" "\\\\" }}",
+                "name": "Git Bash",
+                "startingDirectory": "%USERPROFILE%",
                 "suppressApplicationTitle": false,
-                "closeOnExit": "graceful"
+                "tabTitle": "Git Bash"
+            },
+            {
+                "guid": "{61c54bbd-c2c6-5271-96e7-009a87ff44bf}",
+                "name": "PowerShell",
+                "commandline": "powershell.exe",
+                "icon": "ms-appx:///ProfileIcons/{61c54bbd-c2c6-5271-96e7-009a87ff44bf}.png",
+                "hidden": false,
+                "startingDirectory": "%USERPROFILE%"
+            },
+            {
+                "guid": "{0caa0dad-35be-5f56-a8ff-afceeeaa6101}",
+                "name": "命令提示符",
+                "commandline": "cmd.exe",
+                "hidden": false,
+                "startingDirectory": "%USERPROFILE%"
+            },
+            {
+                "guid": "{9acb9455-ca41-4af7-9852-388fdf67d2da}",
+                "name": "Ubuntu WSL2",
+                "commandline": "wsl.exe",
+                "icon": "ms-appx:///ProfileIcons/{9acb9455-ca41-4af7-9852-388fdf67d2da}.png",
+                "hidden": false
             }
         ]
     },
-    "schemes":
-    [
+    "schemes": [
         {
+            "background": "#1E1E2E",
+            "black": "#45475A",
+            "blue": "#89B4FA",
+            "brightBlack": "#585B70",
+            "brightBlue": "#89B4FA",
+            "brightCyan": "#94E2D5",
+            "brightGreen": "#A6E3A1",
+            "brightPurple": "#F5C2E7",
+            "brightRed": "#F38BA8",
+            "brightWhite": "#A6ADC8",
+            "brightYellow": "#F9E2AF",
+            "cursorColor": "#F5E0DC",
+            "cyan": "#94E2D5",
+            "foreground": "#CDD6F4",
+            "green": "#A6E3A1",
             "name": "Catppuccin Mocha",
-            "cursorColor": "#f5e0dc",
-            "selectionBackground": "#585b70",
-            "background": "#1e1e2e",
-            "foreground": "#cdd6f4",
-            "black": "#45475a",
-            "red": "#f38ba8",
-            "green": "#a6e3a1",
-            "yellow": "#f9e2af",
-            "blue": "#89b4fa",
-            "purple": "#f5c2e7",
-            "cyan": "#94e2d5",
-            "white": "#bac2de",
-            "brightBlack": "#585b70",
-            "brightRed": "#f38ba8",
-            "brightGreen": "#a6e3a1",
-            "brightYellow": "#f9e2af",
-            "brightBlue": "#89b4fa",
-            "brightPurple": "#f5c2e7",
-            "brightCyan": "#94e2d5",
-            "brightWhite": "#a6adc8"
+            "purple": "#F5C2E7",
+            "red": "#F38BA8",
+            "selectionBackground": "#585B70",
+            "white": "#BAC2DE",
+            "yellow": "#F9E2AF"
         }
     ],
-    "actions":
-    [
-        {
-            "command":
-            {
-                "action": "copy",
-                "singleLine": false
-            },
-            "keys": "ctrl+c"
-        },
-        {
-            "command": "paste",
-            "keys": "ctrl+v"
-        },
-        {
-            "command": "find",
-            "keys": "ctrl+shift+f"
-        },
-        {
-            "command":
-            {
-                "action": "splitPane",
-                "split": "auto",
-                "splitMode": "duplicate"
-            },
-            "keys": "alt+shift+d"
-        }
-    ]
+    "showTabsInTitlebar": true,
+    "themes": []
 }
 {{- end -}}

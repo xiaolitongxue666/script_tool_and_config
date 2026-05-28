@@ -63,6 +63,22 @@
 - Cursor 规则：`.cursor/rules/codewhale.mdc`
 - 安装检测：`scripts/chezmoi/install_helpers.sh` → `92-install-codewhale`
 
+## Windows：fnm + uv + Git Bash（2026-05）
+
+| 项 | 约定 |
+|----|------|
+| Node | **fnm**（Layer 0）；新开 Git Bash 自动 `fnm env`，无需手敲 eval |
+| Python | **uv**（Layer 0）；`uv python install` 默认 **3.12**（`UV_DEFAULT_PYTHON` 覆盖） |
+| CodeWhale 命令 | **`codewhale`**（全小写），非 `CodeWhale` |
+| 多 Windows 用户 | **Administrator / xiaoli** 等各跑一遍 Phase 1 + Phase 2（`AppData` 不共享） |
+| WT 配置 | `dot_config/windows-terminal/settings.json.tmpl` + `run_onchange_sync_windows_terminal_config` |
+
+| 问题 | 解法 |
+|------|------|
+| 重启后无 node/codewhale | 确认当前 Windows 用户已 `deploy.sh`；检查 `fnm --version`、`which node` |
+| 有 fnm 无 python | `uv python install 3.12` 或重跑 apply 触发 `run_once_00` |
+| 旁路 Node（如 D:\\Software\\nodejs）抢 PATH | 以 `which node` 为准；优先 fnm multishell |
+
 ## 与 agent-config 职责拆分（2026-05）
 
 | 本仓库 (Phase 1) | agent-config (Phase 2) |
