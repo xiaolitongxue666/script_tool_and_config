@@ -46,6 +46,7 @@
 ## CodeWhale（终端 AI，Layer 4）
 
 - 安装：`.chezmoi/run_once_92-install-codewhale.sh.tmpl`（`npm install -g codewhale`；已移除 `install-deepseek`）
+- WSL：fnm/npm 全局安装；勿从 WSL 修改 Windows npm；部署用 `./deploy.sh` 或 `manage_dotfiles.sh apply`
 - 状态：`~/.codewhale/` 默认；`~/.deepseek/` 只读回退；7890 代理
 - 文档：`docs/CODEWHALE.md`、`docs/PROJECT_AGENT_MEMORY.md`
 

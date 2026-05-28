@@ -136,10 +136,41 @@ if command -v fnm &>/dev/null; then
     eval "$(fnm env 2>/dev/null)" || true
 fi
 
+# WSL：Windows 互操作 PATH 可能先解析到 /mnt/.../AppData/Roaming/npm，不能据此跳过 WSL 内 fnm/npm 安装
+_codewhale_is_windows_interop_path() {
+    local cmd_path="${1:-}"
+    [[ -z "${cmd_path}" ]] && return 1
+    case "${cmd_path}" in
+        /mnt/c/*|/mnt/host/c/*|*AppData/Roaming/npm*)
+            return 0
+            ;;
+    esac
+    return 1
+}
+
+_codewhale_in_local_npm_global() {
+    local npm_root
+    command -v npm &>/dev/null || return 1
+    npm_root="$(npm root -g 2>/dev/null)" || return 1
+    [[ -d "${npm_root}/codewhale" ]]
+}
+
 _codewhale_already_installed() {
-    command -v codewhale &>/dev/null \
-        && command -v codewhale-tui &>/dev/null \
-        && codewhale --version &>/dev/null
+    local cw_path cwt_path
+
+    cw_path="$(command -v codewhale 2>/dev/null || true)"
+    cwt_path="$(command -v codewhale-tui 2>/dev/null || true)"
+
+    if [[ "${IS_WSL}" -eq 1 ]]; then
+        if _codewhale_is_windows_interop_path "${cw_path}" \
+            || _codewhale_is_windows_interop_path "${cwt_path}"; then
+            return 1
+        fi
+        _codewhale_in_local_npm_global || return 1
+    fi
+
+    [[ -n "${cw_path}" && -n "${cwt_path}" ]] || return 1
+    codewhale --version &>/dev/null
 }
 
 if _codewhale_already_installed; then
@@ -149,7 +180,7 @@ if _codewhale_already_installed; then
 fi
 
 if command -v deepseek &>/dev/null; then
-    echo "[INFO] Legacy deepseek CLI detected; CodeWhale uses the codewhale command (you may uninstall the old cargo package manually)" >&2
+    echo "[INFO] Legacy deepseek CLI detected; use codewhale in WSL. Do not uninstall Windows npm packages from WSL (use Windows terminal if needed)" >&2
 fi
 
 if ! command -v fnm &>/dev/null; then

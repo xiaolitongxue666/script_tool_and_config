@@ -2,10 +2,11 @@
 
 本目录集中存放项目说明与指南，根目录仅保留 [README.md](../README.md) 与 [AGENTS.md](../AGENTS.md)。
 
-## 文档清理审计结论（2026-04）
+## 文档清理审计结论（2026-04 / 2026-05）
 
 - `docs/README.md`：保留，作为 docs 目录索引；由根目录 `README.md` 显式链接。
 - `docs/patches/archive/README.md`：保留，当前仍被 `docs/TEST_PLAN_NVIM_INDEPENDENT.md` 引用作为历史补丁说明。
+- **2026-05 已删除**：`scripts/linux/system_basic_env/INSTALL_STATUS.md`（内容已并入 `SOFTWARE_LIST.md` + `verify_installation.sh`）。
 - 删除策略：仅在“无外部引用 + 不再承担测试/流程证据”同时满足时再删除。
 
 ## 安装与配置
@@ -15,6 +16,8 @@
 | [INSTALL_GUIDE.md](INSTALL_GUIDE.md) | 一键安装与首次配置入口（推荐先看）；各平台分步与故障排除 |
 | [OS_SETUP_GUIDE.md](OS_SETUP_GUIDE.md) | Windows / macOS / Linux 分步安装指南与前置条件 |
 | [SOFTWARE_LIST.md](SOFTWARE_LIST.md) | 完整软件清单与 run_once 脚本对应关系（按 OS / WSL 区分） |
+| [CODEWHALE.md](CODEWHALE.md) | CodeWhale 安装、WSL 快速流程与排错 |
+| [PROJECT_AGENT_MEMORY.md](PROJECT_AGENT_MEMORY.md) | 项目 Agent 可提交记忆（含 WSL 部署实测） |
 | [RMUX_WINDOWS.md](RMUX_WINDOWS.md) | Windows rmux 安装、手动使用与排错（含 chezmoi 部署陷阱） |
 | [PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md) | 项目结构说明 |
 
@@ -44,9 +47,10 @@
 
 以下文档位于各脚本目录，从本目录可快速跳转：
 
-- [scripts/linux/system_basic_env/INSTALL_STATUS.md](../scripts/linux/system_basic_env/INSTALL_STATUS.md) — 已弃用，软件清单见 [SOFTWARE_LIST.md](SOFTWARE_LIST.md)
 - [scripts/common/deploy_utils/DEPLOYMENT_GUIDE.md](../scripts/common/deploy_utils/DEPLOYMENT_GUIDE.md) — 部署流程（Windows / Arch）
 - [scripts/common/deploy_utils/MANUAL_ZSH_SETUP_GUIDE.md](../scripts/common/deploy_utils/MANUAL_ZSH_SETUP_GUIDE.md) — 手动 Zsh/Oh My Zsh 配置指南
+
+> 软件安装状态与验证命令见 [SOFTWARE_LIST.md](SOFTWARE_LIST.md) 与 `tests/`、`scripts/chezmoi/verify_installation.sh`（已移除冗余 `INSTALL_STATUS.md`）。
 
 ## 多 OS 与 WSL
 

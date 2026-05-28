@@ -153,7 +153,6 @@ script_tool_and_config/
 │   │   │   ├── test_mirrors.sh              # 镜像源可用性测试
 │   │   │   ├── get_wsl_system_info.sh       # WSL 系统信息
 │   │   │   ├── verify_wsl_ssh.sh            # WSL SSH 验证
-│   │   │   ├── INSTALL_STATUS.md            # 安装状态清单
 │   │   │   └── TEST_README.md               # 测试文档
 │   │   │
 │   │   └── network/                  # 网络配置脚本

@@ -378,7 +378,7 @@ scripts/**/*_test_*.sh
 # ============================================
 # 项目生成的文件（由上方通用规则覆盖）
 
-# 安装/验证报告（脚本输出，可能含主机名/路径；VERIFICATION_RESULT.md 为仓库内示例，不忽略）
+# 安装/验证报告（脚本输出，可能含主机名/路径；WSL/Linux deploy 与 install 均可能生成）
 /.audit_configs_report.txt
 /.audit_configs_report*.txt
 /install_verification_report_*.txt
@@ -419,7 +419,7 @@ temp_plan.md
 .cursor/plans/
 uploads/
 
-# Agent 工具临时输出（Cursor 等）
+# Agent 工具临时输出（Cursor 等；apply 日志勿提交）
 agent-tools/
 
 # ============================================

@@ -74,7 +74,8 @@ install.sh
 | [docs/OS_SETUP_GUIDE.md](docs/OS_SETUP_GUIDE.md) | Windows/macOS/Linux 分步安装指南 |
 | [docs/CHEZMOI_USE_GUIDE.md](docs/CHEZMOI_USE_GUIDE.md) | chezmoi 详细使用指南 |
 | [docs/SOFTWARE_LIST.md](docs/SOFTWARE_LIST.md) | 完整软件清单与 run_once 对应关系 |
-| [scripts/linux/system_basic_env/INSTALL_STATUS.md](scripts/linux/system_basic_env/INSTALL_STATUS.md) | 所需软件安装与配置状态清单（验证项与命令） |
+| [docs/CODEWHALE.md](docs/CODEWHALE.md) | CodeWhale 安装与 WSL 快速流程 |
+| [docs/PROJECT_AGENT_MEMORY.md](docs/PROJECT_AGENT_MEMORY.md) | 项目 Agent 记忆（含 WSL 排错） |
 | [docs/PROJECT_STRUCTURE.md](docs/PROJECT_STRUCTURE.md) | 详细项目结构说明 |
 | [AGENTS.md](AGENTS.md) | 代码代理开发指南 |
 | [docs/ENCODING_AND_LINE_ENDINGS.md](docs/ENCODING_AND_LINE_ENDINGS.md) | 文件编码与换行符规范 |

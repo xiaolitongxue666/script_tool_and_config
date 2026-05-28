@@ -229,7 +229,7 @@ get_software_category() {
     esac
 }
 
-# 返回当前平台显示名（含 WSL 区分，与 SOFTWARE_LIST.md / INSTALL_STATUS 一致）
+# 返回当前平台显示名（含 WSL 区分，与 SOFTWARE_LIST.md 一致）
 # 参数: platform, package_manager
 # 返回: 如 "Windows" / "macOS" / "Linux (WSL, apt)" / "Linux (原生, pacman)"
 get_platform_display_name() {
@@ -339,6 +339,23 @@ check_script_software_installed() {
             return 1
             ;;
         92-install-codewhale|codewhale)
+            # WSL：须 fnm/npm 全局存在 codewhale，不能仅因 Windows 互操作 PATH 判定为已安装
+            if grep -qEi "Microsoft|WSL" /proc/version 2>/dev/null || [[ -n "${WSL_DISTRO_NAME:-}" ]]; then
+                local npm_root cw_path
+                cw_path="$(command -v codewhale 2>/dev/null || true)"
+                case "${cw_path}" in
+                    /mnt/c/*|/mnt/host/c/*|*AppData/Roaming/npm*) return 1 ;;
+                esac
+                if command -v npm &>/dev/null; then
+                    npm_root="$(npm root -g 2>/dev/null || true)"
+                    if [[ -n "${npm_root}" && -d "${npm_root}/codewhale" ]] \
+                        && check_command_exists "codewhale" \
+                        && check_command_exists "codewhale-tui"; then
+                        return 0
+                    fi
+                fi
+                return 1
+            fi
             if check_command_exists "codewhale" && check_command_exists "codewhale-tui"; then
                 return 0
             fi

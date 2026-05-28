@@ -31,8 +31,8 @@
 
 ## 项目 Agent 记忆与 CodeWhale
 
-- **可提交记忆**（本仓库）：[`docs/PROJECT_AGENT_MEMORY.md`](docs/PROJECT_AGENT_MEMORY.md) — 含 CodeWhale 迁移问题与约定；Cursor 细则见 [`.cursor/rules/codewhale.mdc`](.cursor/rules/codewhale.mdc)。
-- **用户向文档**：[`docs/CODEWHALE.md`](docs/CODEWHALE.md)。
+- **可提交记忆**（本仓库）：[`docs/PROJECT_AGENT_MEMORY.md`](docs/PROJECT_AGENT_MEMORY.md) — 含 CodeWhale / WSL 排错；Cursor 细则见 [`.cursor/rules/codewhale.mdc`](.cursor/rules/codewhale.mdc)。
+- **用户向文档**：[`docs/CODEWHALE.md`](docs/CODEWHALE.md)（WSL 快速流程）。
 - **已删除**：`.chezmoi/run_once_92-install-deepseek.sh.tmpl`（勿恢复 cargo 安装路径）。
 - **claude-mem 运行时数据**：`.claude-mem/` 仍 gitignore，与可提交的 `PROJECT_AGENT_MEMORY.md` 分工不同。
 
