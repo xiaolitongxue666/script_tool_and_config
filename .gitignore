@@ -358,7 +358,7 @@ scripts/**/*_test_*.sh
 # VS Code / SFTP（见上方 **/sftp.json）
 # .vscode/sftp.json
 
-# Cursor IDE 用户态数据（仅 User/settings.json 由 chezmoi 模板管理）
+# Cursor IDE 用户态数据（User/settings.json 由 agent-config render/sync 管理，非本仓库 chezmoi）
 **/Cursor/User/globalStorage/
 **/Cursor/User/History/
 **/Cursor/User/workspaceStorage/
@@ -421,6 +421,9 @@ uploads/
 
 # Agent 工具临时输出（Cursor 等；apply 日志勿提交）
 agent-tools/
+
+# 与 agent-config 对齐：机器本地 env（若在本仓库放 Cursor SSH 等）
+config/local.env
 
 # ============================================
 # 项目本地状态与测试产物

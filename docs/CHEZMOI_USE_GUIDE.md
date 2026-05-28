@@ -666,11 +666,10 @@ Cursor 的 `User/settings.json` 由 chezmoi 管理（与 `run_once_93-install-cu
 
 | 平台 | 源模板 | 同步到实际路径 |
 |------|--------|----------------|
-| 共用 | `.chezmoi/dot_config/Cursor/User/settings.json.tmpl` → `~/.config/Cursor/User/settings.json` | Linux 直接使用 |
-| macOS | 同上 | `run_onchange_sync_cursor_settings_to_app_support` → `~/Library/Application Support/Cursor/User/settings.json` |
-| Windows | 同上 | `run_onchange_sync_cursor_settings_to_appdata` → `%APPDATA%\Cursor\User\settings.json` |
+| Cursor 编辑器 User settings | 已迁移至 **agent-config** | `platforms/cursor/settings/editor-settings.jsonc` + `render-cursor-editor-settings.sh` |
+| macOS / Windows | agent-config 同步 | `sync-cursor-editor-settings.sh` → App Support / `%APPDATA%` |
 
-VPS Host 名与路径在 `.chezmoi/chezmoi.toml` 的 `cursor_remote_ssh_host` / `cursor_remote_ssh_path`。
+VPS Host 名与路径在 **agent-config** 的 `config/local.env`（复制 `config/local.env.example`），由 `render-cursor-editor-settings.sh` 渲染。
 
 应用配置：
 

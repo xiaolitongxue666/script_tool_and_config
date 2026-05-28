@@ -13,8 +13,9 @@ run_once_install-zsh                  ← Layer 2
 run_once_install-starship             ← Layer 2
 run_once_install-nerd-fonts           ← Layer 2
 run_once_install-neovim               ← Layer 3（仅安装二进制）
-run_once_90-install-claude-code       ← Layer 4（AI agent，fnm/node 已就绪）
-run_once_92-install-codewhale         ← Layer 4（AI agent，npm 官方路径，需 fnm/node）
+run_once_90-install-claude-code       ← Layer 4（AI agent CLI，fnm/node 已就绪）
+run_once_91-install-codex             ← Layer 4（AI agent CLI，npm @openai/codex）
+run_once_92-install-codewhale         ← Layer 4（AI agent CLI，npm codewhale）
 run_once_93-install-cursor            ← Layer 4（GUI 检测，有 GUI 才装）
 run_once_install-{tmux,i3wm,...} ← Layer 5（平台特有）
 run_on_linux/* / run_on_darwin/*      ← Layer 5（平台特有）
@@ -35,8 +36,18 @@ run_on_windows/*                      ← Layer 5（平台特有）
 | Layer 2 | `run_once_install-nerd-fonts` | FiraMono Nerd Font | all |
 | Layer 3 | `run_once_install-neovim` | Neovim 二进制（>= 0.11.0） | all |
 | Layer 4 | `run_once_90-install-claude-code` | Claude Code CLI（npm i -g @anthropic-ai/claude-code，依赖 fnm/node） | all |
+| Layer 4 | `run_once_91-install-codex` | OpenAI Codex CLI（npm i -g @openai/codex） | all |
 | Layer 4 | `run_once_92-install-codewhale` | CodeWhale CLI（`npm install -g codewhale`，`codewhale` + `codewhale-tui`；代理默认 7890） | all（含 WSL）；详见 [CODEWHALE.md](CODEWHALE.md) |
-| Layer 4 | `run_once_93-install-cursor` | Cursor 编辑器（仅 GUI 环境）；User `settings.json`（含 Remote SSH）由 chezmoi 三平台模板管理 | all（检测 GUI） |
+| Layer 4 | `run_once_93-install-cursor` | Cursor 编辑器（仅 GUI 环境） | all（检测 GUI） |
+
+**Layer 4 职责**：仅安装 Agent **二进制**（CLI/编辑器）。MCP、Skills、全局 `settings.json` / `mcp.json` 由 **agent-config** 仓库的 `install-tools.sh` + `apply-config.sh` 管理（两阶段部署见下）。
+
+### 两阶段部署（本仓库 + agent-config）
+
+1. **本仓库**：`./deploy.sh` 或 `./scripts/manage_dotfiles.sh apply` — 基础环境与 Layer 4 Agent CLI。
+2. **agent-config**：`bash scripts/install-tools.sh` — 全局 MCP/Skills 与各 Agent 配置（不重复安装 CLI）。
+
+各 OS / WSL 须在**对应环境**各跑一遍（Windows Git Bash 与 WSL 的 `$HOME` 独立）。
 
 ---
 
@@ -74,8 +85,7 @@ run_on_windows/*                      ← Layer 5（平台特有）
 | Layer 5 | `run_on_darwin/run_once_install-ghostty` | Ghostty 终端 | darwin |
 | Layer 5 | `run_on_darwin/run_once_install-connect` | connect（SSH ProxyCommand） | darwin |
 | Layer 5 | `run_on_darwin/run_onchange_sync_ghostty_config_to_app_support` | Ghostty 配置同步到 Application Support | darwin（内容变化触发） |
-| Layer 5 | `run_on_darwin/run_onchange_sync_cursor_settings_to_app_support` | Cursor `settings.json` 同步到 Application Support | darwin（内容变化触发） |
-| Layer 5 | `run_on_windows/run_onchange_sync_cursor_settings_to_appdata` | Cursor `settings.json` 同步到 `%APPDATA%` | windows（内容变化触发） |
+| Cursor 编辑器 settings | **agent-config** | `render-cursor-editor-settings.sh` + `sync-cursor-editor-settings.sh` |
 
 ---
 

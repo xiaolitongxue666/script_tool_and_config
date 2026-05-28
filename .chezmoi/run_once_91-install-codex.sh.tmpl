@@ -3,10 +3,10 @@
 #!/usr/bin/env bash
 
 # ============================================
-# Claude Code 安装（chezmoi run_once_）
+# OpenAI Codex CLI 安装（chezmoi run_once_）
 # 必须排在 run_once_00-install-version-managers 之后（字母序），以便 fnm/node 已就绪
-# 仅安装二进制；~/.claude/settings.json 由 agent-config apply-config 管理
-# 参考: npm install -g @anthropic-ai/claude-code
+# 仅安装二进制；~/.codex/settings.json 由 agent-config apply-config 管理
+# 参考: npm install -g @openai/codex
 # ============================================
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -21,7 +21,7 @@ if [[ -f "$COMMON_INSTALL" ]]; then
     # shellcheck disable=SC1090
     source "$COMMON_INSTALL"
 else
-    echo "[WARNING] 未找到 common_install.sh，使用基本函数"
+    echo "[WARNING] common_install.sh not found, using basic functions" >&2
     function setup_proxy() { :; }
     function detect_os_and_package_manager() {
         OS="$(uname -s)"
@@ -62,40 +62,39 @@ if [[ "${PLATFORM:-}" == "linux" ]]; then
 fi
 
 if [[ "${PLATFORM:-}" == "darwin" ]]; then
-    echo "[INFO] 环境: macOS (brew)"
+    echo "[INFO] Environment: macOS (brew)"
 elif [[ "${PLATFORM:-}" == "windows" ]]; then
-    echo "[INFO] 环境: Windows (${PACKAGE_MANAGER:-unknown})"
+    echo "[INFO] Environment: Windows (${PACKAGE_MANAGER:-unknown})"
 elif [[ "${PLATFORM:-}" == "linux" ]]; then
     if [[ "$IS_WSL" -eq 1 ]]; then
-        echo "[INFO] 环境: Linux (WSL, ${PACKAGE_MANAGER:-unknown})"
+        echo "[INFO] Environment: Linux (WSL, ${PACKAGE_MANAGER:-unknown})"
     else
-        echo "[INFO] 环境: Linux (原生, ${PACKAGE_MANAGER:-unknown})"
+        echo "[INFO] Environment: Linux (native, ${PACKAGE_MANAGER:-unknown})"
     fi
 fi
 
-# fnm / node 常见路径（本脚本为独立子 shell，需自行加入 PATH）
 export PATH="${HOME}/.local/share/fnm:${HOME}/.local/bin:${PATH}"
 
 if command -v fnm &>/dev/null; then
     eval "$(fnm env 2>/dev/null)" || true
 fi
 
-if command -v claude &>/dev/null; then
-    if claude --version &>/dev/null; then
-        echo "[INFO] Claude Code 已安装: $(claude --version 2>/dev/null | head -n1)"
+if command -v codex &>/dev/null; then
+    if codex --version &>/dev/null; then
+        echo "[INFO] Codex CLI already installed: $(codex --version 2>/dev/null | head -n1)"
         exit 0
     fi
 fi
 
 if ! command -v fnm &>/dev/null; then
-    echo "[ERROR] 未找到 fnm。请确认 run_once_00-install-version-managers 已成功执行后再 apply。"
+    echo "[ERROR] fnm not found. Ensure run_once_00-install-version-managers succeeded before apply."
     exit 1
 fi
 
 if ! command -v node &>/dev/null; then
-    echo "[INFO] 未检测到 node，使用 fnm 安装 Node.js LTS..."
+    echo "[INFO] node not found, installing Node.js LTS via fnm..."
     if ! fnm install lts/* 2>&1; then
-        echo "[ERROR] fnm 安装 Node.js 失败，请检查网络或代理后重试。"
+        echo "[ERROR] fnm failed to install Node.js. Check network or proxy."
         exit 1
     fi
     eval "$(fnm env 2>/dev/null)" || true
@@ -106,25 +105,25 @@ if ! command -v node &>/dev/null; then
 fi
 
 if ! command -v node &>/dev/null; then
-    echo "[ERROR] node 仍不可用，请检查 fnm 与 PATH。"
+    echo "[ERROR] node still unavailable. Check fnm and PATH."
     exit 1
 fi
 
 if ! command -v npm &>/dev/null; then
-    echo "[ERROR] npm 不可用（node 已安装但缺少 npm），请检查 Node 安装。"
+    echo "[ERROR] npm unavailable (node present but npm missing)."
     exit 1
 fi
 
-echo "[INFO] 开始全局安装 @anthropic-ai/claude-code..."
-if npm install -g @anthropic-ai/claude-code; then
+echo "[INFO] Installing @openai/codex globally via npm..."
+if npm install -g @openai/codex; then
     hash -r 2>/dev/null || true
-    if command -v claude &>/dev/null && claude --version &>/dev/null; then
-        echo "[SUCCESS] Claude Code 可用: $(claude --version 2>/dev/null | head -n1)"
+    if command -v codex &>/dev/null && codex --version &>/dev/null; then
+        echo "[SUCCESS] Codex CLI available: $(codex --version 2>/dev/null | head -n1)"
     else
-        echo "[WARNING] npm 安装完成但 claude 命令不可用，请检查 PATH 或手动执行: npm install -g @anthropic-ai/claude-code"
+        echo "[WARNING] npm install finished but codex not on PATH; try: npm install -g @openai/codex"
     fi
 else
-    echo "[WARNING] npm 全局安装 claude-code 失败，请手动执行: npm install -g @anthropic-ai/claude-code"
+    echo "[WARNING] npm global install of @openai/codex failed; retry manually: npm install -g @openai/codex"
 fi
 
 exit 0

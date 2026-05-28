@@ -59,8 +59,25 @@
 
 - 用户向说明：[CODEWHALE.md](CODEWHALE.md)（含 WSL 快速流程）
 - 软件清单：[SOFTWARE_LIST.md](SOFTWARE_LIST.md) Layer 4
+- 两阶段部署：[DEPLOY_TWO_PHASE.md](DEPLOY_TWO_PHASE.md)
 - Cursor 规则：`.cursor/rules/codewhale.mdc`
 - 安装检测：`scripts/chezmoi/install_helpers.sh` → `92-install-codewhale`
+
+## 与 agent-config 职责拆分（2026-05）
+
+| 本仓库 (Phase 1) | agent-config (Phase 2) |
+|------------------|------------------------|
+| fnm/uv、dotfiles、Layer 4 **CLI**（claude/codex/codewhale/cursor*） | 全局 MCP、Skills、`apply-config` 写入各 Agent 配置 |
+| **不**写 `~/.claude/settings.json`、`~/.codewhale/mcp.json` | Cursor 编辑器 `settings.json`：`render-cursor-editor-settings.sh` |
+| `run_once_90`–`93` 字母序 | `bash scripts/install-tools.sh` 在对应 OS/WSL 各执行一次 |
+
+\* Cursor 仅 GUI 环境（`run_once_93-install-cursor`）。
+
+| 问题 | 解法 |
+|------|------|
+| 只改 chezmoi 未装 codewhale | Phase 1：`eval "$(fnm env)" && ./deploy.sh` |
+| 只 deploy 无 MCP/全局 skills | Phase 2：agent-config `install-tools.sh` |
+| Cursor Remote SSH 主机名进仓库 | 已从 chezmoi `data` 移除；用 agent-config `config/local.env` |
 
 ## 通用 Agent 约束（摘要）
 
