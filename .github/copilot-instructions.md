@@ -32,3 +32,10 @@ Template mapping:
 - `.chezmoi/dot_zshrc.tmpl` — macOS / Linux / WSL (zsh)
 - `.chezmoi/dot_bashrc.tmpl` — Linux bash + Windows Git Bash
 - `.chezmoi/run_on_windows/_bash_profile_windows.tmpl` — Windows login shell
+
+## CodeWhale (replaces DeepSeek-TUI)
+
+- Install: `run_once_92-install-codewhale.sh.tmpl` via `npm install -g codewhale` only (all OS + WSL); proxy port **7890** before npm.
+- Binaries: `codewhale` + `codewhale-tui`; state root `~/.codewhale` (legacy `~/.deepseek` read-only fallback).
+- Do **not** use `cargo install deepseek` or `run_once_92-install-deepseek` (removed).
+- Agent notes: `docs/PROJECT_AGENT_MEMORY.md`, `docs/CODEWHALE.md`.

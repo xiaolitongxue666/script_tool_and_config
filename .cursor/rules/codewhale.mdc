@@ -1,0 +1,19 @@
+---
+description: CodeWhale install, state paths, and migration notes for agents
+globs:
+  - .chezmoi/run_once_92-install-codewhale.sh.tmpl
+  - docs/CODEWHALE.md
+  - docs/PROJECT_AGENT_MEMORY.md
+  - scripts/chezmoi/install_helpers.sh
+---
+
+# CodeWhale（本项目）
+
+- **已替代** DeepSeek-TUI / `run_once_92-install-deepseek`；安装脚本：`.chezmoi/run_once_92-install-codewhale.sh.tmpl`。
+- **安装**：全平台含 WSL 仅用 `npm install -g codewhale`（前置 fnm/node）；**禁止**在 run_once 中用 cargo/brew/winget。
+- **网络**：`npm` 与 postinstall 前 `setup_proxy`；默认 `http://127.0.0.1:7890`；WSL 为宿主机 `:7890`。
+- **状态**：默认 `~/.codewhale/`；`~/.deepseek/` 只读回退；run_once 非破坏性迁移，不删 legacy。
+- **勿写** `codewhale setup --migrate`（上游 v0.8.47 无此参数）。
+- **Windows PATH**：全局 npm 二进制在 `~/AppData/Roaming/npm`（已在 `_bash_profile_windows.tmpl` 加入）。
+
+详细问题与排错见 [docs/PROJECT_AGENT_MEMORY.md](../../docs/PROJECT_AGENT_MEMORY.md) 与 [docs/CODEWHALE.md](../../docs/CODEWHALE.md).

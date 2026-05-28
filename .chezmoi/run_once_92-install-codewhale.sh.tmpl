@@ -1,0 +1,204 @@
+{{- if or (eq .chezmoi.os "linux") (eq .chezmoi.os "darwin") (eq .chezmoi.os "windows") -}}
+{{/* chezmoi:template:line-endings=lf */}}
+#!/usr/bin/env bash
+
+# ============================================
+# CodeWhale 安装（chezmoi run_once_）
+# 必须排在 run_once_00-install-version-managers 之后（字母序），以便 fnm/node 已就绪
+# 全平台（linux / darwin / windows / WSL）统一 npm 官方路径；网络默认走 7890 代理
+# 参考: https://github.com/Hmbown/CodeWhale — npm install -g codewhale
+# ============================================
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="${CHEZMOI_PROJECT_ROOT:-$(cd "${SCRIPT_DIR}/../.." && pwd 2>/dev/null || echo "$HOME")}"
+COMMON_INSTALL="${PROJECT_ROOT}/scripts/chezmoi/common_install.sh"
+
+if [[ ! -f "$COMMON_INSTALL" ]]; then
+    COMMON_INSTALL="$HOME/.local/share/chezmoi/scripts/chezmoi/common_install.sh"
+fi
+
+if [[ -f "$COMMON_INSTALL" ]]; then
+    # shellcheck disable=SC1090
+    source "$COMMON_INSTALL"
+else
+    echo "[WARNING] common_install.sh not found, using basic functions" >&2
+    function setup_proxy() { :; }
+    function detect_os_and_package_manager() {
+        OS="$(uname -s)"
+        if [[ "$OS" == "Darwin" ]]; then
+            PLATFORM="macos"
+            PACKAGE_MANAGER="brew"
+        elif [[ "$OS" == "Linux" ]]; then
+            PLATFORM="linux"
+            if command -v pacman &> /dev/null; then
+                PACKAGE_MANAGER="pacman"
+            elif command -v apt-get &> /dev/null; then
+                PACKAGE_MANAGER="apt"
+            elif command -v dnf &> /dev/null; then
+                PACKAGE_MANAGER="dnf"
+            elif command -v yum &> /dev/null; then
+                PACKAGE_MANAGER="yum"
+            fi
+        elif [[ "$OS" =~ ^(MINGW|MSYS|CYGWIN) ]]; then
+            PLATFORM="windows"
+            if command -v winget &> /dev/null; then
+                PACKAGE_MANAGER="winget"
+            elif command -v pacman.exe &> /dev/null; then
+                PACKAGE_MANAGER="pacman"
+            fi
+        fi
+    }
+fi
+
+detect_os_and_package_manager || exit 1
+
+IS_WSL=0
+if [[ "${PLATFORM:-}" == "linux" ]]; then
+    if grep -qEi "Microsoft|WSL" /proc/version 2>/dev/null || [[ -n "${WSL_DISTRO_NAME:-}" ]]; then
+        IS_WSL=1
+    fi
+fi
+
+# 解析代理 URL：WSL 使用宿主机 :7890，否则模板默认 127.0.0.1:7890
+_resolve_codewhale_proxy_url() {
+    if [[ -n "${PROXY:-}" ]]; then
+        echo "${PROXY}"
+        return 0
+    fi
+    if [[ "${IS_WSL}" -eq 1 ]]; then
+        local host_ip
+        host_ip=$(awk '/^nameserver / {print $2; exit}' /etc/resolv.conf 2>/dev/null)
+        if [[ -n "${host_ip}" ]]; then
+            echo "http://${host_ip}:7890"
+            return 0
+        fi
+    fi
+    echo "{{ env "http_proxy" | default "http://127.0.0.1:7890" }}"
+}
+
+CODEWHALE_PROXY="$(_resolve_codewhale_proxy_url)"
+setup_proxy "${CODEWHALE_PROXY}"
+
+if [[ "${PLATFORM:-}" == "darwin" ]]; then
+    echo "[INFO] Environment: macOS (${PACKAGE_MANAGER:-unknown})"
+elif [[ "${PLATFORM:-}" == "windows" ]]; then
+    echo "[INFO] Environment: Windows (${PACKAGE_MANAGER:-unknown})"
+elif [[ "${PLATFORM:-}" == "linux" ]]; then
+    if [[ "${IS_WSL}" -eq 1 ]]; then
+        echo "[INFO] Environment: Linux (WSL, ${PACKAGE_MANAGER:-unknown})"
+    else
+        echo "[INFO] Environment: Linux (native, ${PACKAGE_MANAGER:-unknown})"
+    fi
+fi
+
+# 非破坏性迁移：~/.deepseek → ~/.codewhale（目标已存在则跳过；保留 legacy 目录）
+# 注意：上游无 `codewhale setup --migrate`，由本脚本在 install/已安装时执行
+_migrate_codewhale_state_paths() {
+    local legacy="${HOME}/.deepseek"
+    local target="${HOME}/.codewhale"
+    local migrated=0
+    local entry base dst
+
+    if [[ ! -d "${legacy}" ]]; then
+        mkdir -p "${target}"
+        echo "[INFO] No legacy ~/.deepseek state; using ~/.codewhale only" >&2
+        return 0
+    fi
+
+    mkdir -p "${target}"
+
+    shopt -s nullglob
+    for entry in "${legacy}"/*; do
+        [[ -e "${entry}" ]] || continue
+        base="${entry##*/}"
+        dst="${target}/${base}"
+        if [[ -e "${dst}" ]]; then
+            continue
+        fi
+        if cp -r "${entry}" "${dst}" 2>/dev/null; then
+            migrated=$((migrated + 1))
+        fi
+    done
+    shopt -u nullglob
+
+    if [[ "${migrated}" -gt 0 ]]; then
+        echo "[INFO] Migrated ${migrated} item(s) from ~/.deepseek to ~/.codewhale (legacy kept for fallback)" >&2
+    else
+        echo "[INFO] ~/.deepseek present; ~/.codewhale already has matching entries (no copies needed)" >&2
+    fi
+    return 0
+}
+
+# fnm / node 常见路径（本脚本为独立子 shell，需自行加入 PATH）
+export PATH="${HOME}/.local/share/fnm:${HOME}/.local/bin:${PATH}"
+
+if command -v fnm &>/dev/null; then
+    eval "$(fnm env 2>/dev/null)" || true
+fi
+
+_codewhale_already_installed() {
+    command -v codewhale &>/dev/null \
+        && command -v codewhale-tui &>/dev/null \
+        && codewhale --version &>/dev/null
+}
+
+if _codewhale_already_installed; then
+    echo "[INFO] CodeWhale already installed: $(codewhale --version 2>/dev/null | head -n1)"
+    _migrate_codewhale_state_paths
+    exit 0
+fi
+
+if command -v deepseek &>/dev/null; then
+    echo "[INFO] Legacy deepseek CLI detected; CodeWhale uses the codewhale command (you may uninstall the old cargo package manually)" >&2
+fi
+
+if ! command -v fnm &>/dev/null; then
+    echo "[ERROR] fnm not found. Ensure run_once_00-install-version-managers succeeded before apply."
+    exit 1
+fi
+
+if ! command -v node &>/dev/null; then
+    echo "[INFO] node not found; installing Node.js LTS via fnm..."
+    if ! fnm install lts/* 2>&1; then
+        echo "[ERROR] fnm failed to install Node.js. Check network or proxy and retry."
+        exit 1
+    fi
+    eval "$(fnm env 2>/dev/null)" || true
+    if ! fnm use lts/* 2>/dev/null; then
+        fnm use default 2>/dev/null || true
+    fi
+    hash -r 2>/dev/null || true
+fi
+
+if ! command -v node &>/dev/null; then
+    echo "[ERROR] node still unavailable. Check fnm and PATH."
+    exit 1
+fi
+
+if ! command -v npm &>/dev/null; then
+    echo "[ERROR] npm unavailable (node installed but npm missing). Check Node installation."
+    exit 1
+fi
+
+codewhale_npm_pkg="codewhale"
+if [[ -n "${CODEWHALE_NPM_VERSION:-}" ]]; then
+    codewhale_npm_pkg="codewhale@${CODEWHALE_NPM_VERSION}"
+fi
+
+echo "[INFO] Installing CodeWhale globally via npm (${codewhale_npm_pkg})..."
+if npm install -g "${codewhale_npm_pkg}"; then
+    hash -r 2>/dev/null || true
+    if _codewhale_already_installed; then
+        echo "[SUCCESS] CodeWhale available: $(codewhale --version 2>/dev/null | head -n1)"
+        _migrate_codewhale_state_paths
+    else
+        echo "[WARNING] npm install finished but codewhale/codewhale-tui not on PATH; check PATH or run: npm install -g codewhale"
+    fi
+else
+    echo "[WARNING] npm global install of codewhale failed"
+    echo "[INFO] Retry manually with proxy on port 7890: npm install -g codewhale"
+    echo "[INFO] See https://github.com/Hmbown/CodeWhale/blob/main/docs/INSTALL.md"
+fi
+
+exit 0
+{{- end -}}

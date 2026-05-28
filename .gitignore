@@ -265,6 +265,12 @@ chezmoi.toml.local
 .claude-mem/
 .claude/settings.local.json
 
+# CodeWhale / DeepSeek-TUI 用户态（若误拷入仓库根或子目录）
+.codewhale/
+.deepseek/
+**/.codewhale/
+**/.deepseek/
+
 # ============================================
 # 包管理器和依赖
 # ============================================
@@ -410,7 +416,11 @@ temp_plan.md
 
 # Cursor 会话上传附件（本地，非仓库资产）
 .cursor/uploads/
+.cursor/plans/
 uploads/
+
+# Agent 工具临时输出（Cursor 等）
+agent-tools/
 
 # ============================================
 # 项目本地状态与测试产物

@@ -224,7 +224,7 @@ get_software_category() {
         system-basic-env)             echo "系统基础" ;;
         yabai|skhd|maccy)             echo "macOS 专属" ;;
         i3wm|dwm|arch-base-packages|aur-helper|configure-pacman)  echo "Linux 专属" ;;
-        90-install-claude-code|92-install-deepseek|93-install-cursor)  echo "AI 工具" ;;
+        90-install-claude-code|92-install-codewhale|93-install-cursor)  echo "AI 工具" ;;
         *)                            echo "其他" ;;
     esac
 }
@@ -332,8 +332,14 @@ check_script_software_installed() {
             # 系统基础环境，通常已安装
             return 0
             ;;
-        claude-code)
+        90-install-claude-code|claude-code)
             if check_command_exists "claude"; then
+                return 0
+            fi
+            return 1
+            ;;
+        92-install-codewhale|codewhale)
+            if check_command_exists "codewhale" && check_command_exists "codewhale-tui"; then
                 return 0
             fi
             return 1

@@ -40,3 +40,9 @@ Shell 配置模板中内置了 claude-mem 项目级记忆自动检测：
 ## chezmoi 源目录
 
 所有配置文件模板位于 `.chezmoi/` 目录，使用 chezmoi 管理 dotfiles。
+
+## CodeWhale（Layer 4 AI 工具）
+
+- 安装脚本：`.chezmoi/run_once_92-install-codewhale.sh.tmpl`（**已移除** `install-deepseek`）。
+- 全平台含 WSL：`npm install -g codewhale`；代理默认 7890；状态目录 `~/.codewhale`（`~/.deepseek` 只读回退）。
+- Agent 必读：`docs/PROJECT_AGENT_MEMORY.md`、`docs/CODEWHALE.md`；细则见 `.cursor/rules/codewhale.mdc`。

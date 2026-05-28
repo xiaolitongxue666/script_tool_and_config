@@ -195,7 +195,7 @@ script_tool_and_config/
 - **deploy.sh**: 快速部署入口脚本（需 chezmoi 已安装，含 Zsh/OMZ 预安装）
 - **README.md**: 项目主文档，包含快速开始、使用说明等
 - **AGENTS.md**: 代理与编码规范，包含代码风格、命名规范、最佳实践
-- **docs/**: 文档目录，含 PROJECT_STRUCTURE.md（本文件）、SOFTWARE_LIST.md、INSTALL_GUIDE.md 等
+- **docs/**: 文档目录，含 PROJECT_STRUCTURE.md（本文件）、SOFTWARE_LIST.md、CODEWHALE.md、PROJECT_AGENT_MEMORY.md、INSTALL_GUIDE.md 等
 - **openspec/**: OpenSpec 规范驱动开发（与 chezmoi 部署无关，独立 CLI `openspec`）
 <!-- ai-unified-config/ 已删除 -->
 - **graphify-out/**: Graphify 知识图谱分析输出缓存
@@ -231,7 +231,7 @@ install.sh
   │       ├─ run_once_install-starship.sh.tmpl
   │       ├─ run_once_install-nerd-fonts.sh.tmpl (FiraMono Nerd Font)
   │       ├─ run_once_90-install-claude-code.sh.tmpl
-  │       ├─ run_once_92-install-deepseek.sh.tmpl
+  │       ├─ run_once_92-install-codewhale.sh.tmpl
   │       ├─ run_once_93-install-cursor.sh.tmpl (GUI 环境)
   │       ├─ run_once_install-tmux.sh.tmpl (Linux/macOS)
   │       ├─ run_on_linux/run_once_*.sh.tmpl (仅 Linux)
@@ -268,7 +268,7 @@ install.sh
 | `run_once_install-nerd-fonts.sh.tmpl` | FiraMono Nerd Font | 多平台 |
 | `run_once_install-neovim.sh.tmpl` | neovim (>= 0.11.0，仅二进制) | 多平台 |
 | `run_once_90-install-claude-code.sh.tmpl` | Claude Code CLI | 多平台 |
-| `run_once_92-install-deepseek.sh.tmpl` | deepseek CLI (cargo) | 多平台 |
+| `run_once_92-install-codewhale.sh.tmpl` | CodeWhale CLI (npm) | 多平台（含 WSL） |
 | `run_once_93-install-cursor.sh.tmpl` | Cursor 编辑器 | 有 GUI 时 |
 | `run_once_install-tmux.sh.tmpl` | tmux, TPM 插件 | Linux, macOS |
 | `run_once_install-alacritty.sh.tmpl` | alacritty 终端 | 仅 Linux |

@@ -43,6 +43,12 @@
 - Windows 只通过 Git Bash 使用 bash，不涉及 zsh
 - 所有模板中的 claude-mem 逻辑保持一致
 
+## CodeWhale（终端 AI，Layer 4）
+
+- 安装：`.chezmoi/run_once_92-install-codewhale.sh.tmpl`（`npm install -g codewhale`；已移除 `install-deepseek`）
+- 状态：`~/.codewhale/` 默认；`~/.deepseek/` 只读回退；7890 代理
+- 文档：`docs/CODEWHALE.md`、`docs/PROJECT_AGENT_MEMORY.md`
+
 ## 多 Agent 兼容
 
 本项目同时为以下 AI 编码工具提供了项目知识文件，内容保持一致：
@@ -50,8 +56,9 @@
 | Agent | 识别文件 |
 |-------|---------|
 | Claude Code | `CLAUDE.md`（本文件） |
-| Cursor | `.cursor/rules/project-rules.mdc` |
+| Cursor | `.cursor/rules/project-rules.mdc`、`.cursor/rules/codewhale.mdc` |
 | GitHub Copilot / Codex | `.github/copilot-instructions.md` |
+| 项目 Agent 记忆（可提交） | `docs/PROJECT_AGENT_MEMORY.md` |
 
 修改项目设计理念或模板策略时，需要同步更新以上所有文件。
 
@@ -80,7 +87,7 @@ Layer 0: run_once_00-install-version-managers      ← fnm + uv
 Layer 1: install-common-tools, install-git
 Layer 2: install-zsh, install-starship, install-nerd-fonts
 Layer 3: install-neovim                             ← 仅安装二进制
-Layer 4: run_once_90-{claude-code}, _92-{deepseek}
+Layer 4: run_once_90-{claude-code}, _92-{codewhale}
          run_once_93-install-cursor                 ← 仅 GUI 环境
 Layer 5: install-tmux + run_on_{linux,darwin}；Windows：`install-rmux`、`install-oh-my-posh`、`install-windows-terminal`
 ```
@@ -121,7 +128,7 @@ Layer 0: fnm/uv（版本管理器，必须最先）
 Layer 1: git + common-tools
 Layer 2: zsh + OMZ + starship + nerd-fonts
 Layer 3: neovim（仅安装二进制，配置由其他项目管理）
-Layer 4: claude-code + deepseek（AI agent，最后安装）
+Layer 4: claude-code + codewhale（AI agent，最后安装）
 Layer 4+: cursor（仅 GUI 环境，Linux/WSL 检测 DISPLAY）
 Layer 5: tmux + 平台特定（linux/darwin/windows 下的 run_on_*）
 
