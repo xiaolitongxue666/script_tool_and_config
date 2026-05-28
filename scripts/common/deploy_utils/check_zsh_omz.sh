@@ -105,18 +105,27 @@ if [ -d "$OMZ_DIR" ]; then
         fi
     fi
 
-    # 检查常用插件
-    declare -A EXPECTED_PLUGINS=(
-        ["zsh-autosuggestions"]="https://github.com/zsh-users/zsh-autosuggestions"
-        ["zsh-history-substring-search"]="https://github.com/zsh-users/zsh-history-substring-search"
-        ["zsh-syntax-highlighting"]="https://github.com/zsh-users/zsh-syntax-highlighting"
-        ["zsh-completions"]="https://github.com/zsh-users/zsh-completions"
+    # 检查常用插件（bash 3.2 无 declare -A，使用平行数组）
+    EXPECTED_PLUGIN_NAMES=(
+        "zsh-autosuggestions"
+        "zsh-history-substring-search"
+        "zsh-syntax-highlighting"
+        "zsh-completions"
+    )
+    EXPECTED_PLUGIN_URLS=(
+        "https://github.com/zsh-users/zsh-autosuggestions"
+        "https://github.com/zsh-users/zsh-history-substring-search"
+        "https://github.com/zsh-users/zsh-syntax-highlighting"
+        "https://github.com/zsh-users/zsh-completions"
     )
 
     log_info ""
     log_info "检查已安装的插件："
     INSTALLED_COUNT=0
-    for plugin_name in "${!EXPECTED_PLUGINS[@]}"; do
+    plugin_idx=0
+    while [ "$plugin_idx" -lt "${#EXPECTED_PLUGIN_NAMES[@]}" ]; do
+        plugin_name="${EXPECTED_PLUGIN_NAMES[$plugin_idx]}"
+        plugin_url="${EXPECTED_PLUGIN_URLS[$plugin_idx]}"
         plugin_path="$ZSH_CUSTOM/$plugin_name"
         if [ -d "$plugin_path" ]; then
             log_success "  ✓ $plugin_name 已安装"
@@ -129,12 +138,13 @@ if [ -d "$OMZ_DIR" ]; then
             fi
         else
             log_warning "  ✗ $plugin_name 未安装"
-            log_info "    安装命令: git clone ${EXPECTED_PLUGINS[$plugin_name]} $plugin_path"
+            log_info "    安装命令: git clone ${plugin_url} $plugin_path"
         fi
+        plugin_idx=$((plugin_idx + 1))
     done
 
     log_info ""
-    log_info "已安装插件数量: $INSTALLED_COUNT/${#EXPECTED_PLUGINS[@]}"
+    log_info "已安装插件数量: $INSTALLED_COUNT/${#EXPECTED_PLUGIN_NAMES[@]}"
 else
     log_warning "Oh My Zsh 未安装，跳过插件检查"
 fi

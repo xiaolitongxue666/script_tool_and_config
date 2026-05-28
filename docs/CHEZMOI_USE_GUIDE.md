@@ -662,7 +662,7 @@ Git 全局配置（`~/.gitconfig`）由 `dot_gitconfig.tmpl` 管理，包含：
 
 ## Cursor 用户设置与 Remote SSH
 
-Cursor 的 `User/settings.json` 由 chezmoi 管理（与 `run_once_93-install-cursor` 的 GUI 安装配套）：
+Cursor 编辑器 `User/settings.json` **不由本仓库 chezmoi 管理**（`run_once_93-install-cursor` 仅安装 GUI/CLI）：
 
 | 平台 | 源模板 | 同步到实际路径 |
 |------|--------|----------------|
@@ -1022,7 +1022,7 @@ extract file.zip  # 解压文件
 ### 配置位置
 
 - 配置文件: `~/.zshrc`
-- 源文件: `.chezmoi/dot_zshrc`
+- 源文件: `.chezmoi/dot_zshrc.tmpl`
 - 插件目录: `~/.oh-my-zsh/custom/plugins/`
 - 内置插件: `~/.oh-my-zsh/plugins/`
 

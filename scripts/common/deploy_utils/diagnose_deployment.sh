@@ -89,14 +89,16 @@ if [[ -f "$CONFIG_MAPPINGS_SH" ]]; then
     # shellcheck disable=SC1090
     source "$CONFIG_MAPPINGS_SH"
     _diag_platform="$(chezmoi_detect_platform_name)"
-    declare -A _diag_map
-    chezmoi_fill_config_mappings _diag_map "$_diag_platform"
-    for _diag_target in "${!_diag_map[@]}"; do
-        _diag_rel="${_diag_map[$_diag_target]}"
+    chezmoi_fill_config_mappings "$_diag_platform"
+    _diag_idx=0
+    while [[ "$_diag_idx" -lt "${#CHEZMOI_MAP_TARGETS[@]}" ]]; do
+        _diag_target="${CHEZMOI_MAP_TARGETS[$_diag_idx]}"
+        _diag_rel="${CHEZMOI_MAP_SOURCES[$_diag_idx]}"
         _diag_src="${PROJECT_ROOT}/${_diag_rel#./}"
         check_source_file "$_diag_src" "${_diag_target/#\~/$HOME}" "$(basename "$_diag_target") 配置"
+        _diag_idx=$((_diag_idx + 1))
     done
-    unset _diag_platform _diag_map _diag_target _diag_rel _diag_src
+    unset _diag_platform _diag_idx _diag_target _diag_rel _diag_src
 elif [[ "$OSTYPE" == "msys" ]] || [[ "$OSTYPE" == "cygwin" ]] || [[ "$OSTYPE" == "mingw"* ]]; then
     check_source_file "$CHEZMOI_DIR/dot_rmux.conf.tmpl" "$HOME/.rmux.conf" "rmux 配置"
 else

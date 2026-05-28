@@ -57,23 +57,17 @@ fi
 # ============================================
 # 定义文件映射（源文件 -> 目标文件，来自 config_mappings.sh）
 # ============================================
-declare -A FILE_MAPPINGS
-declare -A CONFIG_MAPPINGS
 CONFIG_MAPPINGS_SH="${PROJECT_ROOT}/scripts/chezmoi/config_mappings.sh"
 if [[ -f "$CONFIG_MAPPINGS_SH" ]]; then
     # shellcheck disable=SC1090
     source "$CONFIG_MAPPINGS_SH"
     _platform="$(chezmoi_detect_platform_name)"
-    chezmoi_fill_config_mappings CONFIG_MAPPINGS "$_platform"
-    for _target in "${!CONFIG_MAPPINGS[@]}"; do
-        _rel="${CONFIG_MAPPINGS[$_target]}"
-        _source="${PROJECT_ROOT}/${_rel#./}"
-        FILE_MAPPINGS["$_source"]="${_target/#\~/$HOME}"
-    done
-    unset _platform _target _rel _source
+    chezmoi_fill_config_mappings "$_platform"
+    unset _platform
 else
     log_warning "config_mappings.sh not found, using legacy minimal map"
-    FILE_MAPPINGS["$CHEZMOI_DIR/dot_bashrc.tmpl"]="$HOME/.bashrc"
+    CHEZMOI_MAP_TARGETS=("$HOME/.bashrc")
+    CHEZMOI_MAP_SOURCES=("$CHEZMOI_DIR/dot_bashrc.tmpl")
 fi
 
 # ============================================
@@ -160,11 +154,15 @@ process_file() {
 }
 
 # 处理所有文件映射
-for source_file in "${!FILE_MAPPINGS[@]}"; do
-    target_file="${FILE_MAPPINGS[$source_file]}"
+_map_idx=0
+while [[ "$_map_idx" -lt "${#CHEZMOI_MAP_SOURCES[@]}" ]]; do
+    source_file="${PROJECT_ROOT}/${CHEZMOI_MAP_SOURCES[$_map_idx]#./}"
+    target_file="${CHEZMOI_MAP_TARGETS[$_map_idx]/#\~/$HOME}"
     description=$(basename "$target_file")
     process_file "$source_file" "$target_file" "$description"
+    _map_idx=$((_map_idx + 1))
 done
+unset _map_idx source_file target_file description
 
 # ============================================
 # 自动添加所有文件到管理（如果不在管理中）
@@ -179,8 +177,10 @@ if [ -z "$MANAGED_FILES" ]; then
     log_info "没有文件在管理中，尝试自动添加..."
 
     ADDED_COUNT=0
-    for source_file in "${!FILE_MAPPINGS[@]}"; do
-        target_file="${FILE_MAPPINGS[$source_file]}"
+    _map_idx=0
+    while [[ "$_map_idx" -lt "${#CHEZMOI_MAP_SOURCES[@]}" ]]; do
+        target_file="${CHEZMOI_MAP_TARGETS[$_map_idx]/#\~/$HOME}"
+        _map_idx=$((_map_idx + 1))
         if [ -f "$target_file" ]; then
             log_info "添加到管理: $target_file"
             if chezmoi add "$target_file" 2>/dev/null; then
@@ -191,6 +191,7 @@ if [ -z "$MANAGED_FILES" ]; then
             fi
         fi
     done
+    unset _map_idx target_file
 
     if [ $ADDED_COUNT -gt 0 ]; then
         log_success "成功添加 $ADDED_COUNT 个文件到管理"
