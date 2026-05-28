@@ -1,5 +1,7 @@
 # 部署流程指南
 
+> **两阶段 Agent 部署（CLI + MCP）** 见 [docs/DEPLOY_TWO_PHASE.md](../../docs/DEPLOY_TWO_PHASE.md)（Phase 2 详见 agent-config 同文档）。本指南侧重 chezmoi 日常运维与 Windows ↔ Arch 同步。
+
 本指南说明如何在 Windows 和 Arch Linux 之间通过脚本进行配置部署和管理。
 
 ## 目录

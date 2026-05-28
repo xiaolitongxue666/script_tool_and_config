@@ -95,6 +95,21 @@
 | 只 deploy 无 MCP/全局 skills | Phase 2：agent-config `install-tools.sh` |
 | Cursor Remote SSH 主机名进仓库 | 已从 chezmoi `data` 移除；用 agent-config `config/local.env` |
 
+## macOS bash 3.2 兼容（2026-05 部署实测）
+
+macOS 默认 `/bin/bash` 为 **3.2**，不支持 `declare -A` / `local -n`。部署与审计脚本须用平行数组或字符串列表。
+
+| 问题 | 现象 | 解决 |
+|------|------|------|
+| `deploy.sh` exit 2 | `check_zsh_omz.sh: declare -A: invalid option` | 插件检查改用平行数组（已修复） |
+| `diagnose_deployment.sh` 警告 | 同上 + zsh 源文件误报不存在 | `config_mappings.sh` 改平行数组；`dot_zshrc` 统一为 `dot_zshrc.tmpl` |
+| agent-config 测试 3 项失败 | `set -u` 下空数组 `"${arr[@]}"` → unbound variable | `git-smart-commit.sh` / `summary-project-memory.sh` 用空格分隔字符串；`test-peon-install.sh` 用无 git 的 PATH |
+
+**脚本约束（新增/修改 deploy 辅助脚本时）**：
+- 禁止 `declare -A`；映射用 `config_mappings.sh` 的 `CHEZMOI_MAP_*` 平行数组
+- `set -u` 下勿对可能为空的数组做 `"${arr[@]}"` 参数展开；用字符串或 `[[ ${#arr[@]} -gt 0 ]]` 守卫
+- 诊断/审计 zsh 源路径以 `config_mappings.sh` 为准，勿硬编码过时文件名
+
 ## 通用 Agent 约束（摘要）
 
 1. 独立工具脚本（`scripts/common/standalone_tool_script/` 等）**永不删除**。

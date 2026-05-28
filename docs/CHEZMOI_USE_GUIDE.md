@@ -660,23 +660,9 @@ Git 全局配置（`~/.gitconfig`）由 `dot_gitconfig.tmpl` 管理，包含：
 
 然后执行 `chezmoi apply -v` 即可更新 `~/.gitconfig`。
 
-## Windows Terminal 配置
-
-由 chezmoi 模板 [`.chezmoi/dot_config/windows-terminal/settings.json.tmpl`](../.chezmoi/dot_config/windows-terminal/settings.json.tmpl) 管理，经 `run_onchange_sync_windows_terminal_config` 同步到 `%LOCALAPPDATA%` 下 WT 实际 `settings.json`。
-
-| 项 | 说明 |
-|----|------|
-| 默认 Profile | Git Bash（`windows_git_bash_path` 自动检测 C/D 盘，勿写死路径） |
-| 其它 Profile | PowerShell、命令提示符、Ubuntu WSL2 |
-| 快捷键 | 顶层 `keybindings`（ctrl+c/v、ctrl+shift+f、alt+shift+d） |
-| 新标签菜单 | `newTabMenu` → `remainingProfiles` |
-| 主题 | Catppuccin Mocha + CaskaydiaCove NFM |
-
-应用：`./scripts/manage_dotfiles.sh apply` 或 `./deploy.sh`。
-
 ## Cursor 用户设置与 Remote SSH
 
-Cursor 的 `User/settings.json` 由 **agent-config** 管理（与 `run_once_93-install-cursor` 的 GUI 安装配套）：
+Cursor 编辑器 `User/settings.json` **不由本仓库 chezmoi 管理**（已迁移至 **agent-config**；`run_once_93-install-cursor` 仅安装 GUI/CLI）：
 
 | 平台 | 源模板 | 同步到实际路径 |
 |------|--------|----------------|
@@ -1036,7 +1022,7 @@ extract file.zip  # 解压文件
 ### 配置位置
 
 - 配置文件: `~/.zshrc`
-- 源文件: `.chezmoi/dot_zshrc`
+- 源文件: `.chezmoi/dot_zshrc.tmpl`
 - 插件目录: `~/.oh-my-zsh/custom/plugins/`
 - 内置插件: `~/.oh-my-zsh/plugins/`
 

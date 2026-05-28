@@ -63,15 +63,15 @@ fi
 # ============================================
 # 定义配置映射（scripts/chezmoi/config_mappings.sh 为单一来源）
 # ============================================
-declare -A CONFIG_MAPPINGS
 CONFIG_MAPPINGS_SH="${SCRIPT_DIR}/config_mappings.sh"
 if [[ -f "$CONFIG_MAPPINGS_SH" ]]; then
     # shellcheck disable=SC1090
     source "$CONFIG_MAPPINGS_SH"
-    chezmoi_fill_config_mappings CONFIG_MAPPINGS "$PLATFORM"
+    chezmoi_fill_config_mappings "$PLATFORM"
 else
     log_warning "config_mappings.sh not found, using minimal fallback"
-    CONFIG_MAPPINGS["~/.bashrc"]=".chezmoi/dot_bashrc.tmpl"
+    CHEZMOI_MAP_TARGETS=("~/.bashrc")
+    CHEZMOI_MAP_SOURCES=(".chezmoi/dot_bashrc.tmpl")
 fi
 
 # ============================================
@@ -119,8 +119,11 @@ OK_COUNT=0
 # 清空报告文件
 > "$AUDIT_REPORT"
 
-for target_path in "${!CONFIG_MAPPINGS[@]}"; do
-    source_path="${CONFIG_MAPPINGS[$target_path]}"
+_map_idx=0
+while [[ "$_map_idx" -lt "${#CHEZMOI_MAP_TARGETS[@]}" ]]; do
+    target_path="${CHEZMOI_MAP_TARGETS[$_map_idx]}"
+    source_path="${CHEZMOI_MAP_SOURCES[$_map_idx]}"
+    _map_idx=$((_map_idx + 1))
 
     # audit_config 在 MISSING/NOT_TEMPLATE 时返回非 0；命令替换在 set -e 下会误触发退出
     set +e

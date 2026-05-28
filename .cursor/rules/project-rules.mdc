@@ -20,8 +20,9 @@ globs:
 ## chezmoi 部署（Agent）
 
 - 应用配置用 `./scripts/manage_dotfiles.sh apply` 或 `./deploy.sh`，勿仅 `export CHEZMOI_SOURCE_DIR` 后 `chezmoi apply`
-- `scripts/chezmoi/config_mappings.sh` 为审计/force_apply 映射唯一来源
+- `scripts/chezmoi/config_mappings.sh` 为审计/force_apply 映射唯一来源（**bash 3.2 平行数组**，禁止 `declare -A`）
 - `chezmoi_ensure_user_config`（`chezmoi_core.sh`）维护 `sourceDir` 与 Windows `[interpreters.sh]`
+- macOS 默认 bash 3.2：`deploy.sh` 末尾 Zsh/OMZ 检查与 diagnose 须兼容；详见 `docs/PROJECT_AGENT_MEMORY.md`「macOS bash 3.2」
 
 ## claude-mem 自动检测
 

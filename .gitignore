@@ -404,10 +404,15 @@ scripts/common/deploy_utils/*.bak
 /prn
 /aux
 
-# graphify outputs
+# graphify outputs（本地分析产物，非仓库资产）
 graphify-out/
 .graphify_old.json
+.graphify_analysis.json
+.graphify_extract.json
 temp_plan.md
+
+# chezmoi 辅助脚本日志
+scripts/chezmoi/logs/
 
 # AI template smoke test 临时目录/文件
 /tmp_template_test_project/
