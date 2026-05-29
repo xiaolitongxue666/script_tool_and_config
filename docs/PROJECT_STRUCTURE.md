@@ -47,9 +47,9 @@ script_tool_and_config/
 │   ├── SOFTWARE_LIST.md              # 软件清单
 │   ├── ENCODING_AND_LINE_ENDINGS.md  # 编码和换行符规范
 │   ├── CHEZMOI_USE_GUIDE.md          # chezmoi 使用指南
-│   ├── OS_SETUP_GUIDE.md             # 操作系统设置指南
-│   ├── INSTALL_GUIDE.md              # 一键安装与首次配置入口
-│   ├── TEST_PLAN_NVIM_INDEPENDENT.md # Neovim 独立化测试计划
+│   ├── INSTALL_GUIDE.md              # 一键安装与首次配置入口（含各 OS 分步）
+│   ├── PROJECT_MEMORY.md             # 项目级 Agent 紧凑记忆
+│   ├── NEOVIM_AND_THIS_REPO.md       # Neovim 关系与验证清单
 │   └── ...
 │
 ├── scripts/                          # 脚本工具集合

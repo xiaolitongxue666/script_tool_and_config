@@ -5,9 +5,9 @@
 ## 文档清理审计结论（2026-04 / 2026-05）
 
 - `docs/README.md`：保留，作为 docs 目录索引；由根目录 `README.md` 显式链接。
-- `docs/patches/archive/README.md`：保留，当前仍被 `docs/TEST_PLAN_NVIM_INDEPENDENT.md` 引用作为历史补丁说明。
+- `docs/patches/archive/README.md`：保留，作为 Neovim 历史补丁说明。
 - **2026-05 已删除**：`scripts/linux/system_basic_env/INSTALL_STATUS.md`（内容已并入 `SOFTWARE_LIST.md` + `verify_installation.sh`）。
-- **2026-05 已合并**：`OS_SETUP_GUIDE.md`、`TEST_PLAN_NVIM_INDEPENDENT.md` 正文并入 `INSTALL_GUIDE.md` / `NEOVIM_AND_THIS_REPO.md`（原文件保留重定向）。
+- **2026-05 已删除**：`OS_SETUP_GUIDE.md`、`TEST_PLAN_NVIM_INDEPENDENT.md`（正文已并入 `INSTALL_GUIDE.md` / `NEOVIM_AND_THIS_REPO.md`）。
 - 删除策略：仅在“无外部引用 + 不再承担测试/流程证据”同时满足时再删除。
 
 ## 安装与配置
@@ -16,8 +16,8 @@
 |------|------|
 | [INSTALL_GUIDE.md](INSTALL_GUIDE.md) | 一键安装与首次配置入口（推荐先看）；各平台分步与故障排除 |
 | [DEPLOY_TWO_PHASE.md](DEPLOY_TWO_PHASE.md) | 两阶段部署（本仓库 Phase 1 + agent-config Phase 2） |
-| [OS_SETUP_GUIDE.md](OS_SETUP_GUIDE.md) | 已合并至 INSTALL_GUIDE（保留重定向） |
 | [SOFTWARE_LIST.md](SOFTWARE_LIST.md) | 完整软件清单与 run_once 脚本对应关系（按 OS / WSL 区分） |
+| [PROJECT_MEMORY.md](PROJECT_MEMORY.md) | 项目级紧凑记忆（Agent 快速索引，详情见 PROJECT_AGENT_MEMORY） |
 | [CODEWHALE.md](CODEWHALE.md) | CodeWhale 安装、WSL 快速流程与排错 |
 | [PROJECT_AGENT_MEMORY.md](PROJECT_AGENT_MEMORY.md) | 项目 Agent 可提交记忆（含 WSL 部署实测） |
 | [RMUX_WINDOWS.md](RMUX_WINDOWS.md) | Windows rmux 安装、手动使用与排错（含 chezmoi 部署陷阱） |
@@ -40,8 +40,7 @@
 
 | 文档 | 说明 |
 |------|------|
-| [NEOVIM_AND_THIS_REPO.md](NEOVIM_AND_THIS_REPO.md) | Neovim 与本仓库的关系、安装方式 |
-| [TEST_PLAN_NVIM_INDEPENDENT.md](TEST_PLAN_NVIM_INDEPENDENT.md) | Neovim 独立化相关手动验证计划 |
+| [NEOVIM_AND_THIS_REPO.md](NEOVIM_AND_THIS_REPO.md) | Neovim 与本仓库的关系、安装方式与验证清单 |
 | [ZSH_STARTUP_TIME.md](ZSH_STARTUP_TIME.md) | Zsh 启动时间相关说明 |
 | [patches/archive/README.md](patches/archive/README.md) | 补丁归档说明 |
 

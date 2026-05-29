@@ -59,9 +59,9 @@
 | Claude Code | `CLAUDE.md`（本文件） |
 | Cursor | `.cursor/rules/project-rules.mdc`、`.cursor/rules/codewhale.mdc` |
 | GitHub Copilot / Codex | `.github/copilot-instructions.md` |
-| 项目 Agent 记忆（可提交） | `docs/PROJECT_AGENT_MEMORY.md` |
+| 项目 Agent 记忆（可提交） | `docs/PROJECT_AGENT_MEMORY.md`（权威）、`docs/PROJECT_MEMORY.md`（紧凑） |
 
-修改项目设计理念或模板策略时，需要同步更新以上所有文件。
+修改项目设计理念或模板策略时，需要同步更新以上所有文件及 `docs/PROJECT_MEMORY.md`。
 
 ## 架构概要
 

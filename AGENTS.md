@@ -90,7 +90,7 @@ bash tests/test_syntax.sh   # 所有 .sh 文件语法检查
 bash tests/test_proxy.sh    # 代理地址检测/补全逻辑测试
 ```
 
-nvim 独立化相关改动后，可按 [docs/TEST_PLAN_NVIM_INDEPENDENT.md](docs/TEST_PLAN_NVIM_INDEPENDENT.md) 做手动验证。
+nvim 独立化相关改动后，可按 [docs/NEOVIM_AND_THIS_REPO.md](docs/NEOVIM_AND_THIS_REPO.md) §验证清单 做手动验证。
 
 ## 安装流程
 
@@ -392,15 +392,7 @@ ensure_directory() {
 4. `MINGW_PREFIX` 环境变量
 5. `cmd //c "if exist ..."` 回退检查 C:/ 和 D:/ 盘
 
-### 部署入口职责矩阵
-
-| 入口脚本 | 定位 | 应该做 | 不应该做 |
-|------|------|------|------|
-| `install.sh` | 首次安装入口 | 安装/检查 chezmoi、初始化环境、执行 `chezmoi apply -v --force`、调用安装验证脚本 | 承担日常运维命令分发 |
-| `deploy.sh` | 增量部署入口 | 在 chezmoi 已可用前提下执行增量部署与修复流程（含锁处理、诊断、必要校验） | 替代首次安装流程、扩展为通用命令分发器 |
-| `scripts/manage_dotfiles.sh` | 运维命令入口 | 提供 `status/diff/apply/edit/list` 等操作封装 | 内置复杂平台安装逻辑 |
-
-- 三个入口都可触达 chezmoi，但必须保持以上职责边界，避免重复实现和分叉修复。
+部署入口职责矩阵见上文「部署入口职责矩阵（必须遵守）」。
 
 ## 项目结构
 

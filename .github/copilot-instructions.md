@@ -43,4 +43,4 @@ Template mapping:
 - Deploy: `./deploy.sh` or `./scripts/manage_dotfiles.sh apply` — do not pipe apply through `head`/`rg` (SIGPIPE).
 - Binaries: `codewhale` + `codewhale-tui`; state root `~/.codewhale` (legacy `~/.deepseek` read-only fallback).
 - Do **not** use `cargo install deepseek` or `run_once_92-install-deepseek` (removed).
-- Agent notes: `docs/PROJECT_AGENT_MEMORY.md`, `docs/CODEWHALE.md`.
+- Agent notes: `docs/PROJECT_AGENT_MEMORY.md`, `docs/PROJECT_MEMORY.md`, `docs/CODEWHALE.md`.

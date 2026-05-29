@@ -212,7 +212,7 @@ chezmoi-win-git-paths.*.toml
 .chezmoi/.chezmoi.toml.test
 .chezmoi/.chezmoi.toml
 
-# 误提交的非模板 chezmoi 源文件（须为 *.tmpl）
+# 误提交的非模板 chezmoi 源文件（须为 *.tmpl；canonical zsh 源为 dot_zshrc.tmpl）
 .chezmoi/dot_zshrc
 .chezmoi/dot_bashrc
 .chezmoi/dot_bash_profile
@@ -447,6 +447,11 @@ uploads/
 
 # Agent 工具临时输出（Cursor 等；apply 日志勿提交）
 agent-tools/
+.cursor/projects/
+
+# 已删除文档 stub 勿恢复（正文在 INSTALL_GUIDE / NEOVIM_AND_THIS_REPO）
+docs/OS_SETUP_GUIDE.md
+docs/TEST_PLAN_NVIM_INDEPENDENT.md
 
 # 与 agent-config 对齐：机器本地 env（若在本仓库放 Cursor SSH 等）
 config/local.env

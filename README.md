@@ -71,7 +71,7 @@ install.sh
 |------|------|
 | [docs/INSTALL_GUIDE.md](docs/INSTALL_GUIDE.md) | 一键安装与配置入口（推荐先看） |
 | [docs/README.md](docs/README.md) | docs 目录文档索引与维护说明 |
-| [docs/OS_SETUP_GUIDE.md](docs/OS_SETUP_GUIDE.md) | 已合并至 INSTALL_GUIDE（保留重定向） |
+| [docs/PROJECT_MEMORY.md](docs/PROJECT_MEMORY.md) | 项目级 Agent 紧凑记忆 |
 | [docs/CHEZMOI_USE_GUIDE.md](docs/CHEZMOI_USE_GUIDE.md) | chezmoi 详细使用指南 |
 | [docs/SOFTWARE_LIST.md](docs/SOFTWARE_LIST.md) | 完整软件清单与 run_once 对应关系 |
 | [docs/CODEWHALE.md](docs/CODEWHALE.md) | CodeWhale 安装与 WSL 快速流程 |

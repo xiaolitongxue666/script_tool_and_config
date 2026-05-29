@@ -58,4 +58,4 @@ Shell 配置模板中内置了 claude-mem 项目级记忆自动检测：
 - 安装脚本：`.chezmoi/run_once_92-install-codewhale.sh.tmpl`（**已移除** `install-deepseek`）。
 - WSL：`npm install -g codewhale`（fnm 全局）；Windows 互操作 PATH 不算已安装；**禁止**从 WSL 改 Windows npm。
 - 部署：`./deploy.sh` 或 `./scripts/manage_dotfiles.sh apply`（勿管道截断 apply 输出）。
-- Agent 必读：`docs/PROJECT_AGENT_MEMORY.md`、`docs/CODEWHALE.md`；细则见 `.cursor/rules/codewhale.mdc`。
+- Agent 必读：`docs/PROJECT_AGENT_MEMORY.md`、`docs/PROJECT_MEMORY.md`、`docs/CODEWHALE.md`；细则见 `.cursor/rules/codewhale.mdc`。

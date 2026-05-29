@@ -146,6 +146,30 @@ macOS 默认 `/bin/bash` 为 **3.2**，不支持 `declare -A` / `local -n`。部
 - `set -u` 下勿对可能为空的数组做 `"${arr[@]}"` 参数展开；用字符串或 `[[ ${#arr[@]} -gt 0 ]]` 守卫
 - 诊断/审计 zsh 源路径以 `config_mappings.sh` 为准，勿硬编码过时文件名
 
+## WSL 两阶段部署实测（2026-05-29）
+
+| 项 | 结果 |
+|----|------|
+| Phase 1 | `eval "$(fnm env)" && ./deploy.sh` → exit 0；`verify_installation` 通过 5/0/0 |
+| Phase 2 | agent-config `bash scripts/install-tools.sh` → exit 0；`validate-quality` 与 `run-all-tests` 通过 |
+| 代理 | WSL 自动 `http://192.168.192.1:7890`（resolv nameserver） |
+| Layer 4 | claude / codex / codewhale / cursor 均在 PATH |
+
+| 问题 | 原因 | 解决 |
+|------|------|------|
+| 工作区缺 `dot_zshrc.tmpl`、仅有 `dot_zshrc` | chezmoi 渲染或误拷入 gitignore 路径 | `git checkout -- .chezmoi/dot_zshrc.tmpl`；删除 `.chezmoi/dot_zshrc` |
+| deploy 后 `chezmoi status` 显示 `M`/`R` | 模板与目标有差异或 run_once 重命名 | 非失败；按需再 apply |
+| agent-config skills 验证 WARN | 只查 `~/.claude/skills`，实际在 `~/.agents/skills` | agent-config 已修 `verify_global_agent_skills` 多路径 |
+| 误以为 Codex 缺 settings.json | v0.128+ 用 `~/.codex/config.toml` | 以 apply-config 与 `codex --version` 为准 |
+
+## chezmoi 源文件命名（2026-05）
+
+| 项 | 约定 |
+|----|------|
+| zsh 模板 | **必须** `.chezmoi/dot_zshrc.tmpl`（`config_mappings.sh` 映射 `~/.zshrc`） |
+| 禁止提交 | `.chezmoi/dot_zshrc` 等非 `*.tmpl` 源（见 `.gitignore`） |
+| 恢复 | 若工作区仅有 `dot_zshrc`：`git checkout HEAD -- .chezmoi/dot_zshrc.tmpl` 后删除 `dot_zshrc` |
+
 ## 通用 Agent 约束（摘要）
 
 1. 独立工具脚本（`scripts/common/standalone_tool_script/` 等）**永不删除**。
@@ -153,3 +177,4 @@ macOS 默认 `/bin/bash` 为 **3.2**，不支持 `declare -A` / `local -n`。部
 3. 运行时日志英文；注释与文档中文。
 4. Windows run_once **无管理员**依赖。
 5. 用户明确「当前是 WSL」时，Agent 操作范围限定 WSL，不修改 Windows 宿主 npm/包。
+6. 紧凑记忆索引：[PROJECT_MEMORY.md](PROJECT_MEMORY.md)；变更时同步 `AGENTS.md`、`CLAUDE.md`、`.cursor/rules/`。
