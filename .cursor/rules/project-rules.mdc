@@ -27,6 +27,14 @@ globs:
 - `chezmoi_ensure_user_config`（`chezmoi_core.sh`）维护 `sourceDir` 与 Windows `[interpreters.sh]`
 - macOS 默认 bash 3.2：`deploy.sh` 末尾 Zsh/OMZ 检查与 diagnose 须兼容；详见 `docs/PROJECT_AGENT_MEMORY.md`「macOS bash 3.2」
 
+## Windows Terminal / Git Bash 路径（C 或 D 盘）
+
+- Git for Windows 可能在 `C:` 或 `D:`；**禁止**在 `.chezmoidata.toml` 或 WT 模板写死 `C:\Program Files\Git`
+- 检测：`.chezmoi/detect_windows_git_paths.sh`；注入：`chezmoi_run_apply` → `--override-data-file`（源内 `chezmoi.toml [data]` 的 Go 模板**不会**自动求值）
+- apply 成功后 `chezmoi_sync_windows_terminal_config` 同步到 WT LocalState（override-data 改渲染结果时 `run_onchange` 不一定触发）
+- WT 报 `0x80070002`：先 PowerShell `Test-Path` 确认真实 bash 路径，再 `manage_dotfiles.sh apply`，完全重启 WT
+- 详见 `docs/PROJECT_AGENT_MEMORY.md`「Windows Terminal：Git Bash 路径 C/D 盘」
+
 ## claude-mem 自动检测
 
 Shell 配置模板中内置了 claude-mem 项目级记忆自动检测：

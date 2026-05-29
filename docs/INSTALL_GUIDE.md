@@ -132,7 +132,8 @@ ssh -T git@github.com
 **Windows 注意**：
 - 统一在 **Git Bash** 中执行，不要在 PowerShell 或 CMD 中执行 `install.sh`
 - zsh/starship/nerd-fonts 等跨平台脚本均会在 Git Bash 环境下运行
-- SSH 代理使用 Git for Windows 自带的 `connect.exe`（路径自动检测）
+- SSH 代理使用 Git for Windows 自带的 `connect.exe`（apply 时由 `detect_windows_git_paths.sh` 自动检测 C/D 盘）
+- Git 可能装在 **D:**（如 `D:\Program Files\Git`）；WT Git Bash 路径由 apply 注入，**勿**在仓库写死 `C:\Program Files\Git`
 - 包管理器优先使用 winget，回退 MSYS2 pacman
 - **`chezmoi apply` 必须带 `--force`**：`manage_dotfiles.sh apply` 与 `deploy.sh` 已自动注入，避免 `.gitconfig` 等外部修改触发交互菜单卡住
 - **`deploy.sh` 诊断阶段在 Windows 跳过 `apply --dry-run`**（模拟全部 run_once 会长时间无输出）
@@ -184,6 +185,14 @@ STRICT_AGENT_PREFLIGHT=1 bash scripts/install-tools.sh
 | 停在 `.gitconfig has changed...` | chezmoi 等待交互 overwrite | 使用 `--force`（脚本已默认）；手动：`chezmoi apply -v --force` |
 | `timeout obtaining persistent state lock` | 残留 `chezmoi.exe` 或锁文件 | `taskkill //F //IM chezmoi.exe` 后 `bash scripts/common/deploy_utils/fix_chezmoi_lock.sh` |
 | apply 被管道中断 | `\| head` / `\| rg` 导致 SIGPIPE | 勿截断 apply 输出 |
+
+### Windows Terminal：Git Bash 启动失败（0x80070002）
+
+| 现象 | 原因 | 处理 |
+|------|------|------|
+| WT 报「找不到文件」/ `0x80070002` | profile 指向 `C:\Program Files\Git\...`，本机 Git 在 D: 或其他盘 | PowerShell 确认真实路径：`Test-Path 'D:\Program Files\Git\bin\bash.exe'` |
+| chezmoi 源 settings 已是 D:，WT 仍用 C: | WT 读 `%LOCALAPPDATA%` LocalState，未同步 | `./scripts/manage_dotfiles.sh apply`（apply 后自动同步 WT）；**完全关闭并重开 WT** |
+| 仍指向错误盘符 | 本地 `.chezmoidata.toml` / `chezmoi.toml.local` 写死 C: | 删除仓库内 C: 硬编码；必要时在 `~/.config/chezmoi/chezmoi.toml.local` 的 `[data]` 覆盖 |
 
 ### chezmoi 锁占用
 

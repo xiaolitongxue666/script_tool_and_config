@@ -80,6 +80,25 @@
 | 多次 apply 报 lock timeout | 前次 chezmoi 进程未退出 | `taskkill //F //IM chezmoi.exe`，运行 `fix_chezmoi_lock.sh` |
 | `manage_dotfiles apply` 曾缺 force | 调用 `chezmoi_run_apply "-v"` 覆盖默认 | 已修复：`chezmoi_core` 自动补 `--force` |
 
+## Windows Terminal：Git Bash 路径 C/D 盘（2026-05 实测）
+
+Git for Windows 可能装在 **C:** 或 **D:**（如 `D:\Program Files\Git`）。WT 启动 Git Bash 报 **`0x80070002`** 时，通常是 profile 仍指向不存在的 `C:\Program Files\Git\bin\bash.exe`。
+
+| 项 | 约定 |
+|----|------|
+| 检测脚本 | `.chezmoi/detect_windows_git_paths.sh`（参数 `bash` / `icon` / `connect`；优先 D: 再 C:） |
+| 注入方式 | **勿**指望 `.chezmoi/chezmoi.toml` 的 `[data]` Go 模板自动求值（`chezmoi data` 不会解析）；`chezmoi_run_apply` 在 Windows 下生成 `--override-data-file` 注入 `windows_git_*` |
+| 本地覆盖 | `~/.config/chezmoi/chezmoi.toml.local` 的 `[data]` 可写死路径；**勿**在 `.chezmoidata.toml` 写死 `C:/` |
+| WT 同步 | 渲染结果写入 `~/.config/windows-terminal/settings.json` 后，`chezmoi_sync_windows_terminal_config` **apply 后**复制到 `%LOCALAPPDATA%` 下 WT LocalState（override-data 改渲染结果时 `run_onchange` 的 `depends` **不会**触发） |
+| 验证 | PowerShell：`Test-Path 'D:\Program Files\Git\bin\bash.exe'`；apply 后检查 WT LocalState 的 `commandline` 是否为 D: 路径 |
+
+| 问题 | 原因 | 解决 |
+|------|------|------|
+| WT 报 `0x80070002` | WT settings 硬编码 C:，本机 Git 在 D: | `./scripts/manage_dotfiles.sh apply`（含 override + WT 同步） |
+| `chezmoi data` 无 `windows_git_bash_path` | 源内 `[data]` 模板不求值；`.chezmoidata.toml` 仅静态键 | 以 apply 后 `~/.config/windows-terminal/settings.json` 为准；或 `chezmoi --override-data-file` 调试 |
+| apply 后 chezmoi 源正确、WT 仍 C: | `run_onchange_sync` 仅在源模板变更时触发 | 已修复：`chezmoi_run_apply` 成功后调用 `chezmoi_sync_windows_terminal_config` |
+| `.chezmoidata.toml` 写死 C: 覆盖检测 | 静态 data 优先级与注释误导 | 已移除硬编码；检测由 override-data-file 负责 |
+
 ## Windows：fnm + uv + Git Bash（2026-05）
 
 | 项 | 约定 |
@@ -88,7 +107,7 @@
 | Python | **uv**（Layer 0）；`uv python install` 默认 **3.12**（`UV_DEFAULT_PYTHON` 覆盖） |
 | CodeWhale 命令 | **`codewhale`**（全小写），非 `CodeWhale` |
 | 多 Windows 用户 | **Administrator / xiaoli** 等各跑一遍 Phase 1 + Phase 2（`AppData` 不共享） |
-| WT 配置 | `dot_config/windows-terminal/settings.json.tmpl` + `run_onchange_sync_windows_terminal_config` |
+| WT 配置 | `settings.json.tmpl` + `detect_windows_git_paths.sh` + apply 后 `chezmoi_sync_windows_terminal_config`（C/D 盘 Git 路径） |
 
 | 问题 | 解法 |
 |------|------|

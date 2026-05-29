@@ -366,6 +366,94 @@ chezmoi_export_apply_env() {
     fi
 }
 
+# Windows：检测 Git for Windows 路径（C:/ 或 D:/），写入 chezmoi --override-data-file
+# stdout: 临时 TOML 路径；无检测脚本或失败时 stdout 为空
+chezmoi_write_windows_git_override_data() {
+    if [[ ! "$(uname -s)" =~ ^(MINGW|MSYS|CYGWIN) ]]; then
+        return 0
+    fi
+
+    local source_dir="${1:-}"
+    if [[ -z "$source_dir" ]]; then
+        source_dir="$(chezmoi_get_source_dir)"
+    fi
+
+    local detect_script="${source_dir}/detect_windows_git_paths.sh"
+    if [[ ! -f "$detect_script" ]]; then
+        echo "[WARNING] detect_windows_git_paths.sh not found, skip Windows Git path override" >&2
+        return 0
+    fi
+
+    local bash_path icon_path connect_path
+    bash_path="$(bash "$detect_script" bash 2>/dev/null || true)"
+    icon_path="$(bash "$detect_script" icon 2>/dev/null || true)"
+    connect_path="$(bash "$detect_script" connect 2>/dev/null || true)"
+
+    if [[ -z "$bash_path" ]]; then
+        echo "[WARNING] Failed to detect Git for Windows paths" >&2
+        return 0
+    fi
+
+    local override_file
+    override_file="$(mktemp "${TMPDIR:-/tmp}/chezmoi-win-git-paths.XXXXXX.toml" 2>/dev/null || mktemp /tmp/chezmoi-win-git-paths.XXXXXX.toml)"
+    {
+        printf 'windows_git_bash_path = "%s"\n' "$bash_path"
+        printf 'windows_git_icon_path = "%s"\n' "$icon_path"
+        printf 'windows_git_connect_path = "%s"\n' "$connect_path"
+    } > "$override_file"
+
+    echo "$override_file"
+}
+
+# Windows：将 ~/.config/windows-terminal/settings.json 同步到 WT LocalState
+# （override-data 改变渲染结果时 run_onchange 的 depends 不会触发，故 apply 后显式同步）
+chezmoi_sync_windows_terminal_config() {
+    if [[ ! "$(uname -s)" =~ ^(MINGW|MSYS|CYGWIN) ]]; then
+        return 0
+    fi
+
+    local src=""
+    [[ -f "$HOME/.config/windows-terminal/settings.json" ]] && src="$HOME/.config/windows-terminal/settings.json"
+    [[ -z "$src" ]] && [[ -f "$HOME/run_on_windows/.config/windows-terminal/settings.json" ]] && \
+        src="$HOME/run_on_windows/.config/windows-terminal/settings.json"
+
+    if [[ -z "$src" ]] || [[ ! -f "$src" ]]; then
+        echo "[INFO] Windows Terminal settings source not found, skip sync" >&2
+        return 0
+    fi
+
+    local local_app_data="${LOCALAPPDATA:-$HOME/AppData/Local}"
+    local wt_new_dir="${local_app_data}/Microsoft/Windows Terminal"
+    local wt_classic_dir="${local_app_data}/Packages/Microsoft.WindowsTerminal_8wekyb3d8bbwe/LocalState"
+    local synced=false
+    local dest_dir dest backup
+
+    _wt_sync_to_dir() {
+        dest_dir="$1"
+        if [[ -d "$dest_dir" ]]; then
+            dest="${dest_dir}/settings.json"
+            cp "$src" "$dest"
+            echo "[INFO] Synced Windows Terminal settings to: ${dest}" >&2
+            backup="${dest}.backup.$(date +%Y%m%d_%H%M%S)"
+            cp "$dest" "$backup" 2>/dev/null || true
+            synced=true
+            return 0
+        fi
+        return 1
+    }
+
+    if [[ -f "${wt_classic_dir}/settings.json" ]]; then
+        _wt_sync_to_dir "$wt_classic_dir" || true
+    fi
+    _wt_sync_to_dir "$wt_new_dir" || true
+
+    if [[ "$synced" != true ]]; then
+        mkdir -p "$wt_new_dir"
+        cp "$src" "${wt_new_dir}/settings.json"
+        echo "[INFO] Created and synced Windows Terminal settings to: ${wt_new_dir}/settings.json" >&2
+    fi
+}
+
 # ============================================
 # chezmoi 核心操作
 # ============================================
@@ -432,14 +520,34 @@ chezmoi_run_apply() {
         fi
     fi
 
+    # 源内 chezmoi.toml [data] 的 Go 模板不会自动求值；Windows 下注入检测到的 Git 路径
+    local win_git_override_file=""
+    if [[ "$(uname -s)" =~ ^(MINGW|MSYS|CYGWIN) ]]; then
+        win_git_override_file="$(chezmoi_write_windows_git_override_data "")"
+        if [[ -n "$win_git_override_file" && -f "$win_git_override_file" ]]; then
+            apply_args=(--override-data-file "$win_git_override_file" "${apply_args[@]}")
+        fi
+    fi
+
     echo "[INFO] Running: chezmoi apply ${apply_args[*]}"
+    local apply_rc=0
     if chezmoi apply "${apply_args[@]}"; then
         echo "[SUCCESS] Config applied successfully"
-        return 0
+        apply_rc=0
     else
         echo "[ERROR] Config apply failed"
-        return 1
+        apply_rc=1
     fi
+
+    if [[ -n "$win_git_override_file" ]]; then
+        rm -f "$win_git_override_file"
+    fi
+
+    if [[ "$apply_rc" -eq 0 ]] && [[ "$(uname -s)" =~ ^(MINGW|MSYS|CYGWIN) ]]; then
+        chezmoi_sync_windows_terminal_config
+    fi
+
+    return "$apply_rc"
 }
 
 # 验证配置是否完全同步

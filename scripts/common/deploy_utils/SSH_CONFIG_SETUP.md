@@ -71,7 +71,7 @@ chezmoi apply ~/.ssh/config
 模板已包含 GitHub 使用 `ssh.github.com:443` 及可选 ProxyCommand（经 Clash 等代理）：
 
 - **源文件**：`.chezmoi/dot_ssh/config.tmpl`，应用后生成 `~/.ssh/config`。
-- **Windows**：ProxyCommand 使用 Git 自带的 `connect.exe`，路径由 data 中 `windows_git_connect_path` 指定（默认 `C:/Program Files/Git/mingw64/bin/connect.exe`）。
+- **Windows**：ProxyCommand 使用 Git 自带的 `connect.exe`，路径由 apply 时 `detect_windows_git_paths.sh` 注入的 `windows_git_connect_path` 指定（C/D 盘自动检测；可在 `~/.config/chezmoi/chezmoi.toml.local` 覆盖）。
 - **macOS**：系统 nc 无代理转发能力，需先安装 `connect`（`brew install connect`，或首次 `chezmoi apply` 时由 `run_once_install-connect` 自动安装）。**必须使用 connect 的绝对路径**（由 `macos_connect_path` 指定）：Apple Silicon 多为 `/opt/homebrew/bin/connect`，Intel/旧 Homebrew 多为 `/usr/local/bin/connect`。若写为 `connect` 而不写路径，从 Dock/Spotlight 启动的 GUI 应用（如 Obsidian Git 插件）因 PATH 不含该目录会报 `exec: connect: not found` 导致 push 失败。代理类型由 `macos_proxy_connect_opt` 控制：`-H` 为 HTTP 代理（如 Clash），`-S` 为 SOCKS。
 - **Linux**：ProxyCommand 使用 `nc -X connect -x ...`，需安装 netcat-openbsd（或发行版等价包）；若报错请安装后重试。
 

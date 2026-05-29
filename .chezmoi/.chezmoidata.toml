@@ -6,11 +6,9 @@ proxy_host = "127.0.0.1"
 proxy_port = "7890"
 git_user_name = ""
 git_user_email = ""
-# Windows 下 Git Bash 路径（用于 Windows Terminal profile；若 Git 安装在其他盘符请在 .chezmoi.toml.local 中覆盖）
-windows_git_bash_path = "C:/Program Files/Git/bin/bash.exe"
-# Windows 下 Git for Windows 图标路径
-windows_git_icon_path = "C:/Program Files/Git/mingw64/share/git/git-for-windows.ico"
-windows_git_connect_path = "C:/Program Files/Git/mingw64/bin/connect.exe"
+# windows_git_bash_path / windows_git_icon_path / windows_git_connect_path：
+# 勿在此写死 C:/ 路径；apply 时由 detect_windows_git_paths.sh + --override-data-file 注入
+# （可在 ~/.config/chezmoi/chezmoi.toml.local 的 [data] 覆盖）
 macos_connect_path = "/opt/homebrew/bin/connect"
 macos_proxy_connect_opt = "-S"
 macos_zsh_path = "/opt/homebrew/bin/zsh"

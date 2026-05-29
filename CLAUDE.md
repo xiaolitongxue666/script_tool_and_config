@@ -144,7 +144,9 @@ Layer 5: tmux + 平台特定（linux/darwin/windows 下的 run_on_*）
 
 ### Windows Terminal 配置规则（settings.json）
 
-**路径自动检测**：Git Bash 路径**禁止硬编码**。`chezmoi.toml` 的 `[data]` 中通过 `{{ output }}` 自动检测常见安装位置（C:/ → D:/ 回退），`settings.json.tmpl` 通过模板变量引用。用户可在 `.chezmoi.toml.local` 中覆盖。
+**路径自动检测**：Git Bash 路径**禁止硬编码** C 盘。`.chezmoi/detect_windows_git_paths.sh` 按 D/C 盘检测；`chezmoi_run_apply` 在 Windows 下用 `--override-data-file` 注入 `windows_git_*`（源内 `chezmoi.toml [data]` 的 Go 模板**不会**自动求值）。`settings.json.tmpl` 引用 `.windows_git_bash_path` 等变量。用户可在 `~/.config/chezmoi/chezmoi.toml.local` 的 `[data]` 覆盖。
+
+**apply 后 WT 同步**：override-data 改变渲染结果时 `run_onchange` 的 `depends` 不一定触发；`chezmoi_sync_windows_terminal_config` 在 apply 成功后复制到 WT LocalState。
 
 **JSON 反斜杠转义**：chezmoi 的 `replace "/" "\\"` 只产生单反斜杠，JSON 要求 `\\`。模板中必须用 `replace "/" "\\\\"`（4 个反斜杠 → 输出 2 个 → JSON 解析为 1 个）。
 

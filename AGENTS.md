@@ -381,7 +381,7 @@ ensure_directory() {
 
 三个入口脚本共享这个封装层：install.sh（首次安装）→ deploy.sh（增量）→ manage_dotfiles.sh（运维）。
 
-**chezmoi 注意**：CLI 不读 `CHEZMOI_SOURCE_DIR`；`sourceDir` 在 `~/.config/chezmoi/chezmoi.toml`（`chezmoi_ensure_user_config`）。配置映射见 `scripts/chezmoi/config_mappings.sh`。Windows rmux 见 `docs/RMUX_WINDOWS.md`。
+**chezmoi 注意**：CLI 不读 `CHEZMOI_SOURCE_DIR`；`sourceDir` 在 `~/.config/chezmoi/chezmoi.toml`（`chezmoi_ensure_user_config`）。配置映射见 `scripts/chezmoi/config_mappings.sh`。Windows Git/WT 路径 C/D 盘检测见 `docs/PROJECT_AGENT_MEMORY.md`；Windows rmux 见 `docs/RMUX_WINDOWS.md`。
 
 ### connect.exe 路径检测（Windows）
 

@@ -83,7 +83,7 @@
 
 - **保留**：前缀 Ctrl+B、分屏 `|`/`-`/`%`/`"`、hjkl、窗口 `c/p/n`、静态 Catppuccin Mocha 状态栏。
 - **剔除**：TPM、Catppuccin 插件、`run-shell`、剪贴板脚本、resurrect/continuum。
-- **默认 shell**：`windows_git_bash_path`（与 WT Git Bash 一致）。
+- **默认 shell**：`windows_git_bash_path`（与 WT Git Bash 一致；apply 时由 `detect_windows_git_paths.sh` 检测 C/D 盘）。
 
 ## 日常命令
 
