@@ -19,7 +19,7 @@
 
 - Docker 或 Podman
 - 项目根目录可访问
-- Neovim 独立仓库（由 run_once_install-neovim-config 克隆到 `~/.config/nvim`）
+- Neovim 独立仓库（`~/.config/nvim`，非本仓库 chezmoi 管理）
 
 ## 快速开始
 
@@ -245,7 +245,7 @@ export PROXY=192.168.1.76:7890
 
 本项目中 Neovim 采用独立仓库模式。流程是：在系统目标位置（如 `~/.config/nvim`）克隆 nvim 仓库，再执行仓库内的 install.sh 安装前置。
 
-- **宿主机**：由 run_once_install-neovim-config 自动将 `git@github.com:xiaolitongxue666/nvim.git` 克隆到 `~/.config/nvim` 并执行 `install.sh`。
+- **宿主机**：本仓库 `run_once_install-neovim.sh.tmpl` 仅安装 Neovim 二进制；配置由 `~/.config/nvim` 独立仓库维护。
 - **容器内**：若需使用 Neovim 配置，需在目标位置手动克隆并执行安装脚本，例如：
 
 ```bash

@@ -14,6 +14,8 @@ Different platforms use different default shells. Template files are maintained 
 ## chezmoi deploy pitfalls
 
 - Use `./scripts/manage_dotfiles.sh apply` or `./deploy.sh`; `CHEZMOI_SOURCE_DIR` env is **not** read by chezmoi CLI
+- **`chezmoi apply` must include `--force`** (`chezmoi_run_apply` injects it) to avoid interactive overwrite prompts on Windows
+- Windows: `diagnose_deployment.sh` skips `apply --dry-run`; stale lock → `taskkill //F //IM chezmoi.exe` then `fix_chezmoi_lock.sh`
 - `sourceDir` in `~/.config/chezmoi/chezmoi.toml` via `chezmoi_ensure_user_config` in `scripts/chezmoi/chezmoi_core.sh`
 - Config path map single source: `scripts/chezmoi/config_mappings.sh`
 - Windows: `[interpreters.sh]` must point to Git Bash or run_once fails with Win32 error

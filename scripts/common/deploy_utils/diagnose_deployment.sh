@@ -179,14 +179,30 @@ log_info "━━━━━━━━━━━━━━━━━━━━━━━�
 log_info "5. 测试应用配置（详细输出）"
 log_info "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
-log_info "执行: chezmoi apply -v --dry-run"
-APPLY_DRY_RUN=$(chezmoi apply -v --dry-run 2>&1 || true)
-if [ -n "$APPLY_DRY_RUN" ]; then
-    echo "$APPLY_DRY_RUN" | head -30 | while IFS= read -r line; do
-        log_info "  $line"
-    done
+# Windows Git Bash：dry-run 会模拟全部 run_once，长时间无输出易误判为卡住，故跳过
+if [[ "$(uname -s 2>/dev/null)" =~ ^(MINGW|MSYS|CYGWIN) ]]; then
+    log_info "Skipping chezmoi apply --dry-run on Windows (run_once simulation may hang for minutes)"
+    log_info "Use: chezmoi apply -v --force  or  ./scripts/manage_dotfiles.sh apply"
+elif command -v timeout &>/dev/null; then
+    log_info "执行: chezmoi apply -v --dry-run (timeout 30s)"
+    APPLY_DRY_RUN=$(timeout 30 chezmoi apply -v --dry-run 2>&1 || echo "dry-run timeout or error")
+    if [ -n "$APPLY_DRY_RUN" ]; then
+        echo "$APPLY_DRY_RUN" | head -30 | while IFS= read -r line; do
+            log_info "  $line"
+        done
+    else
+        log_info "没有需要应用的配置"
+    fi
 else
-    log_info "没有需要应用的配置"
+    log_info "执行: chezmoi apply -v --dry-run"
+    APPLY_DRY_RUN=$(chezmoi apply -v --dry-run 2>&1 || true)
+    if [ -n "$APPLY_DRY_RUN" ]; then
+        echo "$APPLY_DRY_RUN" | head -30 | while IFS= read -r line; do
+            log_info "  $line"
+        done
+    else
+        log_info "没有需要应用的配置"
+    fi
 fi
 
 # ============================================
@@ -212,13 +228,13 @@ if [ -z "$MANAGED_FILES" ]; then
     log_info ""
     log_info "  3. 运行完整应用："
     log_info "     export CHEZMOI_SOURCE_DIR=\"\$(pwd)/.chezmoi\""
-    log_info "     chezmoi apply -v"
+    log_info "     chezmoi apply -v --force"
 else
     log_info "配置文件已在管理列表中，但可能没有应用"
     log_info ""
     log_info "建议："
     log_info "  1. 检查 chezmoi diff 查看差异"
-    log_info "  2. 运行 chezmoi apply -v 应用配置"
+    log_info "  2. 运行 chezmoi apply -v --force 应用配置"
 fi
 
 end_script

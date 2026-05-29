@@ -131,7 +131,7 @@ log_info "步骤 4/5: 配置所需软件"
 log_info "============================================"
 
 log_info "应用所有配置（会自动执行安装脚本）..."
-log_info "运行: chezmoi apply -v"
+log_info "运行: chezmoi apply -v --force"
 log_info ""
 
 # 检查是否有配置文件
@@ -142,7 +142,7 @@ if [ ! "$(ls -A $CHEZMOI_SOURCE_DIR 2>/dev/null)" ]; then
     log_info "  chezmoi add ~/.bashrc"
 else
     log_info "开始应用配置..."
-    chezmoi apply -v || {
+    chezmoi apply -v --force || {
         log_warning "配置应用过程中出现错误，但继续执行..."
     }
     log_success "配置应用完成"
@@ -212,6 +212,6 @@ log_info "     git commit -m 'Add Windows config'"
 log_info "     git push"
 log_info ""
 log_info "使用帮助: ./scripts/manage_dotfiles.sh help"
-log_info "详细文档: WINDOWS_INSTALL_GUIDE.md"
+log_info "详细文档: docs/INSTALL_GUIDE.md"
 log_info ""
 

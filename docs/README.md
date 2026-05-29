@@ -7,6 +7,7 @@
 - `docs/README.md`：保留，作为 docs 目录索引；由根目录 `README.md` 显式链接。
 - `docs/patches/archive/README.md`：保留，当前仍被 `docs/TEST_PLAN_NVIM_INDEPENDENT.md` 引用作为历史补丁说明。
 - **2026-05 已删除**：`scripts/linux/system_basic_env/INSTALL_STATUS.md`（内容已并入 `SOFTWARE_LIST.md` + `verify_installation.sh`）。
+- **2026-05 已合并**：`OS_SETUP_GUIDE.md`、`TEST_PLAN_NVIM_INDEPENDENT.md` 正文并入 `INSTALL_GUIDE.md` / `NEOVIM_AND_THIS_REPO.md`（原文件保留重定向）。
 - 删除策略：仅在“无外部引用 + 不再承担测试/流程证据”同时满足时再删除。
 
 ## 安装与配置
@@ -14,7 +15,8 @@
 | 文档 | 说明 |
 |------|------|
 | [INSTALL_GUIDE.md](INSTALL_GUIDE.md) | 一键安装与首次配置入口（推荐先看）；各平台分步与故障排除 |
-| [OS_SETUP_GUIDE.md](OS_SETUP_GUIDE.md) | Windows / macOS / Linux 分步安装指南与前置条件 |
+| [DEPLOY_TWO_PHASE.md](DEPLOY_TWO_PHASE.md) | 两阶段部署（本仓库 Phase 1 + agent-config Phase 2） |
+| [OS_SETUP_GUIDE.md](OS_SETUP_GUIDE.md) | 已合并至 INSTALL_GUIDE（保留重定向） |
 | [SOFTWARE_LIST.md](SOFTWARE_LIST.md) | 完整软件清单与 run_once 脚本对应关系（按 OS / WSL 区分） |
 | [CODEWHALE.md](CODEWHALE.md) | CodeWhale 安装、WSL 快速流程与排错 |
 | [PROJECT_AGENT_MEMORY.md](PROJECT_AGENT_MEMORY.md) | 项目 Agent 可提交记忆（含 WSL 部署实测） |

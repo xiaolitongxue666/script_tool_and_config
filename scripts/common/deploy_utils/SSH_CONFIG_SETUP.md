@@ -81,5 +81,5 @@ chezmoi apply ~/.ssh/config
 
 详细说明请参考：
 - [CHEZMOI_USE_GUIDE.md](../../../../docs/CHEZMOI_USE_GUIDE.md#ssh-配置管理)
-- [OS_SETUP_GUIDE.md](../../../../docs/OS_SETUP_GUIDE.md#ssh-配置管理)
+- [INSTALL_GUIDE.md](../../../../docs/INSTALL_GUIDE.md#ssh-配置管理)
 

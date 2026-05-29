@@ -8,5 +8,5 @@ alwaysApply: true
 
 1. 项目有一部分独立工具脚本。
 2. 项目主要功能是通过 chezmoi + 模板 + 辅助脚本，在不同 OS/WSL 安装和配置所需软件。
-3. 部署只能通过 chezmoi 应用模板的方式进行（`./deploy.sh` 或 `./scripts/manage_dotfiles.sh apply`）。
+3. 部署只能通过 chezmoi 应用模板的方式进行（`./deploy.sh` 或 `./scripts/manage_dotfiles.sh apply`）；**apply 须带 `--force`**，避免 Windows 交互卡住。
 4. 用户明确 WSL 场景时：仅在 WSL 内操作（fnm/npm/chezmoi）；禁止从 WSL 修改 Windows npm 或调用 `cmd.exe` 清理 Windows 包。

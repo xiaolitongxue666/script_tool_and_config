@@ -20,6 +20,9 @@ globs:
 ## chezmoi 部署（Agent）
 
 - 应用配置用 `./scripts/manage_dotfiles.sh apply` 或 `./deploy.sh`，勿仅 `export CHEZMOI_SOURCE_DIR` 后 `chezmoi apply`
+- **`chezmoi apply` 必须含 `--force`**（`chezmoi_run_apply` / `manage_dotfiles.sh` 已自动注入），避免 `.gitconfig` 等外部修改触发交互菜单卡住
+- Windows：`diagnose_deployment.sh` 跳过 `apply --dry-run`；apply 前若 lock 失败用 `fix_chezmoi_lock.sh` 或 `taskkill //F //IM chezmoi.exe`
+- 勿对 apply 输出使用 `\| head` / `\| rg` 管道（SIGPIPE）
 - `scripts/chezmoi/config_mappings.sh` 为审计/force_apply 映射唯一来源（**bash 3.2 平行数组**，禁止 `declare -A`）
 - `chezmoi_ensure_user_config`（`chezmoi_core.sh`）维护 `sourceDir` 与 Windows `[interpreters.sh]`
 - macOS 默认 bash 3.2：`deploy.sh` 末尾 Zsh/OMZ 检查与 diagnose 须兼容；详见 `docs/PROJECT_AGENT_MEMORY.md`「macOS bash 3.2」

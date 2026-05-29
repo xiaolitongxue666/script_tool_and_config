@@ -129,13 +129,13 @@ cmd_apply() {
     if type chezmoi_ensure_unlocked &>/dev/null; then
         chezmoi_ensure_unlocked 30
     fi
-    log_info "Applying all configs (chezmoi apply -v)..."
+    log_info "Applying all configs (chezmoi apply -v --force)..."
     if type chezmoi_run_apply &>/dev/null; then
-        chezmoi_run_apply "-v"
+        chezmoi_run_apply "-v --force"
     else
         export PAGER=cat
         export CHEZMOI_PAGER=""
-        chezmoi apply -v
+        chezmoi apply -v --force
     fi
 }
 

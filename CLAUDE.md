@@ -111,6 +111,8 @@ Layer 5: install-tmux + run_on_{linux,darwin}；Windows：`install-rmux`、`inst
 ### Chezmoi 调用规则
 
 - 日常运维通过 `./scripts/manage_dotfiles.sh` 封装调用，不直接调 `chezmoi`
+- **`chezmoi apply` 须含 `--force`**（`chezmoi_run_apply` 自动注入），避免 Windows 上 `.gitconfig` 等外部修改触发交互卡住
+- Windows：`diagnose_deployment.sh` 跳过 `apply --dry-run`；锁占用时用 `fix_chezmoi_lock.sh` 或 `taskkill //F //IM chezmoi.exe`
 - `install.sh` 和 `deploy.sh` 共享 `scripts/chezmoi/chezmoi_core.sh` 中的 chezmoi 核心操作
 - 入口职责：install.sh（首次安装）→ deploy.sh（增量）→ manage_dotfiles.sh（运维）
 - **chezmoi 不读取 `CHEZMOI_SOURCE_DIR` 环境变量**；`sourceDir` 须写在 `~/.config/chezmoi/chezmoi.toml`（`chezmoi_ensure_user_config`）。配置路径映射单一来源：`scripts/chezmoi/config_mappings.sh`

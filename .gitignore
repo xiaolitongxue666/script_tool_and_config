@@ -207,6 +207,20 @@ chezmoistate.boltdb
 .chezmoi/**/tmp/
 .chezmoi/**/temp/
 
+# 误提交的非模板 chezmoi 源文件（须为 *.tmpl）
+.chezmoi/dot_zshrc
+.chezmoi/dot_bashrc
+.chezmoi/dot_bash_profile
+.chezmoi/dot_gitconfig
+.chezmoi/dot_zprofile
+.chezmoi/dot_tmux.conf
+.chezmoi/dot_rmux.conf
+
+# Cursor 编辑器 settings 已迁至 agent-config，勿在本仓库 chezmoi 恢复
+.chezmoi/dot_config/Cursor/
+.chezmoi/run_on_windows/run_onchange_sync_cursor_settings_to_appdata.sh.tmpl
+.chezmoi/run_on_darwin/run_onchange_sync_cursor_settings_to_app_support.sh.tmpl
+
 # rmux 安装下载/解压缓存（run_once_install-rmux 或本地测试）
 .local/share/rmux-install/
 .local/share/rmux-install-test/
@@ -327,6 +341,8 @@ pip-debug.log
 # 日志文件
 # ============================================
 logs/
+logs/phase*.log
+logs/deploy_rerun.log
 *.log
 *.log.*
 # 脚本执行日志（仅本地保留）

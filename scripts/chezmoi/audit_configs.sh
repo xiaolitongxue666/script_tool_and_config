@@ -151,11 +151,11 @@ done
 # ============================================
 log_info ""
 log_info "检查 Neovim run_once 模板..."
-if [ ! -f "${CHEZMOI_DIR}/run_once_install-neovim-config.sh.tmpl" ]; then
-    echo "MISSING: run_once_install-neovim-config.sh.tmpl 不存在" | tee -a "$AUDIT_REPORT"
+if [ ! -f "${CHEZMOI_DIR}/run_once_install-neovim.sh.tmpl" ]; then
+    echo "MISSING: run_once_install-neovim.sh.tmpl 不存在" | tee -a "$AUDIT_REPORT"
     MISSING_COUNT=$((MISSING_COUNT + 1))
 else
-    log_info "run_once_install-neovim-config.sh.tmpl 存在"
+    log_info "run_once_install-neovim.sh.tmpl 存在"
 fi
 
 # ============================================

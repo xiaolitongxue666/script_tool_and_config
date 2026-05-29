@@ -71,7 +71,7 @@ install.sh
 |------|------|
 | [docs/INSTALL_GUIDE.md](docs/INSTALL_GUIDE.md) | 一键安装与配置入口（推荐先看） |
 | [docs/README.md](docs/README.md) | docs 目录文档索引与维护说明 |
-| [docs/OS_SETUP_GUIDE.md](docs/OS_SETUP_GUIDE.md) | Windows/macOS/Linux 分步安装指南 |
+| [docs/OS_SETUP_GUIDE.md](docs/OS_SETUP_GUIDE.md) | 已合并至 INSTALL_GUIDE（保留重定向） |
 | [docs/CHEZMOI_USE_GUIDE.md](docs/CHEZMOI_USE_GUIDE.md) | chezmoi 详细使用指南 |
 | [docs/SOFTWARE_LIST.md](docs/SOFTWARE_LIST.md) | 完整软件清单与 run_once 对应关系 |
 | [docs/CODEWHALE.md](docs/CODEWHALE.md) | CodeWhale 安装与 WSL 快速流程 |
@@ -267,7 +267,7 @@ chezmoi add ~/.new_config
 - **windows_scripts/**: Windows 批处理脚本
 
 ### 4. Neovim 配置
-Neovim 为独立项目；本仓库由 run_once_install-neovim-config 将 [xiaolitongxue666/nvim](https://github.com/xiaolitongxue666/nvim) 克隆到 `~/.config/nvim` 并执行其 install.sh（不注入本仓库路径）。配置基于 Lua、lazy.nvim、LSP 等。详见 [docs/NEOVIM_AND_THIS_REPO.md](docs/NEOVIM_AND_THIS_REPO.md)。
+Neovim 为独立项目；本仓库由 `run_once_install-neovim.sh.tmpl` 安装 Neovim 二进制（>= 0.11.0）。配置由 `~/.config/nvim` 独立仓库管理。详见 [docs/NEOVIM_AND_THIS_REPO.md](docs/NEOVIM_AND_THIS_REPO.md)。
 
 ## 📚 使用指南
 
@@ -303,7 +303,7 @@ git push
 
 ### Neovim 独立仓库管理
 
-Neovim 配置采用独立仓库方式，由 run_once_install-neovim-config 自动克隆到 `~/.config/nvim`：
+Neovim 配置位于独立仓库 `~/.config/nvim`（非本仓库 chezmoi 管理）：
 
 ```bash
 # 更新 Neovim 配置（配置位于 ~/.config/nvim）
@@ -334,7 +334,7 @@ cd ~/.config/nvim && git pull && ./install.sh
 1. **权限要求**：某些脚本需要 root 权限（使用 `sudo`）
 2. **平台特定**：部分脚本仅适用于特定操作系统
 3. **备份**：修改系统配置文件前，建议先备份原文件
-4. **Neovim 配置**：由 run_once_install-neovim-config 自动克隆到 ~/.config/nvim 并执行 install.sh
+4. **Neovim 配置**：本仓库仅安装 Neovim 二进制；`~/.config/nvim` 由独立仓库维护
 5. **代理配置**：安装脚本支持通过 `PROXY` 环境变量配置代理
 
 ## 🔗 相关链接

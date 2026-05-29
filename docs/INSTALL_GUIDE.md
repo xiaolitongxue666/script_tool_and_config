@@ -134,6 +134,24 @@ ssh -T git@github.com
 - zsh/starship/nerd-fonts 等跨平台脚本均会在 Git Bash 环境下运行
 - SSH 代理使用 Git for Windows 自带的 `connect.exe`（路径自动检测）
 - 包管理器优先使用 winget，回退 MSYS2 pacman
+- **`chezmoi apply` 必须带 `--force`**：`manage_dotfiles.sh apply` 与 `deploy.sh` 已自动注入，避免 `.gitconfig` 等外部修改触发交互菜单卡住
+- **`deploy.sh` 诊断阶段在 Windows 跳过 `apply --dry-run`**（模拟全部 run_once 会长时间无输出）
+
+---
+
+## 两阶段部署（Agent CLI + 全局 MCP）
+
+Phase 1 在本仓库（dotfiles + Layer 4 CLI），Phase 2 在 [agent-config](../../AI/agent-config) 仓库。详见 [DEPLOY_TWO_PHASE.md](DEPLOY_TWO_PHASE.md)。
+
+```bash
+# Phase 1（Windows Git Bash）
+eval "$(fnm env)"
+./deploy.sh
+
+# Phase 2
+cd /path/to/agent-config
+STRICT_AGENT_PREFLIGHT=1 bash scripts/install-tools.sh
+```
 
 ---
 
@@ -158,14 +176,26 @@ ssh -T git@github.com
 
 ## 常见问题
 
+### Windows Git Bash：apply / deploy 看似卡住
+
+| 现象 | 原因 | 处理 |
+|------|------|------|
+| 长时间无输出 | `diagnose_deployment.sh` 的 `apply --dry-run` 模拟全部 run_once | Windows 已自动跳过；日常用 `./deploy.sh` 或 `manage_dotfiles.sh apply` |
+| 停在 `.gitconfig has changed...` | chezmoi 等待交互 overwrite | 使用 `--force`（脚本已默认）；手动：`chezmoi apply -v --force` |
+| `timeout obtaining persistent state lock` | 残留 `chezmoi.exe` 或锁文件 | `taskkill //F //IM chezmoi.exe` 后 `bash scripts/common/deploy_utils/fix_chezmoi_lock.sh` |
+| apply 被管道中断 | `\| head` / `\| rg` 导致 SIGPIPE | 勿截断 apply 输出 |
+
 ### chezmoi 锁占用
 
 ```bash
-# 检查是否被其他进程占用
-ls -l ~/.local/share/chezmoi/.lock
+# Windows：强制结束残留进程
+taskkill //F //IM chezmoi.exe
 
-# 手动清理残留锁
-rm -f ~/.local/share/chezmoi/.lock
+# 修复脚本（推荐）
+bash scripts/common/deploy_utils/fix_chezmoi_lock.sh
+
+# 手动清理锁文件
+rm -f ~/.local/share/chezmoi/.lock ~/.local/share/chezmoi/.chezmoi.lock
 ```
 
 ### run_once 脚本跳过
@@ -176,8 +206,8 @@ chezmoi 对已执行的 run_once 脚本会记录到 `~/.local/share/chezmoi/scri
 # 重置单个脚本状态
 rm -f ~/.local/share/chezmoi/scriptstate/run_once_install-xxx.sh
 
-# 重新 apply
-chezmoi apply -v
+# 重新 apply（须 --force，避免交互卡住）
+./scripts/manage_dotfiles.sh apply
 ```
 
 ### fnm/uv 不在 PATH

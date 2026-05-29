@@ -15,6 +15,15 @@ Layer 3: run_once_install-neovim（仅安装 Neovim 二进制）
 
 Neovim 具体的配置、插件、语言服务器由 `~/.config/nvim` 项目自行管理。
 
+## 验证清单
+
+```bash
+bash scripts/chezmoi/audit_configs.sh   # 含 run_once_install-neovim.sh.tmpl 检查
+bash tests/test_syntax.sh
+./scripts/manage_dotfiles.sh apply
+command -v nvim && nvim --version
+```
+
 ## 更新 nvim 配置
 
 ```bash

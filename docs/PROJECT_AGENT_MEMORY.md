@@ -63,6 +63,23 @@
 - Cursor 规则：`.cursor/rules/codewhale.mdc`
 - 安装检测：`scripts/chezmoi/install_helpers.sh` → `92-install-codewhale`
 
+## Windows Git Bash chezmoi 部署（2026-05 实测）
+
+| 项 | 约定 |
+|----|------|
+| apply 参数 | **必须** `-v --force`；`chezmoi_run_apply` 与 `manage_dotfiles.sh apply` 已自动补 `--force` |
+| 禁止 | 对 apply 使用 `\| head` / `\| rg`（SIGPIPE）；在 Windows 依赖 `diagnose_deployment.sh` 的 `apply --dry-run` |
+| 锁 | 中断 apply 后可能残留 `chezmoi.exe` → `timeout obtaining persistent state lock` |
+| 修复 | `taskkill //F //IM chezmoi.exe` → `bash scripts/common/deploy_utils/fix_chezmoi_lock.sh` → 再 apply |
+| 交互卡住 | `.gitconfig` / `.ssh/config` 被外部修改时，无 `--force` 会弹出 `overwrite/skip/quit` 并永久等待 |
+
+| 问题 | 原因 | 解决 |
+|------|------|------|
+| `deploy.sh` 长时间无输出 | 诊断阶段 `chezmoi apply --dry-run` 模拟全部 run_once | Windows 已跳过 dry-run；或直接用 `manage_dotfiles.sh apply` |
+| apply 停在 `.gitconfig has changed` | 缺 `--force`，等待交互 | 使用 `chezmoi apply -v --force` 或 `chezmoi_run_apply` |
+| 多次 apply 报 lock timeout | 前次 chezmoi 进程未退出 | `taskkill //F //IM chezmoi.exe`，运行 `fix_chezmoi_lock.sh` |
+| `manage_dotfiles apply` 曾缺 force | 调用 `chezmoi_run_apply "-v"` 覆盖默认 | 已修复：`chezmoi_core` 自动补 `--force` |
+
 ## Windows：fnm + uv + Git Bash（2026-05）
 
 | 项 | 约定 |

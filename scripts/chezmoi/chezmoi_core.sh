@@ -205,6 +205,24 @@ _chezmoi_remove_stale_locks() {
     done
 }
 
+# 终止残留 chezmoi 进程（Windows taskkill / Unix kill）
+_chezmoi_kill_stale_processes() {
+    local os pids pid line
+    os="$(uname -s 2>/dev/null || echo "")"
+    if [[ "$os" =~ ^(MINGW|MSYS|CYGWIN) ]] && command -v taskkill &>/dev/null; then
+        taskkill //F //IM chezmoi.exe 2>/dev/null || true
+        return 0
+    fi
+    if command -v pgrep &>/dev/null; then
+        pids=$(pgrep -f "chezmoi" 2>/dev/null || true)
+        if [[ -n "$pids" ]]; then
+            for pid in $pids; do
+                kill "$pid" 2>/dev/null || kill -9 "$pid" 2>/dev/null || true
+            done
+        fi
+    fi
+}
+
 # 确保 chezmoi 未占用（若占用则等待或清理）
 # 参数: max_wait_seconds (可选，默认 30)
 chezmoi_ensure_unlocked() {
@@ -214,6 +232,7 @@ chezmoi_ensure_unlocked() {
     while ! chezmoi_check_lock; do
         if [[ "$waited" -ge "$max_wait" ]]; then
             echo "[WARNING] Lock wait timeout, force releasing..."
+            _chezmoi_kill_stale_processes
             _chezmoi_remove_stale_locks
             return 0
         fi
@@ -384,6 +403,16 @@ chezmoi_run_apply() {
     local apply_args=()
     # shellcheck disable=SC2206
     read -r -a apply_args <<< "$extra_args"
+
+    # 非交互 apply：缺 --force 时自动补上（避免 .gitconfig 等外部修改触发交互卡住）
+    local _apply_arg _has_force=false
+    for _apply_arg in "${apply_args[@]}"; do
+        [[ "$_apply_arg" == "--force" ]] && _has_force=true
+    done
+    if ! $_has_force; then
+        apply_args+=("--force")
+    fi
+    unset _apply_arg _has_force
 
     local user_config="${HOME}/.config/chezmoi/chezmoi.toml"
     if [[ -n "${CHEZMOI_PROJECT_ROOT:-}" ]]; then

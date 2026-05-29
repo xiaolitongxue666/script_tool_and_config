@@ -44,7 +44,7 @@ log_info "2. 测试 chezmoi 命令..."
 
 if command -v chezmoi &> /dev/null; then
     log_info "测试: chezmoi version"
-    if chezmoi version &>/dev/null; then
+    if chezmoi --version &>/dev/null; then
         log_success "chezmoi 命令正常"
     else
         log_error "chezmoi 命令异常"
@@ -66,7 +66,7 @@ log_info ""
 log_success "修复完成！"
 log_info ""
 log_info "现在可以尝试运行:"
-log_info "  chezmoi apply -v"
+log_info "  chezmoi apply -v --force"
 log_info "  或"
 log_info "  ./deploy.sh"
 

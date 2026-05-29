@@ -126,8 +126,8 @@ apply_ssh_config() {
         return 1
     fi
 
-    # 应用配置
-    if chezmoi apply ${force_flag} -v "${SSH_CONFIG}"; then
+    # 应用配置（--force 避免外部修改过的文件触发交互提示卡住）
+    if chezmoi apply --force -v "${SSH_CONFIG}"; then
         log_success "SSH 配置已应用"
     else
         error_exit "应用 SSH 配置失败"

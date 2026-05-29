@@ -813,8 +813,8 @@ chmod 600 ~/.ssh/config
 ### Chezmoi 应用失败
 
 ```bash
-# 查看详细输出
-chezmoi apply -v
+# 查看详细输出（须 --force，避免 Windows 交互卡住）
+chezmoi apply -v --force
 
 # 查看差异
 chezmoi diff

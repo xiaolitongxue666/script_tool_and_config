@@ -32,8 +32,10 @@ fnm --version && node -v && uv --version && python --version
 command -v codewhale && codewhale --version
 ```
 
-- 命令为 **`codewhale`**（小写），非 `CodeWhale`
+- 命令为 **`codewhale`**（全小写），非 `CodeWhale`
 - 新开 Git Bash 即可用 fnm/uv，无需手敲 `eval "$(fnm env)"`
+- **`chezmoi apply` 须 `--force`**；`./deploy.sh` 与 `./scripts/manage_dotfiles.sh apply` 已处理
+- 若 apply 卡住：见 [PROJECT_AGENT_MEMORY.md](PROJECT_AGENT_MEMORY.md) § Windows Git Bash chezmoi 部署
 
 ## 多 Windows 用户（Administrator + xiaoli 等）
 
