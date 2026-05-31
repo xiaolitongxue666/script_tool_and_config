@@ -129,6 +129,26 @@ _migrate_codewhale_state_paths() {
     return 0
 }
 
+# 设置 codewhale 默认配置（非破坏性，不影响已有 API Key 等敏感数据）
+_set_codewhale_defaults() {
+    if ! command -v codewhale &>/dev/null; then
+        return 0
+    fi
+
+    # 左下角计费采用人民币（CNY）
+    if codewhale config get cost_currency &>/dev/null; then
+        local current_currency
+        current_currency="$(codewhale config get cost_currency 2>/dev/null || true)"
+        if [[ "${current_currency}" != "\"cny\"" && "${current_currency}" != "cny" ]]; then
+            codewhale config set cost_currency cny 2>/dev/null || true
+            echo "[INFO] Set cost_currency to cny (RMB)" >&2
+        fi
+    else
+        codewhale config set cost_currency cny 2>/dev/null || true
+        echo "[INFO] Set cost_currency to cny (RMB)" >&2
+    fi
+}
+
 # fnm / node 常见路径（本脚本为独立子 shell，需自行加入 PATH）
 export PATH="${HOME}/.local/share/fnm:${HOME}/.local/bin:${PATH}"
 
@@ -176,6 +196,7 @@ _codewhale_already_installed() {
 if _codewhale_already_installed; then
     echo "[INFO] CodeWhale already installed: $(codewhale --version 2>/dev/null | head -n1)"
     _migrate_codewhale_state_paths
+    _set_codewhale_defaults
     exit 0
 fi
 
@@ -222,6 +243,7 @@ if npm install -g "${codewhale_npm_pkg}"; then
     if _codewhale_already_installed; then
         echo "[SUCCESS] CodeWhale available: $(codewhale --version 2>/dev/null | head -n1)"
         _migrate_codewhale_state_paths
+        _set_codewhale_defaults
     else
         echo "[WARNING] npm install finished but codewhale/codewhale-tui not on PATH; check PATH or run: npm install -g codewhale"
     fi

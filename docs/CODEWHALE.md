@@ -43,6 +43,16 @@ test -d ~/.codewhale && codewhale doctor
 
 大陆 npm 较慢时可使用：`npm config set registry https://registry.npmmirror.com`（主路径仍为 npm）。
 
+### 默认配置
+
+安装成功后 `run_once_92` 会自动执行 `_set_codewhale_defaults()`，确保以下配置：
+
+| 配置项 | 值 | 说明 |
+|--------|-----|------|
+| `cost_currency` | `cny` | 左下角计费采用人民币（¥）显示 |
+
+这些设置仅影响非敏感配置项，API Key 等敏感数据需用户通过 `codewhale auth set` 手动配置。
+
 ## 状态目录
 
 | 路径 | 角色 |
