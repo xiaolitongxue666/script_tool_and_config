@@ -21,6 +21,7 @@
 | [CODEWHALE.md](CODEWHALE.md) | CodeWhale 安装、WSL 快速流程与排错 |
 | [PROJECT_AGENT_MEMORY.md](PROJECT_AGENT_MEMORY.md) | 项目 Agent 可提交记忆（含 WSL 部署实测） |
 | [RMUX_WINDOWS.md](RMUX_WINDOWS.md) | Windows rmux 安装、手动使用与排错（含 chezmoi 部署陷阱） |
+| [TMUX_KEYBINDINGS.md](TMUX_KEYBINDINGS.md) | Tmux (Linux/macOS) 与 rmux (Windows) 快捷键速查 |
 | [PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md) | 项目结构说明 |
 
 ## Chezmoi 与项目结构
