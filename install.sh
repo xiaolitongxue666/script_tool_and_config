@@ -128,51 +128,9 @@ fi
 log_success "Platform: $PLATFORM_NAME ($PLATFORM)"
 
 # ============================================
-# 代理配置（可选）
+# 代理配置（默认 127.0.0.1:7890；WSL 用宿主机 IP:7890）
 # ============================================
-# Linux 下区分 WSL2 与原生：WSL2 中 127.0.0.1 无法访问宿主机代理，使用 /etc/resolv.conf 的 nameserver 作为宿主机 IP
-if [ -z "${PROXY:-}" ] && [ -z "${http_proxy:-}" ] && [ "$PLATFORM" = "linux" ]; then
-    if grep -qEi "Microsoft|WSL" /proc/version 2>/dev/null || [ -n "${WSL_DISTRO_NAME:-}" ]; then
-        _hostip=$(awk '/^nameserver / {print $2; exit}' /etc/resolv.conf 2>/dev/null)
-        if [ -n "$_hostip" ]; then
-            PROXY="http://${_hostip}:7890"
-            log_info "WSL detected, using host proxy: $PROXY"
-        fi
-    fi
-fi
-# 如果代理地址没有 http:// 或 https:// 前缀，自动添加
-if [ -n "${PROXY:-}" ]; then
-    if [[ ! "$PROXY" =~ ^https?:// ]]; then
-        PROXY="http://$PROXY"
-    fi
-elif [ -n "${http_proxy:-}" ]; then
-    PROXY="$http_proxy"
-    if [[ ! "$PROXY" =~ ^https?:// ]]; then
-        PROXY="http://$PROXY"
-    fi
-fi
-
-# 设置代理环境变量
-if [ -n "${PROXY:-}" ]; then
-    export PROXY="$PROXY"
-    export http_proxy="$PROXY"
-    export https_proxy="$PROXY"
-    export HTTP_PROXY="$PROXY"
-    export HTTPS_PROXY="$PROXY"
-    log_info "Using proxy: $PROXY"
-    # 解析 host:port 供 chezmoi 模板使用（如 dot_ssh/config.tmpl 的 PROXY_HOST/PROXY_PORT，WSL 下 SSH 走宿主机代理）
-    _proxy_stripped="${PROXY#*://}"
-    _proxy_host="${_proxy_stripped%%:*}"
-    _proxy_port="${_proxy_stripped#*:}"
-    _proxy_port="${_proxy_port%%/*}"
-    if [ -z "$_proxy_port" ] || [ "$_proxy_port" = "$_proxy_host" ]; then
-        _proxy_port="7890"
-    fi
-    export PROXY_HOST="$_proxy_host"
-    export PROXY_PORT="$_proxy_port"
-else
-    log_info "未设置代理，使用直连"
-fi
+chezmoi_setup_proxy
 
 # ============================================
 # 安装 chezmoi

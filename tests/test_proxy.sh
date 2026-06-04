@@ -105,6 +105,65 @@ else
     FAILED=$((FAILED + 1))
 fi
 
+# 测试 6: PROXY=none 禁用代理
+echo -n "[Test 6] PROXY=none disables proxy ... "
+result=$(bash -c "
+source '${CORE_SCRIPT}'
+PROXY=none chezmoi_setup_proxy 2>/dev/null
+if [[ -z \"\${PROXY:-}\" && -z \"\${http_proxy:-}\" ]]; then echo direct; else echo \"\$PROXY\"; fi
+" 2>/dev/null)
+
+if [[ "$result" == "direct" ]]; then
+    echo "PASS (direct connection)"
+    PASSED=$((PASSED + 1))
+else
+    echo "FAIL (expected: direct, got: $result)"
+    FAILED=$((FAILED + 1))
+fi
+
+# 测试 7: NO_PROXY=1 禁用代理
+echo -n "[Test 7] NO_PROXY=1 disables proxy ... "
+result=$(bash -c "
+source '${CORE_SCRIPT}'
+NO_PROXY=1 chezmoi_setup_proxy 2>/dev/null
+if [[ -z \"\${PROXY:-}\" && -z \"\${http_proxy:-}\" ]]; then echo direct; else echo \"\$PROXY\"; fi
+" 2>/dev/null)
+
+if [[ "$result" == "direct" ]]; then
+    echo "PASS (direct connection)"
+    PASSED=$((PASSED + 1))
+else
+    echo "FAIL (expected: direct, got: $result)"
+    FAILED=$((FAILED + 1))
+fi
+
+# 测试 8: mock WSL 时使用 resolv.conf nameserver
+echo -n "[Test 8] WSL mock uses resolv.conf nameserver ... "
+_wsl_expected=""
+if [[ -f /etc/resolv.conf ]]; then
+    _wsl_ns=$(awk '/^nameserver / {print $2; exit}' /etc/resolv.conf 2>/dev/null || true)
+    if [[ -n "$_wsl_ns" ]]; then
+        _wsl_expected="http://${_wsl_ns}:7890"
+    fi
+fi
+if [[ -z "$_wsl_expected" ]]; then
+    _wsl_expected="http://127.0.0.1:7890"
+fi
+result=$(bash -c "
+source '${CORE_SCRIPT}'
+chezmoi_is_wsl() { return 0; }
+unset PROXY http_proxy https_proxy HTTP_PROXY HTTPS_PROXY NO_PROXY
+chezmoi_detect_proxy
+" 2>/dev/null)
+
+if [[ "$result" == "$_wsl_expected" ]]; then
+    echo "PASS (got: $result)"
+    PASSED=$((PASSED + 1))
+else
+    echo "FAIL (expected: $_wsl_expected, got: $result)"
+    FAILED=$((FAILED + 1))
+fi
+
 echo ""
 echo "=========================================="
 echo "Result: $PASSED passed, $FAILED failed"

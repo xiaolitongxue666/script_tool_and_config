@@ -58,6 +58,9 @@ prepare_chezmoi_session_env() {
     fi
     export PAGER=cat
     export CHEZMOI_PAGER=""
+    if type chezmoi_setup_proxy &>/dev/null; then
+        chezmoi_setup_proxy
+    fi
 }
 
 setup_chezmoi_source() {

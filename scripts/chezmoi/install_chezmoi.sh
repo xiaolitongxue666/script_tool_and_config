@@ -22,6 +22,13 @@ else
     function error_exit() { log_error "$1"; exit "${2:-1}"; }
 fi
 
+# 加载 chezmoi 核心封装（代理检测 WSL/本机 7890）
+CHEZMOI_CORE_SH="${PROJECT_ROOT}/scripts/chezmoi/chezmoi_core.sh"
+if [ -f "$CHEZMOI_CORE_SH" ]; then
+    # shellcheck disable=SC1090
+    source "$CHEZMOI_CORE_SH"
+fi
+
 start_script "chezmoi 安装脚本"
 
 # ============================================
@@ -68,30 +75,9 @@ if command -v chezmoi &> /dev/null; then
 fi
 
 # ============================================
-# 代理配置
+# 代理配置（默认 127.0.0.1:7890；WSL 用宿主机 IP:7890）
 # ============================================
-# 从环境变量获取代理，如果没有则使用默认值
-if [ -n "${PROXY:-}" ]; then
-    # 如果代理地址没有 http:// 或 https:// 前缀，自动添加
-    if [[ ! "$PROXY" =~ ^https?:// ]]; then
-        PROXY="http://$PROXY"
-    fi
-elif [ -n "${http_proxy:-}" ]; then
-    PROXY="$http_proxy"
-    if [[ ! "$PROXY" =~ ^https?:// ]]; then
-        PROXY="http://$PROXY"
-    fi
-else
-    PROXY="http://127.0.0.1:7890"
-fi
-
-# 设置代理环境变量
-export PROXY="$PROXY"
-export http_proxy="$PROXY"
-export https_proxy="$PROXY"
-export HTTP_PROXY="$PROXY"
-export HTTPS_PROXY="$PROXY"
-log_info "使用代理: $PROXY"
+chezmoi_setup_proxy
 
 # ============================================
 # 安装 chezmoi

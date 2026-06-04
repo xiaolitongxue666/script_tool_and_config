@@ -14,7 +14,7 @@ globs:
 - **WSL**：须 WSL 内 `npm root -g/codewhale` 存在；`/mnt/.../AppData/Roaming/npm` 的 Windows shim **不算**已安装。
 - **WSL 禁止**：从 WSL 调用 `cmd.exe` / Windows npm 卸载或修改 Windows 包（含 legacy `deepseek`）。
 - **部署**：`./deploy.sh` 或 `./scripts/manage_dotfiles.sh apply`；**勿** `apply | rg | head`（SIGPIPE）。
-- **网络**：`npm` 与 postinstall 前 `setup_proxy`；WSL 为宿主机 `:7890`。
+- **网络**：入口脚本调用 `chezmoi_setup_proxy`（`chezmoi_core.sh`）；WSL 为宿主机 `:7890`，其余 `127.0.0.1:7890`；禁用 `PROXY=none` / `NO_PROXY=1`。
 - **状态**：默认 `~/.codewhale/`；`~/.deepseek/` 只读回退；run_once 非破坏性迁移，不删 legacy。
 - **勿写** `codewhale setup --migrate`（上游 v0.8.47 无此参数）。
 

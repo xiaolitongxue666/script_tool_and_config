@@ -18,7 +18,7 @@
 | 禁止 | run_once 内 cargo / brew / winget / Scoop 安装 CodeWhale |
 | 禁止 | **从 WSL 调用 `cmd.exe` / Windows npm 卸载或修改 Windows 侧包**（含 legacy `deepseek`） |
 | 前置 | Layer 0 `fnm` + `node`；Layer 4 字母序在 claude-code 之后 |
-| 代理 | `npm` / postinstall 下载 GitHub Releases 前 `setup_proxy`；默认 `127.0.0.1:7890`；WSL 用宿主机 IP:7890 |
+| 代理 | 统一 `chezmoi_setup_proxy`（`chezmoi_core.sh`）；默认全平台启用：WSL 宿主机 `:7890`（resolv nameserver），其余 `127.0.0.1:7890`；禁用 `PROXY=none/false` 或 `NO_PROXY=1`；导出 `GIT_HTTP_PROXY`/`GIT_HTTPS_PROXY`；检测日志 stderr、stdout 仅 URL |
 | 失败 | `[WARNING]` + `exit 0`；无 fnm/node 时 `[ERROR]` + `exit 1` |
 | 部署入口 | 增量：`./deploy.sh` 或 `./scripts/manage_dotfiles.sh apply`（**勿**对 apply 使用 `\| rg \| head` 管道，会 SIGPIPE 中断） |
 
@@ -52,7 +52,7 @@
 | apply 长时间无输出/中断 | `apply \| rg \| head` 导致 SIGPIPE | 直接运行 `./scripts/manage_dotfiles.sh apply`，勿管道截断 |
 | npm 装完找不到命令（Windows） | 全局包装在 `~/AppData/Roaming/npm` 未进 PATH | `_bash_profile_windows.tmpl` 已加入该目录 |
 | `doctor` 仍显示 `~/.deepseek` | 仅有 legacy 状态根 | 运行 apply 触发 run_once 迁移；primary 应为 `~/.codewhale` |
-| WSL 下载 postinstall 失败 | 代理指向 127.0.0.1 而非宿主机 | 脚本内 WSL 检测 nameserver → `http://<host>:7890` |
+| WSL 下载 postinstall 失败 | 代理指向 127.0.0.1 而非宿主机 | `chezmoi_setup_proxy` / WSL 检测 nameserver → `http://<host>:7890`（勿在 install/deploy 重复内联逻辑） |
 | 误以为要 commit API Key | config 在用户目录 | chezmoi **不**托管 `~/.codewhale/config.toml` |
 
 ### 相关文档与规则
@@ -152,7 +152,7 @@ macOS 默认 `/bin/bash` 为 **3.2**，不支持 `declare -A` / `local -n`。部
 |----|------|
 | Phase 1 | `eval "$(fnm env)" && ./deploy.sh` → exit 0；`verify_installation` 通过 5/0/0 |
 | Phase 2 | agent-config `bash scripts/install-tools.sh` → exit 0；`validate-quality` 与 `run-all-tests` 通过 |
-| 代理 | WSL 自动 `http://192.168.192.1:7890`（resolv nameserver） |
+| 代理 | 默认启用：`chezmoi_setup_proxy`；WSL → resolv nameserver:7890；其余 → 127.0.0.1:7890；禁用 `PROXY=none` / `NO_PROXY=1` |
 | Layer 4 | claude / codex / codewhale / cursor 均在 PATH |
 
 | 问题 | 原因 | 解决 |
@@ -161,6 +161,23 @@ macOS 默认 `/bin/bash` 为 **3.2**，不支持 `declare -A` / `local -n`。部
 | deploy 后 `chezmoi status` 显示 `M`/`R` | 模板与目标有差异或 run_once 重命名 | 非失败；按需再 apply |
 | agent-config skills 验证 WARN | 只查 `~/.claude/skills`，实际在 `~/.agents/skills` | agent-config 已修 `verify_global_agent_skills` 多路径 |
 | 误以为 Codex 缺 settings.json | v0.128+ 用 `~/.codex/config.toml` | 以 apply-config 与 `codex --version` 为准 |
+
+## 默认代理统一（2026-06-04）
+
+| 项 | 约定 |
+|----|------|
+| 唯一入口 | `scripts/chezmoi/chezmoi_core.sh` → `chezmoi_detect_proxy` / `chezmoi_setup_proxy` |
+| 调用方 | `install.sh`、`deploy.sh`、`manage_dotfiles.sh`（`prepare_chezmoi_session_env`）、`install_chezmoi.sh` |
+| 默认行为 | 无 env 时全平台默认代理：WSL → `http://<resolv nameserver>:7890`；Windows/macOS/原生 Linux → `127.0.0.1:7890` |
+| 禁用 | `PROXY=none/false` 或 `NO_PROXY=1` → unset 全部代理变量 |
+| 日志 | 检测来源写 stderr；`chezmoi_detect_proxy` stdout 仅 URL（避免 `$()` 污染） |
+| 测试 | `bash tests/test_proxy.sh`（8 项含 none/NO_PROXY/WSL mock）+ `test_syntax.sh` |
+| 不变 | Pacman/apt/brew 直连国内源；chezmoi 模板内 proxy 仍用静态 `awk`/`grep`（无新增 exec） |
+
+| 问题 | 原因 | 解决 |
+|------|------|------|
+| 非 WSL 平台默认直连 | `install.sh`/`deploy.sh` 内联逻辑仅在 WSL 设 PROXY | 删除重复块，统一 `chezmoi_setup_proxy` |
+| Git 克隆未走代理 | deploy 曾单独 export `GIT_*_PROXY` | 迁入 `chezmoi_setup_proxy` |
 
 ## chezmoi 源文件命名（2026-05）
 

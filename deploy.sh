@@ -141,38 +141,9 @@ export CHEZMOI_SOURCE_DIR="$CHEZMOI_DIR"
 log_success "已设置 CHEZMOI_SOURCE_DIR: $CHEZMOI_SOURCE_DIR"
 
 # ============================================
-# 设置代理（如果提供）
+# 设置代理（默认 127.0.0.1:7890；WSL 用宿主机 IP:7890）
 # ============================================
-# 与 install.sh 保持一致：仅在明确设置或 WSL 下默认使用代理
-# macOS/原生 Linux 不默认启用代理
-PROXY="${PROXY:-}"
-
-# WSL 下检测宿主机代理
-if [ -z "${PROXY:-}" ] && [ -z "${http_proxy:-}" ] && [ "$PLATFORM" = "linux" ]; then
-    if grep -qEi "Microsoft|WSL" /proc/version 2>/dev/null || [ -n "${WSL_DISTRO_NAME:-}" ]; then
-        _hostip=$(awk '/^nameserver / {print $2; exit}' /etc/resolv.conf 2>/dev/null)
-        if [ -n "$_hostip" ]; then
-            PROXY="http://${_hostip}:7890"
-            log_info "检测到 WSL，使用宿主机代理: $PROXY"
-        fi
-    fi
-fi
-if [ -n "${PROXY:-}" ] && [ "${PROXY:-}" != "none" ] && [ "${PROXY:-}" != "false" ]; then
-    # 确保代理格式正确（添加 http:// 前缀如果没有）
-    if [[ ! "${PROXY:-}" =~ ^https?:// ]]; then
-        PROXY="http://${PROXY}"
-    fi
-    export http_proxy="$PROXY"
-    export https_proxy="$PROXY"
-    export HTTP_PROXY="$PROXY"
-    export HTTPS_PROXY="$PROXY"
-    export GIT_HTTP_PROXY="$PROXY"
-    export GIT_HTTPS_PROXY="$PROXY"
-    log_info "已设置代理: $PROXY"
-else
-    log_info "未设置代理，使用直连"
-    unset PROXY http_proxy https_proxy HTTP_PROXY HTTPS_PROXY GIT_HTTP_PROXY GIT_HTTPS_PROXY 2>/dev/null || true
-fi
+chezmoi_setup_proxy
 
 # ============================================
 # 禁用 chezmoi pager（避免进入交互模式）
