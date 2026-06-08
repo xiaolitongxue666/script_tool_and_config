@@ -81,9 +81,31 @@
 
 ## 配置说明（相对 tmux）
 
-- **保留**：前缀 Ctrl+B、分屏 `|`/`-`/`%`/`"`、hjkl、窗口 `c/p/n`、静态 Catppuccin Mocha 状态栏。
-- **剔除**：TPM、Catppuccin 插件、`run-shell`、剪贴板脚本、resurrect/continuum。
-- **默认 shell**：`windows_git_bash_path`（与 WT Git Bash 一致；apply 时由 `detect_windows_git_paths.sh` 检测 C/D 盘）。
+`dot_rmux.conf.tmpl` 已对齐 `dot_tmux.conf.tmpl` 的可移植部分：
+
+- **状态栏**：`status-position top`；Catppuccin Mocha **静态 hex**（session 绿色 pill、window `#W` / 当前 `#W*` mauve、`status-right` 空）
+- **键位**：与 tmux 相同（`Prefix+ijkl` 切 pane、`Ctrl+方向键` resize 3 格、`Prefix+z`/`=`、分屏 `-c "#{pane_current_path}"`）
+- **复制**：`copy-command clip.exe` + vi 复制模式（替代 tmux-yank）
+- **剔除**：TPM、Catppuccin 插件、`run-shell`、resurrect/continuum
+- **默认 shell**：`windows_git_bash_path`（与 WT Git Bash 一致；apply 时由 `detect_windows_git_paths.sh` 检测 C/D 盘）
+
+键位速查见 [TMUX_KEYBINDINGS.md](TMUX_KEYBINDINGS.md#rmuxwindows)。
+
+### 部署后验证清单（Git Bash + rmux）
+
+```bash
+./scripts/manage_dotfiles.sh apply
+rmux new -s verify-test
+```
+
+在 rmux 会话内逐项确认：
+
+1. 状态栏在**顶部**；左侧 session 名；window 标签 `#W`，当前窗 `#W*` 为 mauve；右侧无内容
+2. `Prefix + %` / `"` 分屏后新 pane **cwd 不变**
+3. `Prefix + i/k/j/l` 按方向切换 pane；`Ctrl+方向键` 调整大小（3 格）
+4. `Prefix + z` zoom；`Prefix + =` 均分 pane
+5. `Prefix + [` → `v` 选择 → `y` 复制到 Windows 剪贴板
+6. `Prefix + r` 重载配置无报错
 
 ## 日常命令
 

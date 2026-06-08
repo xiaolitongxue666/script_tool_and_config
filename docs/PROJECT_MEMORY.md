@@ -13,6 +13,7 @@
 9. **macOS bash 3.2**：禁止 `declare -A`；`set -u` 下空数组勿 `"${arr[@]}"` 传参；代理禁用检测用 `case "$proxy" in none|false|...)` 勿用 `${var,,}`。
 10. **验证**：`bash tests/test_proxy.sh` + `bash tests/test_syntax.sh`；部署后 `verify_installation`（报告 `install_verification_report_*.txt`）。
 11. **tmux（Linux/macOS/WSL）**：`dot_tmux.conf.tmpl` → `~/.tmux.conf`；Catppuccin **v2.3.0 手动** clone 至 `~/.config/tmux/plugins/catppuccin/tmux`（`run_once_install-tmux.sh.tmpl`）；TPM 仅 yank/resurrect/continuum；键位速查 [TMUX_KEYBINDINGS.md](TMUX_KEYBINDINGS.md)。
+12. **rmux（仅 Windows）**：`dot_rmux.conf.tmpl` → `~/.rmux.conf`；键位/顶栏 Mocha 与 tmux 对齐（静态 hex，无 TPM）；验证清单 [RMUX_WINDOWS.md](RMUX_WINDOWS.md)。
 
 ## 对话归纳（2026-06-08 tmux 简化与 Catppuccin）
 
