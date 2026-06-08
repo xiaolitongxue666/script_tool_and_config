@@ -12,6 +12,20 @@
 8. **chezmoi 源**：zsh 模板 canonical 名为 `.chezmoi/dot_zshrc.tmpl`（勿提交无后缀 `dot_zshrc`）；映射见 `scripts/chezmoi/config_mappings.sh`。
 9. **macOS bash 3.2**：禁止 `declare -A`；`set -u` 下空数组勿 `"${arr[@]}"` 传参；代理禁用检测用 `case "$proxy" in none|false|...)` 勿用 `${var,,}`。
 10. **验证**：`bash tests/test_proxy.sh` + `bash tests/test_syntax.sh`；部署后 `verify_installation`（报告 `install_verification_report_*.txt`）。
+11. **tmux（Linux/macOS/WSL）**：`dot_tmux.conf.tmpl` → `~/.tmux.conf`；Catppuccin **v2.3.0 手动** clone 至 `~/.config/tmux/plugins/catppuccin/tmux`（`run_once_install-tmux.sh.tmpl`）；TPM 仅 yank/resurrect/continuum；键位速查 [TMUX_KEYBINDINGS.md](TMUX_KEYBINDINGS.md)。
+
+## 对话归纳（2026-06-08 tmux 简化与 Catppuccin）
+
+| 问题 | 解法 |
+|------|------|
+| 顶栏仍绿底 / Mocha 未生效 | TPM 未装插件；改 **手动** `run catppuccin.tmux` + `tmux-256color` + `terminal-features ",*:RGB"` |
+| `Prefix+$` 改名后仍显示主机名 | 状态栏用 `#T`（pane 标题）；改为 `@catppuccin_window_*_text` 用 **`#W`**（window 名），当前窗 **`#W*`** |
+| session 名不在顶栏 | `status-left "#{E:@catppuccin_status_session}"`；中间 tab 为 **window** 非 session |
+| 选中 window 不明显 | 当前 `mauve` / 非当前 `surface_0`；当前标签后缀 `*` |
+| `Prefix+j` 期望左移 | 面板切换改为 **`i/k/j/l` = 上/下/左/右**（对齐 nvim `<leader>ijkl`），非 vim `hjkl` |
+| `run_once_install-tmux` 跳过 TPM | tmux 已装时 **early exit** 导致未 clone TPM/Catppuccin；改为仅跳过 apt/brew 安装 |
+
+**键位摘要**：分屏 `Prefix+"`/`%`（`-c "#{pane_current_path}"`）；切 pane `Prefix+ijkl`；resize **`Ctrl+方向键` 3 格**（无 Prefix）；布局 `Prefix+z`/`=`；剪贴板 **tmux-yank** + vi 复制模式（删手写 xclip bind）。
 
 ## 对话归纳（2026-06-04 默认代理统一）
 

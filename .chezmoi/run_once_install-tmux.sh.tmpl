@@ -64,37 +64,40 @@ setup_proxy "$PROXY_VALUE"
 detect_os_and_package_manager || exit 1
 
 # 检查 Tmux 是否已安装
+TMUX_INSTALLED=false
 if command -v tmux &> /dev/null; then
     echo "[INFO] Tmux 已安装: $(tmux -V)"
-    exit 0
+    TMUX_INSTALLED=true
 fi
 
-echo "[INFO] 开始安装 Tmux..."
+if [ "$TMUX_INSTALLED" = false ]; then
+    echo "[INFO] 开始安装 Tmux..."
 
-# 根据平台安装 Tmux
-case "$PLATFORM" in
-    macos)
-        if [[ "$PACKAGE_MANAGER" == "brew" ]]; then
+    # 根据平台安装 Tmux
+    case "$PLATFORM" in
+        macos)
+            if [[ "$PACKAGE_MANAGER" == "brew" ]]; then
+                install_package "tmux"
+            else
+                echo "[ERROR] macOS 需要 Homebrew 来安装 Tmux"
+                exit 1
+            fi
+            ;;
+        linux)
             install_package "tmux"
-        else
-            echo "[ERROR] macOS 需要 Homebrew 来安装 Tmux"
+            ;;
+        *)
+            echo "[ERROR] 不支持的操作系统"
             exit 1
-        fi
-        ;;
-    linux)
-        install_package "tmux"
-        ;;
-    *)
-        echo "[ERROR] 不支持的操作系统"
-        exit 1
-        ;;
-esac
+            ;;
+    esac
 
-if command -v tmux &> /dev/null; then
-    echo "[SUCCESS] Tmux 安装成功: $(tmux -V)"
-else
-    echo "[ERROR] Tmux 安装失败"
-    exit 1
+    if command -v tmux &> /dev/null; then
+        echo "[SUCCESS] Tmux 安装成功: $(tmux -V)"
+    else
+        echo "[ERROR] Tmux 安装失败"
+        exit 1
+    fi
 fi
 
 # ============================================
@@ -163,5 +166,23 @@ else
         exit 1
     fi
 fi
-{{- end -}}
 
+# ============================================
+# 安装 Catppuccin for Tmux（手动加载，v2.3.0）
+# ============================================
+CATPPUCCIN_DIR="$HOME/.config/tmux/plugins/catppuccin/tmux"
+CATPPUCCIN_TAG="v2.3.0"
+
+if [ -f "${CATPPUCCIN_DIR}/catppuccin.tmux" ]; then
+    echo "[INFO] Catppuccin for Tmux 已安装"
+else
+    echo "[INFO] Installing Catppuccin for Tmux (${CATPPUCCIN_TAG})..."
+    mkdir -p "$(dirname "$CATPPUCCIN_DIR")"
+    if git clone --depth 1 --branch "$CATPPUCCIN_TAG" https://github.com/catppuccin/tmux.git "$CATPPUCCIN_DIR" 2>&1; then
+        echo "[SUCCESS] Catppuccin for Tmux installed"
+    else
+        echo "[WARNING] Catppuccin for Tmux install failed; tmux will use default colors until fixed"
+    fi
+fi
+
+{{- end -}}

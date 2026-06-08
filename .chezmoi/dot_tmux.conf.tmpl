@@ -35,37 +35,41 @@ set -s escape-time 50
 # 窗口和面板管理
 # ============================================
 
-# 设置窗口分割快捷键
-bind | split-window -h
-bind - split-window -v
-unbind '"'
-unbind %
+# 分屏（tmux 默认键 + 保持当前目录）
+bind '"' split-window -v -c "#{pane_current_path}"
+bind %  split-window -h -c "#{pane_current_path}"
 
-# 快速切换面板（使用 h/j/k/l）
-bind h select-pane -L
-bind j select-pane -D
-bind k select-pane -U
-bind l select-pane -R
+# 面板切换（对齐 nvim <leader> i/k/j/l：上/下/左/右）
+bind -r i select-pane -U
+bind -r k select-pane -D
+bind -r j select-pane -L
+bind -r l select-pane -R
+unbind h
 
-# 调整面板大小（使用 H/J/K/L，支持重复按键）
-bind -r H resize-pane -L 5
-bind -r J resize-pane -D 5
-bind -r K resize-pane -U 5
-bind -r L resize-pane -R 5
+# 调整面板大小（对齐 nvim Ctrl+方向键，3 格，无需 Prefix）
+unbind -n C-Up
+unbind -n C-Down
+unbind -n C-Left
+unbind -n C-Right
+bind -r -n C-Up    resize-pane -U 3
+bind -r -n C-Down  resize-pane -D 3
+bind -r -n C-Left  resize-pane -L 3
+bind -r -n C-Right resize-pane -R 3
+unbind H
+unbind J
+unbind K
+unbind L
+unbind I
+unbind C-Up
+unbind C-Down
+unbind C-Left
+unbind C-Right
 
-# 调整面板大小（使用 I/K/J/L，大写字母）
-bind-key I resize-pane -U 10
-bind-key K resize-pane -D 10
-bind-key J resize-pane -L 10
-bind-key L resize-pane -R 10
+# 布局（对标 nvim leader+wb / leader+wm）
+bind -r z resize-pane -Z
+bind   = select-layout -E
 
-# 选择面板（使用 i/k/j/l，小写字母）
-bind-key i select-pane -U
-bind-key k select-pane -D
-bind-key j select-pane -L
-bind-key l select-pane -R
-
-# 设置窗口切换快捷键
+# 窗口切换
 bind -r C-h select-window -t :-
 bind -r C-l select-window -t :+
 
@@ -80,128 +84,57 @@ bind-key -n MouseDrag1Status swap-window -t=
 # 终端和颜色配置
 # ============================================
 
-# 设置默认 shell 为 zsh
-# 自动检测 zsh 路径（支持 macOS 和 Linux）
-# 优先级：1. Homebrew zsh (Apple Silicon: /opt/homebrew) 2. Homebrew zsh (Intel: /usr/local) 3. 系统 zsh (/usr/bin, /bin) 4. 通过 command -v 查找
-# 使用 run-shell 在配置加载时动态设置，确保跨平台兼容性
+# 默认 shell：run-shell 动态检测 zsh（macOS Homebrew / 系统路径）
 run-shell 'ZSH_PATH=""; if [ -f /opt/homebrew/bin/zsh ]; then ZSH_PATH="/opt/homebrew/bin/zsh"; elif [ -f /usr/local/bin/zsh ]; then ZSH_PATH="/usr/local/bin/zsh"; elif [ -f /usr/bin/zsh ]; then ZSH_PATH="/usr/bin/zsh"; elif [ -f /bin/zsh ]; then ZSH_PATH="/bin/zsh"; else ZSH_PATH=$(command -v zsh 2>/dev/null); fi; [ -n "$ZSH_PATH" ] && tmux set-option -g default-shell "$ZSH_PATH"'
 
-# 设置终端类型（支持真彩色和斜体）
-# 如果使用 Alacritty 终端，取消注释下面一行
-# set -g default-terminal "alacritty"
-set -g default-terminal "screen-256color"
-set -ga terminal-overrides ",xterm-256color:Tc"
+# 终端类型（真彩色；Catppuccin 推荐 tmux-256color + RGB）
+set -g default-terminal "tmux-256color"
+set -ga terminal-features ",*:RGB"
 
 # ============================================
-# Catppuccin 主题配置（通过 TPM 管理）
+# Catppuccin Mocha 主题（手动加载，见 run_once_install-tmux.sh.tmpl）
 # ============================================
 
-# 设置 Catppuccin 主题 flavor 为 Mocha
 set -g @catppuccin_flavor 'mocha'
-
-# 窗口状态样式（可选，使用圆角样式）
 set -g @catppuccin_window_status_style "rounded"
 
-# ============================================
-# 状态栏配置（Catppuccin 主题会覆盖这些设置，但保留作为备用）
-# ============================================
+# 状态栏 window 标签用 #W（window 名）；#T 是 pane 标题，Prefix+, 改名不会更新 #T
+set -g @catppuccin_window_text " #W"
+set -g @catppuccin_window_current_text " #W*"
+set -g @catppuccin_window_number_color "#{@thm_surface_0}"
+set -g @catppuccin_window_text_color "#{@thm_surface_0}"
+set -g @catppuccin_window_current_number_color "#{@thm_mauve}"
+set -g @catppuccin_window_current_text_color "#{@thm_mauve}"
 
-# 注意：status-position 必须在 TPM 加载之后设置，否则会被主题覆盖
+# 必须在设置 status-left/right 之前 run（Catppuccin v2 要求）
+run '~/.config/tmux/plugins/catppuccin/tmux/catppuccin.tmux'
 
-# 状态栏长度配置（Catppuccin 主题会使用这些设置）
-set -g status-right-length 100
+# 状态栏：左侧 session 名 + 中间 window 标签（由主题渲染）
 set -g status-left-length 100
-
-# 状态栏左侧（可选，Catppuccin 主题默认为空）
-set -g status-left ""
-
-# 状态栏右侧（可选，添加一些模块）
-# 注意：这些模块需要安装对应的插件，如果不需要可以注释掉
-# set -g status-right "#{E:@catppuccin_status_application}"
-# set -agF status-right "#{E:@catppuccin_status_cpu}"
-# set -ag status-right "#{E:@catppuccin_status_session}"
-# set -ag status-right "#{E:@catppuccin_status_uptime}"
-# set -agF status-right "#{E:@catppuccin_status_battery}"
+set -g status-right-length 100
+set -g status-left "#{E:@catppuccin_status_session}"
+set -g status-right ""
 
 # ============================================
-# 剪贴板集成（Linux，需要 xclip）
+# 复制模式（vi 键位，配合 tmux-yank）
 # ============================================
-# 注意：macOS 使用 pbcopy/pbpaste，Linux 使用 xclip
-# 安装 xclip: sudo apt-get install xclip 或 sudo pacman -S xclip
-
-# Ctrl+c 复制到剪贴板
-bind C-c run-shell "tmux save-buffer - | xclip -i -sel clipboard 2>/dev/null || tmux save-buffer - | pbcopy 2>/dev/null || true"
-
-# Ctrl+v 从剪贴板粘贴
-bind C-v run-shell "tmux set-buffer \"$(xclip -o -sel clipboard 2>/dev/null || pbpaste 2>/dev/null || echo '')\"; tmux paste-buffer"
-
-# 鼠标选择后自动复制到剪贴板
-unbind -n -Tcopy-mode-vi MouseDragEnd1Pane
-bind -Tcopy-mode-vi MouseDragEnd1Pane send -X copy-selection-and-cancel\; run-shell "tmux save-buffer - | xclip -i -sel clipboard 2>/dev/null || tmux save-buffer - | pbcopy 2>/dev/null || true"
-
-# 中键点击从剪贴板粘贴
-unbind-key MouseDown2Pane
-bind-key -n MouseDown2Pane run-shell "X=\$(xclip -o -sel clipboard 2>/dev/null || pbpaste 2>/dev/null || echo ''); tmux set-buffer \"\$X\"; tmux paste-buffer -p; tmux display-message 'pasted!'"
+setw -g mode-keys vi
+bind -T copy-mode-vi v send-keys -X begin-selection
+bind -T copy-mode-vi C-v send-keys -X rectangle-toggle
 
 # ============================================
 # TPM (Tmux Plugin Manager) 插件配置
 # ============================================
-# 所有 tmux 插件通过 TPM 管理
-# 安装插件：在 tmux 中按 prefix + I（大写 I）
-# 更新插件：在 tmux 中按 prefix + U（大写 U）
-# 卸载插件：在 tmux 中按 prefix + alt + u（小写 u）
+# TPM 快捷键：Prefix+I 安装 / Prefix+U 更新 / Prefix+Alt+u 卸载
 
-# TPM 插件管理器本身（必须第一个）
 set -g @plugin 'tmux-plugins/tpm'
-
-# tmux-sensible: 基础 tmux 设置
-# 作用：提供合理的默认配置，包括：
-#   - 启用 UTF-8 支持
-#   - 设置合理的窗口和面板选项
-#   - 改进复制模式行为
-#   - 优化终端兼容性
-# 用法：安装后自动生效，无需额外配置
 set -g @plugin 'tmux-plugins/tmux-sensible'
-
-# catppuccin/tmux: Catppuccin 主题
-# 作用：提供美观的 Catppuccin Mocha 主题
-# 用法：通过 @catppuccin_flavor 设置主题风格（已在上面配置为 'mocha'）
-# 注意：此插件通过 TPM 管理，替代之前的手动安装方式
-set -g @plugin 'catppuccin/tmux'
-
-# tmux-yank: 改进复制粘贴功能
-# 作用：增强 tmux 的复制粘贴功能，支持系统剪贴板集成
-# 用法：
-#   - 在复制模式下，按 y 复制选中内容到系统剪贴板
-#   - 按 Y 复制整行到系统剪贴板
-#   - 按 prefix + y 复制最后一个命令的输出
-# 注意：macOS 使用 pbcopy/pbpaste，Linux 需要安装 xclip 或 xsel
 set -g @plugin 'tmux-plugins/tmux-yank'
-
-# tmux-resurrect: 保存和恢复 tmux 会话
-# 作用：保存 tmux 会话状态（窗口、面板布局、工作目录等），重启后可恢复
-# 用法：
-#   - 保存会话：prefix + Ctrl-s
-#   - 恢复会话：prefix + Ctrl-r
-# 配置：可以设置保存策略（如 vim 会话、程序状态等）
+set -g @yank_with_mouse on
 set -g @plugin 'tmux-plugins/tmux-resurrect'
-
-# tmux-resurrect 配置
-# 设置 vim 会话恢复策略
 set -g @resurrect-strategy-vim 'session'
-
-# tmux-continuum: 自动保存和恢复会话
-# 作用：自动定期保存 tmux 会话，并在 tmux 启动时自动恢复
-# 用法：安装后自动生效，无需手动操作
-# 配置：
-#   - @continuum-restore: 是否在 tmux 启动时自动恢复（默认开启）
-#   - @continuum-save-interval: 自动保存间隔（分钟，默认 15）
 set -g @plugin 'tmux-plugins/tmux-continuum'
-
-# tmux-continuum 配置
-# 启用自动恢复（tmux 启动时自动恢复上次会话）
 set -g @continuum-restore 'on'
-# 设置自动保存间隔为 15 分钟
 set -g @continuum-save-interval '15'
 
 # 初始化 TPM（必须放在配置文件最后）
