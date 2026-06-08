@@ -13,7 +13,18 @@
 9. **macOS bash 3.2**：禁止 `declare -A`；`set -u` 下空数组勿 `"${arr[@]}"` 传参；代理禁用检测用 `case "$proxy" in none|false|...)` 勿用 `${var,,}`。
 10. **验证**：`bash tests/test_proxy.sh` + `bash tests/test_syntax.sh`；部署后 `verify_installation`（报告 `install_verification_report_*.txt`）。
 11. **tmux（Linux/macOS/WSL）**：`dot_tmux.conf.tmpl` → `~/.tmux.conf`；Catppuccin **v2.3.0 手动** clone 至 `~/.config/tmux/plugins/catppuccin/tmux`（`run_once_install-tmux.sh.tmpl`）；TPM 仅 yank/resurrect/continuum；键位速查 [TMUX_KEYBINDINGS.md](TMUX_KEYBINDINGS.md)。
-12. **rmux（仅 Windows）**：`dot_rmux.conf.tmpl` → `~/.rmux.conf`；键位/顶栏 Mocha 与 tmux 对齐（静态 hex，无 TPM）；验证清单 [RMUX_WINDOWS.md](RMUX_WINDOWS.md)。
+12. **rmux（仅 Windows）**：v0.5.0（zip `rmux-0.5.0-windows-x86_64.zip`）；`dot_rmux.conf.tmpl` → `~/.rmux.conf`；顶栏 window 用 `#{window_index}` + `#{window_name}#{window_flags}` 分 pill（勿裸 `#I`）；`Prefix+,` 须 `command-prompt` 重命名；**apply 后须 `Prefix+r`**（daemon 启动时读配置）；详见 [RMUX_WINDOWS.md](RMUX_WINDOWS.md)。
+
+## 对话归纳（2026-06-08 rmux 升级与状态栏）
+
+| 问题 | 解法 |
+|------|------|
+| 升级到 v0.5.0 后 apply 仍显示旧版 | Release 包名改为 `rmux-0.5.0-windows-x86_64.zip`；`run_once_install-rmux.sh.tmpl` 版本检测仅匹配 `0.5.0` |
+| `Prefix+,` 重命名无反应 | `rename-window` 必须带 `NEW_NAME`；改为 `command-prompt -I '#{window_name}' 'rename-window "%%"'` |
+| window 标签无序号 / 仅 `bash.exe*` | 运行中 daemon 仍持旧 `window-status-format`（`#W`/`#W*`）；`chezmoi apply` 不热更新 → 会话内 **`Prefix+r`** 或 `rmux source-file ~/.rmux.conf` |
+| `#I:#W#F` 状态栏不显示序号 | 改用 `#{window_index}` 长格式 + Catppuccin 式独立序号 pill；`setw -g window-status-separator ""` |
+
+**排错**：`rmux show-options -g window-status-format` 对比磁盘 `~/.rmux.conf`；配置路径优先级见 [rmux Configuration](https://rmux.io/docs/get-started/#/configuration)。
 
 ## 对话归纳（2026-06-08 tmux 简化与 Catppuccin）
 

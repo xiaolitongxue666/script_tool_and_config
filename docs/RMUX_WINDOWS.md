@@ -1,6 +1,6 @@
 # Windows 下 rmux 安装与排错
 
-本文档记录在本仓库中集成 [rmux](https://github.com/Helvesec/rmux) v0.3.1 时的设计选择、遇到的问题与解决方法。与 Linux/macOS 的 tmux（`dot_tmux.conf.tmpl` + TPM）**并行**，互不替代。
+本文档记录在本仓库中集成 [rmux](https://github.com/Helvesec/rmux) v0.5.0 时的设计选择、遇到的问题与解决方法。与 Linux/macOS 的 tmux（`dot_tmux.conf.tmpl` + TPM）**并行**，互不替代。
 
 ## 设计边界
 
@@ -69,7 +69,7 @@
 
 ### 4. 预编译包解压路径
 
-**现象**：zip 内为 `rmux-v0.3.1-x86_64-pc-windows-msvc/rmux.exe` 子目录。
+**现象**：zip 内为子目录（如 `rmux-0.5.0-windows-x86_64/rmux.exe`），非 zip 根目录。
 
 **解决**：安装脚本使用 `find ... -name rmux.exe`，勿假定 zip 根目录即二进制。
 
@@ -83,7 +83,8 @@
 
 `dot_rmux.conf.tmpl` 已对齐 `dot_tmux.conf.tmpl` 的可移植部分：
 
-- **状态栏**：`status-position top`；Catppuccin Mocha **静态 hex**（session 绿色 pill、window `#W` / 当前 `#W*` mauve、`status-right` 空）
+- **状态栏**：`status-position top`；Catppuccin Mocha **静态 hex**（session 绿色 pill、window 为「序号 pill + 名称 pill」如 `1` `name*`、当前窗 mauve、`status-right` 空）
+- **配置热更新**：rmux 启动时读 `~/.rmux.conf`（见 [Configuration](https://rmux.io/docs/get-started/#/configuration)）；`chezmoi apply` 后须在会话内 **`Prefix + r`** 或重新 attach，否则仍用旧 `window-status-format`
 - **键位**：与 tmux 相同（`Prefix+ijkl` 切 pane、`Ctrl+方向键` resize 3 格、`Prefix+z`/`=`、分屏 `-c "#{pane_current_path}"`）
 - **复制**：`copy-command clip.exe` + vi 复制模式（替代 tmux-yank）
 - **剔除**：TPM、Catppuccin 插件、`run-shell`、resurrect/continuum
@@ -100,12 +101,13 @@ rmux new -s verify-test
 
 在 rmux 会话内逐项确认：
 
-1. 状态栏在**顶部**；左侧 session 名；window 标签 `#W`，当前窗 `#W*` 为 mauve；右侧无内容
+1. 状态栏在**顶部**；左侧 session 名；每个 window 为独立「序号 + 名称」pill（如 `1` `work*`），当前窗 mauve 高亮；右侧无内容
 2. `Prefix + %` / `"` 分屏后新 pane **cwd 不变**
 3. `Prefix + i/k/j/l` 按方向切换 pane；`Ctrl+方向键` 调整大小（3 格）
 4. `Prefix + z` zoom；`Prefix + =` 均分 pane
 5. `Prefix + [` → `v` 选择 → `y` 复制到 Windows 剪贴板
-6. `Prefix + r` 重载配置无报错
+6. `Prefix + ,` 弹出重命名提示，输入后 window 标签更新（须 `command-prompt`，不可裸绑 `rename-window`）
+7. `Prefix + r` 重载配置无报错
 
 ## 日常命令
 

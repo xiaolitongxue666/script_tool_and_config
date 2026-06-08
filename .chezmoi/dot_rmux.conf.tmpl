@@ -44,8 +44,11 @@ set -g status-right-length 100
 set -g status-left '#[fg=#11111b,bg=#a6e3a1] #S #[fg=#a6e3a1,bg=#181825] '
 set -g status-right ""
 
-set -g window-status-format '#[fg=#181825,bg=#313244] #[fg=#cdd6f4,bg=#313244] #W #[fg=#181825,bg=#313244] '
-set -g window-status-current-format '#[fg=#181825,bg=#cba6f7] #[fg=#1e1e2e,bg=#cba6f7] #W* #[fg=#cba6f7,bg=#181825] '
+# tmux/Catppuccin 风格：序号独立 pill + 窗口名 + 标志（#{window_flags} 含当前窗 *）
+# 须用 #{window_index} 长格式；#I 在部分 rmux 状态栏渲染中不展开
+setw -g window-status-separator ""
+set -g window-status-format '#[fg=#181825,bg=#313244] #[fg=#cdd6f4,bg=#313244] #{window_index} #[fg=#cdd6f4,bg=#313244] #{window_name}#{window_flags} #[fg=#181825,bg=#313244] '
+set -g window-status-current-format '#[fg=#181825,bg=#cba6f7] #[fg=#11111b,bg=#cba6f7] #{window_index} #[fg=#1e1e2e,bg=#cba6f7] #{window_name}#{window_flags} #[fg=#cba6f7,bg=#181825] '
 
 set -g pane-border-style "fg=#45475a"
 set -g pane-active-border-style "fg=#cba6f7"
@@ -88,7 +91,8 @@ bind -r C-h select-window -t :-
 bind -r C-l select-window -t :+
 
 bind c new-window
-bind , rename-window
+# tmux 默认：Prefix+, 弹出提示输入新窗口名（rename-window 必须带 NEW_NAME 参数）
+bind , command-prompt -I '#{window_name}' 'rename-window "%%"'
 bind p previous-window
 bind n next-window
 bind d detach-client

@@ -16,7 +16,7 @@
 
 ### Windows rmux（与 tmux 分工）
 
-- **仅 Windows**：`run_on_windows/run_once_install-rmux.sh.tmpl` 安装 rmux v0.3.1；`dot_rmux.conf.tmpl` → `~/.rmux.conf`（由 tmux 配置精简，**无插件**）。
+- **仅 Windows**：`run_on_windows/run_once_install-rmux.sh.tmpl` 安装 rmux v0.5.0；`dot_rmux.conf.tmpl` → `~/.rmux.conf`（由 tmux 配置精简，**无插件**）。
 - WT 仍默认 Git Bash；**不**改 `settings.json.tmpl` 自动进 rmux；**不**在 bashrc 里 `attach`。
 - 排错与部署陷阱见 [docs/RMUX_WINDOWS.md](docs/RMUX_WINDOWS.md)。
 

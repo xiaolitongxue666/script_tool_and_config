@@ -5,7 +5,7 @@
 | 平台 | 程序 | 配置文件 | 插件 | 安装脚本 |
 |------|------|---------|------|---------|
 | **Linux / macOS / WSL** | tmux | `~/.tmux.conf`（来自 `dot_tmux.conf.tmpl`） | TPM + 4 插件 | `run_once_install-tmux.sh.tmpl` |
-| **Windows** | rmux v0.3.1 | `~/.rmux.conf`（来自 `dot_rmux.conf.tmpl`） | 无 | `run_once_install-rmux.sh.tmpl` |
+| **Windows** | rmux v0.5.0 | `~/.rmux.conf`（来自 `dot_rmux.conf.tmpl`） | 无 | `run_once_install-rmux.sh.tmpl` |
 
 > Windows 排错详见 [RMUX_WINDOWS.md](RMUX_WINDOWS.md)。
 
@@ -192,7 +192,7 @@ Linux 需 `xclip`/`xsel`；macOS 用 `pbcopy`；WSL 依赖 WSLg 或 `@override_c
 | `Prefix + z` | 放大/还原当前 pane（zoom） |
 | `Prefix + =` | 均分所有 pane 大小 |
 
-> 状态栏在**顶部**；**左侧** session 名（绿色 pill）；中间 window 标签 `#W` / 当前 `#W*`（mauve）；**右侧为空**。
+> 状态栏在**顶部**；**左侧** session 名（绿色 pill）；中间 window 为「序号 pill + 名称 pill」（如 `1` `bash*`），当前窗 mauve 高亮；**右侧为空**。改配置后须 `Prefix + r` 重载。
 
 ### 窗口操作
 

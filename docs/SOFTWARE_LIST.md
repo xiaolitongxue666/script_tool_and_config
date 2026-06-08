@@ -94,7 +94,7 @@ run_on_windows/*                      ← Layer 5（平台特有）
 | 层级 | 脚本 | 安装项 | 说明 |
 |------|------|--------|------|
 | Layer 5 | `run_on_windows/run_once_install-windows-terminal` | Windows Terminal | windows |
-| Layer 5 | `run_on_windows/run_once_install-rmux` | rmux v0.3.1（预编译包 → `~/.local/bin`，cargo 回退） | windows |
+| Layer 5 | `run_on_windows/run_once_install-rmux` | rmux v0.5.0（预编译包 → `~/.local/bin`，cargo 回退） | windows |
 | Layer 5 | `run_once_install-oh-my-posh` | Oh My Posh 提示符 | windows |
 | Layer 5 | `run_on_windows/run_onchange_sync_windows_terminal_config` | Windows Terminal 配置同步到实际路径 | windows（内容变化触发） |
 

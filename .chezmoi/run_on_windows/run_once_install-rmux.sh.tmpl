@@ -4,15 +4,15 @@
 # ============================================
 # rmux 安装脚本（chezmoi run_once_）
 # 仅 Windows；预编译包安装到 ~/.local/bin，失败时回退 cargo install
-# 参考: https://github.com/Helvesec/rmux/releases/tag/v0.3.1
+# 参考: https://github.com/Helvesec/rmux/releases/tag/v0.5.0
 # 排错: docs/RMUX_WINDOWS.md
 # ============================================
 
 set -euo pipefail
 
-readonly RMUX_VERSION="0.3.1"
+readonly RMUX_VERSION="0.5.0"
 readonly RMUX_RELEASE_TAG="v${RMUX_VERSION}"
-readonly RMUX_WINDOWS_ZIP="rmux-${RMUX_RELEASE_TAG}-x86_64-pc-windows-msvc.zip"
+readonly RMUX_WINDOWS_ZIP="rmux-${RMUX_VERSION}-windows-x86_64.zip"
 readonly RMUX_DOWNLOAD_URL="https://github.com/Helvesec/rmux/releases/download/${RMUX_RELEASE_TAG}/${RMUX_WINDOWS_ZIP}"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -44,7 +44,7 @@ setup_proxy "${PROXY:-{{ env "http_proxy" | default "http://127.0.0.1:7890" }}}"
 _rmux_version_ok() {
     local ver_line
     ver_line="$(rmux -V 2>/dev/null | head -n1 || true)"
-    [[ "$ver_line" == *"${RMUX_VERSION}"* ]] || [[ "$ver_line" == *"0.3."* ]]
+    [[ "$ver_line" == *"${RMUX_VERSION}"* ]]
 }
 
 if command -v rmux &>/dev/null && _rmux_version_ok; then

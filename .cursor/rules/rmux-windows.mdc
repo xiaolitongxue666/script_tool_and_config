@@ -13,7 +13,9 @@ globs:
 - Linux/macOS 用 **tmux**（`dot_tmux.conf.tmpl` + TPM）；Windows 用 **rmux**（`dot_rmux.conf.tmpl`），**不要**在 Windows 上维护 tmux 插件配置。
 - WT 默认仍为 Git Bash；**禁止**在 `settings.json.tmpl` 加 rmux 自动启动 profile，**禁止**在 bashrc/bash_profile 里自动 `rmux attach`。
 - 用户手动：`rmux new -s <name>` / `rmux a -t <name>`。
-- 安装：`run_on_windows/run_once_install-rmux.sh.tmpl`（Release zip → `~/.local/bin`，失败则 `cargo install rmux --locked`）。
+- 安装：`run_on_windows/run_once_install-rmux.sh.tmpl`（v0.5.0 zip `rmux-0.5.0-windows-x86_64.zip` → `~/.local/bin`，失败则 `cargo install rmux --locked`）。
+- 配置热更新：`chezmoi apply` 只写 `~/.rmux.conf`；已 attach 会话须 **`Prefix+r`** 或 `rmux source-file ~/.rmux.conf`（daemon 启动时读配置）。
+- 状态栏 window：用 `#{window_index}` + `#{window_name}#{window_flags}` 分 pill；`Prefix+,` 用 `command-prompt` 重命名（勿裸绑 `rename-window`）。
 
 ## chezmoi 部署（易错）
 
