@@ -29,6 +29,14 @@ Host github.com
 {{- end }}
 {{- end }}
 
+# --- Gitea（ci.moicen.com / weli 组织）---
+Host ci.moicen.com
+    HostName ci.moicen.com
+    Port 2222
+    User git
+    IdentityFile {{ .identity_file | default "~/.ssh/id_rsa" }}
+    IdentitiesOnly yes
+
 # --- Alchemy / Moicen VNC（ssh to alchemy/moicen through VNC）---
 Host alchemy-vnc
     HostName alchemy-studio.cn
