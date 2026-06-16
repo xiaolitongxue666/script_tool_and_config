@@ -465,6 +465,295 @@ detect_install_user() {
 }
 
 # ============================================
+# 语义版本比较（bash 3.2 / MSYS2 兼容）
+# ============================================
+
+# 从 --version 输出解析 semver，stdout: major minor patch
+parse_semver() {
+    local text="$1"
+    local major minor patch digits
+    digits=$(printf '%s' "$text" | tr -cd '0-9.')
+    major=$(printf '%s' "$digits" | cut -d. -f1)
+    minor=$(printf '%s' "$digits" | cut -d. -f2)
+    patch=$(printf '%s' "$digits" | cut -d. -f3)
+    [[ -z "$major" ]] && major="0"
+    [[ -z "$minor" ]] && minor="0"
+    [[ -z "$patch" ]] && patch="0"
+    echo "$major $minor $patch"
+}
+
+# 比较两个 semver 字符串；op: lt|le|eq|ge|gt
+# 返回 0 表示关系成立
+compare_semver() {
+    local ver_a="$1"
+    local op="$2"
+    local ver_b="$3"
+    local a_m a_n a_p b_m b_n b_p
+    read -r a_m a_n a_p <<< "$(parse_semver "$ver_a")"
+    read -r b_m b_n b_p <<< "$(parse_semver "$ver_b")"
+
+    local cmp=0
+    if [[ "$a_m" -lt "$b_m" ]]; then cmp=-1
+    elif [[ "$a_m" -gt "$b_m" ]]; then cmp=1
+    elif [[ "$a_n" -lt "$b_n" ]]; then cmp=-1
+    elif [[ "$a_n" -gt "$b_n" ]]; then cmp=1
+    elif [[ "$a_p" -lt "$b_p" ]]; then cmp=-1
+    elif [[ "$a_p" -gt "$b_p" ]]; then cmp=1
+    fi
+
+    case "$op" in
+        lt) [[ "$cmp" -lt 0 ]] ;;
+        le) [[ "$cmp" -le 0 ]] ;;
+        eq) [[ "$cmp" -eq 0 ]] ;;
+        ge) [[ "$cmp" -ge 0 ]] ;;
+        gt) [[ "$cmp" -gt 0 ]] ;;
+        *) return 1 ;;
+    esac
+}
+
+# ============================================
+# 代理与 chezmoi 模板执行
+# ============================================
+
+ensure_proxy_for_download() {
+    if type chezmoi_setup_proxy &>/dev/null; then
+        chezmoi_setup_proxy "${PROXY:-}"
+    else
+        setup_proxy "${PROXY:-${http_proxy:-http://127.0.0.1:7890}}"
+    fi
+}
+
+# 渲染并执行 chezmoi run_once 模板（补装缺失项）
+# 参数: template_abs_path, chezmoi_source_dir
+run_chezmoi_install_script() {
+    local template_path="$1"
+    local source_dir="${2:-${CHEZMOI_SOURCE_DIR:-}}"
+    local config_file="${HOME}/.config/chezmoi/chezmoi.toml"
+
+    if [[ ! -f "$template_path" ]]; then
+        echo "[ERROR] Template not found: $template_path" >&2
+        return 1
+    fi
+    if ! command -v chezmoi &>/dev/null; then
+        echo "[ERROR] chezmoi not found, cannot execute template" >&2
+        return 1
+    fi
+
+    ensure_proxy_for_download
+
+    local rel_path="${template_path#"${source_dir}/"}"
+    rel_path="${rel_path#./}"
+    if [[ "$rel_path" == "$template_path" ]]; then
+        rel_path="$(basename "$template_path")"
+    fi
+
+    echo "[INFO] Running install template: $rel_path" >&2
+    # 须 --file + 绝对路径；否则 chezmoi 把路径当模板字面量，bash 会报 command not found
+    local chezmoi_args=(execute-template --file)
+    if [[ -f "$config_file" ]]; then
+        chezmoi_args+=(--config "$config_file")
+    fi
+    if [[ -n "$source_dir" && -d "$source_dir" ]]; then
+        chezmoi_args+=(--source "$source_dir")
+    fi
+    chezmoi_args+=("$template_path")
+
+    if ! chezmoi "${chezmoi_args[@]}" 2>&1 | bash; then
+        echo "[WARNING] Install template failed: $rel_path" >&2
+        return 1
+    fi
+    return 0
+}
+
+# ============================================
+# 包管理器升级
+# ============================================
+
+upgrade_brew_package() {
+    local name="$1"
+    [[ -z "$name" ]] && return 1
+    if ! command -v brew &>/dev/null; then
+        echo "[WARNING] brew not found, skip upgrade: $name" >&2
+        return 1
+    fi
+    echo "[INFO] Upgrading via brew: $name" >&2
+    if brew list "$name" &>/dev/null 2>&1; then
+        brew upgrade "$name" 2>/dev/null || return 1
+    else
+        brew install "$name" 2>/dev/null || return 1
+    fi
+    return 0
+}
+
+upgrade_brew_cask() {
+    local name="$1"
+    [[ -z "$name" ]] && return 1
+    if ! command -v brew &>/dev/null; then
+        return 1
+    fi
+    echo "[INFO] Upgrading cask via brew: $name" >&2
+    if brew list --cask "$name" &>/dev/null 2>&1; then
+        brew upgrade --cask "$name" 2>/dev/null || return 1
+    else
+        brew install --cask "$name" 2>/dev/null || return 1
+    fi
+    return 0
+}
+
+upgrade_pacman_package() {
+    local name="$1"
+    [[ -z "$name" ]] && return 1
+    echo "[INFO] Upgrading via pacman: $name" >&2
+    if [[ "${PLATFORM:-}" == "windows" ]]; then
+        pacman.exe -Sy --noconfirm 2>/dev/null || true
+        pacman.exe -S --noconfirm "$name" 2>/dev/null || return 1
+    else
+        sudo pacman -Sy --noconfirm 2>/dev/null || true
+        sudo pacman -S --noconfirm "$name" 2>/dev/null || return 1
+    fi
+    return 0
+}
+
+upgrade_apt_package() {
+    local name="$1"
+    [[ -z "$name" ]] && return 1
+    echo "[INFO] Upgrading via apt: $name" >&2
+    sudo apt-get update -qq 2>/dev/null || true
+    if dpkg -l "$name" 2>/dev/null | grep -q '^ii'; then
+        sudo apt-get install --only-upgrade -y "$name" 2>/dev/null || return 1
+    else
+        sudo apt-get install -y "$name" 2>/dev/null || return 1
+    fi
+    return 0
+}
+
+upgrade_winget_id() {
+    local id="$1"
+    [[ -z "$id" ]] && return 1
+    if ! command -v winget &>/dev/null; then
+        echo "[WARNING] winget not found, skip upgrade: $id" >&2
+        return 1
+    fi
+    echo "[INFO] Upgrading via winget: $id" >&2
+    if winget list --id "$id" &>/dev/null 2>&1; then
+        winget upgrade --id "$id" -e --accept-source-agreements --accept-package-agreements 2>/dev/null || return 1
+    else
+        winget install --id "$id" -e --accept-source-agreements --accept-package-agreements 2>/dev/null || return 1
+    fi
+    return 0
+}
+
+upgrade_package_by_manager() {
+    local pkg="$1"
+    [[ -z "$pkg" ]] && return 1
+    if [[ -z "${PACKAGE_MANAGER:-}" ]]; then
+        detect_os_and_package_manager || return 1
+    fi
+    case "$PACKAGE_MANAGER" in
+        brew)   upgrade_brew_package "$pkg" ;;
+        pacman) upgrade_pacman_package "$pkg" ;;
+        apt)    upgrade_apt_package "$pkg" ;;
+        dnf)    sudo dnf upgrade -y "$pkg" 2>/dev/null || sudo dnf install -y "$pkg" ;;
+        yum)    sudo yum update -y "$pkg" 2>/dev/null || sudo yum install -y "$pkg" ;;
+        winget) upgrade_winget_id "$pkg" ;;
+        *)      echo "[WARNING] Unsupported package manager for upgrade: $PACKAGE_MANAGER" >&2; return 1 ;;
+    esac
+}
+
+# ============================================
+# fnm / uv / npm 升级
+# ============================================
+
+_ensure_fnm_env() {
+    if command -v fnm &>/dev/null; then
+        eval "$(fnm env 2>/dev/null)" || true
+        hash -r 2>/dev/null || true
+    fi
+}
+
+ensure_fnm_latest() {
+    if ! command -v fnm &>/dev/null; then
+        return 1
+    fi
+    echo "[INFO] Updating fnm..." >&2
+    if fnm self-update 2>/dev/null; then
+        return 0
+    fi
+    echo "[WARNING] fnm self-update not available or failed" >&2
+    return 1
+}
+
+ensure_uv_latest() {
+    if ! command -v uv &>/dev/null; then
+        return 1
+    fi
+    echo "[INFO] Updating uv..." >&2
+    if uv self update 2>/dev/null; then
+        return 0
+    fi
+    echo "[WARNING] uv self update failed" >&2
+    return 1
+}
+
+ensure_npm_global_latest() {
+    local spec="$1"
+    [[ -z "$spec" ]] && return 1
+    _ensure_fnm_env
+    if ! command -v npm &>/dev/null; then
+        echo "[WARNING] npm not found, skip: $spec" >&2
+        return 1
+    fi
+    ensure_proxy_for_download
+    local npm_target="$spec"
+    if [[ "$spec" != *"@"* ]] || [[ "$spec" == @* ]]; then
+        npm_target="${spec}@latest"
+    fi
+    echo "[INFO] Installing/upgrading npm global: $npm_target" >&2
+    npm install -g "$npm_target" 2>/dev/null || return 1
+    return 0
+}
+
+ensure_neovim_minimum() {
+    if is_nvim_version_ge_0_11; then
+        return 0
+    fi
+    echo "[INFO] Neovim below 0.11.0, triggering install/upgrade..." >&2
+    return 1
+}
+
+ensure_rmux_pinned() {
+    local pinned="${1:-0.5.0}"
+    if command -v rmux &>/dev/null; then
+        local ver_line
+        ver_line="$(rmux -V 2>/dev/null | head -n1 || true)"
+        if [[ "$ver_line" == *"${pinned}"* ]]; then
+            return 0
+        fi
+    fi
+    echo "[INFO] rmux missing or wrong version (want ${pinned}), reinstall needed..." >&2
+    return 1
+}
+
+upgrade_common_tools_packages() {
+    local cmd pkg
+    if type get_common_tool_commands &>/dev/null; then
+        for cmd in $(get_common_tool_commands); do
+            [[ "$cmd" == "trash" ]] && { command -v trash &>/dev/null || command -v trash-cli &>/dev/null; } && continue
+            if ! command -v "$cmd" &>/dev/null; then
+                pkg="$(get_common_tool_package "$cmd" "${PLATFORM:-}" "${PACKAGE_MANAGER:-}")"
+                [[ -z "$pkg" ]] && continue
+                upgrade_package_by_manager "$pkg" || echo "[WARNING] Failed to install missing tool: $cmd" >&2
+                continue
+            fi
+            pkg="$(get_common_tool_package "$cmd" "${PLATFORM:-}" "${PACKAGE_MANAGER:-}")"
+            [[ -z "$pkg" ]] && continue
+            upgrade_package_by_manager "$pkg" || echo "[WARNING] Failed to upgrade tool: $cmd" >&2
+        done
+    fi
+    return 0
+}
+
+# ============================================
 # 日志函数（如果 common.sh 不可用）
 # ============================================
 

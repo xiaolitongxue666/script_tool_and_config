@@ -61,12 +61,18 @@ start_script "One-click Install"
 # ============================================
 TEST_REMOTE=false
 AUTO_COMMIT=false
+NO_UPGRADE=false
 
 while [[ $# -gt 0 ]]; do
     case $1 in
         --proxy|-p)
             PROXY="$2"
             shift 2
+            ;;
+        --no-upgrade)
+            NO_UPGRADE=true
+            export SKIP_SOFTWARE_UPGRADE=1
+            shift
             ;;
         --test-remote)
             TEST_REMOTE=true
@@ -81,12 +87,14 @@ while [[ $# -gt 0 ]]; do
             echo ""
             echo "Options:"
             echo "  --proxy, -p <url>     Proxy URL (e.g. http://192.168.1.76:7890)"
+            echo "  --no-upgrade          Skip upgrading already-installed software"
             echo "  --test-remote         Run remote tests (test tmux on remote host)"
             echo "  --commit              Auto-commit and push after successful test"
             echo "  --help, -h            Show this help message"
             echo ""
             echo "Environment variables:"
             echo "  PROXY                 Proxy URL (e.g. http://192.168.1.76:7890)"
+            echo "  SKIP_SOFTWARE_UPGRADE=1  Skip software upgrade (same as --no-upgrade)"
             echo "  http_proxy            Proxy URL (e.g. http://192.168.1.76:7890)"
             echo ""
             echo "Examples:"
@@ -137,7 +145,7 @@ chezmoi_setup_proxy
 # ============================================
 log_info ""
 log_info "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-log_info "[1/5] Check and install chezmoi"
+log_info "[1/6] Check and install chezmoi"
 log_info "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
 log_info "Checking chezmoi installation status..."
@@ -171,7 +179,7 @@ fi
 # ============================================
 log_info ""
 log_info "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-log_info "[2/5] Initialize chezmoi environment"
+log_info "[2/6] Initialize chezmoi environment"
 log_info "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
 # 创建必要的目录
@@ -231,7 +239,7 @@ fi
 
 log_info ""
 log_info "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-log_info "[3/5] Check config status and diff"
+log_info "[3/6] Check config status and diff"
 log_info "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
 if [ ! -d "$CHEZMOI_DIR" ] || [ -z "$(ls -A "$CHEZMOI_DIR" 2>/dev/null)" ]; then
@@ -288,11 +296,34 @@ else
 fi
 
 # ============================================
-# 软件安装检查（通过 chezmoi run_once 脚本）
+# 软件补装与升级（不依赖 chezmoi run_once 单次执行）
 # ============================================
 log_info ""
 log_info "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-log_info "[4/5] Check software installation status"
+log_info "[4/6] Ensure platform software (install missing + upgrade)"
+log_info "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+ENSURE_SOFTWARE_SCRIPT="${SCRIPT_DIR}/scripts/chezmoi/ensure_platform_software.sh"
+if [[ -f "$ENSURE_SOFTWARE_SCRIPT" ]]; then
+    ENSURE_ARGS=()
+    if [[ "$NO_UPGRADE" == "true" ]]; then
+        ENSURE_ARGS+=(--no-upgrade)
+    fi
+    if bash "$ENSURE_SOFTWARE_SCRIPT" "${ENSURE_ARGS[@]}"; then
+        log_success "Platform software ensure completed"
+    else
+        log_warning "Platform software ensure finished with warnings"
+    fi
+else
+    log_warning "Ensure script not found: $ENSURE_SOFTWARE_SCRIPT"
+fi
+
+# ============================================
+# 软件安装状态报告
+# ============================================
+log_info ""
+log_info "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+log_info "[5/6] Check software installation status"
 log_info "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
 # 检测操作系统和包管理器（用于软件检查）
@@ -323,11 +354,11 @@ fi
 log_success "Software check completed"
 
 # ============================================
-# [5/5] 验证与确认（字体、默认 Shell、环境变量、开机启动声明）
+# [6/6] 验证与确认（字体、默认 Shell、环境变量、开机启动声明）
 # ============================================
 log_info ""
 log_info "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-log_info "[5/5] Verification and confirmation"
+log_info "[6/6] Verification and confirmation"
 log_info "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
 VERIFY_SCRIPT="${SCRIPT_DIR}/scripts/chezmoi/verify_installation.sh"

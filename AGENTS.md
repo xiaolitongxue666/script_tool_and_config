@@ -170,7 +170,8 @@ Layer 5: run_once_install-tmux + run_on_linux/* + run_on_darwin/*；Windows：ru
 
 ### run_once 脚本失败处理规则
 
-- **单个 run_once 脚本失败（exit ≠ 0）会导致整个 `chezmoi apply` 失败，进而触发 `install.sh` 中 `set -e` 的 `error_exit`，终止后续步骤 [4/5] 和 [5/5]**
+- **单个 run_once 脚本失败（exit ≠ 0）会导致整个 `chezmoi apply` 失败，进而触发 `install.sh` 中 `set -e` 的 `error_exit`，终止后续步骤 [4/6]～[6/6]**
+- **`install.sh [4/6]`** 调用 `ensure_platform_software.sh` 补装缺失并默认升级（`--no-upgrade` 可关）；全量补装/升级用 `install.sh`，日常 dotfiles 用 `deploy.sh`
 - **必须遵守**：
   1. 平台不适用的功能 → **优雅跳过**（输出 `[INFO]` 日志、`return 0`），**不得 `exit 1`**
   2. 工具已由系统提供 → 提示并跳过（如 Windows Git Bash 自带 Zsh，无需额外安装）

@@ -131,6 +131,34 @@ run_on_windows/*                      ← Layer 5（平台特有）
 
 ---
 
+## 补装与升级策略（install.sh）
+
+`install.sh` 在 chezmoi apply 之后执行 [`scripts/chezmoi/ensure_platform_software.sh`](../scripts/chezmoi/ensure_platform_software.sh)：
+
+| 步骤 | 行为 |
+|------|------|
+| `[3/6] apply` | 首次部署配置；chezmoi `run_once_*` 仅执行一次 |
+| `[4/6] ensure` | 按 OS/WSL 补装缺失项；**默认**将已装软件升到最新稳定版 |
+| `[5/6] 报告` | 三态：未安装 / 已安装 OK / 部分安装或跳过升级 |
+| `[6/6] verify` | 字体、Shell、PATH 等验证 |
+
+**升级策略**（[`software_policies.sh`](../scripts/chezmoi/software_policies.sh)）：
+
+| 策略 | 软件示例 |
+|------|----------|
+| `latest` | fnm、uv、common-tools、Layer 4 npm CLI、starship、git |
+| `minimum:0.11.0` | Neovim（仅低于 0.11 时升级） |
+| `pinned:0.5.0` | rmux（Windows） |
+| `skip` | nerd-fonts、configure-pacman、configure-homebrew、AUR helper |
+
+**关闭升级**：`./install.sh --no-upgrade` 或 `SKIP_SOFTWARE_UPGRADE=1 ./install.sh`
+
+**代理**：外网下载/npm 默认走 `7890`（WSL 自动解析宿主机 IP）；可 `--proxy http://host:7890`
+
+**与 deploy.sh 分工**：日常 dotfiles 增量用 `deploy.sh`；全量补装/升级请用 `install.sh`
+
+---
+
 ## 维护规则
 
 1. 新增/删除安装脚本时，必须同步更新此文档。
