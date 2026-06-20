@@ -50,6 +50,13 @@
 - 状态：`~/.codewhale/` 默认；`~/.deepseek/` 只读回退；7890 代理
 - 文档：`docs/CODEWHALE.md`、`docs/PROJECT_AGENT_MEMORY.md`
 
+## Pi（终端 Coding Harness，Layer 4）
+
+- 安装：`.chezmoi/run_once_94-install-pi.sh.tmpl`（`npm install -g --ignore-scripts @earendil-works/pi-coding-agent`）
+- Harness：`dot_pi/agent/` → `~/.pi/agent/`（默认 DeepSeek v4 Flash）；`DEEPSEEK_API_KEY` 与 CodeWhale 共用
+- v1：无 pi packages、无 Shell 包装；不改动其他 Agent 配置
+- 文档：`docs/PI.md`、`.cursor/rules/pi.mdc`
+
 ## 多 Agent 兼容
 
 本项目同时为以下 AI 编码工具提供了项目知识文件，内容保持一致：
@@ -57,7 +64,7 @@
 | Agent | 识别文件 |
 |-------|---------|
 | Claude Code | `CLAUDE.md`（本文件） |
-| Cursor | `.cursor/rules/project-rules.mdc`、`.cursor/rules/codewhale.mdc` |
+| Cursor | `.cursor/rules/project-rules.mdc`、`.cursor/rules/codewhale.mdc`、`.cursor/rules/pi.mdc` |
 | GitHub Copilot / Codex | `.github/copilot-instructions.md` |
 | 项目 Agent 记忆（可提交） | `docs/PROJECT_AGENT_MEMORY.md`（权威）、`docs/PROJECT_MEMORY.md`（紧凑） |
 
@@ -90,6 +97,7 @@ Layer 2: install-zsh, install-starship, install-nerd-fonts
 Layer 3: install-neovim                             ← 仅安装二进制
 Layer 4: run_once_90-{claude-code}, _91-{codex}, _92-{codewhale}
          run_once_93-install-cursor                 ← 仅 GUI 环境
+         run_once_94-install-pi                     ← Pi coding agent CLI + 最小 Harness
 Layer 5: install-tmux + run_on_{linux,darwin}；Windows：`install-rmux`、`install-oh-my-posh`、`install-windows-terminal`
 ```
 

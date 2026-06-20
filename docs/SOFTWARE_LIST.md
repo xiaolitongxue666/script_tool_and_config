@@ -17,6 +17,7 @@ run_once_90-install-claude-code       ← Layer 4（AI agent CLI，fnm/node 已�
 run_once_91-install-codex             ← Layer 4（AI agent CLI，npm @openai/codex）
 run_once_92-install-codewhale         ← Layer 4（AI agent CLI，npm codewhale）
 run_once_93-install-cursor            ← Layer 4（GUI 检测，有 GUI 才装）
+run_once_94-install-pi                ← Layer 4（AI agent CLI，npm pi-coding-agent）
 run_once_install-{tmux,i3wm,...} ← Layer 5（平台特有）
 run_on_linux/* / run_on_darwin/*      ← Layer 5（平台特有）
 run_on_windows/*                      ← Layer 5（平台特有）
@@ -39,8 +40,9 @@ run_on_windows/*                      ← Layer 5（平台特有）
 | Layer 4 | `run_once_91-install-codex` | OpenAI Codex CLI（npm i -g @openai/codex） | all |
 | Layer 4 | `run_once_92-install-codewhale` | CodeWhale CLI（`npm install -g codewhale`，`codewhale` + `codewhale-tui`；代理默认 7890） | all（含 WSL）；详见 [CODEWHALE.md](CODEWHALE.md) |
 | Layer 4 | `run_once_93-install-cursor` | Cursor 编辑器（仅 GUI 环境） | all（检测 GUI） |
+| Layer 4 | `run_once_94-install-pi` | Pi coding agent CLI（`npm install -g --ignore-scripts @earendil-works/pi-coding-agent`；Harness：`dot_pi/agent/` 含 `models.json` Flash/Pro） | all（含 WSL）；详见 [PI.md](PI.md) |
 
-**Layer 4 职责**：仅安装 Agent **二进制**（CLI/编辑器）。MCP、Skills、全局 `settings.json` / `mcp.json` 由 **agent-config** 仓库的 `install-tools.sh` + `apply-config.sh` 管理（两阶段部署见下）。
+**Layer 4 职责**：安装 Agent **二进制**（CLI/编辑器）；Pi 最小 Harness（`settings.json`、`AGENTS.md`）由本仓库 chezmoi 管理。MCP、Skills、其他 Agent 全局配置由 **agent-config** 仓库管理（两阶段部署见下）。
 
 ### 两阶段部署（本仓库 + agent-config）
 

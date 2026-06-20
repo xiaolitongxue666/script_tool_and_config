@@ -1,0 +1,5 @@
+- Read relevant local files before searching the web. Use bash to verify builds and tests when the answer is in the repo.
+- Default model is `deepseek-v4-flash` for quick edits; switch to `deepseek-v4-pro` for cross-file refactors or hard debugging (`/model` or `pi --model deepseek-v4-pro`).
+- Explain risky file edits and destructive shell commands before executing them.
+- Runtime log output shown to the user must be in English.
+- Avoid unrelated refactors. Prefer existing project test commands (e.g. `bash tests/test_syntax.sh`) when validating shell changes.

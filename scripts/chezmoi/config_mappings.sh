@@ -36,6 +36,10 @@ chezmoi_fill_config_mappings() {
     _chezmoi_map_add "~/.zprofile" ".chezmoi/dot_zprofile.tmpl"
     _chezmoi_map_add "~/.config/starship/starship.toml" ".chezmoi/dot_config/starship/starship.toml.tmpl"
     _chezmoi_map_add "~/.ssh/config" ".chezmoi/dot_ssh/config.tmpl"
+    _chezmoi_map_add "~/.pi/agent/settings.json" ".chezmoi/dot_pi/agent/settings.json.tmpl"
+    _chezmoi_map_add "~/.pi/agent/models.json" ".chezmoi/dot_pi/agent/models.json.tmpl"
+    _chezmoi_map_add "~/.pi/agent/AGENTS.md" ".chezmoi/dot_pi/agent/AGENTS.md.tmpl"
+    _chezmoi_map_add "~/.pi/agent/APPEND_SYSTEM.md" ".chezmoi/dot_pi/agent/APPEND_SYSTEM.md.tmpl"
 
     case "$platform" in
         linux)

@@ -1,0 +1,23 @@
+---
+description: Pi coding agent install, harness config, and WSL notes for agents
+globs:
+  - .chezmoi/run_once_94-install-pi.sh.tmpl
+  - .chezmoi/dot_pi/**
+  - docs/PI.md
+  - docs/PROJECT_AGENT_MEMORY.md
+  - scripts/chezmoi/install_helpers.sh
+---
+
+# Pi（本项目）
+
+- **安装**：`.chezmoi/run_once_94-install-pi.sh.tmpl`；全平台含 WSL 仅用 `npm install -g --ignore-scripts @earendil-works/pi-coding-agent`（前置 fnm/node）。
+- **WSL**：须 WSL 内 `npm root -g/@earendil-works/pi-coding-agent` 存在；`/mnt/.../AppData/Roaming/npm` shim **不算**已安装。
+- **WSL 禁止**：从 WSL 调用 `cmd.exe` / Windows npm 卸载或修改 Windows 包。
+- **Harness**：`dot_pi/agent/` → `~/.pi/agent/`（settings、models.json、AGENTS.md、APPEND_SYSTEM.md）；**不**改 claude/codewhale/codex/cursor 配置。
+- **模型**：内置 `deepseek-v4-flash`（默认）/ `deepseek-v4-pro`；见 `models.json` 的 `modelOverrides`。
+- **认证**：默认 DeepSeek；`/login` → **Use an API key** → DeepSeek；`DEEPSEEK_API_KEY` 与 CodeWhale 共用；`.gitignore` 忽略 `.pi/`。
+- **部署**：`./deploy.sh` 或 `./scripts/manage_dotfiles.sh apply`；**勿** `apply | rg | head`（SIGPIPE）。
+- **网络**：WSL 宿主机 `:7890`，其余 `127.0.0.1:7890`。
+- **v1 范围**：无 pi packages/extensions、无 Shell `pi()` 包装。
+
+详细说明见 [docs/PI.md](../../docs/PI.md) 与 [docs/PROJECT_AGENT_MEMORY.md](../../docs/PROJECT_AGENT_MEMORY.md)。

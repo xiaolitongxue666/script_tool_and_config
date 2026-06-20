@@ -290,6 +290,10 @@ chezmoi.toml.local
 **/.codewhale/
 **/.deepseek/
 
+# Pi coding agent 用户态（auth.json 含 API key、sessions；Harness 模板在 .chezmoi/dot_pi/）
+.pi/
+**/.pi/
+
 # ============================================
 # 包管理器和依赖
 # ============================================

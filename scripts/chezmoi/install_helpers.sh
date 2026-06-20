@@ -371,6 +371,28 @@ check_script_software_installed() {
             fi
             return 1
             ;;
+        94-install-pi|pi)
+            # WSL：须 fnm/npm 全局存在 pi-coding-agent，不能仅因 Windows 互操作 PATH 判定为已安装
+            if grep -qEi "Microsoft|WSL" /proc/version 2>/dev/null || [[ -n "${WSL_DISTRO_NAME:-}" ]]; then
+                local npm_root pi_path
+                pi_path="$(command -v pi 2>/dev/null || true)"
+                case "${pi_path}" in
+                    /mnt/c/*|/mnt/host/c/*|*AppData/Roaming/npm*) return 1 ;;
+                esac
+                if command -v npm &>/dev/null; then
+                    npm_root="$(npm root -g 2>/dev/null || true)"
+                    if [[ -n "${npm_root}" && -d "${npm_root}/@earendil-works/pi-coding-agent" ]] \
+                        && check_command_exists "pi"; then
+                        return 0
+                    fi
+                fi
+                return 1
+            fi
+            if check_command_exists "pi"; then
+                return 0
+            fi
+            return 1
+            ;;
         *)
             # 默认使用软件名作为命令名
             check_software_installed "$command_name"

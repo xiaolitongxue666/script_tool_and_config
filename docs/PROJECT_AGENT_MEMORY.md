@@ -63,6 +63,57 @@
 - Cursor 规则：`.cursor/rules/codewhale.mdc`
 - 安装检测：`scripts/chezmoi/install_helpers.sh` → `92-install-codewhale`
 
+## Pi coding agent（Layer 4，2026-06）
+
+### 背景
+
+- 上游 [earendil-works/pi](https://github.com/earendil-works/pi)；CLI 包 `@earendil-works/pi-coding-agent`。
+- 项目脚本：`.chezmoi/run_once_94-install-pi.sh.tmpl`；Harness：`.chezmoi/dot_pi/agent/`。
+
+### 安装约定（Agent 修改代码时必须遵守）
+
+| 项 | 约定 |
+|----|------|
+| 路径 | 全平台含 WSL **仅** `npm install -g --ignore-scripts @earendil-works/pi-coding-agent`（WSL 内 fnm/npm 全局） |
+| 禁止 | run_once 内 cargo / brew / winget；**禁止**从 WSL 改 Windows npm |
+| 前置 | Layer 0 `fnm` + `node`；Layer 4 字母序在 cursor 之后 |
+| 代理 | 与 CodeWhale 相同：`chezmoi_setup_proxy`；WSL 宿主机 `:7890` |
+| 失败 | `[WARNING]` + `exit 0`；无 fnm/node 时 `[ERROR]` + `exit 1` |
+| 隔离 | **不**修改 claude/codex/codewhale/cursor 配置或 Shell 包装 |
+
+### WSL 专用
+
+| 项 | 说明 |
+|----|------|
+| 安装判定 | `npm root -g/@earendil-works/pi-coding-agent` 存在；`/mnt/c/.../AppData/Roaming/npm` **不算**已安装 |
+| 推荐流程 | `eval "$(fnm env)"` → `./deploy.sh` |
+| 验证 | `which pi`、`pi --version`、`test -f ~/.pi/agent/settings.json` |
+
+### 认证与 Harness
+
+| 路径 | 管理方 |
+|------|--------|
+| `~/.pi/agent/settings.json` 等 | chezmoi `dot_pi/agent/` |
+| `~/.pi/agent/auth.json` | run_once **仅缺失/空 `{}`/无 deepseek** 时创建 DeepSeek `$DEEPSEEK_API_KEY` 引用；不覆盖其他 provider；`/login` 写入明文 key |
+| pi packages / MCP | v1 不在本仓库；留 agent-config Phase 2 |
+
+`DEEPSEEK_API_KEY` 与 CodeWhale 共用。认证使用 Pi 内置 `deepseek` provider（非 `openai_compatible` 自定义端点）。V4 模型 ID：`deepseek-v4-flash`、`deepseek-v4-pro`。
+
+### 遇到的问题与解决
+
+| 问题 | 原因 | 解决 |
+|------|------|------|
+| `/login` 列表无 DeepSeek | 误选 **Use a subscription**（仅 Anthropic/Codex/Copilot） | Esc 返回 → 选 **Use an API key** → DeepSeek；或 `export DEEPSEEK_API_KEY` |
+| 已有空 `{}` 的 auth.json | run_once 曾跳过创建 | 删 deepseek 条目或清空为 `{}` 后 re-apply；或直接用 `/login` |
+| Pi 提示需 Node ≥22.19 | 本机 fnm 为 v20，Pi ≥0.75 要求更高 | `fnm install 22 && fnm use 22` 后再 `npm i -g @earendil-works/pi-coding-agent` |
+| 误将 `~/.pi/` 提交进仓库 | auth.json 含 API key | `.gitignore` 已忽略 `.pi/`、`**/.pi/`；Harness 模板仅在 `.chezmoi/dot_pi/` |
+
+### 相关文档与规则
+
+- 用户向说明：[PI.md](PI.md)
+- Cursor 规则：`.cursor/rules/pi.mdc`
+- 安装检测：`scripts/chezmoi/install_helpers.sh` → `94-install-pi`
+
 ## Windows Git Bash chezmoi 部署（2026-05 实测）
 
 | 项 | 约定 |
@@ -119,10 +170,11 @@ Git for Windows 可能装在 **C:** 或 **D:**（如 `D:\Program Files\Git`）�
 
 | 本仓库 (Phase 1) | agent-config (Phase 2) |
 |------------------|------------------------|
-| fnm/uv、dotfiles、Layer 4 **CLI**（claude/codex/codewhale/cursor*） | 全局 MCP、Skills、`apply-config` 写入各 Agent 配置 |
+| fnm/uv、dotfiles、Layer 4 **CLI**（claude/codex/codewhale/cursor/pi*） | 全局 MCP、Skills、`apply-config` 写入各 Agent 配置 |
+| Pi 最小 Harness（`~/.pi/agent/settings.json`、`AGENTS.md`） | Pi packages/extensions、MCP |
 | **不**写 `~/.claude/settings.json`、`~/.codewhale/mcp.json` | Cursor 编辑器 `settings.json`：`render-cursor-editor-settings.sh` |
 | WT Git Bash 默认 profile（**仅 Windows**） | Cursor 集成终端 Git Bash：`platforms/cursor/settings/editor-settings.jsonc` + `@WINDOWS_GIT_BASH_PATH@`（与 `detect_windows_git_paths.sh` 同源） |
-| `run_once_90`–`93` 字母序 | `bash scripts/install-tools.sh` 在对应 OS/WSL 各执行一次 |
+| `run_once_90`–`94` 字母序 | `bash scripts/install-tools.sh` 在对应 OS/WSL 各执行一次 |
 
 \* Cursor 仅 GUI 环境（`run_once_93-install-cursor`）。
 

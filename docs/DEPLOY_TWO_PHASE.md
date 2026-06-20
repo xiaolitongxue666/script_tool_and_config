@@ -13,8 +13,9 @@ Layer 4 安装（字母序）：
 - `run_once_91-install-codex` — `codex`
 - `run_once_92-install-codewhale` — `codewhale` + `codewhale-tui`
 - `run_once_93-install-cursor` — Cursor 编辑器（仅 GUI）
+- `run_once_94-install-pi` — `pi`（最小 Harness 在 `~/.pi/agent/`，MCP/packages 留 Phase 2）
 
-**不**写入 `~/.claude/settings.json`、`~/.codewhale/mcp.json` 等 Agent 全局配置。
+**不**写入 `~/.claude/settings.json`、`~/.codewhale/mcp.json` 等 Agent 全局配置（Pi 的 `settings.json`/`AGENTS.md` 由本仓库 `dot_pi/agent/` 管理）。
 
 ## Phase 2 — agent-config
 

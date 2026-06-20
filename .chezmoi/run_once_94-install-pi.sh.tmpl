@@ -1,0 +1,231 @@
+{{- if or (eq .chezmoi.os "linux") (eq .chezmoi.os "darwin") (eq .chezmoi.os "windows") -}}
+{{/* chezmoi:template:line-endings=lf */}}
+#!/usr/bin/env bash
+
+# ============================================
+# Pi coding agent CLI 安装（chezmoi run_once_）
+# 必须排在 run_once_00-install-version-managers 之后（字母序），以便 fnm/node 已就绪
+# 仅安装二进制；~/.pi/agent/settings.json 等 Harness 脚手架由 chezmoi 模板管理
+# 参考: https://pi.dev/docs/latest/quickstart
+# ============================================
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="${CHEZMOI_PROJECT_ROOT:-$(cd "${SCRIPT_DIR}/../.." && pwd 2>/dev/null || echo "$HOME")}"
+COMMON_INSTALL="${PROJECT_ROOT}/scripts/chezmoi/common_install.sh"
+
+if [[ ! -f "$COMMON_INSTALL" ]]; then
+    COMMON_INSTALL="$HOME/.local/share/chezmoi/scripts/chezmoi/common_install.sh"
+fi
+
+if [[ -f "$COMMON_INSTALL" ]]; then
+    # shellcheck disable=SC1090
+    source "$COMMON_INSTALL"
+else
+    echo "[WARNING] common_install.sh not found, using basic functions" >&2
+    function setup_proxy() { :; }
+    function detect_os_and_package_manager() {
+        OS="$(uname -s)"
+        if [[ "$OS" == "Darwin" ]]; then
+            PLATFORM="macos"
+            PACKAGE_MANAGER="brew"
+        elif [[ "$OS" == "Linux" ]]; then
+            PLATFORM="linux"
+            if command -v pacman &> /dev/null; then
+                PACKAGE_MANAGER="pacman"
+            elif command -v apt-get &> /dev/null; then
+                PACKAGE_MANAGER="apt"
+            elif command -v dnf &> /dev/null; then
+                PACKAGE_MANAGER="dnf"
+            elif command -v yum &> /dev/null; then
+                PACKAGE_MANAGER="yum"
+            fi
+        elif [[ "$OS" =~ ^(MINGW|MSYS|CYGWIN) ]]; then
+            PLATFORM="windows"
+            if command -v winget &> /dev/null; then
+                PACKAGE_MANAGER="winget"
+            elif command -v pacman.exe &> /dev/null; then
+                PACKAGE_MANAGER="pacman"
+            fi
+        fi
+    }
+fi
+
+detect_os_and_package_manager || exit 1
+
+IS_WSL=0
+if [[ "${PLATFORM:-}" == "linux" ]]; then
+    if grep -qEi "Microsoft|WSL" /proc/version 2>/dev/null || [[ -n "${WSL_DISTRO_NAME:-}" ]]; then
+        IS_WSL=1
+    fi
+fi
+
+# 解析代理 URL：WSL 使用宿主机 :7890，否则模板默认 127.0.0.1:7890
+_resolve_pi_proxy_url() {
+    if [[ -n "${PROXY:-}" ]]; then
+        echo "${PROXY}"
+        return 0
+    fi
+    if [[ "${IS_WSL}" -eq 1 ]]; then
+        local host_ip
+        host_ip=$(awk '/^nameserver / {print $2; exit}' /etc/resolv.conf 2>/dev/null)
+        if [[ -n "${host_ip}" ]]; then
+            echo "http://${host_ip}:7890"
+            return 0
+        fi
+    fi
+    echo "{{ env "http_proxy" | default "http://127.0.0.1:7890" }}"
+}
+
+PI_PROXY="$(_resolve_pi_proxy_url)"
+setup_proxy "${PI_PROXY}"
+
+if [[ "${PLATFORM:-}" == "darwin" ]]; then
+    echo "[INFO] Environment: macOS (${PACKAGE_MANAGER:-unknown})"
+elif [[ "${PLATFORM:-}" == "windows" ]]; then
+    echo "[INFO] Environment: Windows (${PACKAGE_MANAGER:-unknown})"
+elif [[ "${PLATFORM:-}" == "linux" ]]; then
+    if [[ "${IS_WSL}" -eq 1 ]]; then
+        echo "[INFO] Environment: Linux (WSL, ${PACKAGE_MANAGER:-unknown})"
+    else
+        echo "[INFO] Environment: Linux (native, ${PACKAGE_MANAGER:-unknown})"
+    fi
+fi
+
+# 仅当 auth.json 缺失、为空或不含 deepseek 且为占位 {} 时写入凭据引用
+_pi_auth_needs_deepseek() {
+    local auth_file="$1"
+    local content
+
+    [[ ! -f "${auth_file}" ]] && return 0
+    if grep -q '"deepseek"' "${auth_file}" 2>/dev/null; then
+        return 1
+    fi
+    content="$(tr -d ' \n\r\t' < "${auth_file}" 2>/dev/null || true)"
+    [[ "${content}" == "{}" || -z "${content}" ]] && return 0
+    return 1
+}
+
+_ensure_pi_deepseek_auth() {
+    local auth_file="${HOME}/.pi/agent/auth.json"
+    local agent_dir="${HOME}/.pi/agent"
+
+    mkdir -p "${agent_dir}"
+    chmod 700 "${agent_dir}" 2>/dev/null || true
+
+    if ! _pi_auth_needs_deepseek "${auth_file}"; then
+        return 0
+    fi
+
+    cat > "${auth_file}" <<'EOF'
+{
+  "deepseek": {
+    "type": "api_key",
+    "key": "$DEEPSEEK_API_KEY"
+  }
+}
+EOF
+    chmod 600 "${auth_file}" 2>/dev/null || true
+
+    if [[ -n "${DEEPSEEK_API_KEY:-}" ]]; then
+        echo "[INFO] Ensured ~/.pi/agent/auth.json has DeepSeek env reference" >&2
+    else
+        echo "[INFO] Ensured ~/.pi/agent/auth.json; set DEEPSEEK_API_KEY or run pi then /login" >&2
+    fi
+}
+
+_pi_is_windows_interop_path() {
+    local cmd_path="${1:-}"
+    [[ -z "${cmd_path}" ]] && return 1
+    case "${cmd_path}" in
+        /mnt/c/*|/mnt/host/c/*|*AppData/Roaming/npm*)
+            return 0
+            ;;
+    esac
+    return 1
+}
+
+_pi_in_local_npm_global() {
+    local npm_root
+    command -v npm &>/dev/null || return 1
+    npm_root="$(npm root -g 2>/dev/null)" || return 1
+    [[ -d "${npm_root}/@earendil-works/pi-coding-agent" ]]
+}
+
+_pi_already_installed() {
+    local pi_path
+
+    pi_path="$(command -v pi 2>/dev/null || true)"
+
+    if [[ "${IS_WSL}" -eq 1 ]]; then
+        if _pi_is_windows_interop_path "${pi_path}"; then
+            return 1
+        fi
+        _pi_in_local_npm_global || return 1
+    fi
+
+    [[ -n "${pi_path}" ]] || return 1
+    pi --version &>/dev/null
+}
+
+export PATH="${HOME}/.local/share/fnm:${HOME}/.local/bin:${PATH}"
+
+if command -v fnm &>/dev/null; then
+    eval "$(fnm env 2>/dev/null)" || true
+fi
+
+if _pi_already_installed; then
+    echo "[INFO] Pi CLI already installed: $(pi --version 2>/dev/null | head -n1)"
+    _ensure_pi_deepseek_auth
+    exit 0
+fi
+
+if ! command -v fnm &>/dev/null; then
+    echo "[ERROR] fnm not found. Ensure run_once_00-install-version-managers succeeded before apply."
+    exit 1
+fi
+
+if ! command -v node &>/dev/null; then
+    echo "[INFO] node not found, installing Node.js LTS via fnm..."
+    if ! fnm install lts/* 2>&1; then
+        echo "[ERROR] fnm failed to install Node.js. Check network or proxy."
+        exit 1
+    fi
+    eval "$(fnm env 2>/dev/null)" || true
+    if ! fnm use lts/* 2>/dev/null; then
+        fnm use default 2>/dev/null || true
+    fi
+    hash -r 2>/dev/null || true
+fi
+
+if ! command -v node &>/dev/null; then
+    echo "[ERROR] node still unavailable. Check fnm and PATH."
+    exit 1
+fi
+
+if ! command -v npm &>/dev/null; then
+    echo "[ERROR] npm unavailable (node present but npm missing)."
+    exit 1
+fi
+
+pi_npm_pkg="@earendil-works/pi-coding-agent"
+if [[ -n "${PI_NPM_VERSION:-}" ]]; then
+    pi_npm_pkg="@earendil-works/pi-coding-agent@${PI_NPM_VERSION}"
+fi
+
+echo "[INFO] Installing Pi coding agent globally via npm (${pi_npm_pkg})..."
+if npm install -g --ignore-scripts "${pi_npm_pkg}"; then
+    hash -r 2>/dev/null || true
+    if _pi_already_installed; then
+        echo "[SUCCESS] Pi CLI available: $(pi --version 2>/dev/null | head -n1)"
+        _ensure_pi_deepseek_auth
+    else
+        echo "[WARNING] npm install finished but pi not on PATH; try: npm install -g --ignore-scripts @earendil-works/pi-coding-agent"
+    fi
+else
+    echo "[WARNING] npm global install of @earendil-works/pi-coding-agent failed"
+    echo "[INFO] Retry manually with proxy on port 7890: npm install -g --ignore-scripts @earendil-works/pi-coding-agent"
+    echo "[INFO] See https://pi.dev/docs/latest/quickstart"
+fi
+
+exit 0
+{{- end -}}
