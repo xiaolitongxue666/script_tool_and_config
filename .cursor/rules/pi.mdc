@@ -14,7 +14,7 @@ globs:
 - **WSL**：须 WSL 内 `npm root -g/@earendil-works/pi-coding-agent` 存在；`/mnt/.../AppData/Roaming/npm` shim **不算**已安装。
 - **WSL 禁止**：从 WSL 调用 `cmd.exe` / Windows npm 卸载或修改 Windows 包。
 - **Harness**：`dot_pi/agent/` → `~/.pi/agent/`（settings、models.json、AGENTS.md、APPEND_SYSTEM.md）；**不**改 claude/codewhale/codex/cursor 配置。
-- **模型**：内置 `deepseek-v4-flash`（默认）/ `deepseek-v4-pro`；见 `models.json` 的 `modelOverrides`。
+- **模型**：内置 `deepseek-v4-flash`（默认）/ `deepseek-v4-pro`；`models.json` `modelOverrides` 须 **contextWindow 1M**（勿 64K）。
 - **认证**：默认 DeepSeek；`/login` → **Use an API key** → DeepSeek；`DEEPSEEK_API_KEY` 与 CodeWhale 共用；`.gitignore` 忽略 `.pi/`。
 - **部署**：`./deploy.sh` 或 `./scripts/manage_dotfiles.sh apply`；**勿** `apply | rg | head`（SIGPIPE）。
 - **网络**：WSL 宿主机 `:7890`，其余 `127.0.0.1:7890`。

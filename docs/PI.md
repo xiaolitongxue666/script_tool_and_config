@@ -44,7 +44,7 @@ npm list -g @earendil-works/pi-coding-agent   # WSL：应指向 fnm 全局，非
 | 路径 | 模板 | 说明 |
 |------|------|------|
 | `~/.pi/agent/settings.json` | `.chezmoi/dot_pi/agent/settings.json.tmpl` | 默认 Flash；Ctrl+P 在 Flash/Pro 间切换 |
-| `~/.pi/agent/models.json` | `.chezmoi/dot_pi/agent/models.json.tmpl` | V4 Flash/Pro 的 `modelOverrides`（思考链、上下文） |
+| `~/.pi/agent/models.json` | `.chezmoi/dot_pi/agent/models.json.tmpl` | V4 Flash/Pro 的 `modelOverrides`（思考链、**contextWindow 1M**） |
 | `~/.pi/agent/AGENTS.md` | `.chezmoi/dot_pi/agent/AGENTS.md.tmpl` | 全局 coding 上下文 |
 | `~/.pi/agent/APPEND_SYSTEM.md` | `.chezmoi/dot_pi/agent/APPEND_SYSTEM.md.tmpl` | 行为规则（精简） |
 
@@ -58,6 +58,8 @@ Pi 内置 `deepseek` provider（**无需**自建 `openai_compatible` 端点）�
 |------|------|----------|
 | `deepseek-v4-flash` | 默认；低延迟、高性价比 | 单文件修改、快速查代码、简单测试 |
 | `deepseek-v4-pro` | 强推理（`reasoning` + `xhigh`） | 跨文件重构、复杂编译/运行时错误 |
+
+`models.json` 的 `modelOverrides` 会覆盖 pi 框架层模型元数据；本仓库将 Flash/Pro 的 `contextWindow` 设为 **1M**（`1000000`）。勿保留 `64000`，否则长会话会被框架提前截断（与 DeepSeek API 实际上下文无关）。
 
 调度方式：
 
@@ -121,6 +123,7 @@ v1 **不**预装 pi packages（pi-web-access、pi-cursor-sdk 等）；MCP/Skills
 | WSL `command -v pi` 指向 `/mnt/c/.../npm` | 在 WSL 内 `npm install -g --ignore-scripts @earendil-works/pi-coding-agent` |
 | 模型 ID 无效 | `pi` 内 `/model` 选择；或编辑 `settings.json` 的 `defaultModel` |
 | 无 API Key | `export DEEPSEEK_API_KEY` 或 `/login` → **Use an API key** → DeepSeek |
+| 上下文被限制 ~64K | `models.json` `contextWindow` 误为 64000 | 模板改为 `1000000` 后 `manage_dotfiles.sh apply` |
 | npm 安装失败 | 确认 7890 代理；手动重试安装命令 |
 
 卸载：`npm uninstall -g @earendil-works/pi-coding-agent`（`~/.pi/agent/` 保留，符合上游文档）。

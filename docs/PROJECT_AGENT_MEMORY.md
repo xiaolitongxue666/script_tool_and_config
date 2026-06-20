@@ -107,6 +107,7 @@
 | 已有空 `{}` 的 auth.json | run_once 曾跳过创建 | 删 deepseek 条目或清空为 `{}` 后 re-apply；或直接用 `/login` |
 | Pi 提示需 Node ≥22.19 | 本机 fnm 为 v20，Pi ≥0.75 要求更高 | `fnm install 22 && fnm use 22` 后再 `npm i -g @earendil-works/pi-coding-agent` |
 | 误将 `~/.pi/` 提交进仓库 | auth.json 含 API key | `.gitignore` 已忽略 `.pi/`、`**/.pi/`；Harness 模板仅在 `.chezmoi/dot_pi/` |
+| 上下文仅 64K | `models.json.tmpl` `contextWindow: 64000` 在 pi 框架层覆盖内置 1M | 改为 `1000000` 后 `./scripts/manage_dotfiles.sh apply`；`grep contextWindow ~/.pi/agent/models.json` 验证 |
 
 ### 相关文档与规则
 
