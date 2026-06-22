@@ -283,6 +283,7 @@ chezmoi.toml.local
 # Claude / AI 本地记忆与设置（含会话与项目 data）
 .claude-mem/
 .claude/settings.local.json
+.project-memory-backups/
 
 # CodeWhale / DeepSeek-TUI 用户态（若误拷入仓库根或子目录）
 .codewhale/
