@@ -1,0 +1,26 @@
+# Pi 自定义命令（与 Cursor / Claude / CodeWhale 语义对齐）
+
+用户输入 **`/commit-push`** 或 **`/summary-memory`**（或中文同义）时，按下列流程执行。底层脚本在 **agent-config** 仓库（Phase 2）；默认路径 `../../AI/agent-config/scripts/` 或本机已安装的 `git-smart-commit` / `summary-project-memory` 全局包装器。
+
+---
+
+## `/commit-push`
+
+一键提交并推送：分析改动 → 如果需要更新 `.gitignore` → 生成 Conventional Commit → git add → gitignore 检查 → secret 扫描 → SSH 预检 → commit → push。全程自动，无需中间确认。
+
+1. **快速检查** — `git status --porcelain`；无变更则退出。
+2. **按需更新 `.gitignore`** — 若应忽略的路径/产物尚未写入，先更新 `.gitignore`。
+3. **构建消息** — 未传 `-m` 时按 Conventional Commit 自动生成。
+4. **执行脚本** — `git-smart-commit` 或 `bash <agent-config>/scripts/git-smart-commit.sh`（Windows 可用 `git-smart-commit.ps1`）。
+5. **输出结果** — 分支、变更数、commit hash、push 状态；exit 5 时用 `--push-only` 恢复，禁止重复完整 commit。
+
+---
+
+## `/summary-memory`
+
+项目级维护与记忆压缩：清理无用/冗余文件 → 从本会话提炼知识 → 更新项目文档。仅限当前项目目录，不写 `~/.claude-mem` 等全局记忆。注意相关 memory 文件的**大小和日期**，memory 不要太大了，适当的总结合并较老的 memory，某一些可以分析并删除。
+
+1. **Phase 1–2** — 扫描并（经用户确认）清理无用/冗余文件；检查 memory 相关文件大小与日期。
+2. **Phase 3** — 从本会话提炼知识，与现有 `PROJECT_MEMORY.md` 去重合并。
+3. **Phase 4** — `summary-project-memory --validate` → `--apply` 写入 `PROJECT_MEMORY.md`；备份 `.project-memory-backups/`（保留最近 2 份）；控制 `PROJECT_AGENT_MEMORY.md` 体量。
+4. **Phase 5** — 报告 Cleaned / Memory updated / Pending suggestions。

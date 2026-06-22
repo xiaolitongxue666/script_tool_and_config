@@ -46,7 +46,8 @@ npm list -g @earendil-works/pi-coding-agent   # WSL：应指向 fnm 全局，非
 | `~/.pi/agent/settings.json` | `.chezmoi/dot_pi/agent/settings.json.tmpl` | 默认 Flash；Ctrl+P 在 Flash/Pro 间切换 |
 | `~/.pi/agent/models.json` | `.chezmoi/dot_pi/agent/models.json.tmpl` | V4 Flash/Pro 的 `modelOverrides`（思考链、**contextWindow 1M**） |
 | `~/.pi/agent/AGENTS.md` | `.chezmoi/dot_pi/agent/AGENTS.md.tmpl` | 全局 coding 上下文 |
-| `~/.pi/agent/APPEND_SYSTEM.md` | `.chezmoi/dot_pi/agent/APPEND_SYSTEM.md.tmpl` | 行为规则（精简） |
+| `~/.pi/agent/APPEND_SYSTEM.md` | `.chezmoi/dot_pi/agent/APPEND_SYSTEM.md.tmpl` | 行为规则（中文回复、代理、命令引用） |
+| `~/.pi/agent/COMMANDS.md` | `.chezmoi/dot_pi/agent/COMMANDS.md.tmpl` | **`/commit-push`**、**`/summary-memory`** 流程（与四 Agent 对齐） |
 
 **不** chezmoi 管理：`auth.json`（run_once 按需创建）、sessions、`/login` OAuth 产物。
 
@@ -115,6 +116,17 @@ pi
 Layer 4 字母序：`90` claude → `91` codex → `92` codewhale → `93` cursor → **`94` pi**。
 
 v1 **不**预装 pi packages（pi-web-access、pi-cursor-sdk 等）；MCP/Skills 扩展留 agent-config Phase 2。
+
+## 自定义命令（`/commit-push`、`/summary-memory`）
+
+Pi 无原生 slash 注册；Harness 通过 `~/.pi/agent/COMMANDS.md`（chezmoi `dot_pi/agent/COMMANDS.md.tmpl`）提供与 Cursor / Claude / CodeWhale **语义一致**的两条命令。
+
+| 命令 | 核心描述 |
+|------|----------|
+| `/commit-push` | 分析改动 → 按需更新 `.gitignore` → Conventional Commit → `git-smart-commit` → push |
+| `/summary-memory` | 清理冗余 → 会话提炼 → 更新 `PROJECT_MEMORY.md`；控制 memory 文件大小/日期 |
+
+底层脚本在 agent-config：`scripts/git-smart-commit.sh`、`scripts/summary-project-memory.sh`。Phase 2 安装后可用全局包装器 `git-smart-commit`、`summary-project-memory`。
 
 ## 故障排查
 

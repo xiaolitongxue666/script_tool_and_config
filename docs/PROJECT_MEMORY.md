@@ -21,3 +21,8 @@
 19) **tmux 插件（2026-06）**：tmux 已装时勿 early exit 跳过 TPM/Catppuccin clone；顶栏用 `#W`/`#W*` 非 `#T`；切 pane 为 `Prefix+ijkl`。
 20) **rmux 排错（2026-06）**：`Prefix+,` 须 `command-prompt` 带 `NEW_NAME`；`#{window_index}` pill 非裸 `#I`；`rmux show-options -g window-status-format` 对比磁盘配置。
 21) **WSL dotfiles（2026-05）**：误留无后缀 `dot_zshrc` 时从 git 恢复 `dot_zshrc.tmpl`；`deploy.sh` 成功后 `chezmoi status` 有 M/R 为正常差异。
+22) **Agent 体系**：Layer 4 五 Agent（claude/codex/codewhale/cursor/pi）；Phase 2 agent-config 管 MCP/Skills/Cursor Commands；详见 [PROJECT_AGENT_MEMORY.md](docs/PROJECT_AGENT_MEMORY.md) § Agent 体系总览。
+23) **全局配置**：中文回复 + 7890 代理（WSL 宿主机）；Pi 缺口已补 `dot_pi/agent/COMMANDS.md` + APPEND_SYSTEM 中文/代理。
+24) **`/commit-push`**（全 Agent 必备）：分析改动 → 按需更新 `.gitignore` → Conventional Commit → `git-smart-commit` → push；canonical 在 agent-config slash/commands。
+25) **`/summary-memory`**（全 Agent 必备）：清理冗余 → 会话提炼 → 更新 `PROJECT_MEMORY.md`；控制 memory 大小/日期；机械层 `summary-project-memory.sh`。
+26) **Cursor 分工**：本仓库 `.cursor/rules/` = 项目 rules；`~/.cursor/commands/` = 全局 Cursor Commands（Phase 2 apply）。

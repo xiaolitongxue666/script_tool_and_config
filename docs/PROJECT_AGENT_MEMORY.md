@@ -2,6 +2,68 @@
 
 本文件为**本仓库专属**的可提交记忆，供 Cursor / Claude Code / Copilot 等 Agent 读取。用户级 claude-mem 数据仍在 `.claude-mem/`（已 gitignore，不提交）。
 
+## Agent 体系总览（2026-06）
+
+### 两阶段架构
+
+| 阶段 | 入口 | 职责 |
+|------|------|------|
+| Phase 1（本仓库） | `./deploy.sh` | fnm/uv、dotfiles、Layer 4 CLI、`dot_pi/agent/` Harness |
+| Phase 2（agent-config） | `bash scripts/install-tools.sh` | 全局 MCP/Skills、Cursor Commands、slash 命令、`git-smart-commit` |
+
+agent-config 路径：`../../AI/agent-config`（相对本仓库）；详见 [DEPLOY_TWO_PHASE.md](DEPLOY_TWO_PHASE.md)。
+
+### Layer 4 主 Agent（5 个）
+
+| Agent | Phase 1 安装 | Phase 2 配置 | 项目知识文件 |
+|-------|-------------|--------------|--------------|
+| Claude Code | `run_once_90-install-claude-code` | MCP + Skills + hooks + slash | `CLAUDE.md` |
+| Codex | `run_once_91-install-codex` | `~/.codex/config.toml`；prompts 桥接 | `.codex/AGENTS.md` → `AGENTS.md` |
+| CodeWhale | `run_once_92-install-codewhale` | MCP + Skills + slash | `.cursor/rules/codewhale.mdc` |
+| Cursor | `run_once_93-install-cursor`（GUI） | MCP + Skills + **Cursor Commands** | 本仓库 `.cursor/rules/*.mdc` |
+| Pi | `run_once_94-install-pi` | Harness 由本仓库 `dot_pi/agent/` | `docs/PI.md` |
+
+辅助层：GitHub Copilot（`.github/copilot-instructions.md`）、claude-mem（Shell `claude()`）、OpenSpec（`openspec/AGENTS.md`）。
+
+**Cursor 分工**：本仓库 `.cursor/` 仅 **rules**（项目级）；全局 **Cursor Commands**（`/commit-push` 等）在 `~/.cursor/commands/`，由 agent-config `apply-config.sh` 写入。
+
+### 全局配置（每个 Agent 必备）
+
+| 配置项 | 要求 | 管理方 |
+|--------|------|--------|
+| 中文回复 | 与用户交互、注释、文档说明使用中文；`log_*` 运行时输出英文 | agent-config `common-agent-policy.md` + 各 platform `agent.md`；Pi 见 `dot_pi/agent/APPEND_SYSTEM.md` |
+| 7890 代理 | 外网默认启用：WSL → `http://<resolv nameserver>:7890`；其余 → `127.0.0.1:7890`；禁用 `PROXY=none/false` 或 `NO_PROXY=1` | Phase 1：`chezmoi_core.sh`；Phase 2：`agent-config/scripts/lib/proxy.sh`；Pi：`settings.json` `httpProxy` |
+| **`/commit-push`** | **强制**；语义见下 | agent-config slash/commands + `git-smart-commit` |
+| **`/summary-memory`** | **强制**；语义见下 | agent-config slash/commands + `summary-project-memory.sh` |
+
+Pacman/apt/brew 包管理仍直连国内源，不走代理。
+
+### 自定义命令：全 Agent 覆盖矩阵
+
+| Agent | `/commit-push` | `/summary-memory` | 注册机制 |
+|-------|:--------------:|:-----------------:|----------|
+| Cursor | ✅ | ✅ | Cursor Commands → `~/.cursor/commands/*.md` |
+| Claude Code | ✅ | ✅ | Slash → `~/.claude/commands/*.md` |
+| CodeWhale | ✅ | ✅ | Slash → `~/.codewhale/commands/*.md` |
+| Codex | ⚠️ | ⚠️ | prompts → `platforms/codex/prompts/`（v0.128+ 无 slash 注册；自然语言或 `/commit-push` 同义触发） |
+| Pi | ✅ | ✅ | Harness `~/.pi/agent/COMMANDS.md`（chezmoi `dot_pi/agent/COMMANDS.md.tmpl`） |
+
+canonical 源：agent-config `platforms/{cursor,claude-code,codewhale}/slash-commands/`、`platforms/codex/prompts/`。
+
+#### `/commit-push` 核心描述
+
+一键提交并推送：分析改动 → 如果需要更新 `.gitignore` → 生成 Conventional Commit → git add → gitignore 检查 → secret 扫描 → SSH 预检 → commit → push。全程自动，无需中间确认。
+
+- 底层：`git-smart-commit`（`agent-config/scripts/git-smart-commit.sh` / `.ps1`）
+- exit 4：SSH 预检失败，未 commit；exit 5：已 commit 未 push（用 `--push-only` 恢复，禁止重复完整 commit）
+
+#### `/summary-memory` 核心描述
+
+项目级维护与记忆压缩：清理无用/冗余文件 → 从本会话提炼知识 → 更新项目文档。仅限当前项目目录，不写 `~/.claude-mem` 等全局记忆。注意相关 memory 文件的**大小和日期**，memory 不要太大了，适当的总结合并较老的 memory，某一些可以分析并删除。
+
+- 机械层：`summary-project-memory.sh`（`--gather` / `--validate` / `--apply`）
+- 写入目标：`PROJECT_MEMORY.md`（≤25 条 + 问题/解法表）；备份 `.project-memory-backups/`（保留最近 2 份）
+
 ## CodeWhale 迁移（DeepSeek-TUI → CodeWhale，2026-05）
 
 ### 背景
