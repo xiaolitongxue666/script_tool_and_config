@@ -21,7 +21,7 @@ agent-config 路径：`../../AI/agent-config`（相对本仓库）；详见 [DEP
 | Codex | `run_once_91-install-codex` | `~/.codex/config.toml`；prompts 桥接 | `.codex/AGENTS.md` → `AGENTS.md` |
 | CodeWhale | `run_once_92-install-codewhale` | MCP + Skills + slash | `.cursor/rules/codewhale.mdc` |
 | Cursor | `run_once_93-install-cursor`（GUI） | MCP + Skills + **Cursor Commands** | 本仓库 `.cursor/rules/*.mdc` |
-| Pi | `run_once_94-install-pi` | Harness 由本仓库 `dot_pi/agent/` | `docs/PI.md` |
+| Pi | `run_once_94-install-pi` | Harness 由本仓库 `dot_pi/agent/` | `docs/PI.md` 起四篇线性文档（见 README） |
 
 辅助层：GitHub Copilot（`.github/copilot-instructions.md`）、claude-mem（Shell `claude()`）、OpenSpec（`openspec/AGENTS.md`）。
 
@@ -173,7 +173,7 @@ canonical 源：agent-config `platforms/{cursor,claude-code,codewhale}/slash-com
 
 ### 相关文档与规则
 
-- 用户向说明：[PI.md](PI.md)
+- 用户向说明（**唯一学习顺序**）：[PI.md](PI.md) → [PI_LEARNING_GUIDE.md](PI_LEARNING_GUIDE.md) → [PI_SOURCE_READING.md](PI_SOURCE_READING.md)（本地 `DotfilesAndScript/pi` 源码，`../../pi/` 可点击链接）→ [PI_CUSTOMIZATION.md](PI_CUSTOMIZATION.md)；索引 [docs/README.md](README.md)
 - Cursor 规则：`.cursor/rules/pi.mdc`
 - 安装检测：`scripts/chezmoi/install_helpers.sh` → `94-install-pi`
 
