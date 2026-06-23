@@ -19,10 +19,7 @@
 | [SOFTWARE_LIST.md](SOFTWARE_LIST.md) | 完整软件清单与 run_once 脚本对应关系（按 OS / WSL 区分） |
 | [PROJECT_MEMORY.md](PROJECT_MEMORY.md) | 项目级紧凑记忆（Agent 快速索引，详情见 PROJECT_AGENT_MEMORY） |
 | [CODEWHALE.md](CODEWHALE.md) | CodeWhale 安装、WSL 快速流程与排错 |
-| [PI.md](PI.md) | Pi 安装、Harness 配置与排错（**第 1 站**） |
-| [PI_LEARNING_GUIDE.md](PI_LEARNING_GUIDE.md) | Pi 上手练习与配置分层（**第 2 站**） |
-| [PI_SOURCE_READING.md](PI_SOURCE_READING.md) | 本地 `pi` 仓库分阶段源码阅读，可点击跳转源码文件（**第 3 站**） |
-| [PI_CUSTOMIZATION.md](PI_CUSTOMIZATION.md) | Pi 生态与专属定制（**第 4 站**） |
+| Pi | 见 [agent-config/docs/PI.md](../../AI/agent-config/docs/PI.md)（Phase 2 安装与 Harness） |
 | [PROJECT_AGENT_MEMORY.md](PROJECT_AGENT_MEMORY.md) | 项目 Agent 可提交记忆（含 WSL 部署实测） |
 | [RMUX_WINDOWS.md](RMUX_WINDOWS.md) | Windows rmux 安装、手动使用与排错（含 chezmoi 部署陷阱） |
 | [TMUX_KEYBINDINGS.md](TMUX_KEYBINDINGS.md) | Tmux (Linux/macOS) 与 rmux (Windows) 快捷键速查 |

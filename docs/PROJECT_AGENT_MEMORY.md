@@ -8,8 +8,8 @@
 
 | 阶段 | 入口 | 职责 |
 |------|------|------|
-| Phase 1（本仓库） | `./deploy.sh` | fnm/uv、dotfiles、Layer 4 CLI、`dot_pi/agent/` Harness |
-| Phase 2（agent-config） | `bash scripts/install-tools.sh` | 全局 MCP/Skills、Cursor Commands、slash 命令、`git-smart-commit` |
+| Phase 1（本仓库） | `./deploy.sh` | fnm/uv、dotfiles、Layer 4 CLI（存量冗余） |
+| Phase 2（agent-config） | `bash scripts/install-tools.sh` | 全部 AI Agent CLI + MCP/Skills + Harness（含 **Pi**） |
 
 agent-config 路径：`../../AI/agent-config`（相对本仓库）；详见 [DEPLOY_TWO_PHASE.md](DEPLOY_TWO_PHASE.md)。
 
@@ -21,7 +21,7 @@ agent-config 路径：`../../AI/agent-config`（相对本仓库）；详见 [DEP
 | Codex | `run_once_91-install-codex` | `~/.codex/config.toml`；prompts 桥接 | `.codex/AGENTS.md` → `AGENTS.md` |
 | CodeWhale | `run_once_92-install-codewhale` | MCP + Skills + slash | `.cursor/rules/codewhale.mdc` |
 | Cursor | `run_once_93-install-cursor`（GUI） | MCP + Skills + **Cursor Commands** | 本仓库 `.cursor/rules/*.mdc` |
-| Pi | `run_once_94-install-pi` | Harness 由本仓库 `dot_pi/agent/` | `docs/PI.md` 起四篇线性文档（见 README） |
+| Pi | **agent-config Phase 2** | CLI + Harness `~/.pi/agent/` | [agent-config/docs/PI.md](../../AI/agent-config/docs/PI.md) |
 
 辅助层：GitHub Copilot（`.github/copilot-instructions.md`）、claude-mem（Shell `claude()`）、OpenSpec（`openspec/AGENTS.md`）。
 
@@ -31,8 +31,8 @@ agent-config 路径：`../../AI/agent-config`（相对本仓库）；详见 [DEP
 
 | 配置项 | 要求 | 管理方 |
 |--------|------|--------|
-| 中文回复 | 与用户交互、注释、文档说明使用中文；`log_*` 运行时输出英文 | agent-config `common-agent-policy.md` + 各 platform `agent.md`；Pi 见 `dot_pi/agent/APPEND_SYSTEM.md` |
-| 7890 代理 | 外网默认启用：WSL → `http://<resolv nameserver>:7890`；其余 → `127.0.0.1:7890`；禁用 `PROXY=none/false` 或 `NO_PROXY=1` | Phase 1：`chezmoi_core.sh`；Phase 2：`agent-config/scripts/lib/proxy.sh`；Pi：`settings.json` `httpProxy` |
+| 中文回复 | 与用户交互、注释、文档说明使用中文；`log_*` 运行时输出英文 | agent-config `common-agent-policy.md` + 各 platform `agent.md` |
+| 7890 代理 | 外网默认启用：WSL → `http://<resolv nameserver>:7890`；其余 → `127.0.0.1:7890` | Phase 1：`chezmoi_core.sh`；Phase 2：`agent-config/scripts/lib/proxy.sh` |
 | **`/commit-push`** | **强制**；语义见下 | agent-config slash/commands + `git-smart-commit` |
 | **`/summary-memory`** | **强制**；语义见下 | agent-config slash/commands + `summary-project-memory.sh` |
 
@@ -46,9 +46,9 @@ Pacman/apt/brew 包管理仍直连国内源，不走代理。
 | Claude Code | ✅ | ✅ | Slash → `~/.claude/commands/*.md` |
 | CodeWhale | ✅ | ✅ | Slash → `~/.codewhale/commands/*.md` |
 | Codex | ⚠️ | ⚠️ | prompts → `platforms/codex/prompts/`（v0.128+ 无 slash 注册；自然语言或 `/commit-push` 同义触发） |
-| Pi | ✅ | ✅ | Harness `~/.pi/agent/COMMANDS.md`（chezmoi `dot_pi/agent/COMMANDS.md.tmpl`） |
+| Pi | ✅ | ✅ | agent-config `platforms/pi/harness/COMMANDS.md` → `~/.pi/agent/COMMANDS.md` |
 
-canonical 源：agent-config `platforms/{cursor,claude-code,codewhale}/slash-commands/`、`platforms/codex/prompts/`。
+canonical 源：agent-config `platforms/{cursor,claude-code,codewhale,pi}/` 与 `platforms/codex/prompts/`。
 
 #### `/commit-push` 核心描述
 
@@ -62,7 +62,7 @@ canonical 源：agent-config `platforms/{cursor,claude-code,codewhale}/slash-com
 项目级维护与记忆压缩：清理无用/冗余文件 → 从本会话提炼知识 → 更新项目文档。仅限当前项目目录，不写 `~/.claude-mem` 等全局记忆。注意相关 memory 文件的**大小和日期**，memory 不要太大了，适当的总结合并较老的 memory，某一些可以分析并删除。
 
 - 机械层：`summary-project-memory.sh`（`--gather` / `--validate` / `--apply`）
-- 写入目标：`PROJECT_MEMORY.md`（≤25 条 + 问题/解法表）；备份 `.project-memory-backups/`（保留最近 2 份）
+- 写入目标：**`docs/PROJECT_MEMORY.md`**（≤25 条）；`--gather` 默认查仓库根 `PROJECT_MEMORY.md`（本仓已删除），validate 后 apply 至 `docs/`；备份 `.project-memory-backups/`（保留最近 2 份）
 
 ## CodeWhale 迁移（DeepSeek-TUI → CodeWhale，2026-05）
 
@@ -125,57 +125,9 @@ canonical 源：agent-config `platforms/{cursor,claude-code,codewhale}/slash-com
 - Cursor 规则：`.cursor/rules/codewhale.mdc`
 - 安装检测：`scripts/chezmoi/install_helpers.sh` → `92-install-codewhale`
 
-## Pi coding agent（Layer 4，2026-06）
+## Pi（已迁入 agent-config，2026-06）
 
-### 背景
-
-- 上游 [earendil-works/pi](https://github.com/earendil-works/pi)；CLI 包 `@earendil-works/pi-coding-agent`。
-- 项目脚本：`.chezmoi/run_once_94-install-pi.sh.tmpl`；Harness：`.chezmoi/dot_pi/agent/`。
-
-### 安装约定（Agent 修改代码时必须遵守）
-
-| 项 | 约定 |
-|----|------|
-| 路径 | 全平台含 WSL **仅** `npm install -g --ignore-scripts @earendil-works/pi-coding-agent`（WSL 内 fnm/npm 全局） |
-| 禁止 | run_once 内 cargo / brew / winget；**禁止**从 WSL 改 Windows npm |
-| 前置 | Layer 0 `fnm` + `node`；Layer 4 字母序在 cursor 之后 |
-| 代理 | 与 CodeWhale 相同：`chezmoi_setup_proxy`；WSL 宿主机 `:7890` |
-| 失败 | `[WARNING]` + `exit 0`；无 fnm/node 时 `[ERROR]` + `exit 1` |
-| 隔离 | **不**修改 claude/codex/codewhale/cursor 配置或 Shell 包装 |
-
-### WSL 专用
-
-| 项 | 说明 |
-|----|------|
-| 安装判定 | `npm root -g/@earendil-works/pi-coding-agent` 存在；`/mnt/c/.../AppData/Roaming/npm` **不算**已安装 |
-| 推荐流程 | `eval "$(fnm env)"` → `./deploy.sh` |
-| 验证 | `which pi`、`pi --version`、`test -f ~/.pi/agent/settings.json` |
-
-### 认证与 Harness
-
-| 路径 | 管理方 |
-|------|--------|
-| `~/.pi/agent/settings.json` 等 | chezmoi `dot_pi/agent/` |
-| `~/.pi/agent/auth.json` | run_once **仅缺失/空 `{}`/无 deepseek** 时创建 DeepSeek `$DEEPSEEK_API_KEY` 引用；不覆盖其他 provider；`/login` 写入明文 key |
-| pi packages / MCP | v1 不在本仓库；留 agent-config Phase 2 |
-
-`DEEPSEEK_API_KEY` 与 CodeWhale 共用。认证使用 Pi 内置 `deepseek` provider（非 `openai_compatible` 自定义端点）。V4 模型 ID：`deepseek-v4-flash`、`deepseek-v4-pro`。
-
-### 遇到的问题与解决
-
-| 问题 | 原因 | 解决 |
-|------|------|------|
-| `/login` 列表无 DeepSeek | 误选 **Use a subscription**（仅 Anthropic/Codex/Copilot） | Esc 返回 → 选 **Use an API key** → DeepSeek；或 `export DEEPSEEK_API_KEY` |
-| 已有空 `{}` 的 auth.json | run_once 曾跳过创建 | 删 deepseek 条目或清空为 `{}` 后 re-apply；或直接用 `/login` |
-| Pi 提示需 Node ≥22.19 | 本机 fnm 为 v20，Pi ≥0.75 要求更高 | `fnm install 22 && fnm use 22` 后再 `npm i -g @earendil-works/pi-coding-agent` |
-| 误将 `~/.pi/` 提交进仓库 | auth.json 含 API key | `.gitignore` 已忽略 `.pi/`、`**/.pi/`；Harness 模板仅在 `.chezmoi/dot_pi/` |
-| 上下文仅 64K | `models.json.tmpl` `contextWindow: 64000` 在 pi 框架层覆盖内置 1M | 改为 `1000000` 后 `./scripts/manage_dotfiles.sh apply`；`grep contextWindow ~/.pi/agent/models.json` 验证 |
-
-### 相关文档与规则
-
-- 用户向说明（**唯一学习顺序**）：[PI.md](PI.md) → [PI_LEARNING_GUIDE.md](PI_LEARNING_GUIDE.md) → [PI_SOURCE_READING.md](PI_SOURCE_READING.md)（本地 `DotfilesAndScript/pi` 源码，`../../pi/` 可点击链接）→ [PI_CUSTOMIZATION.md](PI_CUSTOMIZATION.md)；索引 [docs/README.md](README.md)
-- Cursor 规则：`.cursor/rules/pi.mdc`
-- 安装检测：`scripts/chezmoi/install_helpers.sh` → `94-install-pi`
+Pi 的安装、Harness、文档 **不在本仓库**。唯一 SSOT：[agent-config/docs/PI.md](../../AI/agent-config/docs/PI.md)（`bash scripts/install-tools.sh` + `apply-config.sh`）。
 
 ## Windows Git Bash chezmoi 部署（2026-05 实测）
 
@@ -212,6 +164,7 @@ Git for Windows 可能装在 **C:** 或 **D:**（如 `D:\Program Files\Git`）�
 | `chezmoi data` 无 `windows_git_bash_path` | 源内 `[data]` 模板不求值；`.chezmoidata.toml` 仅静态键 | 以 apply 后 `~/.config/windows-terminal/settings.json` 为准；或 `chezmoi --override-data-file` 调试 |
 | apply 后 chezmoi 源正确、WT 仍 C: | `run_onchange_sync` 仅在源模板变更时触发 | 已修复：`chezmoi_run_apply` 成功后调用 `chezmoi_sync_windows_terminal_config` |
 | `.chezmoidata.toml` 写死 C: 覆盖检测 | 静态 data 优先级与注释误导 | 已移除硬编码；检测由 override-data-file 负责 |
+| `deploy.sh` / `diagnose` 报 `windows_git_bash_path` | 裸 `chezmoi status/diff/apply` 未注入 override | 已修复（2026-06）：`chezmoi_build_base_args` + `chezmoi_capture_*`；`deploy.sh` 设 `CHEZMOI_PROJECT_ROOT` 并走 `chezmoi_run_apply` |
 
 ## Windows：fnm + uv + Git Bash（2026-05）
 
@@ -233,11 +186,10 @@ Git for Windows 可能装在 **C:** 或 **D:**（如 `D:\Program Files\Git`）�
 
 | 本仓库 (Phase 1) | agent-config (Phase 2) |
 |------------------|------------------------|
-| fnm/uv、dotfiles、Layer 4 **CLI**（claude/codex/codewhale/cursor/pi*） | 全局 MCP、Skills、`apply-config` 写入各 Agent 配置 |
-| Pi 最小 Harness（`~/.pi/agent/settings.json`、`AGENTS.md`） | Pi packages/extensions、MCP |
-| **不**写 `~/.claude/settings.json`、`~/.codewhale/mcp.json` | Cursor 编辑器 `settings.json`：`render-cursor-editor-settings.sh` |
+| fnm/uv、dotfiles、Layer 4 CLI（存量冗余） | **全部** Agent CLI + MCP/Skills + Harness（含 Pi） |
+| **不**写 Agent 全局配置 | `apply-config` 写入各 Agent 配置 |
 | WT Git Bash 默认 profile（**仅 Windows**） | Cursor 集成终端 Git Bash：`platforms/cursor/settings/editor-settings.jsonc` + `@WINDOWS_GIT_BASH_PATH@`（与 `detect_windows_git_paths.sh` 同源） |
-| `run_once_90`–`94` 字母序 | `bash scripts/install-tools.sh` 在对应 OS/WSL 各执行一次 |
+| `run_once_90`–`93` 字母序（存量） | `bash scripts/install-tools.sh` 在对应 OS/WSL 各执行一次 |
 
 \* Cursor 仅 GUI 环境（`run_once_93-install-cursor`）。
 

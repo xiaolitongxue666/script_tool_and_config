@@ -129,9 +129,6 @@ _upgrade_software_by_name() {
         92-install-codewhale)
             ensure_npm_global_latest "$(get_npm_global_spec "$name")" || return 1
             ;;
-        94-install-pi)
-            ensure_npm_global_latest "$(get_npm_global_spec "$name")" || return 1
-            ;;
         93-install-cursor)
             _detect_gui_available || return 0
             local target

@@ -232,7 +232,7 @@ install.sh
   │       ├─ run_once_90-install-claude-code.sh.tmpl
   │       ├─ run_once_92-install-codewhale.sh.tmpl
   │       ├─ run_once_93-install-cursor.sh.tmpl (GUI 环境)
-  │       ├─ run_once_94-install-pi.sh.tmpl
+  │       ├─ run_once_93-install-cursor.sh.tmpl
   │       ├─ run_once_install-tmux.sh.tmpl (Linux/macOS)
   │       ├─ run_on_linux/run_once_*.sh.tmpl (仅 Linux)
   │       ├─ run_on_darwin/run_once_*.sh.tmpl (仅 macOS)
@@ -270,7 +270,6 @@ install.sh
 | `run_once_90-install-claude-code.sh.tmpl` | Claude Code CLI | 多平台 |
 | `run_once_92-install-codewhale.sh.tmpl` | CodeWhale CLI (npm) | 多平台（含 WSL） |
 | `run_once_93-install-cursor.sh.tmpl` | Cursor 编辑器 | 有 GUI 时 |
-| `run_once_94-install-pi.sh.tmpl` | Pi coding agent CLI + Harness | 多平台（含 WSL） |
 | `run_once_install-tmux.sh.tmpl` | tmux, TPM 插件 | Linux, macOS |
 | `run_once_install-alacritty.sh.tmpl` | alacritty 终端 | 仅 Linux |
 | `run_once_install-dwm.sh.tmpl` | dwm 窗口管理器 | 仅 Linux |

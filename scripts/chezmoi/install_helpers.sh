@@ -7,10 +7,32 @@
 
 _INSTALL_HELPERS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 _SOFTWARE_POLICIES_SH="${_INSTALL_HELPERS_DIR}/software_policies.sh"
+_CHEZMOI_CORE_SH="${_INSTALL_HELPERS_DIR}/chezmoi_core.sh"
 if [[ -f "$_SOFTWARE_POLICIES_SH" ]]; then
     # shellcheck disable=SC1090
     source "$_SOFTWARE_POLICIES_SH"
 fi
+if [[ -f "$_CHEZMOI_CORE_SH" ]] && ! type chezmoi_capture_status &>/dev/null 2>&1; then
+    # shellcheck disable=SC1090
+    source "$_CHEZMOI_CORE_SH"
+fi
+
+# 统一 chezmoi status/diff 查询（Windows 下含 override-data）
+_chezmoi_query_output() {
+    local subcmd="$1"
+    if type chezmoi_export_apply_env &>/dev/null; then
+        chezmoi_export_apply_env
+    fi
+    if [[ "$subcmd" == "status" ]] && type chezmoi_capture_status &>/dev/null; then
+        chezmoi_capture_status
+        return 0
+    fi
+    if [[ "$subcmd" == "diff" ]] && type chezmoi_capture_diff &>/dev/null; then
+        chezmoi_capture_diff
+        return 0
+    fi
+    PAGER=cat chezmoi "$subcmd" 2>&1 || true
+}
 
 # ============================================
 # 软件安装检查函数
@@ -89,7 +111,7 @@ check_software_installed() {
 check_chezmoi_status() {
     local status_output
     # 设置 PAGER=cat 避免进入交互模式
-    status_output=$(PAGER=cat chezmoi status 2>&1 || true)
+    status_output=$(_chezmoi_query_output status)
 
     # 如果输出包含错误信息，认为有差异
     if echo "$status_output" | grep -qi "error\|failed"; then
@@ -108,7 +130,7 @@ check_chezmoi_status() {
 check_chezmoi_diff() {
     local diff_output
     # 设置 PAGER=cat 避免进入交互模式
-    diff_output=$(PAGER=cat chezmoi diff 2>&1 || true)
+    diff_output=$(_chezmoi_query_output diff)
 
     # 如果输出包含错误信息，认为有差异
     if echo "$diff_output" | grep -qi "error\|failed"; then
@@ -137,7 +159,7 @@ check_config_up_to_date() {
 get_chezmoi_status_summary() {
     local status_output
     # 设置 PAGER=cat 避免进入交互模式
-    status_output=$(PAGER=cat chezmoi status 2>&1 || true)
+    status_output=$(_chezmoi_query_output status)
 
     # 检查是否出错
     if echo "$status_output" | grep -qi "error\|failed"; then
@@ -164,7 +186,7 @@ get_chezmoi_status_summary() {
 get_chezmoi_diff_summary() {
     local diff_output
     # 设置 PAGER=cat 避免进入交互模式
-    diff_output=$(PAGER=cat chezmoi diff 2>&1 || true)
+    diff_output=$(_chezmoi_query_output diff)
 
     # 检查是否出错
     if echo "$diff_output" | grep -qi "error\|failed"; then
@@ -367,28 +389,6 @@ check_script_software_installed() {
                 return 1
             fi
             if check_command_exists "codewhale" && check_command_exists "codewhale-tui"; then
-                return 0
-            fi
-            return 1
-            ;;
-        94-install-pi|pi)
-            # WSL：须 fnm/npm 全局存在 pi-coding-agent，不能仅因 Windows 互操作 PATH 判定为已安装
-            if grep -qEi "Microsoft|WSL" /proc/version 2>/dev/null || [[ -n "${WSL_DISTRO_NAME:-}" ]]; then
-                local npm_root pi_path
-                pi_path="$(command -v pi 2>/dev/null || true)"
-                case "${pi_path}" in
-                    /mnt/c/*|/mnt/host/c/*|*AppData/Roaming/npm*) return 1 ;;
-                esac
-                if command -v npm &>/dev/null; then
-                    npm_root="$(npm root -g 2>/dev/null || true)"
-                    if [[ -n "${npm_root}" && -d "${npm_root}/@earendil-works/pi-coding-agent" ]] \
-                        && check_command_exists "pi"; then
-                        return 0
-                    fi
-                fi
-                return 1
-            fi
-            if check_command_exists "pi"; then
                 return 0
             fi
             return 1

@@ -1,61 +1,48 @@
 # 两阶段部署（本仓库 + agent-config）
 
-## Phase 1 — 本仓库（二进制 + dotfiles）
+## 职责边界（SSOT）
+
+| 仓库 | 职责 |
+|------|------|
+| **script_tool_and_config（本仓库）** | **非 AI** 软件：fnm/uv、git、shell、终端、tmux/rmux 等 dotfiles |
+| **[agent-config](../../AI/agent-config)** | **全部 AI Agent**：CLI、MCP、Skills、Harness（含 **Pi**） |
+
+> 存量冗余：本仓库 Layer 4 `run_once_90`–`93` 与 agent-config `install-tools.sh` 功能重复；**Pi 已完全迁入 agent-config**，本仓库不再包含任何 Pi 安装或 Harness 模板。
+
+## Phase 1 — 本仓库（非 AI + fnm）
 
 ```bash
 eval "$(fnm env)"
 ./deploy.sh
 ```
 
-Layer 4 安装（字母序）：
+Layer 4（存量，可选）：`90` claude → `91` codex → `92` codewhale → `93` cursor（GUI）。
 
-- `run_once_90-install-claude-code` — `claude`
-- `run_once_91-install-codex` — `codex`
-- `run_once_92-install-codewhale` — `codewhale` + `codewhale-tui`
-- `run_once_93-install-cursor` — Cursor 编辑器（仅 GUI）
-- `run_once_94-install-pi` — `pi`（最小 Harness 在 `~/.pi/agent/`，含 `COMMANDS.md`；MCP/packages 留 Phase 2）
+**不**写入 `~/.claude/settings.json`、`~/.codewhale/mcp.json`、`~/.pi/agent/` 等 Agent 全局配置。
 
-**不**写入 `~/.claude/settings.json`、`~/.codewhale/mcp.json` 等 Agent 全局配置（Pi 的 `settings.json`/`AGENTS.md`/`COMMANDS.md` 由本仓库 `dot_pi/agent/` 管理）。
-
-## Phase 2 — agent-config
+## Phase 2 — agent-config（全部 AI）
 
 ```bash
 cd /path/to/agent-config
 bash scripts/install-tools.sh
 ```
 
-详见 agent-config 仓库 [`docs/DEPLOY_TWO_PHASE.md`](../../AI/agent-config/docs/DEPLOY_TWO_PHASE.md)。
+负责：全部 Agent CLI（含 **pi**）、MCP、Skills、`/commit-push` 与 `/summary-memory` 全局包装器。
 
-### 全局 Agent 配置与自定义命令
-
-Phase 2 还负责：
-
-- **中文回复**、**7890 代理**（WSL 宿主机 IP）：见 agent-config `common/agents/common-agent-policy.md`
-- **Cursor Commands** → `~/.cursor/commands/`（本仓库 `.cursor/rules/` 仅为项目 rules，不含 commands）
-- **Slash 命令** → `~/.claude/commands/`、`~/.codewhale/commands/`
-- **Codex prompts** → `~/.codex/`（v0.128+ 无 slash；自然语言或 `/commit-push` 同义触发）
-
-**五 Layer 4 Agent 均须具备** `/commit-push` 与 `/summary-memory`（Pi 由 Phase 1 `dot_pi/agent/COMMANDS.md.tmpl` 补齐）。canonical 源：`agent-config/platforms/*/slash-commands/` 与 `platforms/codex/prompts/`。详见 [PROJECT_AGENT_MEMORY.md](PROJECT_AGENT_MEMORY.md) § Agent 体系总览。
-
-更新 command 正文后在本机执行：
-
-```bash
-cd /path/to/agent-config
-bash scripts/apply-config.sh
-```
+- Pi 文档：[agent-config/docs/PI.md](../../AI/agent-config/docs/PI.md)
+- 五 Agent 自定义命令 canonical 源：`agent-config/platforms/*/slash-commands/` 与 `platforms/codex/prompts/`、`platforms/pi/harness/COMMANDS.md`
 
 ## Windows Git Bash 验收
 
 ```bash
-fnm --version && node -v && uv --version && python --version
+fnm --version && node -v
 command -v codewhale && codewhale --version
+# Pi（Phase 2 后）：
+command -v pi && test -f ~/.pi/agent/settings.json
 ```
 
-- 命令为 **`codewhale`**（全小写），非 `CodeWhale`
-- 新开 Git Bash 即可用 fnm/uv，无需手敲 `eval "$(fnm env)"`
-- **`chezmoi apply` 须 `--force`**；`./deploy.sh` 与 `./scripts/manage_dotfiles.sh apply` 已处理
-- 若 apply 卡住：见 [PROJECT_AGENT_MEMORY.md](PROJECT_AGENT_MEMORY.md) § Windows Git Bash chezmoi 部署
+- **`chezmoi apply` 须 `--force`**；`./deploy.sh` 已处理
 
-## 多 Windows 用户（Administrator + xiaoli 等）
+## 多环境
 
-每个账户在**该用户**的 Git Bash 中各执行一遍 Phase 1 与 Phase 2（`AppData` 不共享）。
+各 OS / WSL 须在对应环境各执行一遍 Phase 1 与 Phase 2（`$HOME` 独立）。

@@ -145,7 +145,6 @@ Layer 2: run_once_install-zsh, run_once_install-starship, run_once_install-nerd-
 Layer 3: run_once_install-neovim（仅安装二进制，配置由其他项目管理）
 Layer 4: run_once_90-install-claude-code, run_once_91-install-codex, run_once_92-install-codewhale（AI agent CLI，仅二进制）
 Layer 4+: run_once_93-install-cursor（仅 GUI 环境）
-Layer 4: run_once_94-install-pi（Pi coding agent CLI + 最小 Harness）
 Layer 5: run_once_install-tmux + run_on_linux/* + run_on_darwin/*；Windows：run_on_windows/install-rmux、install-windows-terminal、install-oh-my-posh
 ```
 

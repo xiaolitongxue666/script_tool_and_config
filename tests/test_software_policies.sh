@@ -27,8 +27,6 @@ assert_eq "neovim policy" "minimum:0.11.0" "$(get_software_policy neovim)"
 assert_eq "rmux policy" "pinned:0.5.0" "$(get_software_policy install-rmux)"
 assert_eq "nerd-fonts policy" "skip" "$(get_software_policy nerd-fonts)"
 assert_eq "claude policy" "latest" "$(get_software_policy 90-install-claude-code)"
-assert_eq "pi policy" "latest" "$(get_software_policy 94-install-pi)"
-assert_eq "pi npm spec" "@earendil-works/pi-coding-agent" "$(get_npm_global_spec 94-install-pi)"
 
 CHEZMOI_DIR="${PROJECT_ROOT}/.chezmoi"
 count_linux=0
@@ -37,9 +35,9 @@ while IFS= read -r s; do
     count_linux=$((count_linux + 1))
 done < <(list_applicable_run_once_scripts "$CHEZMOI_DIR" linux)
 
-if [[ "$count_linux" -ge 20 ]]; then
+if [[ "$count_linux" -ge 19 ]]; then
     PASSED=$((PASSED + 1))
-    echo "[PASS] linux script count >= 20 ($count_linux)"
+    echo "[PASS] linux script count >= 19 ($count_linux)"
 else
     FAILED=$((FAILED + 1))
     echo "[FAIL] linux script count too low ($count_linux)"
@@ -48,10 +46,7 @@ fi
 has_layer4=0
 while IFS= read -r s; do
     [[ "$s" == *"90-install-claude-code"* ]] && has_layer4=1
-    [[ "$s" == *"94-install-pi"* ]] && has_pi=1
 done < <(list_applicable_run_once_scripts "$CHEZMOI_DIR" linux)
-
-has_pi="${has_pi:-0}"
 
 if [[ "$has_layer4" -eq 1 ]]; then
     PASSED=$((PASSED + 1))
@@ -59,14 +54,6 @@ if [[ "$has_layer4" -eq 1 ]]; then
 else
     FAILED=$((FAILED + 1))
     echo "[FAIL] Layer 4 claude script missing from linux list"
-fi
-
-if [[ "$has_pi" -eq 1 ]]; then
-    PASSED=$((PASSED + 1))
-    echo "[PASS] Layer 4 pi script included for linux"
-else
-    FAILED=$((FAILED + 1))
-    echo "[FAIL] Layer 4 pi script missing from linux list"
 fi
 
 pkg="$(get_common_tool_package bat linux pacman)"

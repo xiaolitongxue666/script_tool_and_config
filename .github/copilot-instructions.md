@@ -44,10 +44,4 @@ Template mapping:
 - Binaries: `codewhale` + `codewhale-tui`; state root `~/.codewhale` (legacy `~/.deepseek` read-only fallback).
 - Do **not** use `cargo install deepseek` or `run_once_92-install-deepseek` (removed).
 - Agent notes: `docs/PROJECT_AGENT_MEMORY.md`, `docs/PROJECT_MEMORY.md`, `docs/CODEWHALE.md`.
-
-## Pi（Layer 4 Coding Harness)
-
-- Install: `run_once_94-install-pi.sh.tmpl` via `npm install -g --ignore-scripts @earendil-works/pi-coding-agent` (WSL: fnm global; not Windows interop npm).
-- Harness: `dot_pi/agent/` → `~/.pi/agent/`; default DeepSeek v4 Flash; shares `DEEPSEEK_API_KEY` with CodeWhale.
-- Do **not** modify claude/codex/codewhale/cursor configs; v1 has no pi packages or Shell wrapper.
-- Agent notes: `docs/PI.md`, `.cursor/rules/pi.mdc`.
+- Pi: [agent-config/docs/PI.md](../../AI/agent-config/docs/PI.md) (Phase 2 only; not in this repo).

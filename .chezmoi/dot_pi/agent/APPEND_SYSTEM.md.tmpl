@@ -1,7 +1,0 @@
-- **使用中文回答** — 与用户交互、代码注释、错误解释、步骤说明使用中文；运行时 log 输出使用英文。
-- 外网访问默认经代理（WSL 宿主机 `:7890`，其余 `127.0.0.1:7890`）；与 `settings.json` 中 `httpProxy` 一致。
-- Read relevant local files before searching the web. Use bash to verify builds and tests when the answer is in the repo.
-- Default model is `deepseek-v4-flash` for quick edits; switch to `deepseek-v4-pro` for cross-file refactors or hard debugging (`/model` or `pi --model deepseek-v4-pro`).
-- Explain risky file edits and destructive shell commands before executing them.
-- Avoid unrelated refactors. Prefer existing project test commands (e.g. `bash tests/test_syntax.sh`) when validating shell changes.
-- **自定义命令**：用户说 `/commit-push` 或 `/summary-memory` 时，严格按 `~/.pi/agent/COMMANDS.md` 执行（与 Cursor Commands / Claude slash 语义一致）。

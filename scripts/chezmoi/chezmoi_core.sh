@@ -496,18 +496,69 @@ chezmoi_sync_windows_terminal_config() {
 # chezmoi 核心操作
 # ============================================
 
+# 构建 chezmoi 公共 CLI 前缀（--config/--source、Windows --override-data-file）
+# 结果写入全局 CHEZMOI_BASE_ARGS；临时 override 路径在 CHEZMOI_WIN_GIT_OVERRIDE_FILE
+chezmoi_build_base_args() {
+    CHEZMOI_BASE_ARGS=()
+    CHEZMOI_WIN_GIT_OVERRIDE_FILE=""
+
+    if [[ -n "${CHEZMOI_PROJECT_ROOT:-}" ]]; then
+        chezmoi_ensure_user_config "${CHEZMOI_PROJECT_ROOT}"
+    fi
+
+    local user_config="${HOME}/.config/chezmoi/chezmoi.toml"
+    if [[ -f "$user_config" ]]; then
+        CHEZMOI_BASE_ARGS=(--config "$user_config")
+    else
+        local source_dir
+        source_dir="$(chezmoi_get_source_dir)"
+        if [[ -d "$source_dir" ]]; then
+            CHEZMOI_BASE_ARGS=(--source "$source_dir")
+        fi
+    fi
+
+    if [[ "$(uname -s)" =~ ^(MINGW|MSYS|CYGWIN) ]]; then
+        CHEZMOI_WIN_GIT_OVERRIDE_FILE="$(chezmoi_write_windows_git_override_data "")"
+        if [[ -n "$CHEZMOI_WIN_GIT_OVERRIDE_FILE" && -f "$CHEZMOI_WIN_GIT_OVERRIDE_FILE" ]]; then
+            CHEZMOI_BASE_ARGS=(--override-data-file "$CHEZMOI_WIN_GIT_OVERRIDE_FILE" "${CHEZMOI_BASE_ARGS[@]}")
+        fi
+    fi
+}
+
+# 删除 Windows Git 路径 override 临时文件
+chezmoi_cleanup_win_git_override() {
+    if [[ -n "${CHEZMOI_WIN_GIT_OVERRIDE_FILE:-}" ]]; then
+        rm -f "$CHEZMOI_WIN_GIT_OVERRIDE_FILE"
+        CHEZMOI_WIN_GIT_OVERRIDE_FILE=""
+    fi
+}
+
+# chezmoi status 原始输出（含 Windows override-data）
+chezmoi_capture_status() {
+    chezmoi_build_base_args
+    chezmoi status "${CHEZMOI_BASE_ARGS[@]}" 2>&1 || true
+    chezmoi_cleanup_win_git_override
+}
+
+# chezmoi diff 原始输出（含 Windows override-data）
+chezmoi_capture_diff() {
+    chezmoi_build_base_args
+    chezmoi diff "${CHEZMOI_BASE_ARGS[@]}" 2>&1 || true
+    chezmoi_cleanup_win_git_override
+}
+
 # chezmoi status（检查配置状态）
 # 输出到 stdout
 chezmoi_run_status() {
     echo "[INFO] Checking config status (chezmoi status)..."
-    chezmoi status 2>&1 || true
+    chezmoi_capture_status
 }
 
 # chezmoi diff（检查配置差异）
 # 输出到 stdout
 chezmoi_run_diff() {
     echo "[INFO] Checking config diff (chezmoi diff)..."
-    chezmoi diff 2>&1 || true
+    chezmoi_capture_diff
 }
 
 # chezmoi apply（应用配置）
@@ -526,46 +577,22 @@ chezmoi_run_apply() {
     # 导出环境变量
     chezmoi_export_apply_env
 
-    local apply_args=()
+    local extra_apply_args=()
     # shellcheck disable=SC2206
-    read -r -a apply_args <<< "$extra_args"
+    read -r -a extra_apply_args <<< "$extra_args"
 
     # 非交互 apply：缺 --force 时自动补上（避免 .gitconfig 等外部修改触发交互卡住）
     local _apply_arg _has_force=false
-    for _apply_arg in "${apply_args[@]}"; do
+    for _apply_arg in "${extra_apply_args[@]}"; do
         [[ "$_apply_arg" == "--force" ]] && _has_force=true
     done
     if ! $_has_force; then
-        apply_args+=("--force")
+        extra_apply_args+=("--force")
     fi
     unset _apply_arg _has_force
 
-    local user_config="${HOME}/.config/chezmoi/chezmoi.toml"
-    if [[ -n "${CHEZMOI_PROJECT_ROOT:-}" ]]; then
-        chezmoi_ensure_user_config "${CHEZMOI_PROJECT_ROOT}"
-    fi
-
-    # 优先使用用户 config（含 sourceDir 与 Windows [interpreters.sh]）。
-    # 勿在已有 sourceDir 时再传 --source 为 Git Bash 的 /d/... 路径，否则 chezmoi.exe 可能
-    # 直接 fork/exec .sh 并报「%1 is not a valid Win32 application」。
-    if [[ -f "$user_config" ]]; then
-        apply_args=(--config "$user_config" "${apply_args[@]}")
-    else
-        local source_dir
-        source_dir="$(chezmoi_get_source_dir)"
-        if [[ -d "$source_dir" ]]; then
-            apply_args=(--source "$source_dir" "${apply_args[@]}")
-        fi
-    fi
-
-    # 源内 chezmoi.toml [data] 的 Go 模板不会自动求值；Windows 下注入检测到的 Git 路径
-    local win_git_override_file=""
-    if [[ "$(uname -s)" =~ ^(MINGW|MSYS|CYGWIN) ]]; then
-        win_git_override_file="$(chezmoi_write_windows_git_override_data "")"
-        if [[ -n "$win_git_override_file" && -f "$win_git_override_file" ]]; then
-            apply_args=(--override-data-file "$win_git_override_file" "${apply_args[@]}")
-        fi
-    fi
+    chezmoi_build_base_args
+    local apply_args=("${CHEZMOI_BASE_ARGS[@]}" "${extra_apply_args[@]}")
 
     echo "[INFO] Running: chezmoi apply ${apply_args[*]}"
     local apply_rc=0
@@ -577,9 +604,7 @@ chezmoi_run_apply() {
         apply_rc=1
     fi
 
-    if [[ -n "$win_git_override_file" ]]; then
-        rm -f "$win_git_override_file"
-    fi
+    chezmoi_cleanup_win_git_override
 
     if [[ "$apply_rc" -eq 0 ]] && [[ "$(uname -s)" =~ ^(MINGW|MSYS|CYGWIN) ]]; then
         chezmoi_sync_windows_terminal_config
@@ -604,8 +629,8 @@ chezmoi_verify_sync() {
         fi
     fi
 
-    status_output=$(chezmoi status 2>&1 || true)
-    diff_output=$(chezmoi diff 2>&1 || true)
+    status_output="$(chezmoi_capture_status)"
+    diff_output="$(chezmoi_capture_diff)"
 
     # 过滤 run 脚本的状态行（run_*/run_once_* 已执行后仍显示 R，属正常）
     local status_clean

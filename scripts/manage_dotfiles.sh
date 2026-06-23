@@ -155,14 +155,28 @@ cmd_diff() {
     log_info "查看配置差异..."
     export PAGER=cat
     export CHEZMOI_PAGER=""
-    chezmoi diff
+    if type chezmoi_export_apply_env &>/dev/null; then
+        chezmoi_export_apply_env
+    fi
+    if type chezmoi_run_diff &>/dev/null; then
+        chezmoi_run_diff
+    else
+        chezmoi diff
+    fi
 }
 
 cmd_status() {
     check_chezmoi
     setup_chezmoi_source
-    log_info "Config status (chezmoi status)..."
-    chezmoi status
+    if type chezmoi_export_apply_env &>/dev/null; then
+        chezmoi_export_apply_env
+    fi
+    if type chezmoi_run_status &>/dev/null; then
+        chezmoi_run_status
+    else
+        log_info "Config status (chezmoi status)..."
+        chezmoi status
+    fi
 }
 
 cmd_edit() {

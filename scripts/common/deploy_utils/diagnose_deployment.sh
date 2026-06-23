@@ -11,6 +11,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../../.." && pwd)"
 COMMON_SH="${PROJECT_ROOT}/scripts/common.sh"
 CONFIG_MAPPINGS_SH="${PROJECT_ROOT}/scripts/chezmoi/config_mappings.sh"
+CHEZMOI_CORE_SH="${PROJECT_ROOT}/scripts/chezmoi/chezmoi_core.sh"
 
 # 加载通用函数库
 if [ -f "$COMMON_SH" ]; then
@@ -21,6 +22,12 @@ else
     function log_warning() { echo "[WARNING] $*"; }
     function log_error() { echo "[ERROR] $*" >&2; }
 fi
+
+if [ -f "$CHEZMOI_CORE_SH" ]; then
+    # shellcheck disable=SC1090
+    source "$CHEZMOI_CORE_SH"
+fi
+export CHEZMOI_PROJECT_ROOT="$PROJECT_ROOT"
 
 start_script "部署诊断"
 
@@ -143,7 +150,14 @@ log_info "━━━━━━━━━━━━━━━━━━━━━━━�
 log_info "3. 检查 chezmoi 状态"
 log_info "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
-STATUS_OUTPUT=$(chezmoi status 2>&1 || true)
+if type chezmoi_export_apply_env &>/dev/null; then
+    chezmoi_export_apply_env
+fi
+if type chezmoi_capture_status &>/dev/null; then
+    STATUS_OUTPUT=$(chezmoi_capture_status)
+else
+    STATUS_OUTPUT=$(chezmoi status 2>&1 || true)
+fi
 if [ -n "$STATUS_OUTPUT" ]; then
     log_info "发现未同步的配置："
     echo "$STATUS_OUTPUT" | while IFS= read -r line; do
@@ -161,7 +175,11 @@ log_info "━━━━━━━━━━━━━━━━━━━━━━━�
 log_info "4. 检查配置差异"
 log_info "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
-DIFF_OUTPUT=$(chezmoi diff 2>&1 || true)
+if type chezmoi_capture_diff &>/dev/null; then
+    DIFF_OUTPUT=$(chezmoi_capture_diff)
+else
+    DIFF_OUTPUT=$(chezmoi diff 2>&1 || true)
+fi
 if [ -n "$DIFF_OUTPUT" ]; then
     log_info "发现配置差异："
     echo "$DIFF_OUTPUT" | head -20 | while IFS= read -r line; do

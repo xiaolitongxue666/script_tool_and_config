@@ -35,6 +35,7 @@ if [ -f "$CHEZMOI_CORE_SH" ]; then
         chezmoi_normalize_windows_env
     fi
 fi
+export CHEZMOI_PROJECT_ROOT="${SCRIPT_DIR}"
 
 log_setup "deploy"
 
@@ -314,11 +315,18 @@ log_info ""
 # 检查配置状态（带超时）
 # ============================================
 log_info "检查配置状态..."
-# 使用 timeout 避免卡住，最多等待 5 秒
-if command -v timeout &> /dev/null; then
-    STATUS_OUTPUT=$(timeout 5 chezmoi status 2>&1 || echo "timeout or error")
+if type chezmoi_capture_status &>/dev/null; then
+    if type chezmoi_export_apply_env &>/dev/null; then
+        chezmoi_export_apply_env
+    fi
+    STATUS_OUTPUT=$(chezmoi_capture_status)
 else
-    STATUS_OUTPUT=$(chezmoi status 2>&1 || true)
+    # 使用 timeout 避免卡住，最多等待 5 秒
+    if command -v timeout &> /dev/null; then
+        STATUS_OUTPUT=$(timeout 5 chezmoi status 2>&1 || echo "timeout or error")
+    else
+        STATUS_OUTPUT=$(chezmoi status 2>&1 || true)
+    fi
 fi
 if [ -n "$STATUS_OUTPUT" ]; then
     log_info "配置状态："
@@ -335,11 +343,18 @@ fi
 # 显示配置差异（如果有，带超时）
 # ============================================
 log_info "检查配置差异..."
-# 使用 timeout 避免卡住，最多等待 5 秒
-if command -v timeout &> /dev/null; then
-    DIFF_OUTPUT=$(timeout 5 chezmoi diff 2>&1 || echo "timeout or error")
+if type chezmoi_capture_diff &>/dev/null; then
+    if type chezmoi_export_apply_env &>/dev/null; then
+        chezmoi_export_apply_env
+    fi
+    DIFF_OUTPUT=$(chezmoi_capture_diff)
 else
-    DIFF_OUTPUT=$(chezmoi diff 2>&1 || true)
+    # 使用 timeout 避免卡住，最多等待 5 秒
+    if command -v timeout &> /dev/null; then
+        DIFF_OUTPUT=$(timeout 5 chezmoi diff 2>&1 || echo "timeout or error")
+    else
+        DIFF_OUTPUT=$(chezmoi diff 2>&1 || true)
+    fi
 fi
 if [ -n "$DIFF_OUTPUT" ]; then
     log_info "发现配置差异，将应用以下更改："
@@ -524,7 +539,6 @@ fi
 # ============================================
 # 应用配置
 # ============================================
-export CHEZMOI_PROJECT_ROOT="${SCRIPT_DIR}"
 if type chezmoi_export_apply_env &>/dev/null; then
     chezmoi_export_apply_env
 fi
@@ -551,39 +565,42 @@ if [ -z "$MANAGED_FILES" ]; then
         log_info "  ✓ $PLATFORM_NAME 特定配置（仅当前系统）"
         log_info "  ✓ 模板文件会根据系统变量自动生成对应内容"
         log_info ""
-        log_info "执行: chezmoi apply -v --force"
+        log_info "执行: chezmoi apply -v --force (chezmoi_run_apply)"
         echo ""
 
-        # 执行并捕获输出（禁用 pager，使用 --force 避免交互）
         export CHEZMOI_PAGER=""
-        if command -v timeout &> /dev/null; then
+        if type chezmoi_run_apply &>/dev/null; then
+            if chezmoi_run_apply "-v --force"; then
+                APPLY_EXIT_CODE=0
+                log_success "配置应用成功"
+            else
+                APPLY_EXIT_CODE=1
+                log_warning "chezmoi apply 失败"
+            fi
+        elif command -v timeout &> /dev/null; then
             APPLY_OUTPUT=$(timeout 60 chezmoi apply -v --force 2>&1 || echo "timeout or error")
             APPLY_EXIT_CODE=$?
             if echo "$APPLY_OUTPUT" | grep -q "timeout"; then
                 log_error "chezmoi apply 超时"
                 APPLY_EXIT_CODE=1
             fi
+            echo "$APPLY_OUTPUT"
+            echo ""
+            if [ $APPLY_EXIT_CODE -eq 0 ]; then
+                log_success "配置应用成功"
+            else
+                log_warning "chezmoi apply 退出码: $APPLY_EXIT_CODE"
+            fi
         else
             APPLY_OUTPUT=$(chezmoi apply -v --force 2>&1)
             APPLY_EXIT_CODE=$?
-        fi
-
-        # 显示输出
-        echo "$APPLY_OUTPUT"
-        echo ""
-
-        # 分析输出
-        if [ $APPLY_EXIT_CODE -eq 0 ]; then
-            if echo "$APPLY_OUTPUT" | grep -qE "(apply|create|update|remove)"; then
-                APPLIED_COUNT=$(echo "$APPLY_OUTPUT" | grep -E "(apply|create|update|remove)" | wc -l)
-                APPLIED_COUNT=$((APPLIED_COUNT + 0))
-                log_success "配置应用成功，处理了 $APPLIED_COUNT 个文件"
+            echo "$APPLY_OUTPUT"
+            echo ""
+            if [ $APPLY_EXIT_CODE -eq 0 ]; then
+                log_success "配置应用成功"
             else
-                log_info "所有配置文件都是最新的，无需更新"
+                log_warning "chezmoi apply 退出码: $APPLY_EXIT_CODE"
             fi
-        else
-            log_warning "chezmoi apply 退出码: $APPLY_EXIT_CODE"
-            log_info "请检查上面的输出以了解详细信息"
         fi
     fi
 else
@@ -593,12 +610,12 @@ else
     log_info "  ✓ $PLATFORM_NAME 特定配置（仅当前系统）"
     log_info "  ✓ 模板文件会根据系统变量自动生成对应内容"
     log_info ""
-    log_info "执行: chezmoi apply -v --force"
+    log_info "执行: chezmoi apply -v --force (chezmoi_run_apply)"
     echo ""
 
     # 对于 .zshrc 等模板文件，优先使用 execute-template 避免进入 pager
     ZSHRC_TEMPLATE="$CHEZMOI_DIR/dot_zshrc.tmpl"
-    if [ -f "$ZSHRC_TEMPLATE" ]; then
+    if [ -f "$ZSHRC_TEMPLATE" ] && ! type chezmoi_run_apply &>/dev/null; then
         log_info "检测到 .zshrc 模板，优先使用 execute-template 生成/更新..."
         export CHEZMOI_PAGER=""
 
@@ -627,9 +644,17 @@ else
         fi
     fi
 
-    # 执行并捕获输出（带超时，禁用 pager，使用 --force 避免交互）
     export CHEZMOI_PAGER=""
-    if command -v timeout &> /dev/null; then
+    if type chezmoi_run_apply &>/dev/null; then
+        if chezmoi_run_apply "-v --force"; then
+            APPLY_EXIT_CODE=0
+            log_success "配置应用成功"
+        else
+            APPLY_EXIT_CODE=1
+            log_warning "chezmoi apply 失败"
+            log_info "请检查上面的输出以了解详细信息"
+        fi
+    elif command -v timeout &> /dev/null; then
         APPLY_OUTPUT=$(timeout 60 chezmoi apply -v --force 2>&1 || echo "timeout or error")
         APPLY_EXIT_CODE=$?
         if echo "$APPLY_OUTPUT" | grep -q "timeout"; then
@@ -637,30 +662,25 @@ else
             log_info "请运行: $FIX_LOCK_SCRIPT"
             APPLY_EXIT_CODE=1
         fi
+        echo "$APPLY_OUTPUT"
+        echo ""
+        if [ $APPLY_EXIT_CODE -eq 0 ]; then
+            log_success "配置应用成功"
+        else
+            log_warning "chezmoi apply 退出码: $APPLY_EXIT_CODE"
+            log_info "请检查上面的输出以了解详细信息"
+        fi
     else
         APPLY_OUTPUT=$(chezmoi apply -v --force 2>&1)
         APPLY_EXIT_CODE=$?
-    fi
-
-    # 显示输出
-    echo "$APPLY_OUTPUT"
-    echo ""
-
-    # 分析输出，统计应用的文件
-    if [ $APPLY_EXIT_CODE -eq 0 ]; then
-        # 统计应用的文件数量
-        # 使用 grep 查找匹配行，然后统计行数，避免 grep -c 可能的换行符问题
-        if echo "$APPLY_OUTPUT" | grep -qE "(apply|create|update|remove)"; then
-            APPLIED_COUNT=$(echo "$APPLY_OUTPUT" | grep -E "(apply|create|update|remove)" | wc -l)
-            # 去除可能的空白字符
-            APPLIED_COUNT=$((APPLIED_COUNT + 0))  # 强制转换为整数
-            log_success "配置应用成功，处理了 $APPLIED_COUNT 个文件"
+        echo "$APPLY_OUTPUT"
+        echo ""
+        if [ $APPLY_EXIT_CODE -eq 0 ]; then
+            log_success "配置应用成功"
         else
-            log_info "所有配置文件都是最新的，无需更新"
+            log_warning "chezmoi apply 退出码: $APPLY_EXIT_CODE"
+            log_info "请检查上面的输出以了解详细信息"
         fi
-    else
-        log_warning "chezmoi apply 退出码: $APPLY_EXIT_CODE"
-        log_info "请检查上面的输出以了解详细信息"
     fi
 fi
 
@@ -668,7 +688,14 @@ fi
 # 验证部署结果
 # ============================================
 log_info "验证部署结果..."
-FINAL_STATUS=$(chezmoi status 2>&1 || true)
+if type chezmoi_capture_status &>/dev/null; then
+    if type chezmoi_export_apply_env &>/dev/null; then
+        chezmoi_export_apply_env
+    fi
+    FINAL_STATUS=$(chezmoi_capture_status)
+else
+    FINAL_STATUS=$(chezmoi status 2>&1 || true)
+fi
 if [ -z "$FINAL_STATUS" ]; then
     log_success "所有配置文件已同步，部署成功！"
 else
