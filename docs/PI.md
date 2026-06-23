@@ -60,7 +60,7 @@ npm list -g @earendil-works/pi-coding-agent   # WSL：应指向 fnm 全局，非
 
 | 路径 | 模板 | 说明 |
 |------|------|------|
-| `~/.pi/agent/settings.json` | [`.chezmoi/dot_pi/agent/settings.json.tmpl`](../.chezmoi/dot_pi/agent/settings.json.tmpl) | 默认 Flash；Ctrl+P 在 Flash/Pro 间切换 |
+| `~/.pi/agent/settings.json` | [`.chezmoi/dot_pi/agent/settings.json.tmpl`](../.chezmoi/dot_pi/agent/settings.json.tmpl) | 默认 Flash；`enabledModels` 供 Ctrl+P 轮询 |
 | `~/.pi/agent/models.json` | [`.chezmoi/dot_pi/agent/models.json.tmpl`](../.chezmoi/dot_pi/agent/models.json.tmpl) | V4 Flash/Pro 的 `modelOverrides`（思考链、**contextWindow 1M**） |
 | `~/.pi/agent/AGENTS.md` | [`.chezmoi/dot_pi/agent/AGENTS.md.tmpl`](../.chezmoi/dot_pi/agent/AGENTS.md.tmpl) | 全局 coding 上下文 |
 | `~/.pi/agent/APPEND_SYSTEM.md` | [`.chezmoi/dot_pi/agent/APPEND_SYSTEM.md.tmpl`](../.chezmoi/dot_pi/agent/APPEND_SYSTEM.md.tmpl) | 行为规则（中文回复、代理、命令引用） |
@@ -90,11 +90,18 @@ pi --model deepseek-v4-pro -p "Refactor this module and fix build errors"
 
 # 交互式 TUI
 pi
-/model deepseek-v4-flash    # 或 Ctrl+L / Ctrl+P 在两者间切换
+/model deepseek-v4-flash
 /model deepseek-v4-pro
 ```
 
-`Shift+Tab` 切换 thinking level；Pro 推荐 `high`/`xhigh`，Flash 可用 `low`/`medium`。
+**TUI 快捷键**（完整列表：`/hotkeys`）：
+
+| 快捷键 | 作用 |
+|--------|------|
+| `Ctrl+P` | 在 settings 中配置的模型间切换（本仓库 `enabledModels`：Flash ↔ Pro） |
+| `Shift+Tab` | 一键轮询所有 thinking 档位（按当前模型能力跳过不可用档） |
+
+Pro 推荐 `high`/`xhigh`，Flash 可用 `low`/`medium`。亦可用 `/model` 或 `Ctrl+L` 打开模型选择器。
 
 ### 认证
 

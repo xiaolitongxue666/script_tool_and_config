@@ -3,5 +3,6 @@
 - This dotfiles repo uses chezmoi for multi-OS/WSL deployment. Run `./deploy.sh` or `./scripts/manage_dotfiles.sh apply` after config changes.
 - Shell: macOS/Linux/WSL use zsh; Windows Git Bash uses bash. Pick the matching template under `.chezmoi/` when editing shell config.
 - For project-specific rules, read the project-root `AGENTS.md` or `CLAUDE.md` first. If neither exists, inspect the repo layout and ask before assuming a stack.
+- **Project memory**: Check for `docs/PROJECT_AGENT_MEMORY.md` or `PROJECT_MEMORY.md` in the project root at session start. If present, read it to restore project context. Update it via `/summary-memory` (see `~/.pi/agent/COMMANDS.md`).
 - **Custom commands**: when the user says `/commit-push` or `/summary-memory`, follow `~/.pi/agent/COMMANDS.md` (same semantics as Cursor Commands / Claude slash).
 - Coding focus: prefer minimal diffs, match existing conventions, and verify with project test entry points when available.

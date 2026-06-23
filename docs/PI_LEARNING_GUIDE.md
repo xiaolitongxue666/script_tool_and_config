@@ -98,8 +98,8 @@ WSL 注意：须在 WSL 内用 fnm/npm 安装；`command -v pi` 指向 `/mnt/c/.
 
 | 能力 | 命令 / 操作 |
 |------|-------------|
-| 换模型 | `/model` 或 `Ctrl+P`（Flash ↔ Pro） |
-| 思考深度 | `Shift+Tab` |
+| 换模型 | `Ctrl+P` 在 settings 中配置的模型间切换（本仓库 `enabledModels`：Flash ↔ Pro）；亦可用 `/model` 或 `Ctrl+L` |
+| 思考深度 | `Shift+Tab` 一键轮询所有档位 |
 | 引用文件 | 输入 `@` 模糊搜索项目文件 |
 | 会话分支 | `/tree`、`/fork` |
 | 压缩上下文 | `/compact` |
