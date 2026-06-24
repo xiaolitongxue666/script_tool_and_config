@@ -434,35 +434,34 @@ check_common_tools_installed_status() {
     return 2
 }
 
-# 返回软件报告状态码：0=未安装, 1=已安装/符合策略, 2=部分安装或跳过升级
+# 返回软件报告状态码（stdout）：0=未安装, 1=已安装/符合策略, 2=部分安装或跳过升级
 # 参数: script_path, upgrade_skipped(0|1)
+# 注意：状态经 stdout 输出，函数始终 return 0，避免 install.sh 的 set -e 在 $() 中误判失败
 get_software_report_status() {
     local script_path="$1"
     local upgrade_skipped="${2:-0}"
-    local software_name
+    local software_name status_code=1
     software_name="$(extract_software_name_from_script "$script_path")"
 
     if [[ "$software_name" == "common-tools" ]]; then
         check_common_tools_installed_status
         case $? in
-            0) ;;
-            2) return 2 ;;
-            *) return 0 ;;
+            0) status_code=1 ;;
+            2) status_code=2 ;;
+            *) status_code=0 ;;
         esac
     elif ! check_script_software_installed "$script_path"; then
-        return 0
-    fi
-
-    if [[ "$upgrade_skipped" -eq 1 ]]; then
+        status_code=0
+    elif [[ "$upgrade_skipped" -eq 1 ]]; then
         local policy=""
         if type get_software_policy &>/dev/null; then
             policy="$(get_software_policy "$software_name")"
         fi
         if [[ "$policy" == "latest" ]]; then
-            return 2
+            status_code=2
         fi
     fi
-    return 1
+    echo "$status_code"
 }
 
 # 统一发现 run_once 模板（含 Layer 4）

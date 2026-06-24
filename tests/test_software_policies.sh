@@ -62,5 +62,15 @@ assert_eq "bat pacman" "bat" "$pkg"
 pkg="$(get_common_tool_package fd linux apt)"
 assert_eq "fd apt" "fd-find" "$pkg"
 
+# install.sh 使用 set -e；已安装项若用 return 1 会在 $() 中触发退出
+status_code="$(get_software_report_status "${CHEZMOI_DIR}/run_once_install-git.sh.tmpl" 0)"
+if [[ "$status_code" =~ ^[012]$ ]]; then
+    PASSED=$((PASSED + 1))
+    echo "[PASS] get_software_report_status safe under command substitution (git -> $status_code)"
+else
+    FAILED=$((FAILED + 1))
+    echo "[FAIL] get_software_report_status returned invalid status: $status_code"
+fi
+
 echo "Summary: $PASSED passed, $FAILED failed"
 [[ "$FAILED" -eq 0 ]]

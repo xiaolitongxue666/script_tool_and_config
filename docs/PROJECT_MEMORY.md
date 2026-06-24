@@ -10,14 +10,14 @@
 8) **Windows chezmoi override SSOT**：`chezmoi_core.sh` 的 `chezmoi_build_base_args` + `chezmoi_capture_status|diff` 注入 `windows_git_*`；`deploy.sh`（启动设 `CHEZMOI_PROJECT_ROOT`）、`manage_dotfiles.sh`、`diagnose_deployment.sh`、`install_helpers.sh` 须走 `chezmoi_run_apply`/capture；**禁止**裸 `chezmoi status/diff/apply`（缺 override 时 WT 模板报 `windows_git_bash_path`）。
 9) **chezmoi 源**：zsh 模板 canonical 为 `.chezmoi/dot_zshrc.tmpl`；映射见 `scripts/chezmoi/config_mappings.sh`。
 10) **macOS bash 3.2**：禁止 `declare -A`；`set -u` 下空数组勿 `"${arr[@]}"`；代理禁用用 `case` 勿 `${var,,}`。
-11) **验证**：`bash tests/test_proxy.sh` + `test_syntax.sh` + `test_semver_compare.sh` + `test_software_policies.sh`；部署后 `verify_installation`（报告 `install_verification_report_*.txt`）。
+11) **验证**：`bash tests/test_proxy.sh` + `test_syntax.sh` + `test_semver_compare.sh` + `test_software_policies.sh` + `test_install_report_status.sh`（macOS `[5/6]` set -e）；部署后 `verify_installation`（报告 `install_verification_report_*.txt`）。
 12) **tmux（Linux/macOS/WSL）**：`dot_tmux.conf.tmpl` → `~/.tmux.conf`；Catppuccin **v2.3.0** 手动 clone；TPM 仅 yank/resurrect/continuum；键位见 [TMUX_KEYBINDINGS.md](TMUX_KEYBINDINGS.md)。
 13) **rmux（仅 Windows）**：v0.5.0；`dot_rmux.conf.tmpl` → `~/.rmux.conf`；**apply 后须 `Prefix+r`** 重载 daemon；详见 [RMUX_WINDOWS.md](RMUX_WINDOWS.md)。
 14) **install 六步**：`[3/6]` chezmoi apply（`run_once_*` 每台机仅一次）→ `[4/6]` `ensure_platform_software.sh` 补装缺失 + 默认升最新；`--no-upgrade` 或 `SKIP_SOFTWARE_UPGRADE=1` 关闭；全量用 `install.sh`，日常增量用 `deploy.sh`。
 15) **ensure 策略**：`software_policies.sh` 定义 `latest` / `minimum:0.11.0`（Neovim）/ `pinned:0.5.0`（rmux）/ `skip`；清单见 [SOFTWARE_LIST.md](SOFTWARE_LIST.md)。
 16) **ensure 补装**：`run_chezmoi_install_script` 须 `chezmoi execute-template --file <绝对模板路径>` 再 pipe bash；禁止无 `--file` 把路径当模板字面量。
 17) **ensure 升级**：fnm/uv self-update；common-tools 逐项包管理器升级；Layer4 `npm install -g @latest`；代理走 `ensure_proxy_for_download` / `chezmoi_setup_proxy`。
-18) **install 状态报告**：`install_helpers.sh` 统一 `find run_once_*.sh.tmpl`（含 Layer4 90–93）；common-tools 逐项检查；三态：缺失 / OK / 部分安装或 `--no-upgrade` 跳过升级。
+18) **install 状态报告**：`install_helpers.sh` 统一 `find run_once_*.sh.tmpl`（含 Layer4 90–93）；common-tools 逐项检查；三态：缺失 / OK / 部分安装或 `--no-upgrade` 跳过升级。`get_software_report_status` 状态经 **stdout**（0/1/2），函数须 **return 0**——`install.sh` 的 `set -e` 下 `$()` 捕获时若 return 1 会误判失败（macOS step4 后首项已装即中断）；`prompt_git:vcs_info` 为 zsh 提示符杂音非根因。
 19) **tmux/rmux 排错（2026-06）**：tmux 已装时勿 early exit 跳过 TPM/Catppuccin；顶栏 `#W`/`#W*`；切 pane `Prefix+ijkl`。rmux：`Prefix+,` 须 `command-prompt` 带 `NEW_NAME`；详见 TMUX/RMUX 文档。
 20) **Agent 体系**：Layer 4 四 Agent CLI（存量）；Pi + 全局 MCP/Skills 在 agent-config Phase 2；详见 [PROJECT_AGENT_MEMORY.md](PROJECT_AGENT_MEMORY.md)。
 21) **全局配置**：中文回复 + 7890 代理（WSL 宿主机）；自定义 slash/commands canonical 在 agent-config。
