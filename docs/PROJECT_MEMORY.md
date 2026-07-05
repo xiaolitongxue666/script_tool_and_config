@@ -5,7 +5,7 @@
 3) **Layer 4 CLI（存量）**：claude / codex / codewhale / cursor 由 `run_once_90–93`；**Pi 已迁入 agent-config Phase 2**（本仓勿保留 `run_once_94`/`dot_pi`/PI 文档副本文）。
 4) **CodeWhale**：仅 `npm install -g codewhale`（WSL 内 fnm/npm）；禁止 cargo / 从 WSL 改 Windows npm；状态 `~/.codewhale/`（`~/.deepseek/` 只读回退）。
 5) **Pi**：不在本仓库；见 [agent-config/docs/PI.md](../../AI/agent-config/docs/PI.md)。
-6) **代理（默认启用）**：唯一入口 `chezmoi_core.sh` → `chezmoi_setup_proxy`；WSL → `http://<resolv nameserver>:7890`，其余 `127.0.0.1:7890`；禁用 `PROXY=none/false` 或 `NO_PROXY=1`；Pacman/apt/brew 仍直连国内源。
+6) **代理（默认启用）**：唯一入口 `chezmoi_core.sh` → `chezmoi_setup_proxy`；WSL → `http://<resolv nameserver>:7890`，其余 `127.0.0.1:7890`；禁用 `PROXY=none/false` 或 `NO_PROXY=1`；**brew 操作在 `upgrade_brew_package/upgrade_brew_cask` 中临时 unset 代理**（`common_install.sh`），避免 brew 因全局代理不可用而挂起。
 7) **WSL CodeWhale/Pi**：已装判定看 WSL 内 `npm root -g` 对应包，勿把 `/mnt/c/.../npm` 当已安装。
 8) **Windows chezmoi override SSOT**：`chezmoi_core.sh` 的 `chezmoi_build_base_args` + `chezmoi_capture_status|diff` 注入 `windows_git_*`；`deploy.sh`（启动设 `CHEZMOI_PROJECT_ROOT`）、`manage_dotfiles.sh`、`diagnose_deployment.sh`、`install_helpers.sh` 须走 `chezmoi_run_apply`/capture；**禁止**裸 `chezmoi status/diff/apply`（缺 override 时 WT 模板报 `windows_git_bash_path`）。
 9) **chezmoi 源**：zsh 模板 canonical 为 `.chezmoi/dot_zshrc.tmpl`；映射见 `scripts/chezmoi/config_mappings.sh`。
@@ -16,12 +16,12 @@
 14) **install 六步**：`[3/6]` chezmoi apply（`run_once_*` 每台机仅一次）→ `[4/6]` `ensure_platform_software.sh` 补装缺失 + 默认升最新；`--no-upgrade` 或 `SKIP_SOFTWARE_UPGRADE=1` 关闭；全量用 `install.sh`，日常增量用 `deploy.sh`。
 15) **ensure 策略**：`software_policies.sh` 定义 `latest` / `minimum:0.11.0`（Neovim）/ `pinned:0.5.0`（rmux）/ `skip`；清单见 [SOFTWARE_LIST.md](SOFTWARE_LIST.md)。
 16) **ensure 补装**：`run_chezmoi_install_script` 须 `chezmoi execute-template --file <绝对模板路径>` 再 pipe bash；禁止无 `--file` 把路径当模板字面量。
-17) **ensure 升级**：fnm/uv self-update；common-tools 逐项包管理器升级；Layer4 `npm install -g @latest`；代理走 `ensure_proxy_for_download` / `chezmoi_setup_proxy`。
-18) **install 状态报告**：`install_helpers.sh` 统一 `find run_once_*.sh.tmpl`（含 Layer4 90–93）；common-tools 逐项检查；三态：缺失 / OK / 部分安装或 `--no-upgrade` 跳过升级。`get_software_report_status` 状态经 **stdout**（0/1/2），函数须 **return 0**——`install.sh` 的 `set -e` 下 `$()` 捕获时若 return 1 会误判失败（macOS step4 后首项已装即中断）；`prompt_git:vcs_info` 为 zsh 提示符杂音非根因。
-19) **tmux/rmux 排错（2026-06）**：tmux 已装时勿 early exit 跳过 TPM/Catppuccin；顶栏 `#W`/`#W*`；切 pane `Prefix+ijkl`。rmux：`Prefix+,` 须 `command-prompt` 带 `NEW_NAME`；详见 TMUX/RMUX 文档。
-20) **Agent 体系**：Layer 4 四 Agent CLI（存量）；Pi + 全局 MCP/Skills 在 agent-config Phase 2；详见 [PROJECT_AGENT_MEMORY.md](PROJECT_AGENT_MEMORY.md)。
-21) **全局配置**：中文回复 + 7890 代理（WSL 宿主机）；自定义 slash/commands canonical 在 agent-config。
-22) **`/commit-push` + `/summary-memory`**：全 Agent 必备；机械层 `summary-project-memory.sh`（gather/validate/apply）；**写入 `docs/PROJECT_MEMORY.md`**（脚本默认查根目录，apply 须写 docs/）；canonical 语义在 agent-config。
-23) **Cursor 分工**：本仓库 `.cursor/rules/` = 项目 rules；`~/.cursor/commands/` = 全局 Cursor Commands（Phase 2 apply）。
-24) **部署排错**：`deploy.sh` 与 `manage_dotfiles.sh apply` 行为应对齐（均经 `chezmoi_run_apply`）；apply 后 `chezmoi status` 有 M/R 可为正常差异；winget msstore 证书警告非致命。
-25) **冗余清理**：根目录 `PROJECT_MEMORY.md`（若存在 Pi 教程草稿）应删除；Pi 相关 `docs/PI*.md`、`.chezmoi/dot_pi/`、`run_once_94` 若仍残留须移除并仅保留 agent-config 外链。
+17) **ensure 升级**：fnm/uv self-update；common-tools 逐项包管理器升级；Layer4 `npm install -g @latest`；代理走 `ensure_proxy_for_download`；brew 升级操作自动 unset 代理防挂起。
+18) **install 状态报告**：`install_helpers.sh` 统一 `find run_once_*.sh.tmpl`（含 Layer4 90–93）；common-tools 逐项检查；三态（缺失/OK/部分安装+跳过升级）。`get_software_report_status` 状态经 **stdout** 输出、函数 **return 0**（`set -e` 下 `$()` 捕获 return 1 中断 macOS step4）。
+19) **brew 排错（2026-07）**：`install.sh [4/6]` 中 `brew upgrade <pkg>` 在全局 `http_proxy` 下可能挂起（代理不可用时 curl 无响应）。修复：`upgrade_brew_package/upgrade_brew_cask`（`common_install.sh`）执行前 `unset http_proxy https_proxy HTTP_PROXY HTTPS_PROXY`，完成后恢复。验证：macOS 完整 `./install.sh` 通过。
+20) **tmux/rmux 排错（2026-06）**：tmux 已装时勿 early exit 跳过 TPM/Catppuccin；顶栏 `#W`/`#W*`；切 pane `Prefix+ijkl`。rmux：`Prefix+,` 须 `command-prompt` 带 `NEW_NAME`。
+21) **Agent 体系**：Layer 4 四 Agent CLI（存量）；Pi + 全局 MCP/Skills 在 agent-config Phase 2；详见 [PROJECT_AGENT_MEMORY.md](PROJECT_AGENT_MEMORY.md)。
+22) **全局配置**：中文回复 + 7890 代理（WSL 宿主机）；自定义 slash/commands canonical 在 agent-config。
+23) **`/commit-push` + `/summary-memory`**：全 Agent 必备；机械层 `summary-project-memory.sh`（gather/validate/apply）；**写入 `docs/PROJECT_MEMORY.md`**（脚本默认查根目录，apply 须写 docs/）。
+24) **Cursor 分工**：本仓库 `.cursor/rules/` = 项目 rules；`~/.cursor/commands/` = 全局 Cursor Commands（Phase 2 apply）。
+25) **部署排错**：`deploy.sh` 与 `manage_dotfiles.sh apply` 行为应对齐（均经 `chezmoi_run_apply`）；apply 后 `chezmoi status` 有 M/R 可为正常差异；winget msstore 证书警告非致命。

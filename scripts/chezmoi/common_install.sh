@@ -577,12 +577,19 @@ upgrade_brew_package() {
         return 1
     fi
     echo "[INFO] Upgrading via brew: $name" >&2
+    # 临时禁用代理 — brew 需要直连或使用自身镜像，走代理不可用时会挂起
+    local saved_http_proxy="${http_proxy:-}" saved_https_proxy="${https_proxy:-}"
+    unset http_proxy https_proxy HTTP_PROXY HTTPS_PROXY
+    local ret=0
     if brew list "$name" &>/dev/null 2>&1; then
-        brew upgrade "$name" 2>/dev/null || return 1
+        brew upgrade "$name" 2>/dev/null || ret=1
     else
-        brew install "$name" 2>/dev/null || return 1
+        brew install "$name" 2>/dev/null || ret=1
     fi
-    return 0
+    # 恢复代理
+    [[ -n "$saved_http_proxy" ]] && export http_proxy="$saved_http_proxy"
+    [[ -n "$saved_https_proxy" ]] && export https_proxy="$saved_https_proxy"
+    return $ret
 }
 
 upgrade_brew_cask() {
@@ -592,12 +599,19 @@ upgrade_brew_cask() {
         return 1
     fi
     echo "[INFO] Upgrading cask via brew: $name" >&2
+    # 临时禁用代理 — brew 需要直连或使用自身镜像
+    local saved_http_proxy="${http_proxy:-}" saved_https_proxy="${https_proxy:-}"
+    unset http_proxy https_proxy HTTP_PROXY HTTPS_PROXY
+    local ret=0
     if brew list --cask "$name" &>/dev/null 2>&1; then
-        brew upgrade --cask "$name" 2>/dev/null || return 1
+        brew upgrade --cask "$name" 2>/dev/null || ret=1
     else
-        brew install --cask "$name" 2>/dev/null || return 1
+        brew install --cask "$name" 2>/dev/null || ret=1
     fi
-    return 0
+    # 恢复代理
+    [[ -n "$saved_http_proxy" ]] && export http_proxy="$saved_http_proxy"
+    [[ -n "$saved_https_proxy" ]] && export https_proxy="$saved_https_proxy"
+    return $ret
 }
 
 upgrade_pacman_package() {
