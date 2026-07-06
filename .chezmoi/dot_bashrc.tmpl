@@ -246,7 +246,34 @@ elif [[ "$OS" == "linux" ]]; then
     if [[ -n "${SSH_CONNECTION:-}${SSH_CLIENT:-}${SSH_TTY:-}" ]] || [[ -z "${TERM:-}" ]]; then
         export TERM=xterm-256color
     fi
-    pi() { TERM=xterm-256color command pi "$@"; }
+    _pi_terminal_cleanup() {
+        stty sane 2>/dev/null || true
+        printf '\033[?25h\033[?1049l\033[?2004l\033[<u\033[>4;0m' 2>/dev/null || true
+    }
+    pi() {
+        if [[ -n "${SSH_CONNECTION:-}${SSH_CLIENT:-}${SSH_TTY:-}" ]] || [[ -z "${TERM:-}" ]]; then
+            export TERM=xterm-256color
+        fi
+        if [[ -n "${SSH_CONNECTION:-}" && -z "${PI_SSH_HINT_DONE:-}" ]]; then
+            export PI_SSH_HINT_DONE=1
+            echo "pi/SSH: 退出 Ctrl+D 或 Ctrl+C · Esc 中断生成 · /exit 不是退出命令" >&2
+        fi
+        trap '_pi_terminal_cleanup' EXIT INT TERM HUP
+        _pi_terminal_cleanup
+        local rc=0 pi_bin
+        pi_bin="$(command -v pi)"
+        if [[ -n "${SSH_CONNECTION:-}" ]] && command -v script >/dev/null 2>&1 && [[ -n "$pi_bin" ]]; then
+            local cmd="TERM=xterm-256color $(printf '%q' "$pi_bin")"
+            (( $# )) && cmd+=" $(printf '%q ' "$@")"
+            script -q -c "$cmd" /dev/null || rc=$?
+        else
+            TERM=xterm-256color command pi "$@" || rc=$?
+        fi
+        _pi_terminal_cleanup
+        trap - EXIT INT TERM HUP
+        return "$rc"
+    }
+    pi-reset() { _pi_terminal_cleanup; command reset; }
     # 用户本地 bin（chezmoi、uv、lazygit 等）与 cargo，与 .zprofile 对齐，确保登录/自启动后可用
     export PATH="{{ .chezmoi.homeDir }}/.local/bin:{{ .chezmoi.homeDir }}/.cargo/bin:$PATH"
     # Debian/Ubuntu: bat 包提供 batcat，fd-find 包提供 fdfind，统一为 bat/fd 命令
