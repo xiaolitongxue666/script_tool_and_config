@@ -256,7 +256,7 @@ elif [[ "$OS" == "linux" ]]; then
         fi
         if [[ -n "${SSH_CONNECTION:-}" && -z "${PI_SSH_HINT_DONE:-}" ]]; then
             export PI_SSH_HINT_DONE=1
-            echo "pi/SSH: 退出 /quit 或 /exit 或 Ctrl+D · Esc 中断 · 勿把 /exit 当普通聊天" >&2
+            echo "pi/SSH: 退出 /quit /exit Ctrl+D · 中断 /stop 或 Ctrl+] Ctrl+X · Esc 可能无效" >&2
         fi
         trap '_pi_terminal_cleanup' EXIT INT TERM HUP
         _pi_terminal_cleanup
