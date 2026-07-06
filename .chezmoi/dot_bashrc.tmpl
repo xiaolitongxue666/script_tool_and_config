@@ -256,19 +256,12 @@ elif [[ "$OS" == "linux" ]]; then
         fi
         if [[ -n "${SSH_CONNECTION:-}" && -z "${PI_SSH_HINT_DONE:-}" ]]; then
             export PI_SSH_HINT_DONE=1
-            echo "pi/SSH: 退出 Ctrl+D 或 Ctrl+C · Esc 中断生成 · /exit 不是退出命令" >&2
+            echo "pi/SSH: 退出 /quit 或 /exit 或 Ctrl+D · Esc 中断 · 勿把 /exit 当普通聊天" >&2
         fi
         trap '_pi_terminal_cleanup' EXIT INT TERM HUP
         _pi_terminal_cleanup
-        local rc=0 pi_bin
-        pi_bin="$(command -v pi)"
-        if [[ -n "${SSH_CONNECTION:-}" ]] && command -v script >/dev/null 2>&1 && [[ -n "$pi_bin" ]]; then
-            local cmd="TERM=xterm-256color $(printf '%q' "$pi_bin")"
-            (( $# )) && cmd+=" $(printf '%q ' "$@")"
-            script -q -c "$cmd" /dev/null || rc=$?
-        else
-            TERM=xterm-256color command pi "$@" || rc=$?
-        fi
+        local rc=0
+        TERM=xterm-256color command pi "$@" || rc=$?
         _pi_terminal_cleanup
         trap - EXIT INT TERM HUP
         return "$rc"
