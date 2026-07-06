@@ -96,6 +96,26 @@ chezmoi_export_template_env() {
     fi
 }
 
+# 检测是否为 headless 原生 Linux（VPS：无 GUI、非 WSL）
+chezmoi_is_headless_native_linux() {
+    if [[ "$(uname -s)" != "Linux" ]]; then
+        return 1
+    fi
+    if chezmoi_is_wsl; then
+        return 1
+    fi
+    if [[ -n "${DISPLAY:-}" || -n "${WAYLAND_DISPLAY:-}" ]]; then
+        return 1
+    fi
+    if [[ -d /mnt/wslg ]]; then
+        return 1
+    fi
+    if [[ -n "${XDG_SESSION_TYPE:-}" && "${XDG_SESSION_TYPE}" != "tty" ]]; then
+        return 1
+    fi
+    return 0
+}
+
 # ============================================
 # 代理配置
 # ============================================
@@ -117,10 +137,53 @@ _chezmoi_log_proxy_detect() {
     echo "[INFO] $*" >&2
 }
 
+# headless Linux 代理端口探测（与 agent-config PROXY_PROBE_PORTS 对齐）
+chezmoi_proxy_port_is_listening() {
+    local host="$1"
+    local port="$2"
+    if command -v ss &>/dev/null; then
+        ss -tlnH 2>/dev/null | grep -qE "(^|:)${host}:${port}([[:space:]]|$)" && return 0
+        ss -tlnH 2>/dev/null | grep -qE ":${port}([[:space:]]|$)" && return 0
+        return 1
+    fi
+    if command -v netstat &>/dev/null; then
+        netstat -tln 2>/dev/null | grep -qE ":${port}[[:space:]]" && return 0
+    fi
+    return 1
+}
+
+chezmoi_proxy_verify_url() {
+    local url="$1"
+    [[ "${PROXY_DISCOVER_VERIFY:-1}" == "1" ]] || return 0
+    command -v curl &>/dev/null || return 0
+    local code
+    code="$(curl --noproxy '*' -x "$url" -s -o /dev/null -w '%{http_code}' --connect-timeout 2 https://api.github.com 2>/dev/null || echo "000")"
+    [[ "$code" != "000" && -n "$code" ]]
+}
+
+# stdout: 探测到的 proxy URL；失败时 stdout 为空
+chezmoi_discover_headless_proxy_url() {
+    [[ "${PROXY_AUTO_DISCOVER:-true}" != "false" ]] || return 1
+    local ports="${PROXY_PROBE_PORTS:-7890 17890 7897 10808 1080}"
+    local port url
+    for port in $ports; do
+        if ! chezmoi_proxy_port_is_listening "127.0.0.1" "$port"; then
+            continue
+        fi
+        url="http://127.0.0.1:${port}"
+        if chezmoi_proxy_verify_url "$url"; then
+            echo "$url"
+            return 0
+        fi
+    done
+    return 1
+}
+
 # 根据平台自动检测代理
 # stdout 仅输出 URL；日志写 stderr
 #  - 环境变量 PROXY / http_proxy（none/false 视为禁用，输出空）
 #  - WSL 下从 resolv.conf 获取宿主机 IP:7890
+#  - headless 原生 Linux：扫描 PROXY_PROBE_PORTS（VPS mihomo 常用 17890）
 #  - 否则 127.0.0.1:7890
 chezmoi_detect_proxy() {
     if chezmoi_proxy_disabled; then
@@ -147,6 +210,15 @@ chezmoi_detect_proxy() {
             return 0
         fi
         _chezmoi_log_proxy_detect "Proxy source: wsl_fallback (no nameserver in resolv.conf, using 127.0.0.1)"
+    elif chezmoi_is_headless_native_linux; then
+        local discovered
+        discovered="$(chezmoi_discover_headless_proxy_url 2>/dev/null || true)"
+        if [[ -n "$discovered" ]]; then
+            _chezmoi_log_proxy_detect "Proxy source: headless_linux_discover (OS=${os}, url=${discovered})"
+            echo "$discovered"
+            return 0
+        fi
+        _chezmoi_log_proxy_detect "Proxy source: headless_linux_fallback (no listening probe port, using 127.0.0.1:7890)"
     else
         _chezmoi_log_proxy_detect "Proxy source: default_local (OS=${os}, WSL=no)"
     fi
@@ -382,11 +454,16 @@ chezmoi_ensure_user_config() {
     export CHEZMOI_SOURCE_DIR="${source_dir_abs}"
 }
 
-# 导出 apply 所需的环境变量（macOS connect 路径等）
+# 导出 apply 所需的环境变量（macOS connect 路径、headless 代理等）
 chezmoi_export_apply_env() {
     chezmoi_export_template_env
     export CHEZMOI_PAGER=""
     export PAGER=cat
+
+    if chezmoi_is_headless_native_linux && ! chezmoi_proxy_disabled; then
+        chezmoi_setup_proxy "$(chezmoi_detect_proxy)" >/dev/null 2>&1 || true
+        echo "[INFO] Environment: headless-linux (VPS-like); proxy for apply: ${PROXY:-none}" >&2
+    fi
 
     # macOS connect 路径
     if [[ "$(uname -s)" == "Darwin" ]]; then
@@ -443,6 +520,54 @@ chezmoi_write_windows_git_override_data() {
     echo "$override_file"
 }
 
+# headless 原生 Linux：探测代理端口并写入 chezmoi --override-data-file（渲染 dot_gitconfig 等）
+# stdout: 临时 TOML 路径；不适用或失败时 stdout 为空
+chezmoi_write_headless_proxy_override_data() {
+    if ! chezmoi_is_headless_native_linux; then
+        return 0
+    fi
+    if chezmoi_proxy_disabled; then
+        return 0
+    fi
+
+    local proxy_url proxy_host proxy_port stripped
+    proxy_url="$(chezmoi_detect_proxy 2>/dev/null || true)"
+    if [[ -z "$proxy_url" ]]; then
+        return 0
+    fi
+
+    stripped="${proxy_url#*://}"
+    proxy_host="${stripped%%:*}"
+    proxy_port="${stripped#*:}"
+    proxy_port="${proxy_port%%/*}"
+    [[ -z "$proxy_port" || "$proxy_port" = "$proxy_host" ]] && proxy_port="7890"
+
+    local override_file
+    override_file="$(mktemp "${TMPDIR:-/tmp}/chezmoi-headless-proxy.XXXXXX.toml" 2>/dev/null || mktemp /tmp/chezmoi-headless-proxy.XXXXXX.toml)"
+    {
+        printf 'proxy = "%s"\n' "$proxy_url"
+        printf 'proxy_host = "%s"\n' "$proxy_host"
+        printf 'proxy_port = "%s"\n' "$proxy_port"
+    } > "$override_file"
+
+    echo "[INFO] Headless Linux proxy override: ${proxy_url} (for chezmoi template data)" >&2
+    echo "$override_file"
+}
+
+# 合并多个 override TOML 到单一临时文件（stdout: 路径）
+chezmoi_merge_override_data_files() {
+    local merged_file
+    merged_file="$(mktemp "${TMPDIR:-/tmp}/chezmoi-override-merged.XXXXXX.toml" 2>/dev/null || mktemp /tmp/chezmoi-override-merged.XXXXXX.toml)"
+    : > "$merged_file"
+    local f
+    for f in "$@"; do
+        [[ -n "$f" && -f "$f" ]] || continue
+        cat "$f" >> "$merged_file"
+        printf '\n' >> "$merged_file"
+    done
+    echo "$merged_file"
+}
+
 # Windows：将 ~/.config/windows-terminal/settings.json 同步到 WT LocalState
 # （override-data 改变渲染结果时 run_onchange 的 depends 不会触发，故 apply 后显式同步）
 chezmoi_sync_windows_terminal_config() {
@@ -496,10 +621,11 @@ chezmoi_sync_windows_terminal_config() {
 # chezmoi 核心操作
 # ============================================
 
-# 构建 chezmoi 公共 CLI 前缀（--config/--source、Windows --override-data-file）
-# 结果写入全局 CHEZMOI_BASE_ARGS；临时 override 路径在 CHEZMOI_WIN_GIT_OVERRIDE_FILE
+# 构建 chezmoi 公共 CLI 前缀（--config/--source、override-data-file）
+# 结果写入全局 CHEZMOI_BASE_ARGS；临时 override 路径在 CHEZMOI_OVERRIDE_FILES
 chezmoi_build_base_args() {
     CHEZMOI_BASE_ARGS=()
+    CHEZMOI_OVERRIDE_FILES=()
     CHEZMOI_WIN_GIT_OVERRIDE_FILE=""
 
     if [[ -n "${CHEZMOI_PROJECT_ROOT:-}" ]]; then
@@ -517,18 +643,49 @@ chezmoi_build_base_args() {
         fi
     fi
 
+    local -a override_parts=()
+    local win_override headless_override merged_override
+
     if [[ "$(uname -s)" =~ ^(MINGW|MSYS|CYGWIN) ]]; then
-        CHEZMOI_WIN_GIT_OVERRIDE_FILE="$(chezmoi_write_windows_git_override_data "")"
-        if [[ -n "$CHEZMOI_WIN_GIT_OVERRIDE_FILE" && -f "$CHEZMOI_WIN_GIT_OVERRIDE_FILE" ]]; then
-            CHEZMOI_BASE_ARGS=(--override-data-file "$CHEZMOI_WIN_GIT_OVERRIDE_FILE" "${CHEZMOI_BASE_ARGS[@]}")
+        win_override="$(chezmoi_write_windows_git_override_data "")"
+        if [[ -n "$win_override" && -f "$win_override" ]]; then
+            CHEZMOI_WIN_GIT_OVERRIDE_FILE="$win_override"
+            override_parts+=("$win_override")
         fi
+    fi
+
+    if chezmoi_is_headless_native_linux; then
+        headless_override="$(chezmoi_write_headless_proxy_override_data 2>/dev/null || true)"
+        if [[ -n "$headless_override" && -f "$headless_override" ]]; then
+            override_parts+=("$headless_override")
+        fi
+    fi
+
+    if [[ ${#override_parts[@]} -gt 0 ]]; then
+        merged_override="$(chezmoi_merge_override_data_files "${override_parts[@]}")"
+        CHEZMOI_OVERRIDE_FILES+=("$merged_override")
+        local _part
+        for _part in "${override_parts[@]}"; do
+            CHEZMOI_OVERRIDE_FILES+=("$_part")
+        done
+        unset _part
+        CHEZMOI_BASE_ARGS=(--override-data-file "$merged_override" "${CHEZMOI_BASE_ARGS[@]}")
     fi
 }
 
-# 删除 Windows Git 路径 override 临时文件
+# 删除 override 临时文件
 chezmoi_cleanup_win_git_override() {
+    chezmoi_cleanup_override_files
+}
+
+chezmoi_cleanup_override_files() {
+    local f
+    for f in "${CHEZMOI_OVERRIDE_FILES[@]:-}"; do
+        [[ -n "$f" ]] && rm -f "$f" 2>/dev/null || true
+    done
+    CHEZMOI_OVERRIDE_FILES=()
     if [[ -n "${CHEZMOI_WIN_GIT_OVERRIDE_FILE:-}" ]]; then
-        rm -f "$CHEZMOI_WIN_GIT_OVERRIDE_FILE"
+        rm -f "$CHEZMOI_WIN_GIT_OVERRIDE_FILE" 2>/dev/null || true
         CHEZMOI_WIN_GIT_OVERRIDE_FILE=""
     fi
 }
@@ -604,7 +761,7 @@ chezmoi_run_apply() {
         apply_rc=1
     fi
 
-    chezmoi_cleanup_win_git_override
+    chezmoi_cleanup_override_files
 
     if [[ "$apply_rc" -eq 0 ]] && [[ "$(uname -s)" =~ ^(MINGW|MSYS|CYGWIN) ]]; then
         chezmoi_sync_windows_terminal_config

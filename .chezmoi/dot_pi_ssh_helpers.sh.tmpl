@@ -1,0 +1,39 @@
+# Pi / SSH 终端辅助函数（Cursor Remote SSH → VPS）
+# 由 chezmoi 部署至 ~/.pi_ssh_helpers.sh；.zprofile 与 Linux .bashrc 共用
+
+_pi_ssh_session() {
+    [[ -n "${SSH_CONNECTION:-}${SSH_CLIENT:-}${SSH_TTY:-}" ]]
+}
+
+# SSH 会话 TERM 回退（仅 SSH；非 SSH 空 TERM 不强制改动）
+if _pi_ssh_session; then
+    export TERM=xterm-256color
+fi
+
+# TERM alone 不够：Pi 仍会 query Kitty keyboard protocol；Cursor 1.109+ 会应答，经 SSH 后 Esc/修饰键易失效
+_pi_terminal_cleanup() {
+    stty sane 2>/dev/null || true
+    printf '\033[?25h\033[?1049l\033[?2004l\033[<u\033[>4;0m' 2>/dev/null || true
+}
+
+pi() {
+    if _pi_ssh_session; then
+        export TERM=xterm-256color
+    fi
+    if [[ -n "${SSH_CONNECTION:-}" && -z "${PI_SSH_HINT_DONE:-}" ]]; then
+        export PI_SSH_HINT_DONE=1
+        echo "pi/SSH: quit /quit /exit Ctrl+D · interrupt /stop or Ctrl+] Ctrl+X · Esc may not work" >&2
+    fi
+    trap '_pi_terminal_cleanup' EXIT INT TERM HUP
+    _pi_terminal_cleanup
+    local rc=0
+    TERM=xterm-256color command pi "$@" || rc=$?
+    _pi_terminal_cleanup
+    trap - EXIT INT TERM HUP
+    return "$rc"
+}
+
+pi-reset() {
+    _pi_terminal_cleanup
+    command reset
+}

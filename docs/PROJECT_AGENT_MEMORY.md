@@ -32,7 +32,7 @@ agent-config 路径：`../../AI/agent-config`（相对本仓库）；详见 [DEP
 | 配置项 | 要求 | 管理方 |
 |--------|------|--------|
 | 中文回复 | 与用户交互、注释、文档说明使用中文；`log_*` 运行时输出英文 | agent-config `common-agent-policy.md` + 各 platform `agent.md` |
-| 7890 代理 | 外网默认启用：WSL → `http://<resolv nameserver>:7890`；其余 → `127.0.0.1:7890` | Phase 1：`chezmoi_core.sh`；Phase 2：`agent-config/scripts/lib/proxy.sh` |
+| 7890 代理 | 外网默认启用：WSL → `http://<resolv nameserver>:7890`；headless 原生 Linux（VPS）→ 探测 `PROXY_PROBE_PORTS`（含 **17890**）；桌面 Linux/macOS/Windows → `127.0.0.1:7890` | Phase 1：`chezmoi_core.sh`；Phase 2：`agent-config/scripts/lib/proxy.sh` |
 | **`/commit-push`** | **强制**；语义见下 | agent-config slash/commands + `git-smart-commit` |
 | **`/summary-memory`** | **强制**；语义见下 | agent-config slash/commands + `summary-project-memory.sh` |
 
@@ -80,7 +80,7 @@ canonical 源：agent-config `platforms/{cursor,claude-code,codewhale,pi}/` 与 
 | 禁止 | run_once 内 cargo / brew / winget / Scoop 安装 CodeWhale |
 | 禁止 | **从 WSL 调用 `cmd.exe` / Windows npm 卸载或修改 Windows 侧包**（含 legacy `deepseek`） |
 | 前置 | Layer 0 `fnm` + `node`；Layer 4 字母序在 claude-code 之后 |
-| 代理 | 统一 `chezmoi_setup_proxy`（`chezmoi_core.sh`）；默认全平台启用：WSL 宿主机 `:7890`（resolv nameserver），其余 `127.0.0.1:7890`；禁用 `PROXY=none/false` 或 `NO_PROXY=1`；导出 `GIT_HTTP_PROXY`/`GIT_HTTPS_PROXY`；检测日志 stderr、stdout 仅 URL |
+| 代理 | 统一 `chezmoi_setup_proxy`（`chezmoi_core.sh`）；WSL 宿主机 `:7890`；headless Linux 扫描 `7890 17890 …` 并注入 chezmoi override-data；桌面默认 `127.0.0.1:7890`；禁用 `PROXY=none/false` 或 `NO_PROXY=1` |
 | 失败 | `[WARNING]` + `exit 0`；无 fnm/node 时 `[ERROR]` + `exit 1` |
 | 部署入口 | 增量：`./deploy.sh` 或 `./scripts/manage_dotfiles.sh apply`（**勿**对 apply 使用 `\| rg \| head` 管道，会 SIGPIPE 中断） |
 
@@ -220,7 +220,7 @@ macOS 默认 `/bin/bash` 为 **3.2**，不支持 `declare -A` / `local -n`。部
 |----|------|
 | Phase 1 | `eval "$(fnm env)" && ./deploy.sh` → exit 0；`verify_installation` 通过 5/0/0 |
 | Phase 2 | agent-config `bash scripts/install-tools.sh` → exit 0；`validate-quality` 与 `run-all-tests` 通过 |
-| 代理 | 默认启用：`chezmoi_setup_proxy`；WSL → resolv nameserver:7890；其余 → 127.0.0.1:7890；禁用 `PROXY=none` / `NO_PROXY=1` |
+| 代理 | 默认启用：`chezmoi_setup_proxy`；WSL → resolv nameserver:7890；headless Linux → 17890 等端口探测；桌面 → 127.0.0.1:7890 |
 | Layer 4 | claude / codex / codewhale / cursor 均在 PATH |
 
 | 问题 | 原因 | 解决 |
@@ -236,7 +236,7 @@ macOS 默认 `/bin/bash` 为 **3.2**，不支持 `declare -A` / `local -n`。部
 |----|------|
 | 唯一入口 | `scripts/chezmoi/chezmoi_core.sh` → `chezmoi_detect_proxy` / `chezmoi_setup_proxy` |
 | 调用方 | `install.sh`、`deploy.sh`、`manage_dotfiles.sh`（`prepare_chezmoi_session_env`）、`install_chezmoi.sh` |
-| 默认行为 | 无 env 时全平台默认代理：WSL → `http://<resolv nameserver>:7890`；Windows/macOS/原生 Linux → `127.0.0.1:7890` |
+| 默认行为 | 无 env 时：WSL → `http://<resolv nameserver>:7890`；headless 原生 Linux → 探测 `PROXY_PROBE_PORTS`（VPS mihomo **17890**）；Windows/macOS/桌面 Linux → `127.0.0.1:7890` |
 | 禁用 | `PROXY=none/false` 或 `NO_PROXY=1` → unset 全部代理变量 |
 | 日志 | 检测来源写 stderr；`chezmoi_detect_proxy` stdout 仅 URL（避免 `$()` 污染） |
 | 测试 | `bash tests/test_proxy.sh`（8 项含 none/NO_PROXY/WSL mock）+ `test_syntax.sh` |

@@ -164,6 +164,51 @@ else
     FAILED=$((FAILED + 1))
 fi
 
+# 测试 9: headless Linux mock 探测 17890
+echo -n "[Test 9] headless Linux discovers 17890 when listening ... "
+_mock_bin="$(mktemp -d 2>/dev/null || mktemp -d -t chezmoi_proxy_test)"
+cat > "${_mock_bin}/ss" <<'MOCKSS'
+#!/usr/bin/env bash
+echo "127.0.0.1:17890"
+MOCKSS
+chmod +x "${_mock_bin}/ss"
+result=$(bash -c "
+source '${CORE_SCRIPT}'
+chezmoi_is_wsl() { return 1; }
+chezmoi_is_headless_native_linux() { return 0; }
+chezmoi_proxy_verify_url() { return 0; }
+unset PROXY http_proxy https_proxy HTTP_PROXY HTTPS_PROXY NO_PROXY
+PATH='${_mock_bin}:'\"\$PATH\"
+chezmoi_detect_proxy
+" 2>/dev/null)
+rm -rf "${_mock_bin}"
+
+if [[ "$result" == "http://127.0.0.1:17890" ]]; then
+    echo "PASS (got: $result)"
+    PASSED=$((PASSED + 1))
+else
+    echo "FAIL (expected: http://127.0.0.1:17890, got: $result)"
+    FAILED=$((FAILED + 1))
+fi
+
+# 测试 10: 桌面 Linux（非 headless）仍默认 7890
+echo -n "[Test 10] non-headless Linux keeps default 7890 ... "
+result=$(bash -c "
+source '${CORE_SCRIPT}'
+chezmoi_is_wsl() { return 1; }
+chezmoi_is_headless_native_linux() { return 1; }
+unset PROXY http_proxy https_proxy HTTP_PROXY HTTPS_PROXY NO_PROXY
+chezmoi_detect_proxy
+" 2>/dev/null)
+
+if [[ "$result" == "http://127.0.0.1:7890" ]]; then
+    echo "PASS (got: $result)"
+    PASSED=$((PASSED + 1))
+else
+    echo "FAIL (expected: http://127.0.0.1:7890, got: $result)"
+    FAILED=$((FAILED + 1))
+fi
+
 echo ""
 echo "=========================================="
 echo "Result: $PASSED passed, $FAILED failed"

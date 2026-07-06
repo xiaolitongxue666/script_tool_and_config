@@ -59,6 +59,8 @@ Host xiaolitongxue-vps
     HostName xiaolitongxue.com.cn
     User ubuntu
     Port 22
+    # 与 github.com 一致：个人密钥优先，通用 ed25519 回退
+    IdentityFile ~/.ssh/id_ed25519_github_personal
     IdentityFile ~/.ssh/id_ed25519
     IdentitiesOnly yes
     ServerAliveInterval 60
