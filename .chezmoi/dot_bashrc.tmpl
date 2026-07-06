@@ -242,6 +242,11 @@ CC_GIT_BASH_CANDS
 
 # Linux 特定配置
 elif [[ "$OS" == "linux" ]]; then
+    # SSH 会话 TERM 回退（与 .zprofile 一致；bash 登录未 exec zsh 时 Pi/TUI 仍可用）
+    if [[ -n "${SSH_CONNECTION:-}${SSH_CLIENT:-}${SSH_TTY:-}" ]] || [[ -z "${TERM:-}" ]]; then
+        export TERM=xterm-256color
+    fi
+    pi() { TERM=xterm-256color command pi "$@"; }
     # 用户本地 bin（chezmoi、uv、lazygit 等）与 cargo，与 .zprofile 对齐，确保登录/自启动后可用
     export PATH="{{ .chezmoi.homeDir }}/.local/bin:{{ .chezmoi.homeDir }}/.cargo/bin:$PATH"
     # Debian/Ubuntu: bat 包提供 batcat，fd-find 包提供 fdfind，统一为 bat/fd 命令

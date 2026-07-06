@@ -53,7 +53,8 @@ Host moicen-vnc
 
 # --- 小同学 VPS（Cursor Remote SSH / 日常运维）---
 # CLI: cursor --remote ssh-remote+xiaolitongxue-vps /home/ubuntu/rss -n
-# 勿用 cursor -n "vscode-remote://..."（会被当成本地路径）；详见 Cursor User settings.json 模板注释
+# 勿用 cursor -n "vscode-remote://..."（会被当成本地路径）；详见 Cursor User settings 模板注释
+# 注：SetEnv TERM 需远端 sshd AcceptEnv TERM；默认未开时由 ~/.zprofile 在 SSH 会话内设置 TERM=xterm-256color
 Host xiaolitongxue-vps
     HostName xiaolitongxue.com.cn
     User ubuntu

@@ -112,6 +112,21 @@ fi
 # export RUSTUP_HOME="{{ .chezmoi.homeDir }}/.rustup"
 
 # ============================================
+# SSH 终端 TERM（Pi / TUI / ncurses）
+# ============================================
+# Cursor/VS Code 集成终端 SSH 时，客户端 SetEnv TERM 需 sshd AcceptEnv TERM（默认仅 LANG/LC_*），
+# 常出现 TERM 为空或 xterm-kitty 而远端无对应 terminfo。Pi 依赖 Kitty keyboard protocol，
+# 在 SSH 上协商失败会导致按键无响应；统一回退 xterm-256color（VPS 普遍有 terminfo）。
+if [[ -n "${SSH_CONNECTION:-}${SSH_CLIENT:-}${SSH_TTY:-}" ]] || [[ -z "${TERM:-}" ]]; then
+    export TERM=xterm-256color
+fi
+
+# Pi CLI：启动时强制 TERM，避免 SSH 上 Kitty 协议挂起（agent-config Pi 终端文档 方案 B）
+pi() {
+    TERM=xterm-256color command pi "$@"
+}
+
+# ============================================
 # 字符编码设置（确保中文正确显示）
 # ============================================
 {{ if eq .chezmoi.os "windows" }}
