@@ -4,7 +4,7 @@
 2) **两阶段**：Phase 1 本仓库 `eval "$(fnm env)" && ./deploy.sh` → Phase 2 agent-config `bash scripts/install-tools.sh`；各 OS/WSL `$HOME` 独立各跑一遍。
 3) **Layer 4 CLI（存量）**：claude / codex / codewhale / cursor 由 `run_once_90–93`；**Pi 已迁入 agent-config Phase 2**（本仓勿保留 `run_once_94`/`dot_pi`/PI 文档副本文）。
 4) **CodeWhale**：仅 `npm install -g codewhale`（WSL 内 fnm/npm）；禁止 cargo / 从 WSL 改 Windows npm；状态 `~/.codewhale/`（`~/.deepseek/` 只读回退）。
-5) **Pi**：不在本仓库；见 [agent-config/docs/PI.md](../../AI/agent-config/docs/PI.md)。
+5) **Pi / SSH 终端**：Harness 在 agent-config；本仓 `.zprofile`/`.bashrc` 提供 **`pi()`**（SSH 设 `TERM=xterm-256color`、TUI 退出 ANSI/stty cleanup、**`pi-reset`**）及 SSH 提示；中断键与 `/stop` 见 agent-config `platforms/pi/harness/keybindings.json` + `extensions/ssh-terminal`。
 6) **代理（默认启用）**：唯一入口 `chezmoi_core.sh` → `chezmoi_setup_proxy`；WSL → `http://<resolv nameserver>:7890`，其余 `127.0.0.1:7890`；禁用 `PROXY=none/false` 或 `NO_PROXY=1`；**brew 操作在 `upgrade_brew_package/upgrade_brew_cask` 中临时 unset 代理**（`common_install.sh`），避免 brew 因全局代理不可用而挂起。
 7) **WSL CodeWhale/Pi**：已装判定看 WSL 内 `npm root -g` 对应包，勿把 `/mnt/c/.../npm` 当已安装。
 8) **Windows chezmoi override SSOT**：`chezmoi_core.sh` 的 `chezmoi_build_base_args` + `chezmoi_capture_status|diff` 注入 `windows_git_*`；`deploy.sh`（启动设 `CHEZMOI_PROJECT_ROOT`）、`manage_dotfiles.sh`、`diagnose_deployment.sh`、`install_helpers.sh` 须走 `chezmoi_run_apply`/capture；**禁止**裸 `chezmoi status/diff/apply`（缺 override 时 WT 模板报 `windows_git_bash_path`）。
@@ -24,4 +24,4 @@
 22) **`/commit-push` + `/summary-memory`**：全 Agent 必备；机械层 `summary-project-memory.sh`（gather/validate/apply）；**写入 `docs/PROJECT_MEMORY.md`**（脚本默认查根目录，apply 须写 docs/）。
 23) **Cursor 分工**：本仓库 `.cursor/rules/` = 项目 rules；`~/.cursor/commands/` = 全局 Cursor Commands（Phase 2 apply）。
 24) **SSH GitHub 密钥**：`.chezmoi/dot_ssh/config.tmpl` 的 `github.com` 须 `id_ed25519_github_personal` 优先 + `id_rsa` 回退，并设 `IdentitiesOnly yes`；`identity_file` 仅用于 `ci.moicen.com` 等非 GitHub Host。
-25) **部署排错**：`deploy.sh`/`manage_dotfiles.sh apply` 须经 `chezmoi_run_apply`；apply 后 `chezmoi status` 的 M/R 可为正常差异；winget msstore 证书警告非致命；**VPS（`VM-0-8-ubuntu`）仅 `id_ed25519_github_personal`**，`install.sh` 单密钥 `id_rsa` 会导致 `git pull` Permission denied。
+25) **部署排错**：`deploy.sh`/`manage_dotfiles.sh apply` 须经 `chezmoi_run_apply`；apply 后 `chezmoi status` 的 M/R 可为正常差异；winget msstore 证书警告非致命；**VPS（`VM-0-8-ubuntu`）仅 `id_ed25519_github_personal`**；SSH `SetEnv TERM` 需 sshd AcceptEnv，靠 `.zprofile` SSH 块设 TERM。
