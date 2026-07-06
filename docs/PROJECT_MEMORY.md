@@ -18,10 +18,10 @@
 16) **ensure 补装**：`run_chezmoi_install_script` 须 `chezmoi execute-template --file <绝对模板路径>` 再 pipe bash；禁止无 `--file` 把路径当模板字面量。
 17) **ensure 升级**：fnm/uv self-update；common-tools 逐项包管理器升级；Layer4 `npm install -g @latest`；代理走 `ensure_proxy_for_download`；brew 升级操作自动 unset 代理防挂起。
 18) **install 状态报告**：`install_helpers.sh` 统一 `find run_once_*.sh.tmpl`（含 Layer4 90–93）；common-tools 逐项检查；三态（缺失/OK/部分安装+跳过升级）。`get_software_report_status` 状态经 **stdout** 输出、函数 **return 0**（`set -e` 下 `$()` 捕获 return 1 中断 macOS step4）。
-19) **brew 排错（2026-07）**：`install.sh [4/6]` 中 `brew upgrade <pkg>` 在全局 `http_proxy` 下可能挂起（代理不可用时 curl 无响应）。修复：`upgrade_brew_package/upgrade_brew_cask`（`common_install.sh`）执行前 `unset http_proxy https_proxy HTTP_PROXY HTTPS_PROXY`，完成后恢复。验证：macOS 完整 `./install.sh` 通过。
-20) **tmux/rmux 排错（2026-06）**：tmux 已装时勿 early exit 跳过 TPM/Catppuccin；顶栏 `#W`/`#W*`；切 pane `Prefix+ijkl`。rmux：`Prefix+,` 须 `command-prompt` 带 `NEW_NAME`。
-21) **Agent 体系**：Layer 4 四 Agent CLI（存量）；Pi + 全局 MCP/Skills 在 agent-config Phase 2；详见 [PROJECT_AGENT_MEMORY.md](PROJECT_AGENT_MEMORY.md)。
-22) **全局配置**：中文回复 + 7890 代理（WSL 宿主机）；自定义 slash/commands canonical 在 agent-config。
-23) **`/commit-push` + `/summary-memory`**：全 Agent 必备；机械层 `summary-project-memory.sh`（gather/validate/apply）；**写入 `docs/PROJECT_MEMORY.md`**（脚本默认查根目录，apply 须写 docs/）。
-24) **Cursor 分工**：本仓库 `.cursor/rules/` = 项目 rules；`~/.cursor/commands/` = 全局 Cursor Commands（Phase 2 apply）。
-25) **部署排错**：`deploy.sh` 与 `manage_dotfiles.sh apply` 行为应对齐（均经 `chezmoi_run_apply`）；apply 后 `chezmoi status` 有 M/R 可为正常差异；winget msstore 证书警告非致命。
+19) **brew/tmux 排错**：brew `upgrade` 在全局代理下可能挂起 → `upgrade_brew_package/upgrade_brew_cask` 临时 unset 代理；tmux 已装时勿 early exit 跳过 TPM/Catppuccin；顶栏 `#W`/`#W*`；rmux `Prefix+,` 须 `command-prompt` 带 `NEW_NAME`。
+20) **Agent 体系**：Layer 4 四 Agent CLI（存量）；Pi + 全局 MCP/Skills 在 agent-config Phase 2；详见 [PROJECT_AGENT_MEMORY.md](PROJECT_AGENT_MEMORY.md)。
+21) **全局配置**：中文回复 + 7890 代理（WSL 宿主机）；自定义 slash/commands canonical 在 agent-config。
+22) **`/commit-push` + `/summary-memory`**：全 Agent 必备；机械层 `summary-project-memory.sh`（gather/validate/apply）；**写入 `docs/PROJECT_MEMORY.md`**（脚本默认查根目录，apply 须写 docs/）。
+23) **Cursor 分工**：本仓库 `.cursor/rules/` = 项目 rules；`~/.cursor/commands/` = 全局 Cursor Commands（Phase 2 apply）。
+24) **SSH GitHub 密钥**：`.chezmoi/dot_ssh/config.tmpl` 的 `github.com` 须 `id_ed25519_github_personal` 优先 + `id_rsa` 回退，并设 `IdentitiesOnly yes`；`identity_file` 仅用于 `ci.moicen.com` 等非 GitHub Host。
+25) **部署排错**：`deploy.sh`/`manage_dotfiles.sh apply` 须经 `chezmoi_run_apply`；apply 后 `chezmoi status` 的 M/R 可为正常差异；winget msstore 证书警告非致命；**VPS（`VM-0-8-ubuntu`）仅 `id_ed25519_github_personal`**，`install.sh` 单密钥 `id_rsa` 会导致 `git pull` Permission denied。
