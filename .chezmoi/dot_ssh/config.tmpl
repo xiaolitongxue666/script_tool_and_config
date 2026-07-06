@@ -14,7 +14,10 @@ Host github.com
     HostName ssh.github.com
     Port 443
     User git
-    IdentityFile {{ .identity_file | default "~/.ssh/id_rsa" }}
+    # 个人 GitHub 优先；VPS 等无 id_rsa 的机器回退到 ed25519_github_personal
+    IdentityFile ~/.ssh/id_ed25519_github_personal
+    IdentityFile ~/.ssh/id_rsa
+    IdentitiesOnly yes
 {{- if index . "ssh_use_proxy" }}
 {{- if eq .chezmoi.os "windows" }}
 {{- $win_detect := trim (output "cmd" "/c" "if exist \"D:\\Program Files\\Git\\mingw64\\bin\\connect.exe\" (echo D:/Program Files/Git/mingw64/bin/connect.exe) else (if exist \"C:\\Program Files\\Git\\mingw64\\bin\\connect.exe\" (echo C:/Program Files/Git/mingw64/bin/connect.exe) else (echo.))") }}
