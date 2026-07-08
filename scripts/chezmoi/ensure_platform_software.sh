@@ -164,7 +164,13 @@ _upgrade_software_by_name() {
             ;;
         ghostty)
             if [[ -d "/Applications/Ghostty.app" ]]; then
-                brew upgrade --cask ghostty 2>/dev/null || true
+                if type _brew_macos_prepare_env &>/dev/null; then
+                    _brew_macos_prepare_env
+                    brew upgrade --cask ghostty 2>/dev/null || true
+                    _brew_macos_restore_env
+                else
+                    HOMEBREW_NO_AUTO_UPDATE=1 brew upgrade --cask ghostty 2>/dev/null || true
+                fi
             fi
             ;;
         install-windows-terminal|windows-terminal)

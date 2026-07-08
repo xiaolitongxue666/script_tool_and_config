@@ -39,10 +39,63 @@ enable_proxy() {
     fi
 }
 
-# 禁用代理（用于 pacman/Homebrew 操作，使用国内源）
+# 禁用代理（用于 Linux 包管理器走国内源；macOS Homebrew 有代理时勿调用）
 disable_proxy() {
-    unset http_proxy https_proxy HTTP_PROXY HTTPS_PROXY
+    unset http_proxy https_proxy HTTP_PROXY HTTPS_PROXY all_proxy ALL_PROXY
     echo "[INFO] 代理已禁用（用于包管理器操作）"
+}
+
+# macOS：有代理时把 brew.git origin 从国内镜像切回 GitHub（tuna 高峰会排队卡死）
+_brew_macos_prefer_github_remote() {
+    [[ "$(uname -s)" == "Darwin" ]] || return 0
+    local proxy_url="${http_proxy:-${HTTP_PROXY:-${https_proxy:-${HTTPS_PROXY:-}}}}"
+    [[ -n "$proxy_url" && "${NO_PROXY:-0}" != "1" ]] || return 0
+    command -v brew &>/dev/null || return 0
+
+    local brew_repo
+    brew_repo="$(brew --repository 2>/dev/null || true)"
+    [[ -n "$brew_repo" && -d "$brew_repo/.git" ]] || return 0
+
+    local current
+    current="$(git -C "$brew_repo" remote get-url origin 2>/dev/null || true)"
+    case "$current" in
+        *mirrors.tuna.tsinghua.edu.cn*|*mirrors.ustc.edu.cn*|*mirrors.aliyun.com*)
+            local github_url="https://github.com/Homebrew/brew.git"
+            echo "[INFO] macOS brew: proxy on, switching origin mirror -> GitHub" >&2
+            git -C "$brew_repo" remote set-url origin "$github_url" 2>/dev/null \
+                && echo "[INFO] Homebrew origin -> ${github_url}" >&2 \
+                || echo "[WARNING] Failed to switch Homebrew origin to GitHub" >&2
+            ;;
+    esac
+    unset HOMEBREW_API_DOMAIN HOMEBREW_BOTTLE_DOMAIN HOMEBREW_BREW_GIT_REMOTE 2>/dev/null || true
+}
+
+# macOS Homebrew：保留已设置的代理（7890→GitHub 通常稳于卸代理直连清华）；始终禁隐式 auto-update
+_brew_macos_prepare_env() {
+    __BREW_MACOS_SAVED_NO_AUTO="${HOMEBREW_NO_AUTO_UPDATE:-}"
+    export HOMEBREW_NO_AUTO_UPDATE=1
+
+    if [[ "$(uname -s)" != "Darwin" ]]; then
+        return 0
+    fi
+
+    local proxy_url="${http_proxy:-${HTTP_PROXY:-${https_proxy:-${HTTPS_PROXY:-}}}}"
+    if [[ -n "$proxy_url" && "${NO_PROXY:-0}" != "1" ]]; then
+        # 补齐 all_proxy，供 git/curl 经代理访问 GitHub
+        export all_proxy="${all_proxy:-$proxy_url}"
+        export ALL_PROXY="${ALL_PROXY:-$proxy_url}"
+        echo "[INFO] macOS brew: keeping proxy ${proxy_url}" >&2
+        _brew_macos_prefer_github_remote
+    fi
+}
+
+_brew_macos_restore_env() {
+    if [[ -n "${__BREW_MACOS_SAVED_NO_AUTO:-}" ]]; then
+        export HOMEBREW_NO_AUTO_UPDATE="$__BREW_MACOS_SAVED_NO_AUTO"
+    else
+        unset HOMEBREW_NO_AUTO_UPDATE
+    fi
+    unset __BREW_MACOS_SAVED_NO_AUTO
 }
 
 # 检查代理是否可用
@@ -577,18 +630,16 @@ upgrade_brew_package() {
         return 1
     fi
     echo "[INFO] Upgrading via brew: $name" >&2
-    # 临时禁用代理 — brew 需要直连或使用自身镜像，走代理不可用时会挂起
-    local saved_http_proxy="${http_proxy:-}" saved_https_proxy="${https_proxy:-}"
-    unset http_proxy https_proxy HTTP_PROXY HTTPS_PROXY
+    # macOS：有代理则保留（实测 7890→GitHub 稳于卸代理直连清华 git 易卡）；
+    # 始终 HOMEBREW_NO_AUTO_UPDATE=1，避免 upgrade 隐式 brew update 卡住
+    _brew_macos_prepare_env
     local ret=0
-    if brew list "$name" &>/dev/null 2>&1; then
-        brew upgrade "$name" 2>/dev/null || ret=1
+    if brew list "$name" &>/dev/null; then
+        brew upgrade "$name" || ret=1
     else
-        brew install "$name" 2>/dev/null || ret=1
+        brew install "$name" || ret=1
     fi
-    # 恢复代理
-    [[ -n "$saved_http_proxy" ]] && export http_proxy="$saved_http_proxy"
-    [[ -n "$saved_https_proxy" ]] && export https_proxy="$saved_https_proxy"
+    _brew_macos_restore_env
     return $ret
 }
 
@@ -599,18 +650,14 @@ upgrade_brew_cask() {
         return 1
     fi
     echo "[INFO] Upgrading cask via brew: $name" >&2
-    # 临时禁用代理 — brew 需要直连或使用自身镜像
-    local saved_http_proxy="${http_proxy:-}" saved_https_proxy="${https_proxy:-}"
-    unset http_proxy https_proxy HTTP_PROXY HTTPS_PROXY
+    _brew_macos_prepare_env
     local ret=0
-    if brew list --cask "$name" &>/dev/null 2>&1; then
-        brew upgrade --cask "$name" 2>/dev/null || ret=1
+    if brew list --cask "$name" &>/dev/null; then
+        brew upgrade --cask "$name" || ret=1
     else
-        brew install --cask "$name" 2>/dev/null || ret=1
+        brew install --cask "$name" || ret=1
     fi
-    # 恢复代理
-    [[ -n "$saved_http_proxy" ]] && export http_proxy="$saved_http_proxy"
-    [[ -n "$saved_https_proxy" ]] && export https_proxy="$saved_https_proxy"
+    _brew_macos_restore_env
     return $ret
 }
 

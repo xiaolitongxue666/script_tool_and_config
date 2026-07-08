@@ -36,7 +36,7 @@ agent-config 路径：`../../AI/agent-config`（相对本仓库）；详见 [DEP
 | **`/commit-push`** | **强制**；语义见下 | agent-config slash/commands + `git-smart-commit` |
 | **`/summary-memory`** | **强制**；语义见下 | agent-config slash/commands + `summary-project-memory.sh` |
 
-Pacman/apt/brew 包管理仍直连国内源，不走代理。
+Pacman/apt 直连国内源。**macOS Homebrew 例外**：有 7890 代理时保留代理、切 GitHub origin，并 `HOMEBREW_NO_AUTO_UPDATE=1`（清华 tuna 高峰会 `Waiting in queue` 卡死）；见下方「macOS Homebrew 网络」。
 
 ### 自定义命令：全 Agent 覆盖矩阵
 
@@ -240,12 +240,29 @@ macOS 默认 `/bin/bash` 为 **3.2**，不支持 `declare -A` / `local -n`。部
 | 禁用 | `PROXY=none/false` 或 `NO_PROXY=1` → unset 全部代理变量 |
 | 日志 | 检测来源写 stderr；`chezmoi_detect_proxy` stdout 仅 URL（避免 `$()` 污染） |
 | 测试 | `bash tests/test_proxy.sh`（8 项含 none/NO_PROXY/WSL mock）+ `test_syntax.sh` |
-| 不变 | Pacman/apt/brew 直连国内源；chezmoi 模板内 proxy 仍用静态 `awk`/`grep`（无新增 exec） |
+| 不变 | Pacman/apt 直连国内源；chezmoi 模板内 proxy 仍用静态 `awk`/`grep`（无新增 exec） |
+| macOS brew | 有代理 → 保留代理 + origin→GitHub；`HOMEBREW_NO_AUTO_UPDATE=1`；无代理才可用 tuna |
 
 | 问题 | 原因 | 解决 |
 |------|------|------|
 | 非 WSL 平台默认直连 | `install.sh`/`deploy.sh` 内联逻辑仅在 WSL 设 PROXY | 删除重复块，统一 `chezmoi_setup_proxy` |
 | Git 克隆未走代理 | deploy 曾单独 export `GIT_*_PROXY` | 迁入 `chezmoi_setup_proxy` |
+
+## macOS Homebrew 网络（2026-07）
+
+| 项 | 约定 |
+|----|------|
+| 卡死主因 | `[4/6]` `brew upgrade` 在 tap 过期时隐式 `brew update`；清华 `origin` 高峰返回 `Waiting in queue`（实测 Position 300+） |
+| 代理策略 | macOS **有代理则保留**（勿 unset）；`common_install.sh` → `_brew_macos_prepare_env` |
+| remote | 有代理时 `_brew_macos_prefer_github_remote` 将 tuna/ustc/aliyun → `https://github.com/Homebrew/brew.git` |
+| auto-update | `HOMEBREW_NO_AUTO_UPDATE=1`（与 `UPDATE_HOMEBREW` 默认跳过一致） |
+| 配置入口 | `run_on_darwin/run_once_configure-homebrew.sh.tmpl` 在跳过 update 时仍可切 remote |
+| 文档 | [INSTALL_GUIDE.md](INSTALL_GUIDE.md)「macOS Homebrew 网络」 |
+
+| 问题 | 原因 | 解决 |
+|------|------|------|
+| `Upgrading via brew: connect` 表面挂死 | 隐式 update + tuna 排队 + 曾 `2>/dev/null` | `NO_AUTO_UPDATE` + 切 GitHub + 保留代理/可见日志 |
+| 卸代理「直连镜像」仍慢/卡 | tuna git 限流排队，非代理本身 | 有 7890 时走 GitHub；无代理再考虑镜像 |
 
 ## chezmoi 源文件命名（2026-05）
 

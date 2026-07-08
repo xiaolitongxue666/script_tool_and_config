@@ -251,9 +251,21 @@ export https_proxy=http://<正确IP>:7890
 # Pacman（Arch）国内源
 sudo sed -i 's/^#Server/Server/' /etc/pacman.d/mirrorlist
 
-# Homebrew 国内源（macOS）
-export HOMEBREW_BREW_GIT_REMOTE=https://mirrors.tuna.tsinghua.edu.cn/git/homebrew/brew.git
-
 # apt（Ubuntu/Debian）国内源
 sudo sed -i 's|http://archive.ubuntu.com|https://mirrors.tuna.tsinghua.edu.cn|g' /etc/apt/sources.list
+```
+
+### macOS Homebrew 网络（本机实测建议）
+
+- **有 7890 代理时优先走代理 + GitHub 官方 remote**（不要依赖清华 tuna git）。
+- 实测：清华 `brew.git` 高峰会返回 `Waiting in queue... (Position: 300+)`，`git fetch` 可卡数分钟；同一时段经代理拉 `github.com/Homebrew/brew` 约 2s 完成。
+- 安装脚本在 macOS 上：
+  1. `brew install/upgrade` **保留代理**，并设 `HOMEBREW_NO_AUTO_UPDATE=1`（避免 upgrade 隐式 update）；
+  2. 检测到代理时，自动把 Homebrew `origin` 从 tuna/ustc/aliyun **切回** `https://github.com/Homebrew/brew.git`。
+- 无代理时仍可用清华镜像作备选。
+- 需要显式更新：`UPDATE_HOMEBREW=true ./install.sh`（或 `brew update`）。
+
+```bash
+# 仅无代理时可选：清华 brew.git remote
+export HOMEBREW_BREW_GIT_REMOTE=https://mirrors.tuna.tsinghua.edu.cn/git/homebrew/brew.git
 ```

@@ -137,16 +137,58 @@ check_homebrew() {
 }
 
 # ============================================
+# 有 7890 等代理时：brew.git 切回 GitHub 官方
+# 清华 tuna 高峰会 Waiting in queue（实测 Position 300+，fetch 可卡数分钟）
+# ============================================
+prefer_github_brew_remote_with_proxy() {
+    if type _brew_macos_prefer_github_remote &>/dev/null; then
+        _brew_macos_prefer_github_remote
+        return $?
+    fi
+    local proxy_url="${http_proxy:-${HTTP_PROXY:-${https_proxy:-${HTTPS_PROXY:-}}}}"
+    if [[ -z "$proxy_url" || "${NO_PROXY:-0}" == "1" ]]; then
+        log_info "无代理：保留当前 Homebrew git remote（可用清华镜像）"
+        return 0
+    fi
+    command -v brew &>/dev/null || return 0
+    local brew_repo
+    brew_repo="$(brew --repository 2>/dev/null || true)"
+    [[ -n "$brew_repo" && -d "$brew_repo/.git" ]] || return 0
+    local current
+    current="$(git -C "$brew_repo" remote get-url origin 2>/dev/null || true)"
+    local github_url="https://github.com/Homebrew/brew.git"
+    if [[ "$current" == *"mirrors.tuna.tsinghua.edu.cn"* ]] || [[ "$current" == *"mirrors.ustc.edu.cn"* ]] || [[ "$current" == *"mirrors.aliyun.com"* ]]; then
+        log_info "Proxy available: switching Homebrew origin from mirror to GitHub"
+        git -C "$brew_repo" remote set-url origin "$github_url" \
+            && log_success "Homebrew origin -> ${github_url}" \
+            || log_warning "Failed to set Homebrew origin to GitHub"
+    else
+        log_info "Homebrew origin already non-mirror: ${current:-unknown}"
+    fi
+    unset HOMEBREW_API_DOMAIN HOMEBREW_BOTTLE_DOMAIN HOMEBREW_BREW_GIT_REMOTE 2>/dev/null || true
+}
+
+# ============================================
 # 更新 Homebrew（默认关闭，可显式开启）
+# macOS：有代理时切 GitHub remote + 保留代理；避免 tuna 排队卡死
 # ============================================
 update_homebrew() {
     local should_update_homebrew="${UPDATE_HOMEBREW:-false}"
+    # 不论是否 update：有代理则切走清华 remote，避免后续 brew 命令隐式 fetch 排队
+    prefer_github_brew_remote_with_proxy
+
     if [[ "${should_update_homebrew}" != "true" ]]; then
         log_info "默认跳过 Homebrew 更新（设置 UPDATE_HOMEBREW=true 可开启）"
         return 0
     fi
 
     log_info "更新 Homebrew..."
+    local proxy_url="${http_proxy:-${HTTP_PROXY:-}}"
+    if [[ -n "$proxy_url" && "${NO_PROXY:-0}" != "1" ]]; then
+        log_info "macOS brew update: using proxy ${proxy_url}"
+        export all_proxy="${all_proxy:-$proxy_url}"
+        export ALL_PROXY="${ALL_PROXY:-$proxy_url}"
+    fi
     if brew update; then
         log_success "Homebrew 更新成功"
     else
