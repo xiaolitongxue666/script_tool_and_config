@@ -8,20 +8,20 @@
 
 | 阶段 | 入口 | 职责 |
 |------|------|------|
-| Phase 1（本仓库） | `./deploy.sh` | fnm/uv、dotfiles、Layer 4 CLI（存量冗余） |
+| Phase 1（本仓库） | `./deploy.sh` | fnm/uv、dotfiles、Layer 4 CLI（存量双路径，**当前保留**） |
 | Phase 2（agent-config） | `bash scripts/install-tools.sh` | 全部 AI Agent CLI + MCP/Skills + Harness（含 **Pi**） |
 
-agent-config 路径：`../../AI/agent-config`（相对本仓库）；详见 [DEPLOY_TWO_PHASE.md](DEPLOY_TWO_PHASE.md)。
+agent-config 路径：`../../AI/agent-config`（相对本仓库）；详见 [DEPLOY_TWO_PHASE.md](DEPLOY_TWO_PHASE.md)。Layer 4 与 Phase 2 均可装 CLI（除 Pi 仅 Phase 2）；后续再收敛，本轮不删 `run_once_90`–`93`。
 
 ### Layer 4 主 Agent（5 个）
 
-| Agent | Phase 1 安装 | Phase 2 配置 | 项目知识文件 |
-|-------|-------------|--------------|--------------|
-| Claude Code | `run_once_90-install-claude-code` | MCP + Skills + hooks + slash | `CLAUDE.md` |
-| Codex | `run_once_91-install-codex` | `~/.codex/config.toml`；prompts 桥接 | `.codex/AGENTS.md` → `AGENTS.md` |
-| CodeWhale | `run_once_92-install-codewhale` | MCP + Skills + slash | `.cursor/rules/codewhale.mdc` |
-| Cursor | `run_once_93-install-cursor`（GUI） | MCP + Skills + **Cursor Commands** | 本仓库 `.cursor/rules/*.mdc` |
-| Pi | **agent-config Phase 2** | CLI + Harness `~/.pi/agent/` | [agent-config/docs/PI.md](../../AI/agent-config/docs/PI.md) |
+| Agent | Phase 1 安装 | Phase 2 | 项目知识文件 |
+|-------|-------------|---------|--------------|
+| Claude Code | `run_once_90-install-claude-code`（存量） | CLI + MCP + Skills + hooks + slash | `CLAUDE.md` |
+| Codex | `run_once_91-install-codex`（存量） | CLI + `~/.codex/config.toml`；prompts 桥接 | `.codex/AGENTS.md` → `AGENTS.md` |
+| CodeWhale | `run_once_92-install-codewhale`（存量） | CLI + MCP + Skills + slash | `.cursor/rules/codewhale.mdc` |
+| Cursor | `run_once_93-install-cursor`（GUI，存量） | MCP + Skills + **Cursor Commands** | 本仓库 `.cursor/rules/*.mdc` |
+| Pi | 无（已迁出） | CLI + Harness `~/.pi/agent/` | [agent-config/docs/PI.md](../../AI/agent-config/docs/PI.md) |
 
 辅助层：GitHub Copilot（`.github/copilot-instructions.md`）、claude-mem（Shell `claude()`）、OpenSpec（`openspec/AGENTS.md`）。
 
@@ -207,7 +207,7 @@ Git for Windows 可能装在 **C:** 或 **D:**（如 `D:\Program Files\Git`）�
 
 | 本仓库 (Phase 1) | agent-config (Phase 2) |
 |------------------|------------------------|
-| fnm/uv、dotfiles、Layer 4 CLI（存量冗余） | **全部** Agent CLI + MCP/Skills + Harness（含 Pi） |
+| fnm/uv、dotfiles、Layer 4 CLI（存量双路径，当前保留） | **全部** Agent CLI + MCP/Skills + Harness（含 Pi） |
 | **不**写 Agent 全局配置 | `apply-config` 写入各 Agent 配置 |
 | WT Git Bash 默认 profile（**仅 Windows**） | Cursor 集成终端 Git Bash：`platforms/cursor/settings/editor-settings.jsonc` + `@WINDOWS_GIT_BASH_PATH@`（与 `detect_windows_git_paths.sh` 同源） |
 | `run_once_90`–`93` 字母序（存量） | `bash scripts/install-tools.sh` 在对应 OS/WSL 各执行一次 |

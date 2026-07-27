@@ -77,7 +77,7 @@ API Key **不**通过本仓库 chezmoi 模板下发。
 
 ## 与 Claude Code / Cursor 的关系
 
-Layer 4 字母序：`90-install-claude-code` → `91-install-codex` → `92-install-codewhale` → `93-install-cursor`。仅安装 CLI；配置见 agent-config。
+Layer 4 字母序：`90-install-claude-code` → `91-install-codex` → `92-install-codewhale` → `93-install-cursor`。本仓库仅装 CLI（存量）；agent-config `install-tools.sh` 也会装 CLI 并负责 MCP/Skills 等配置（双路径，当前保留）。
 
 ## 迁移与排错
 

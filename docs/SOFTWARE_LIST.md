@@ -42,12 +42,12 @@ run_on_windows/*                      ← Layer 5（平台特有）
 
 > **Pi** 已迁入 [agent-config](../../AI/agent-config)（Phase 2）；本仓库不再包含 `run_once_94` 或 `dot_pi/`。
 
-**Layer 4 职责（存量）**：安装部分 Agent **二进制**；全局 MCP/Skills/Harness（含 Pi）由 **agent-config** 管理。
+**Layer 4 职责（存量双路径）**：本仓库 `run_once_90`–`93` 仍安装部分 Agent **二进制**/Cursor GUI；**agent-config** `install-tools.sh` 也会安装全部 Agent CLI（含 Pi）并负责 MCP/Skills/Harness。两侧 CLI 安装为已知冗余，**当前保留**（后续再收敛）；Pi 仅 Phase 2。
 
 ### 两阶段部署（本仓库 + agent-config）
 
-1. **本仓库**：`./deploy.sh` 或 `./scripts/manage_dotfiles.sh apply` — 基础环境与 Layer 4 Agent CLI。
-2. **agent-config**：`bash scripts/install-tools.sh` — 全局 MCP/Skills 与各 Agent 配置（不重复安装 CLI）。
+1. **本仓库**：`./deploy.sh` 或 `./scripts/manage_dotfiles.sh apply` — 非 AI 基建 + Layer 4 Agent CLI（存量）。
+2. **agent-config**：`bash scripts/install-tools.sh` — 全部 Agent CLI（含 Pi）+ 全局 MCP/Skills + 各 Agent 配置。
 
 各 OS / WSL 须在**对应环境**各跑一遍（Windows Git Bash 与 WSL 的 `$HOME` 独立）。
 

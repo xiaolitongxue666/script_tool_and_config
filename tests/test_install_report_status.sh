@@ -47,7 +47,7 @@ test_status_stdout_and_exit_zero() {
     pass "status stdout=$code exit=0 ($(basename "$script_path"))"
 }
 
-echo "=== install report status tests (macOS Intel, set -e) ==="
+echo "=== install report status tests (host platform, set -e) ==="
 echo "Host: $(uname -s) $(uname -m)"
 
 # mock：旧 bug — return 1 表示已安装会在 set -e + $() 中中断
@@ -92,16 +92,19 @@ done
 
 # 与 install.sh [5/6] 相同调用链（须先 detect_os_and_package_manager）
 detect_os_and_package_manager
-if [[ "${PLATFORM:-}" != "darwin" ]]; then
-    fail "expected darwin on macOS host (got ${PLATFORM:-unset})"
-else
-    pass "detect_os_and_package_manager -> darwin/brew"
-fi
+case "${PLATFORM:-}" in
+    darwin|linux|windows)
+        pass "detect_os_and_package_manager -> ${PLATFORM}/${PACKAGE_MANAGER:-unknown}"
+        ;;
+    *)
+        fail "unexpected PLATFORM (got ${PLATFORM:-unset})"
+        ;;
+esac
 
 if report_install_status_by_platform "$CHEZMOI_DIR" "$PLATFORM" "$PACKAGE_MANAGER" >/dev/null; then
-    pass "report_install_status_by_platform completes (macOS)"
+    pass "report_install_status_by_platform completes (${PLATFORM})"
 else
-    fail "report_install_status_by_platform failed (macOS)"
+    fail "report_install_status_by_platform failed (${PLATFORM})"
 fi
 
 echo "Summary: $PASSED passed, $FAILED failed"

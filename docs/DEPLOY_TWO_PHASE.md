@@ -7,7 +7,7 @@
 | **script_tool_and_config（本仓库）** | **非 AI** 软件：fnm/uv、git、shell、终端、tmux/rmux 等 dotfiles |
 | **[agent-config](../../AI/agent-config)** | **全部 AI Agent**：CLI、MCP、Skills、Harness（含 **Pi**） |
 
-> 存量冗余：本仓库 Layer 4 `run_once_90`–`93` 与 agent-config `install-tools.sh` 功能重复；**Pi 已完全迁入 agent-config**，本仓库不再包含任何 Pi 安装或 Harness 模板。
+> 存量双路径：本仓库 Layer 4 `run_once_90`–`93` 与 agent-config `install-tools.sh` 均可安装 Agent CLI（功能重复）；**当前保留两侧**，后续再收敛。**Pi 已完全迁入 agent-config**，本仓库不再包含任何 Pi 安装或 Harness 模板。
 
 ## Phase 1 — 本仓库（非 AI + fnm）
 

@@ -2,7 +2,7 @@
 
 1) **职责**：独立工具脚本（`scripts/common/standalone_tool_script/` 等）永不删除；部署仅经 chezmoi + `install.sh` / `deploy.sh` / `manage_dotfiles.sh apply`（**须 `--force`**）。
 2) **两阶段**：Phase 1 本仓库 `eval "$(fnm env)" && ./deploy.sh` → Phase 2 agent-config `bash scripts/install-tools.sh`；各 OS/WSL `$HOME` 独立各跑一遍。
-3) **Layer 4 CLI（存量）**：claude / codex / codewhale / cursor 由 `run_once_90–93`；**Pi 已迁入 agent-config Phase 2**（本仓勿保留 `run_once_94`/`dot_pi`/PI 文档副本文）。
+3) **Layer 4 CLI（存量双路径）**：claude / codex / codewhale / cursor 由 `run_once_90–93`；Phase 2 `install-tools.sh` 也会装全部 Agent CLI；**两侧当前保留**。**Pi 仅 agent-config Phase 2**（本仓勿保留 `run_once_94`/`dot_pi`/PI 文档副本文）。
 4) **CodeWhale**：仅 `npm install -g codewhale`（WSL 内 fnm/npm）；禁止 cargo / 从 WSL 改 Windows npm；状态 `~/.codewhale/`（`~/.deepseek/` 只读回退）。
 5) **Pi / SSH 终端**：Harness 在 agent-config；本仓 **`~/.pi_ssh_helpers.sh`**（`dot_pi_ssh_helpers.sh.tmpl`）为 SSOT，由 `.zprofile`/Linux `.bashrc` source；SSH 会话设 `TERM=xterm-256color`、TUI cleanup、**`pi-reset`**；诊断：`scripts/common/deploy_utils/diagnose_vps_ssh_pi.sh`。
 6) **代理（默认启用）**：唯一入口 `chezmoi_core.sh` → `chezmoi_setup_proxy`；**WSL → 宿主机** `http://<resolv nameserver>:7890`；headless 原生 Linux（VPS）扫描 `PROXY_PROBE_PORTS`（含 **17890**）并注入 override-data；桌面 Linux/macOS/Windows → `127.0.0.1:7890`；禁用 `PROXY=none/false` 或 `NO_PROXY=1`。Pacman/apt 直连国内源；**macOS brew 见 #19**。
@@ -20,7 +20,7 @@
 18) **[5/6] 报告**：`get_software_report_status` 经 **stdout**、函数 **return 0**。别名：`neovim`→`nvim`≥0.11、`windows-terminal`→`wt`、`nerd-fonts`→FiraMono；common-tools **跳过** `packages.conf` 中 `-` 的平台项（如 Win 上 trash/btop）。
 19) **Windows winget / common-tools**：install/upgrade/list 须 `--source winget`（避 msstore/`0x8a15005e`）；检查命令 `rg`/`delta`（winget id `BurntSushi.ripgrep.MSVC` / `dandavison.delta`）；失败则 GitHub zip → `~/.local/bin`（**仅 Windows**）；勿默认 BypassCertificatePinning。WSL/Linux/macOS 走各平台包管理器。
 20) **macOS Homebrew 网络**：有 7890 时保留代理并切 brew origin 至 GitHub；`HOMEBREW_NO_AUTO_UPDATE=1`；无代理才可用 tuna。详见 [INSTALL_GUIDE.md](INSTALL_GUIDE.md)。
-21) **Agent 体系**：Layer 4 四 CLI（存量）；Pi + MCP/Skills 在 agent-config Phase 2；权威长文 [PROJECT_AGENT_MEMORY.md](PROJECT_AGENT_MEMORY.md)。
+21) **Agent 体系**：Layer 4 四 CLI（存量双路径）+ Phase 2 全部 CLI；Pi + MCP/Skills 在 agent-config Phase 2；权威长文 [PROJECT_AGENT_MEMORY.md](PROJECT_AGENT_MEMORY.md)。
 22) **全局配置**：中文回复 + 代理（WSL 宿主机 7890 / VPS 17890）；slash/commands canonical 在 agent-config；本仓 `.cursor/rules/` = 项目 rules。
 23) **`/commit-push` + `/summary-memory`**：`git-smart-commit` / `summary-project-memory`；写入 `docs/PROJECT_MEMORY.md`；备份 `.project-memory-backups/`（保留 2 份）。
 24) **SSH GitHub 密钥**：`github.com` / `xiaolitongxue-vps` 按本机**已有文件**写 `IdentityFile`（personal 优先）；缺文件不写，避免 `no such identity`；`identity_file` 仅非 GitHub Host。

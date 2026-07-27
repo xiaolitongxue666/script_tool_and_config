@@ -202,7 +202,7 @@ if [ -n "$CROSS_PLATFORM_DIRS" ]; then
     echo "$CROSS_PLATFORM_DIRS" | while IFS= read -r dir; do
         DIR_NAME=$(basename "$dir")
         if [[ "$DIR_NAME" == "dot_config" ]]; then
-            log_info "  📁 配置目录: ~/.config/ (包含 Alacritty, Fish, Starship 等)"
+            log_info "  📁 配置目录: ~/.config/ (包含 Alacritty, Starship 等)"
             # 显示子目录
             find "$dir" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | while IFS= read -r subdir; do
                 SUBDIR_NAME=$(basename "$subdir")
@@ -219,7 +219,7 @@ log_info ""
 log_info "跨平台软件包括："
 log_info "  • 开发工具: Git, Neovim"
 log_info "  • 终端工具: Alacritty, Tmux, Starship"
-log_info "  • Shell: Bash, Zsh, Fish"
+log_info "  • Shell: Bash, Zsh"
 log_info "  • 版本管理器: fnm, uv, rustup"
 log_info "  • 字体: Nerd Fonts"
 log_info "  • 其他: 各种命令行工具（bat, eza, fd, rg, fzf 等）"
@@ -458,7 +458,7 @@ if [ -z "$MANAGED_FILES" ]; then
 else
     log_info "发现已管理的文件，直接应用配置..."
     log_info "chezmoi 将根据当前系统（$PLATFORM_NAME）自动应用对应的配置："
-    log_info "  ✓ 跨平台配置（Git, Neovim, Starship, Alacritty, Fish, Tmux 等）"
+    log_info "  ✓ 跨平台配置（Git, Neovim, Starship, Alacritty, Tmux 等）"
     log_info "  ✓ $PLATFORM_NAME 特定配置（仅当前系统）"
     log_info "  ✓ 模板文件会根据系统变量自动生成对应内容"
     log_info ""
