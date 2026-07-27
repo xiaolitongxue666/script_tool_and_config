@@ -57,7 +57,28 @@ chezmoi_fill_config_mappings() {
 }
 
 # 检测当前平台名（与 audit_configs 一致）
+# 平台名（stdout）；优先复用 detect_platform.sh SSOT
 chezmoi_detect_platform_name() {
+    if type detect_platform &>/dev/null; then
+        # detect_platform 日志在 stderr，只取 PLATFORM
+        detect_platform >/dev/null 2>&1 || true
+        if [[ -n "${PLATFORM:-}" ]]; then
+            echo "${PLATFORM}"
+            return 0
+        fi
+    else
+        local _detect
+        _detect="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/detect_platform.sh"
+        if [[ -f "$_detect" ]]; then
+            # shellcheck disable=SC1090
+            source "$_detect"
+            detect_platform >/dev/null 2>&1 || true
+            if [[ -n "${PLATFORM:-}" ]]; then
+                echo "${PLATFORM}"
+                return 0
+            fi
+        fi
+    fi
     local os
     os="$(uname -s)"
     if [[ "$os" == "Darwin" ]]; then

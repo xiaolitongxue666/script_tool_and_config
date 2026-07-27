@@ -106,28 +106,14 @@ else
 fi
 
 # ============================================
-# 检测操作系统
+# 检测操作系统（SSOT: scripts/chezmoi/detect_platform.sh）
 # ============================================
-if type detect_platform &> /dev/null; then
-    detect_platform || error_exit "Unsupported operating system"
-else
-    OS="$(uname -s)"
-    if [[ "$OS" == "Darwin" ]]; then
-        PLATFORM="darwin"
-        PLATFORM_NAME="macOS"
-    elif [[ "$OS" == "Linux" ]]; then
-        PLATFORM="linux"
-        PLATFORM_NAME="Linux"
-    elif [[ "$OS" =~ ^(MINGW|MSYS|CYGWIN) ]]; then
-        PLATFORM="windows"
-        PLATFORM_NAME="Windows"
-    else
-        PLATFORM="unknown"
-        PLATFORM_NAME="Unknown"
-    fi
+if ! type detect_platform &> /dev/null; then
+    error_exit "detect_platform unavailable; ensure scripts/chezmoi/common_install.sh or detect_platform.sh is sourced"
 fi
+detect_platform || error_exit "Unsupported operating system"
 
-log_info "检测到操作系统: $PLATFORM_NAME ($OS)"
+log_info "Detected OS: $PLATFORM_NAME ($OS)"
 
 # ============================================
 # 设置源状态目录和环境变量
@@ -384,144 +370,10 @@ else
 fi
 
 # ============================================
-# 安装和配置 Zsh + Oh My Zsh + 插件（在应用配置之前）
+# Zsh / Oh My Zsh / 插件由 run_once_install-zsh + ensure 负责
+# （首次 install.sh apply；补装用 ensure_platform_software）
+# deploy 末尾仅运行 check_zsh_omz 诊断，不在此内联安装
 # ============================================
-log_info ""
-log_info "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-log_info "安装和配置 Zsh + Oh My Zsh + 插件"
-log_info "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-
-# 检查是否需要安装 Zsh
-if ! command -v zsh &> /dev/null; then
-    log_info "Zsh 未安装，开始安装..."
-    case "$PLATFORM" in
-        linux)
-            if command -v pacman &> /dev/null; then
-                sudo pacman -S --noconfirm zsh || log_warning "Zsh 安装失败"
-            elif command -v apt-get &> /dev/null; then
-                sudo apt-get update && sudo apt-get install -y zsh || log_warning "Zsh 安装失败"
-            fi
-            ;;
-        darwin)
-            if command -v brew &> /dev/null; then
-                brew install zsh || log_warning "Zsh 安装失败"
-            fi
-            ;;
-    esac
-fi
-
-# 安装 Oh My Zsh
-OMZ_DIR="$HOME/.oh-my-zsh"
-if [ ! -d "$OMZ_DIR" ]; then
-    log_info "Oh My Zsh 未安装，开始安装..."
-    export RUNZSH=no
-    export KEEP_ZSHRC=yes
-    export CHSH=no
-
-    if [ -n "$PROXY" ]; then
-        log_info "使用代理安装 Oh My Zsh: $PROXY"
-        if curl --proxy "$PROXY" -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh | sh; then
-            log_success "Oh My Zsh 安装成功"
-        else
-            log_warning "Oh My Zsh 安装失败"
-        fi
-    else
-        if sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"; then
-            log_success "Oh My Zsh 安装成功"
-        else
-            log_warning "Oh My Zsh 安装失败"
-        fi
-    fi
-else
-    log_info "Oh My Zsh 已安装，检查更新..."
-    if [ -d "$OMZ_DIR/.git" ]; then
-        cd "$OMZ_DIR"
-        if git pull --quiet 2>/dev/null; then
-            log_success "Oh My Zsh 已更新到最新版本"
-        else
-            log_info "Oh My Zsh 已是最新版本或更新失败"
-        fi
-        cd - > /dev/null
-    fi
-fi
-
-# 检查并修复缺失的内置插件（copydir, copyfile 等）
-if [ -d "$OMZ_DIR" ]; then
-    OMZ_PLUGINS_DIR="$OMZ_DIR/plugins"
-    MISSING_BUILTIN_PLUGINS=()
-
-    # 检查模板中配置的内置插件
-    ZSHRC_TEMPLATE="$CHEZMOI_DIR/dot_zshrc.tmpl"
-    if [ -f "$ZSHRC_TEMPLATE" ]; then
-        BUILTIN_PLUGINS=$(grep -A 20 "^plugins=" "$ZSHRC_TEMPLATE" 2>/dev/null | grep -E "^\s+(copydir|copyfile|extract|web-search|colored-man-pages|dirhistory)" | sed 's/^[[:space:]]*//' | sed 's/#.*$//' | grep -v "^$" || echo "")
-
-        if [ -n "$BUILTIN_PLUGINS" ]; then
-            while IFS= read -r plugin_name; do
-                if [ -n "$plugin_name" ] && [[ ! "$plugin_name" =~ ^# ]]; then
-                    plugin_path="$OMZ_PLUGINS_DIR/$plugin_name"
-                    if [ ! -d "$plugin_path" ]; then
-                        MISSING_BUILTIN_PLUGINS+=("$plugin_name")
-                    fi
-                fi
-            done <<< "$BUILTIN_PLUGINS"
-        fi
-    fi
-
-    # 如果有缺失的插件，尝试更新 Oh My Zsh
-    if [ ${#MISSING_BUILTIN_PLUGINS[@]} -gt 0 ]; then
-        log_warning "发现缺失的内置插件: ${MISSING_BUILTIN_PLUGINS[*]}"
-        log_info "尝试更新 Oh My Zsh 以获取最新插件..."
-        if [ -d "$OMZ_DIR/.git" ]; then
-            cd "$OMZ_DIR"
-            if git pull --quiet 2>/dev/null; then
-                log_success "Oh My Zsh 已更新"
-            else
-                log_warning "Oh My Zsh 更新失败"
-            fi
-            cd - > /dev/null
-        fi
-    fi
-fi
-
-# 安装自定义插件
-ZSH_CUSTOM="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins"
-mkdir -p "$ZSH_CUSTOM"
-
-PLUGINS=(
-    "zsh-autosuggestions|https://github.com/zsh-users/zsh-autosuggestions"
-    "zsh-history-substring-search|https://github.com/zsh-users/zsh-history-substring-search"
-    "zsh-syntax-highlighting|https://github.com/zsh-users/zsh-syntax-highlighting"
-    "zsh-completions|https://github.com/zsh-users/zsh-completions"
-)
-
-INSTALLED_COUNT=0
-TOTAL_PLUGINS=${#PLUGINS[@]}
-
-for plugin_entry in "${PLUGINS[@]}"; do
-    plugin_name="${plugin_entry%%|*}"
-    plugin_url="${plugin_entry#*|}"
-    plugin_path="$ZSH_CUSTOM/$plugin_name"
-
-    if [ -d "$plugin_path" ]; then
-        INSTALLED_COUNT=$((INSTALLED_COUNT + 1))
-    else
-        log_info "安装插件: $plugin_name..."
-        if [ -n "$PROXY" ]; then
-            git config --global http.proxy "$PROXY" 2>/dev/null || true
-            git config --global https.proxy "$PROXY" 2>/dev/null || true
-        fi
-
-        if git clone "$plugin_url" "$plugin_path" 2>&1 | tee /tmp/git_clone_output.log; then
-            log_success "  ✓ $plugin_name 安装成功"
-            INSTALLED_COUNT=$((INSTALLED_COUNT + 1))
-        else
-            log_warning "  ✗ $plugin_name 安装失败"
-            rm -f /tmp/git_clone_output.log 2>/dev/null || true
-        fi
-    fi
-done
-
-log_info "已安装插件: $INSTALLED_COUNT/$TOTAL_PLUGINS"
 
 # ============================================
 # 确保 SSH ProxyCommand 依赖就绪（与 install.sh 保持一致）
@@ -784,14 +636,15 @@ if [ -f "$CHECK_ZSH_OMZ_SCRIPT" ] && [ -x "$CHECK_ZSH_OMZ_SCRIPT" ]; then
     fi
 
     if [ "$NEEDS_FIX" = true ]; then
-        log_warning "检查发现问题"
-        log_info "请运行 ./scripts/common/deploy_utils/manual_zsh_setup.sh 进行手动修复"
+        log_warning "Check found issues"
+        log_info "Prefer: re-run chezmoi apply (OMZ/plugins via .chezmoiexternal.toml.tmpl on linux/darwin)"
+        log_info "  ./scripts/manage_dotfiles.sh apply"
+        log_info "Repair fallback (manual): ./scripts/common/deploy_utils/manual_zsh_setup.sh"
 
-        # 修复后再次检查
-        log_info "修复后再次检查..."
+        log_info "Re-check after noting fix path..."
         "$CHECK_ZSH_OMZ_SCRIPT" 2>&1 | tail -20
     else
-        log_success "Zsh 和 Oh My Zsh 配置正常"
+        log_success "Zsh / Oh My Zsh check OK"
     fi
 else
     log_warning "Zsh/OMZ 检查脚本不可用，跳过检查"

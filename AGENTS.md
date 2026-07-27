@@ -107,7 +107,8 @@ nvim 独立化相关改动后，可按 [docs/NEOVIM_AND_THIS_REPO.md](docs/NEOVI
 ```
 install.sh
   ├── scripts/chezmoi/install_chezmoi.sh         安装 chezmoi
-  ├── scripts/chezmoi/common_install.sh           OS/平台检测
+  ├── scripts/chezmoi/detect_platform.sh          平台/包管理器 SSOT
+  ├── scripts/chezmoi/common_install.sh           安装函数聚合（packages/brew/proxy）
   ├── scripts/chezmoi/chezmoi_core.sh             核心封装（锁检测、apply、验证）
   ├── chezmoi apply -v --force                    核心部署
   │   ├── .chezmoi/run_once_install-*.sh.tmpl    跨平台软件（git/neovim/zsh/tmux/...）
@@ -126,7 +127,7 @@ install.sh
 
 ### 辅助部署
 
-- `./deploy.sh`：快速重新部署，要求 chezmoi 已安装，包含 Zsh/OMZ 安装和诊断
+- `./deploy.sh`：快速重新部署，要求 chezmoi 已安装；OMZ/插件由 `.chezmoiexternal.toml.tmpl` + apply 负责，末尾仅 `check_zsh_omz` 诊断
 - `scripts/manage_dotfiles.sh`：配置管理入口（status/diff/apply/edit）
 
 ### run_once 执行排序规则
@@ -366,9 +367,9 @@ ensure_directory() {
 
 ## 架构说明
 
-### 核心操作封装（本次重构新增）
+### 核心操作封装
 
-`scripts/chezmoi/chezmoi_core.sh` 统一封装了 chezmoi 的全部核心操作：
+`scripts/chezmoi/chezmoi_core.sh` 为聚合入口（`chezmoi_proxy.sh` / `chezmoi_lock.sh` / `chezmoi_apply.sh`），统一封装：
 
 | 函数 | 作用 | 使用方 |
 |------|------|--------|
@@ -414,7 +415,9 @@ ensure_directory() {
 │   ├── common.sh               # 公共函数库（颜色输出、日志）
 │   ├── manage_dotfiles.sh      # dotfiles 管理入口
 │   ├── chezmoi/                # chezmoi 相关工具
-│   │   ├── chezmoi_core.sh     # 【核心】chezmoi 操作统一封装（新增）
+│   │   ├── chezmoi_core.sh     # 核心聚合（proxy/lock/apply）
+│   │   ├── detect_platform.sh  # 平台检测 SSOT
+│   │   ├── packages.conf       # common-tools 包名 SSOT
 │   │   ├── common_install.sh   # 通用安装函数库（含 load_run_once_context）
 │   │   ├── install_chezmoi.sh  # chezmoi 安装
 │   │   ├── verify_installation.sh  # 安装验证
@@ -431,7 +434,7 @@ ensure_directory() {
 │   │   └── network/            # 网络配置
 │   ├── darwin/                 # macOS 特定脚本
 │   └── windows/                # Windows 特定脚本
-├── tests/                      # 测试目录（新增）
+├── tests/                      # 测试目录
 │   ├── test_syntax.sh          # 批量语法检查
 │   └── test_proxy.sh           # 代理逻辑测试
 ├── docs/                       # 文档目录
@@ -870,7 +873,7 @@ git push
 
 项目完整目录结构见 [docs/PROJECT_STRUCTURE.md](docs/PROJECT_STRUCTURE.md)。
 
-脚本目录概览：`scripts/` 下为 `common/`（deploy_utils、standalone_tool_script、project_tools、ffmpeg-magic、git_templates 等）、`linux/`、`darwin/`、`windows/`、`chezmoi/`、`migration/`。
+脚本目录概览：`scripts/` 下为 `common/`（deploy_utils、standalone_tool_script、project_tools、ffmpeg-magic、git_templates 等）、`linux/`、`darwin/`、`windows/`、`chezmoi/`。
 
 ## 脚本分类和命名规范
 

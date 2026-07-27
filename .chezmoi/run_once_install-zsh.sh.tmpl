@@ -2,84 +2,38 @@
 #!/bin/bash
 
 # ============================================
-# Zsh 和 Oh My Zsh 安装脚本（chezmoi run_once_）
-# 支持 Linux/macOS/Windows (MSYS2)
-#
-# Windows 策略：
-#   Git for Windows 已内置 Zsh（在 /usr/bin/zsh），无需额外安装。
-#   非 MSYS2（winget 等包管理器）环境跳过安装，不阻断流程。
-#   仅 MSYS2 pacman 环境才通过 pacman 安装。
-#   Oh My Zsh 仅在 Linux/macOS 上安装。
+# Zsh 安装脚本（chezmoi run_once_）
+# Oh My Zsh / 插件：.chezmoiexternal.toml.tmpl（仅 linux/darwin）
+# 本脚本：zsh 二进制 + 默认 shell
 # ============================================
 
-# 获取 common_install.sh 路径
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="${CHEZMOI_PROJECT_ROOT:-$(cd "${SCRIPT_DIR}/../.." && pwd 2>/dev/null || echo "$HOME")}"
 COMMON_INSTALL="${PROJECT_ROOT}/scripts/chezmoi/common_install.sh"
-
 if [ ! -f "$COMMON_INSTALL" ]; then
     COMMON_INSTALL="$HOME/.local/share/chezmoi/scripts/chezmoi/common_install.sh"
 fi
-
-# 加载通用函数库
 if [ -f "$COMMON_INSTALL" ]; then
+    # shellcheck disable=SC1090
     source "$COMMON_INSTALL"
 else
-    echo "[WARNING] 未找到 common_install.sh，使用基本函数"
-    function setup_proxy() { :; }
-    function detect_os_and_package_manager() {
-        OS="$(uname -s)"
-        if [[ "$OS" == "Darwin" ]]; then
-            PLATFORM="macos"
-            PACKAGE_MANAGER="brew"
-        elif [[ "$OS" == "Linux" ]]; then
-            PLATFORM="linux"
-            if command -v pacman &> /dev/null; then
-                PACKAGE_MANAGER="pacman"
-            elif command -v apt-get &> /dev/null; then
-                PACKAGE_MANAGER="apt"
-            fi
-        elif [[ "$OS" =~ ^(MINGW|MSYS|CYGWIN) ]]; then
-            PLATFORM="windows"
-            if command -v pacman.exe &> /dev/null; then
-                PACKAGE_MANAGER="pacman"
-            fi
-        fi
-    }
-    function install_package() {
-        local pkg="$1"
-        if [[ "$PACKAGE_MANAGER" == "brew" ]]; then
-            brew install "$pkg"
-        elif [[ "$PACKAGE_MANAGER" == "pacman" ]]; then
-            if [[ "$PLATFORM" == "windows" ]]; then
-                pacman.exe -S --noconfirm "$pkg"
-            else
-                sudo pacman -S --noconfirm "$pkg"
-            fi
-        elif [[ "$PACKAGE_MANAGER" == "apt" ]]; then
-            sudo apt-get update && sudo apt-get install -y "$pkg"
-        fi
-    }
+    echo "[ERROR] common_install.sh not found" >&2
+    exit 1
 fi
 
-# 设置代理
-setup_proxy "${PROXY:-{{ env "http_proxy" | default "http://127.0.0.1:7890" }}}"
+export PROXY="${PROXY:-{{ env "http_proxy" | default "http://127.0.0.1:7890" }}}"
+load_run_once_context "$SCRIPT_DIR" "install-zsh" || exit 1
 
-# 检测操作系统和包管理器
-detect_os_and_package_manager || exit 1
-
-# 检查 Zsh 是否已安装
 if command -v zsh &> /dev/null; then
-    echo "[INFO] Zsh 已安装: $(zsh --version)"
+    echo "[INFO] Zsh already installed: $(zsh --version)"
 else
-    echo "[INFO] 开始安装 Zsh..."
-
+    echo "[INFO] Installing Zsh..."
     case "$PLATFORM" in
-        macos)
+        darwin|macos)
             if [[ "$PACKAGE_MANAGER" == "brew" ]]; then
                 install_package "zsh"
             else
-                echo "[INFO] macOS 通常已预装 Zsh"
+                echo "[INFO] macOS usually ships with Zsh"
             fi
             ;;
         linux)
@@ -87,91 +41,24 @@ else
             ;;
         windows)
             if [[ "$PACKAGE_MANAGER" == "pacman" ]]; then
-                echo "[INFO] 通过 MSYS2 安装 Zsh..."
+                echo "[INFO] Installing Zsh via MSYS2..."
                 install_package "zsh"
             else
-                echo "[INFO] Windows 上 Zsh 通过 Git Bash 提供（已内置于 Git for Windows），无需额外安装"
+                echo "[INFO] On Windows, Zsh is provided by Git for Windows; skipping extra install"
             fi
             ;;
         *)
-            echo "[ERROR] 不支持的操作系统"
+            echo "[ERROR] Unsupported operating system"
             exit 1
             ;;
     esac
 fi
 
-# 安装 Oh My Zsh（仅 Linux/macOS，Windows 可选）
-if [[ "$PLATFORM" != "windows" ]]; then
-    if [ ! -d "$HOME/.oh-my-zsh" ]; then
-        echo "[INFO] 安装 Oh My Zsh..."
-        export RUNZSH=no
-        export KEEP_ZSHRC=yes
-        export CHSH=no
-
-        # 使用 download_with_progress 函数（如果可用），否则使用 curl
-        local install_script="/tmp/install_oh_my_zsh.sh"
-        if type download_with_progress &>/dev/null; then
-            if download_with_progress "https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh" "${install_script}" 60 3; then
-                chmod +x "${install_script}"
-                bash "${install_script}"
-                rm -f "${install_script}"
-            else
-                echo "[WARNING] 下载 Oh My Zsh 安装脚本失败，尝试直接安装..."
-                sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" || {
-                    echo "[WARNING] Oh My Zsh 安装失败，但继续..."
-                }
-            fi
-        else
-            # 回退到使用 curl 直接安装
-            sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" || {
-                echo "[WARNING] Oh My Zsh 安装失败，但继续..."
-            }
-        fi
-    else
-        echo "[INFO] Oh My Zsh 已安装"
-    fi
-
-    # 安装 Oh My Zsh 插件（Fish-like 体验）
-    if [ -d "$HOME/.oh-my-zsh" ]; then
-        echo "[INFO] 安装 Oh My Zsh 插件..."
-        ZSH_CUSTOM="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins"
-        mkdir -p "$ZSH_CUSTOM"
-
-        # 插件列表
-        declare -A PLUGINS=(
-            ["zsh-autosuggestions"]="https://github.com/zsh-users/zsh-autosuggestions"
-            ["zsh-history-substring-search"]="https://github.com/zsh-users/zsh-history-substring-search"
-            ["zsh-syntax-highlighting"]="https://github.com/zsh-users/zsh-syntax-highlighting"
-            ["zsh-completions"]="https://github.com/zsh-users/zsh-completions"
-        )
-
-        for plugin_name in "${!PLUGINS[@]}"; do
-            plugin_url="${PLUGINS[$plugin_name]}"
-            plugin_path="$ZSH_CUSTOM/$plugin_name"
-
-            if [ -d "$plugin_path" ]; then
-                echo "[INFO] 插件 $plugin_name 已安装，跳过"
-            else
-                echo "[INFO] 安装插件 $plugin_name..."
-                if git clone --depth=1 "$plugin_url" "$plugin_path" 2>/dev/null; then
-                    echo "[INFO] 插件 $plugin_name 安装成功"
-                else
-                    # WSL 下 ~/.gitconfig 的 http.https://github.com.proxy 常为 127.0.0.1:7890，无法访问宿主机代理，导致 clone 失败；临时清空该配置再试
-                    if git -c http.https://github.com.proxy= -c https.https://github.com.proxy= clone --depth=1 "$plugin_url" "$plugin_path" 2>/dev/null; then
-                        echo "[INFO] 插件 $plugin_name 安装成功（已绕过 GitHub proxy 重试）"
-                    else
-                        echo "[WARNING] 插件 $plugin_name 安装失败。若在 WSL 下，可能是 Git 的 GitHub proxy 指向 127.0.0.1 导致，可执行: git config --global --unset http.https://github.com.proxy; git config --global --unset https.https://github.com.proxy 后手动 clone，详见 INSTALL_GUIDE 故障排除"
-                    fi
-                fi
-            fi
-        done
-    fi
-else
-    echo "[INFO] Windows 上跳过 Oh My Zsh 安装（可选）"
+if [[ "$PLATFORM" == "windows" ]]; then
+    echo "[INFO] Oh My Zsh via .chezmoiexternal.toml.tmpl on linux/darwin only; skipped on Windows"
 fi
 
-# 设置默认 shell 为 zsh（仅 Linux/macOS），使重新登录后使用 zsh
-if [[ "$PLATFORM" == "linux" || "$PLATFORM" == "macos" ]]; then
+if [[ "$PLATFORM" == "linux" || "$PLATFORM" == "darwin" || "$PLATFORM" == "macos" ]]; then
     if command -v zsh &>/dev/null; then
         ZSH_PATH="$(command -v zsh)"
         CURRENT_SHELL=""
@@ -182,14 +69,13 @@ if [[ "$PLATFORM" == "linux" || "$PLATFORM" == "macos" ]]; then
         fi
         if [[ -n "$ZSH_PATH" && "$CURRENT_SHELL" != "$ZSH_PATH" ]]; then
             if chsh -s "$ZSH_PATH" 2>/dev/null; then
-                echo "[SUCCESS] 默认 shell 已设为 zsh，请重新登录生效"
+                echo "[SUCCESS] Default shell set to zsh; re-login to take effect"
             else
-                echo "[INFO] 未能自动设置默认 shell。请手动执行以下命令后重新登录以使 zsh 为默认: chsh -s $ZSH_PATH"
+                echo "[INFO] Could not set default shell automatically. Run: chsh -s $ZSH_PATH"
             fi
         fi
     fi
 fi
 
-echo "[SUCCESS] Zsh 和 Oh My Zsh 安装完成"
+echo "[SUCCESS] Zsh install step complete (OMZ/plugins via chezmoi externals on linux/darwin)"
 {{- end -}}
-

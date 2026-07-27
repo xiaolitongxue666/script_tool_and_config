@@ -2,8 +2,29 @@
 
 # ============================================
 # 软件升级策略与 run_once 脚本发现
-# 与 docs/SOFTWARE_LIST.md 对齐；供 ensure_platform_software.sh 使用
+# common-tools 包名 SSOT：packages.conf；策略表与 docs/SOFTWARE_LIST.md 对齐
+# 供 ensure_platform_software.sh 使用
 # ============================================
+
+_SOFTWARE_POLICIES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+_PACKAGES_CONF="${PACKAGES_CONF:-${_SOFTWARE_POLICIES_DIR}/packages.conf}"
+
+# 加载 packages.conf（幂等）
+_load_packages_conf() {
+    if [[ "${_PACKAGES_CONF_LOADED:-0}" == "1" ]]; then
+        return 0
+    fi
+    if [[ ! -f "${_PACKAGES_CONF}" ]]; then
+        echo "[WARNING] packages.conf not found: ${_PACKAGES_CONF}" >&2
+        COMMON_TOOLS_COMMANDS="${COMMON_TOOLS_COMMANDS:-bat eza fd ripgrep fzf lazygit git-delta gh trash btop fastfetch}"
+        COMMON_TOOLS_PKG_LINES="${COMMON_TOOLS_PKG_LINES:-}"
+        _PACKAGES_CONF_LOADED=1
+        return 0
+    fi
+    # shellcheck disable=SC1090
+    source "${_PACKAGES_CONF}"
+    _PACKAGES_CONF_LOADED=1
+}
 
 # 返回软件升级策略：latest | minimum:VER | pinned:VER | skip
 # 参数: software_name（extract_software_name_from_script 输出）
@@ -67,87 +88,65 @@ list_applicable_run_once_scripts() {
     done <<< "$(echo "$all_scripts" | sort -u)"
 }
 
-# common-tools 命令列表（与 run_once_install-common-tools 一致）
+# common-tools 命令列表（SSOT: packages.conf）
 get_common_tool_commands() {
-    echo "bat eza fd ripgrep fzf lazygit git-delta gh trash btop fastfetch"
+    _load_packages_conf
+    echo "${COMMON_TOOLS_COMMANDS}"
 }
 
-# 返回 common-tools 中命令对应的包名 / winget id
+# 从 COMMON_TOOLS_PKG_LINES 解析包名
+# 列: cmd|darwin|linux_pacman|linux_apt|linux_other|windows_winget|windows_pacman
 # 参数: command_name, platform, package_manager
+# stdout: 包名；跳过安装时输出空字符串
 get_common_tool_package() {
     local cmd="$1"
     local platform="$2"
     local pkg_mgr="$3"
     local plat="$platform"
+    local field=0
+    local line col_cmd pkg
+
     [[ "$plat" == "macos" ]] && plat="darwin"
+    _load_packages_conf
 
-    if [[ "$plat" == "darwin" || "$plat" == "macos" ]]; then
-        case "$cmd" in
-            bat) echo "bat" ;;
-            eza) echo "eza" ;;
-            fd) echo "fd" ;;
-            ripgrep) echo "ripgrep" ;;
-            fzf) echo "fzf" ;;
-            lazygit) echo "lazygit" ;;
-            git-delta) echo "git-delta" ;;
-            gh) echo "gh" ;;
-            trash) echo "trash-cli" ;;
-            btop) echo "btop" ;;
-            fastfetch) echo "fastfetch" ;;
-            *) echo "$cmd" ;;
-        esac
+    case "$plat" in
+        darwin) field=2 ;;
+        linux)
+            case "$pkg_mgr" in
+                pacman) field=3 ;;
+                apt) field=4 ;;
+                *) field=5 ;;
+            esac
+            ;;
+        windows)
+            case "$pkg_mgr" in
+                winget) field=6 ;;
+                pacman) field=7 ;;
+                *) field=0 ;;
+            esac
+            ;;
+        *) field=0 ;;
+    esac
+
+    if [[ "$field" -eq 0 ]]; then
+        echo ""
         return 0
     fi
 
-    if [[ "$plat" == "linux" ]]; then
-        if [[ "$pkg_mgr" == "pacman" ]]; then
-            case "$cmd" in
-                bat) echo "bat" ;;
-                eza) echo "eza" ;;
-                fd) echo "fd" ;;
-                ripgrep) echo "ripgrep" ;;
-                fzf) echo "fzf" ;;
-                lazygit) echo "lazygit" ;;
-                git-delta) echo "git-delta" ;;
-                gh) echo "github-cli" ;;
-                trash) echo "trash-cli" ;;
-                btop) echo "btop" ;;
-                fastfetch) echo "fastfetch" ;;
-                *) echo "$cmd" ;;
-            esac
-        elif [[ "$pkg_mgr" == "apt" ]]; then
-            case "$cmd" in
-                fd) echo "fd-find" ;;
-                trash) echo "trash-cli" ;;
-                *) echo "$cmd" ;;
-            esac
+    while IFS= read -r line; do
+        [[ -z "$line" ]] && continue
+        col_cmd="${line%%|*}"
+        [[ "$col_cmd" != "$cmd" ]] && continue
+        pkg="$(echo "$line" | cut -d'|' -f"$field")"
+        if [[ "$pkg" == "-" ]]; then
+            echo ""
         else
-            echo "$cmd"
+            echo "$pkg"
         fi
         return 0
-    fi
+    done <<< "${COMMON_TOOLS_PKG_LINES}"
 
-    if [[ "$plat" == "windows" ]]; then
-        if [[ "$pkg_mgr" == "winget" ]]; then
-            case "$cmd" in
-                bat) echo "sharkdp.bat" ;;
-                eza) echo "eza-community.eza" ;;
-                fd) echo "sharkdp.fd" ;;
-                ripgrep) echo "BurntSushi.ripgrep" ;;
-                fzf) echo "junegunn.fzf" ;;
-                lazygit) echo "jesseduffield.lazygit" ;;
-                git-delta) echo "dandavison.delta" ;;
-                gh) echo "GitHub.cli" ;;
-                *) echo "" ;;
-            esac
-        elif [[ "$pkg_mgr" == "pacman" ]]; then
-            case "$cmd" in
-                gh) echo "github-cli" ;;
-                trash) echo "trash-cli" ;;
-                *) echo "$cmd" ;;
-            esac
-        fi
-    fi
+    echo ""
 }
 
 # Layer 4 npm 包 spec

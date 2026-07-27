@@ -21,6 +21,7 @@ script_tool_and_config/
 ├── .chezmoi/                        # chezmoi 源状态目录（配置模板）
 │   ├── chezmoi.toml                 # 源内 config（`apply -c` 指定；chezmoi 规定名，内容模板化）
 │   ├── .chezmoidata.toml            # 静态默认数据（chezmoi 规定名）
+│   ├── .chezmoiexternal.toml.tmpl   # OMZ/zsh 插件（linux/darwin git-repo external）
 │   ├── dot_*.tmpl                   # 跨平台配置模板
 │   ├── dot_config/                  # ~/.config/ 配置模板
 │   ├── run_once_00-*.sh.tmpl        # 优先安装脚本（版本管理器等，字母序最先执行）
@@ -60,12 +61,20 @@ script_tool_and_config/
 │   ├── chezmoi/                      # chezmoi 安装与管理脚本
 │   │   ├── README.md                 # chezmoi 脚本说明
 │   │   ├── install_chezmoi.sh       # 安装 chezmoi 工具
-│   │   ├── common_install.sh        # 通用安装函数库（OS检测、包管理器、代理）
+│   │   ├── detect_platform.sh       # 平台/包管理器检测 SSOT
+│   │   ├── packages.conf            # common-tools 包名 SSOT
+│   │   ├── brew_macos_network.sh    # 代理 + macOS brew 网络策略
+│   │   ├── package_install.sh       # 包安装/升级函数
+│   │   ├── common_install.sh        # 通用安装聚合入口（source 上述模块）
 │   │   ├── install_helpers.sh       # 安装辅助函数（软件状态检查）
+│   │   ├── software_policies.sh     # 升级策略 + packages.conf 解析
 │   │   ├── audit_configs.sh         # 配置审计脚本
 │   │   ├── verify_installation.sh   # 安装后验证脚本
 │   │   ├── diagnose_chezmoi.sh      # chezmoi 诊断脚本
-│   │   ├── chezmoi_core.sh          # apply/锁/代理/ensure_user_config
+│   │   ├── chezmoi_proxy.sh         # 代理检测与设置
+│   │   ├── chezmoi_lock.sh          # 锁检测与释放
+│   │   ├── chezmoi_apply.sh         # apply/status/diff、override、WT 同步
+│   │   ├── chezmoi_core.sh          # 核心聚合入口（source proxy/lock/apply）
 │   │   ├── config_mappings.sh       # 配置路径映射（审计/force_apply 单一来源）
 │   │   ├── ensure_ssh_prereqs.sh    # SSH 前置依赖检查
 │   │   └── helpers.sh               # chezmoi 辅助函数
@@ -76,7 +85,7 @@ script_tool_and_config/
 │   │   │   ├── backup_git_config.sh       # 备份 ~/.gitconfig
 │   │   │   ├── setup_ssh_config.sh        # 部署 SSH 配置
 │   │   │   ├── check_zsh_omz.sh           # Zsh/OMZ 状态检查
-│   │   │   ├── manual_zsh_setup.sh        # 手动 Zsh/OMZ 安装
+│   │   │   ├── manual_zsh_setup.sh        # Zsh/OMZ 手工修复（次要；优先 chezmoi external）
 │   │   │   ├── measure_zsh_startup.sh     # Zsh 启动时间测量
 │   │   │   ├── nvim_checkhealth_to_log.sh # Neovim checkhealth 日志
 │   │   │   ├── diagnose_deployment.sh     # 部署诊断
@@ -191,7 +200,7 @@ script_tool_and_config/
 ### 根目录与文档
 
 - **install.sh**: 一键安装入口脚本。完整调用链见下方流程图
-- **deploy.sh**: 快速部署入口脚本（需 chezmoi 已安装，含 Zsh/OMZ 预安装）
+- **deploy.sh**: 快速部署入口（需 chezmoi 已安装）；OMZ 由 `.chezmoiexternal.toml.tmpl` + apply，末尾仅 check_zsh_omz 诊断
 - **README.md**: 项目主文档，包含快速开始、使用说明等
 - **AGENTS.md**: 代理与编码规范，包含代码风格、命名规范、最佳实践
 - **docs/**: 文档目录，含 PROJECT_STRUCTURE.md（本文件）、SOFTWARE_LIST.md、CODEWHALE.md、PROJECT_AGENT_MEMORY.md、INSTALL_GUIDE.md 等
@@ -224,7 +233,7 @@ install.sh
   │   └─ chezmoi apply -v --force → 触发所有 run_once_*.sh.tmpl 脚本
   │       ├─ run_once_00-install-version-managers.sh.tmpl (fnm, uv, rustup)
   │       ├─ run_once_install-common-tools.sh.tmpl (bat, eza, fd, rg, fzf 等)
-  │       ├─ run_once_install-zsh.sh.tmpl (zsh, oh-my-zsh, 插件)
+  │       ├─ run_once_install-zsh.sh.tmpl (zsh 二进制；OMZ/插件见 .chezmoiexternal)
   │       ├─ run_once_install-git.sh.tmpl
   │       ├─ run_once_install-neovim.sh.tmpl (>= 0.11.0，仅安装二进制)
   │       ├─ run_once_install-starship.sh.tmpl
@@ -263,7 +272,7 @@ install.sh
 | `run_once_00-install-version-managers.sh.tmpl` | fnm, uv, rustup | 多平台 |
 | `run_once_install-common-tools.sh.tmpl` | bat, eza, fd, rg, fzf, lazygit, git-delta, gh, trash-cli, btop, fastfetch | 多平台 |
 | `run_once_install-git.sh.tmpl` | git, connect-proxy | 多平台 |
-| `run_once_install-zsh.sh.tmpl` | zsh, oh-my-zsh, 插件 | Linux, macOS, Windows(MSYS2) |
+| `run_once_install-zsh.sh.tmpl` | zsh 二进制 + 默认 shell；OMZ/插件由 `.chezmoiexternal.toml.tmpl` | Linux, macOS, Windows(MSYS2) |
 | `run_once_install-starship.sh.tmpl` | starship 提示符 | 多平台 |
 | `run_once_install-nerd-fonts.sh.tmpl` | FiraMono Nerd Font | 多平台 |
 | `run_once_install-neovim.sh.tmpl` | neovim (>= 0.11.0，仅二进制) | 多平台 |

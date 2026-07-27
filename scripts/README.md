@@ -9,7 +9,7 @@
 - **linux/**：Linux 专用（system_basic_env、network）
 - **darwin/**：macOS 专用
 - **windows/**：Windows 专用（windows_scripts、system_basic_env）
-- **chezmoi/**、**migration/**
+- **chezmoi/**：chezmoi 安装、平台检测、packages.conf、apply/代理/锁封装（见该目录 README）
 
 完整目录树与脚本列表见 [PROJECT_STRUCTURE.md](../docs/PROJECT_STRUCTURE.md)。
 

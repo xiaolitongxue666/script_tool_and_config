@@ -207,8 +207,13 @@ chezmoistate.boltdb
 .chezmoi/**/tmp/
 .chezmoi/**/temp/
 
-# chezmoi Windows Git 路径 override 调试临时文件（若在仓库内生成）
+# chezmoi override-data 临时文件（若 TMPDIR/仓库内生成）
 chezmoi-win-git-paths.*.toml
+chezmoi-headless-proxy.*.toml
+chezmoi-override-merged.*.toml
+**/chezmoi-win-git-paths.*.toml
+**/chezmoi-headless-proxy.*.toml
+**/chezmoi-override-merged.*.toml
 .chezmoi/.chezmoi.toml.test
 .chezmoi/.chezmoi.toml
 

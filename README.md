@@ -56,7 +56,8 @@ SSH 配置由 `.chezmoi/dot_ssh/config.tmpl` 管理，预置包含 `github.com`�
 ```
 install.sh
   ├── scripts/chezmoi/install_chezmoi.sh          ← 安装 chezmoi
-  ├── scripts/chezmoi/common_install.sh            ← OS/平台检测
+  ├── scripts/chezmoi/detect_platform.sh           ← 平台/包管理器 SSOT
+  ├── scripts/chezmoi/common_install.sh            ← 安装函数聚合入口
   ├── chezmoi apply -v --force                     ← 核心部署
   │   ├── .chezmoi/run_once_install-*.sh.tmpl     ← 跨平台软件（git/neovim/zsh/tmux/...）
   │   ├── .chezmoi/run_on_linux/                   ← Linux 独有（pacman/AUR/i3wm/...）
@@ -121,7 +122,7 @@ install.sh
 | rustup | Rust 工具链 | 可选，多平台共有 |
 | starship | 跨 shell 提示符 | 多平台共有 |
 | tmux | 终端复用器 | 多平台共有（含 TPM 插件） |
-| zsh, oh-my-zsh | Z shell 与配置框架 | 多平台共有 |
+| zsh, oh-my-zsh | Z shell；OMZ/插件经 chezmoi external（linux/darwin；Windows 跳过 OMZ） | 多平台共有 |
 <!-- fish 已移除 -->
 | bat, eza, fd, ripgrep, fzf, trash-cli | 文件/搜索工具（cat/ls/find/grep 替代与模糊查找、回收站） | 多平台共有；Ubuntu 下 bat→batcat、fd→fdfind 已别名 |
 | git, neovim, lazygit, git-delta, gh | 版本控制、编辑器、Git TUI、diff 增强、GitHub CLI | 多平台共有 |

@@ -24,9 +24,9 @@
     # 注意：exec 函数在模板解析时执行外部命令，可能导致卡住
     # 改为在运行时通过脚本检测，这里只设置默认值
     package_manager = "{{ if eq .chezmoi.os \"linux\" }}pacman{{ else if eq .chezmoi.os \"darwin\" }}brew{{ else if eq .chezmoi.os \"windows\" }}winget{{ else }}unknown{{ end }}"
-    # Git 全局配置（请在 .chezmoi.toml.local 或 env 中设置真实值，避免敏感信息进仓库）
-    git_user_name = ""
-    git_user_email = ""
+    # Git 全局配置（与 .chezmoidata.toml 一致；本机可在 ~/.config/chezmoi/chezmoi.toml [data] 覆盖）
+    git_user_name = "xiaolitongxue666"
+    git_user_email = "leonpa1987@gmail.com"
     # Windows Git Bash / 图标 / connect.exe（C:/ 或 D:/；detect_windows_git_paths.sh）
     # 注意：源内 [data] 的 Go 模板不会自动求值；chezmoi_run_apply 在 Windows 下用
     # --override-data-file 注入检测结果。本地覆盖见 ~/.config/chezmoi/chezmoi.toml.local

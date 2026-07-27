@@ -33,7 +33,7 @@ if [ -f "$ENSURE_UNLOCKED" ]; then
     log_info ""
     bash "$ENSURE_UNLOCKED" || true
 else
-    log_warning "未找到 ensure_chezmoi_unlocked.sh，请从 scripts/common/utils 目录执行或检查路径"
+    log_warning "ensure_chezmoi_unlocked.sh not found (expected under scripts/common/deploy_utils/)"
 fi
 
 # ============================================

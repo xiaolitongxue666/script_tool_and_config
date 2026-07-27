@@ -1,12 +1,23 @@
-# Zsh + Oh My Zsh 手动安装和配置指南
+# Zsh + Oh My Zsh 手动安装和配置指南（修复备用）
 
 ## 概述
 
-本指南提供完整的手动操作流程，用于安装和配置 Zsh + Oh My Zsh，参考 `deploy.sh` 的流程。
+**非常规路径。** 日常部署请用：
+
+```bash
+./scripts/manage_dotfiles.sh apply
+# 或 ./deploy.sh / ./install.sh
+```
+
+- OMZ / 插件 SSOT：`.chezmoi/.chezmoiexternal.toml.tmpl`（仅 linux/darwin）
+- zsh 二进制：`run_once_install-zsh.sh.tmpl`
+- 诊断：`check_zsh_omz.sh`（deploy 末尾自动跑）
+
+本指南与 `manual_zsh_setup.sh` 仅在 apply/external 失败时作手工修复。
 
 ## 使用方法
 
-### 方法 1: 使用自动化脚本（推荐）
+### 方法 1: 使用修复脚本
 
 ```bash
 # 在项目根目录运行

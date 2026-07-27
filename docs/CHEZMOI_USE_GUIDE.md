@@ -644,21 +644,21 @@ ps aux | grep ssh
 
 Git 全局配置（`~/.gitconfig`）由 `dot_gitconfig.tmpl` 管理，包含：
 
-- **[user]**：`name`、`email`（需在 data 或 `.chezmoi.toml.local` 中设置 `git_user_name`、`git_user_email`，避免敏感信息进仓库）
+- **[user]**：`name`、`email`（默认见 `.chezmoi/.chezmoidata.toml`：`xiaolitongxue666` / `leonpa1987@gmail.com`；本机可在 `~/.config/chezmoi/chezmoi.toml` `[data]` 覆盖）
 - **[core]**：`autocrlf`（Windows 为 true，其余为 input）、`longpaths`（仅 Windows true）、`color.ui`
 - **GitHub 代理**：`[http "https://github.com"]` / `[https "https://github.com"]` 的 `proxy`，使用 data 中的 `proxy`
 
 **不纳入模板的项**（请在本机或单独配置中设置）：`safe.directory`、`credential.*`、`filter.lfs.*` 等机器/用户私有项。
 
-**设置姓名与邮箱**：在仓库根目录创建或编辑 `.chezmoi.toml.local`（该文件已被忽略，不会提交），添加：
+**覆盖姓名与邮箱**：编辑 `~/.config/chezmoi/chezmoi.toml`（或已 ignore 的 `**/chezmoi.toml.local`）：
 
 ```toml
 [data]
-    git_user_name = "你的姓名"
-    git_user_email = "your.email@example.com"
+    git_user_name = "xiaolitongxue666"
+    git_user_email = "leonpa1987@gmail.com"
 ```
 
-然后执行 `chezmoi apply -v` 即可更新 `~/.gitconfig`。
+然后执行 `./scripts/manage_dotfiles.sh apply`（须 `--force`，由封装注入）更新 `~/.gitconfig`。
 
 ## Cursor 用户设置与 Remote SSH
 

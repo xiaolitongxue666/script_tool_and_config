@@ -133,7 +133,7 @@ Layer 5: install-tmux + run_on_{linux,darwin}；Windows：`install-rmux`、`inst
 
 Layer 0: fnm/uv（版本管理器，必须最先）
 Layer 1: git + common-tools
-Layer 2: zsh + OMZ + starship + nerd-fonts
+Layer 2: zsh（二进制）+ OMZ/插件（`.chezmoiexternal.toml.tmpl`，linux/darwin）+ starship + nerd-fonts
 Layer 3: neovim（仅安装二进制，配置由其他项目管理）
 Layer 4: claude-code + codex + codewhale（AI agent CLI，仅二进制）
 Layer 4+: cursor（仅 GUI 环境，Linux/WSL 检测 DISPLAY）

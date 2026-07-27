@@ -24,7 +24,7 @@ Personal software configuration and scripts collection for cross-platform develo
   - CentOS/RHEL/Fedora: dnf/yum
 
 ### Development Tools
-- **Shells**: Bash, Zsh, Fish Shell
+- **Shells**: Bash, Zsh（Fish 已不再使用）
 - **Editors**: Neovim (Lua-based config), IDEA (IdeaVim)
 - **Terminal**: Alacritty, Tmux
 - **Version Managers**: fnm (Node.js), uv (Python), pyenv
@@ -231,7 +231,7 @@ chezmoi is the core configuration management tool:
 ## Important Constraints
 
 ### Platform-Specific Constraints
-1. **ArchLinux Scripts**: Some scripts (e.g., `install_common_tools.sh`, deprecated; cross-platform install via `./install.sh` and run_once, see SOFTWARE_LIST.md) only work on ArchLinux
+1. **ArchLinux Scripts**: Some `run_on_linux/` scripts are Arch-only; cross-platform tools via `./install.sh` + `packages.conf` / run_once（见 SOFTWARE_LIST.md）
 2. **Windows Path Handling**: Some scripts require path conversion (`cygpath -w`)
 3. **Permission Requirements**: Linux installation scripts require `sudo`
 4. **Network Requirements**: Initial installation requires network connectivity
@@ -269,7 +269,6 @@ chezmoi is the core configuration management tool:
 ### Configuration Tools
 - **chezmoi**: Dotfiles management (https://www.chezmoi.io/)
 - **Oh My Zsh**: Zsh framework (https://ohmyz.sh/)
-- **Oh My Fish**: Fish framework
 - **Oh My Posh**: Cross-shell prompt for Windows
 
 ### Development Tools

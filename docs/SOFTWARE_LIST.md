@@ -30,8 +30,8 @@ run_on_windows/*                      ← Layer 5（平台特有）
 |------|------|--------|------|
 | Layer 0 | `run_once_00-install-version-managers` | **fnm**（Node/npm）、**uv**（Python）；Windows 另 bootstrap `fnm install lts/*` + `uv python install`（默认 3.12，`UV_DEFAULT_PYTHON` 可覆盖）；rustup（可选） | all |
 | Layer 1 | `run_once_install-git` | git, connect-proxy（Linux apt 场景） | all |
-| Layer 1 | `run_once_install-common-tools` | bat, eza, fd, ripgrep, fzf, lazygit, git-delta, gh, trash-cli, btop, fastfetch | all |
-| Layer 2 | `run_once_install-zsh` | zsh, Oh My Zsh, zsh 插件（autosuggestions/history-substring-search/syntax-highlighting/completions） | all（Windows 可选） |
+| Layer 1 | `run_once_install-common-tools` | bat, eza, fd, rg, fzf, lazygit, delta, gh, trash-cli, btop, fastfetch（包名 SSOT：[`scripts/chezmoi/packages.conf`](../scripts/chezmoi/packages.conf)） | all |
+| Layer 2 | `run_once_install-zsh` + `.chezmoiexternal.toml.tmpl` | zsh 二进制；Oh My Zsh 与插件（autosuggestions/history-substring-search/syntax-highlighting/completions）由 chezmoi external（仅 linux/darwin） | all（Windows 跳过 OMZ） |
 | Layer 2 | `run_once_install-starship` | starship 提示符 | all |
 | Layer 2 | `run_once_install-nerd-fonts` | FiraMono Nerd Font | all |
 | Layer 3 | `run_once_install-neovim` | Neovim 二进制（>= 0.11.0） | all |
@@ -121,10 +121,10 @@ run_on_windows/*                      ← Layer 5（平台特有）
 | bat | bat | bat | bat | sharkdp.bat |
 | eza | eza | eza | eza | eza-community.eza |
 | fd | fd | fd | fd-find | sharkdp.fd |
-| ripgrep | ripgrep | ripgrep | ripgrep | BurntSushi.ripgrep |
+| rg（包名 ripgrep） | ripgrep | ripgrep | ripgrep | BurntSushi.ripgrep.MSVC |
 | fzf | fzf | fzf | fzf | junegunn.fzf |
 | lazygit | lazygit | lazygit | lazygit | jesseduffield.lazygit |
-| git-delta | git-delta | git-delta | git-delta | dandavison.delta |
+| delta（包名 git-delta） | git-delta | git-delta | git-delta | dandavison.delta |
 | gh | gh | github-cli | gh | GitHub.cli |
 | neovim | neovim (brew) | neovim (pacman) | PPA → tarball | Neovim.Neovim |
 | starship | starship | starship | starship (cargo) | starship.starship |

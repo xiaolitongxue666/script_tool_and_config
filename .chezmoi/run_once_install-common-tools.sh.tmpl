@@ -2,81 +2,36 @@
 #!/bin/bash
 
 # ============================================
-# 通用工具安装脚本（chezmoi run_once_）
-# 一键安装所需通用工具：bat, eza, fd, ripgrep, fzf, lazygit, git-delta, gh, btop, fastfetch 等
-# OS：linux（含 Arch/Ubuntu/Debian/Fedora 等）、darwin、windows
-# Linux 子类型：WSL（多为 apt）、原生（pacman/apt/dnf/yum）；Arch=linux+pacman，WSL=linux+apt
+# 通用工具安装（chezmoi run_once_）
+# 包名 SSOT：scripts/chezmoi/packages.conf（经 software_policies.sh）
 # ============================================
 
-# 获取 common_install.sh 路径
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="${CHEZMOI_PROJECT_ROOT:-$(cd "${SCRIPT_DIR}/../.." && pwd 2>/dev/null || echo "$HOME")}"
 COMMON_INSTALL="${PROJECT_ROOT}/scripts/chezmoi/common_install.sh"
-
 if [ ! -f "$COMMON_INSTALL" ]; then
     COMMON_INSTALL="$HOME/.local/share/chezmoi/scripts/chezmoi/common_install.sh"
 fi
-
-# 加载通用函数库
 if [ -f "$COMMON_INSTALL" ]; then
+    # shellcheck disable=SC1090
     source "$COMMON_INSTALL"
 else
-    echo "[WARNING] 未找到 common_install.sh，使用基本函数"
-    function setup_proxy() { :; }
-    function detect_os_and_package_manager() {
-        OS="$(uname -s)"
-        if [[ "$OS" == "Darwin" ]]; then
-            PLATFORM="macos"
-            PACKAGE_MANAGER="brew"
-        elif [[ "$OS" == "Linux" ]]; then
-            PLATFORM="linux"
-            if command -v pacman &> /dev/null; then
-                PACKAGE_MANAGER="pacman"
-            elif command -v apt-get &> /dev/null; then
-                PACKAGE_MANAGER="apt"
-            elif command -v dnf &> /dev/null; then
-                PACKAGE_MANAGER="dnf"
-            elif command -v yum &> /dev/null; then
-                PACKAGE_MANAGER="yum"
-            fi
-        elif [[ "$OS" =~ ^(MINGW|MSYS|CYGWIN) ]]; then
-            PLATFORM="windows"
-            if command -v winget &> /dev/null; then
-                PACKAGE_MANAGER="winget"
-            elif command -v pacman.exe &> /dev/null; then
-                PACKAGE_MANAGER="pacman"
-            fi
-        fi
-    }
-    function install_package() {
-        local pkg="$1"
-        if [[ "$PACKAGE_MANAGER" == "brew" ]]; then
-            brew install "$pkg"
-        elif [[ "$PACKAGE_MANAGER" == "pacman" ]]; then
-            if [[ "$PLATFORM" == "windows" ]]; then
-                pacman.exe -S --noconfirm "$pkg"
-            else
-                sudo pacman -S --noconfirm "$pkg"
-            fi
-        elif [[ "$PACKAGE_MANAGER" == "apt" ]]; then
-            sudo apt-get update && sudo apt-get install -y "$pkg"
-        elif [[ "$PACKAGE_MANAGER" == "dnf" ]]; then
-            sudo dnf install -y "$pkg"
-        elif [[ "$PACKAGE_MANAGER" == "yum" ]]; then
-            sudo yum install -y "$pkg"
-        elif [[ "$PACKAGE_MANAGER" == "winget" ]]; then
-            winget install --id="$pkg" -e --accept-source-agreements --accept-package-agreements
-        fi
-    }
+    echo "[ERROR] common_install.sh not found" >&2
+    exit 1
 fi
 
-# 设置代理
-setup_proxy "${PROXY:-{{ env "http_proxy" | default "http://127.0.0.1:7890" }}}"
+export PROXY="${PROXY:-{{ env "http_proxy" | default "http://127.0.0.1:7890" }}}"
+load_run_once_context "$SCRIPT_DIR" "install-common-tools" || exit 1
 
-# 检测操作系统和包管理器
-detect_os_and_package_manager || exit 1
+SOFTWARE_POLICIES="${PROJECT_ROOT}/scripts/chezmoi/software_policies.sh"
+if [ -f "$SOFTWARE_POLICIES" ]; then
+    # shellcheck disable=SC1090
+    source "$SOFTWARE_POLICIES"
+else
+    echo "[ERROR] software_policies.sh not found" >&2
+    exit 1
+fi
 
-# WSL 检测（仅 Linux 下；用于日志区分）
 IS_WSL=0
 if [[ "$PLATFORM" == "linux" ]]; then
     if grep -qEi "Microsoft|WSL" /proc/version 2>/dev/null || [[ -n "${WSL_DISTRO_NAME:-}" ]]; then
@@ -84,118 +39,37 @@ if [[ "$PLATFORM" == "linux" ]]; then
     fi
 fi
 
-# 环境日志：区分 OS 与 WSL
-if [[ "$PLATFORM" == "darwin" ]]; then
-    echo "[INFO] 环境: macOS (brew)"
+if [[ "$PLATFORM" == "darwin" || "$PLATFORM" == "macos" ]]; then
+    echo "[INFO] Environment: macOS (brew)"
 elif [[ "$PLATFORM" == "windows" ]]; then
-    echo "[INFO] 环境: Windows ($PACKAGE_MANAGER)"
+    echo "[INFO] Environment: Windows ($PACKAGE_MANAGER)"
 elif [[ "$PLATFORM" == "linux" ]]; then
     if [[ "$IS_WSL" -eq 1 ]]; then
-        echo "[INFO] 环境: Linux (WSL, $PACKAGE_MANAGER)"
+        echo "[INFO] Environment: Linux (WSL, $PACKAGE_MANAGER)"
     else
-        echo "[INFO] 环境: Linux (原生, $PACKAGE_MANAGER)"
+        echo "[INFO] Environment: Linux (native, $PACKAGE_MANAGER)"
     fi
 fi
 
-echo "[INFO] 开始安装通用工具..."
+echo "[INFO] Installing common tools (packages.conf SSOT)..."
 
-# 定义工具列表（包名映射）
-declare -A TOOLS
-
-case "$PLATFORM" in
-    macos)
-        TOOLS["bat"]="bat"
-        TOOLS["eza"]="eza"
-        TOOLS["fd"]="fd"
-        TOOLS["ripgrep"]="ripgrep"
-        TOOLS["fzf"]="fzf"
-        TOOLS["lazygit"]="lazygit"
-        TOOLS["git-delta"]="git-delta"
-        TOOLS["gh"]="gh"
-        TOOLS["trash"]="trash-cli"
-        TOOLS["btop"]="btop"
-        TOOLS["fastfetch"]="fastfetch"
-        ;;
-    linux)
-        if [[ "$PACKAGE_MANAGER" == "pacman" ]]; then
-            TOOLS["bat"]="bat"
-            TOOLS["eza"]="eza"
-            TOOLS["fd"]="fd"
-            TOOLS["ripgrep"]="ripgrep"
-            TOOLS["fzf"]="fzf"
-            TOOLS["lazygit"]="lazygit"
-            TOOLS["git-delta"]="git-delta"
-            TOOLS["gh"]="github-cli"
-            TOOLS["trash"]="trash-cli"
-            TOOLS["btop"]="btop"
-            TOOLS["fastfetch"]="fastfetch"
-        elif [[ "$PACKAGE_MANAGER" == "apt" ]]; then
-            TOOLS["bat"]="bat"
-            TOOLS["eza"]="eza"
-            TOOLS["fd"]="fd-find"
-            TOOLS["ripgrep"]="ripgrep"
-            TOOLS["fzf"]="fzf"
-            TOOLS["lazygit"]="lazygit"
-            TOOLS["git-delta"]="git-delta"
-            TOOLS["gh"]="gh"
-            TOOLS["trash"]="trash-cli"
-            TOOLS["btop"]="btop"
-            TOOLS["fastfetch"]="fastfetch"
-        else
-            TOOLS["bat"]="bat"
-            TOOLS["eza"]="eza"
-            TOOLS["fd"]="fd"
-            TOOLS["ripgrep"]="ripgrep"
-            TOOLS["fzf"]="fzf"
-            TOOLS["lazygit"]="lazygit"
-            TOOLS["git-delta"]="git-delta"
-            TOOLS["gh"]="gh"
-            TOOLS["trash"]="trash-cli"
-            TOOLS["btop"]="btop"
-            TOOLS["fastfetch"]="fastfetch"
-        fi
-        ;;
-    windows)
-        if [[ "$PACKAGE_MANAGER" == "winget" ]]; then
-            TOOLS["bat"]="sharkdp.bat"
-            TOOLS["eza"]="eza-community.eza"
-            TOOLS["fd"]="sharkdp.fd"
-            TOOLS["ripgrep"]="BurntSushi.ripgrep"
-            TOOLS["fzf"]="junegunn.fzf"
-            TOOLS["lazygit"]="jesseduffield.lazygit"
-            TOOLS["git-delta"]="dandavison.delta"
-            TOOLS["gh"]="GitHub.cli"
-        elif [[ "$PACKAGE_MANAGER" == "pacman" ]]; then
-            TOOLS["bat"]="bat"
-            TOOLS["eza"]="eza"
-            TOOLS["fd"]="fd"
-            TOOLS["ripgrep"]="ripgrep"
-            TOOLS["fzf"]="fzf"
-            TOOLS["lazygit"]="lazygit"
-            TOOLS["git-delta"]="git-delta"
-            TOOLS["gh"]="github-cli"
-        fi
-        ;;
-esac
-
-# Ubuntu/Debian 专用：fastfetch 在 24.10 之前官方源无此包，依次尝试 apt → PPA → snap → .deb
 install_fastfetch_apt() {
     if command -v fastfetch &> /dev/null; then
         return 0
     fi
-    echo "[INFO] 尝试安装 fastfetch（Ubuntu 24.10 以下官方源无此包，将依次尝试 apt/PPA/snap/.deb）..."
+    echo "[INFO] Trying fastfetch install (apt/PPA/snap/.deb fallbacks)..."
     if sudo apt-get install -y fastfetch 2>/dev/null; then
         return 0
     fi
     if command -v add-apt-repository &> /dev/null; then
-        echo "[INFO] 通过 PPA 安装 fastfetch..."
+        echo "[INFO] Installing fastfetch via PPA..."
         if sudo add-apt-repository -y ppa:zhangsongcui3371/fastfetch 2>/dev/null && \
            sudo apt-get update -qq && sudo apt-get install -y fastfetch 2>/dev/null; then
             return 0
         fi
     fi
     if command -v snap &> /dev/null; then
-        echo "[INFO] 通过 Snap 安装 fastfetch..."
+        echo "[INFO] Installing fastfetch via Snap..."
         if sudo snap install fastfetch 2>/dev/null; then
             return 0
         fi
@@ -204,7 +78,7 @@ install_fastfetch_apt() {
     deb_url="$(curl -sL https://api.github.com/repos/fastfetch-cli/fastfetch/releases/latest | grep "browser_download_url" | grep "linux-amd64.deb" | head -1 | sed 's/.*"browser_download_url": "\([^"]*\)".*/\1/')"
     if [[ -n "$deb_url" ]]; then
         deb_file="/tmp/fastfetch-linux-amd64.$$.deb"
-        echo "[INFO] 从 GitHub Releases 下载 .deb 安装 fastfetch..."
+        echo "[INFO] Downloading fastfetch .deb from GitHub Releases..."
         if (command -v wget &>/dev/null && wget -q -O "$deb_file" "$deb_url") || (command -v curl &>/dev/null && curl -sL -o "$deb_file" "$deb_url"); then
             if sudo apt-get install -y "$deb_file" 2>/dev/null || sudo dpkg -i "$deb_file" 2>/dev/null; then
                 rm -f "$deb_file"
@@ -216,37 +90,46 @@ install_fastfetch_apt() {
     return 1
 }
 
-# 安装工具
 INSTALLED=0
 FAILED=0
+SKIPPED=0
 
-for tool in "${!TOOLS[@]}"; do
-    pkg="${TOOLS[$tool]}"
+if ! type get_common_tool_commands &>/dev/null || ! type get_common_tool_package &>/dev/null; then
+    echo "[ERROR] get_common_tool_* helpers unavailable; aborting common-tools install"
+    exit 1
+fi
 
-    # 检查工具是否已安装
+for tool in $(get_common_tool_commands); do
+    pkg="$(get_common_tool_package "$tool" "${PLATFORM}" "${PACKAGE_MANAGER}")"
+
     if command -v "$tool" &> /dev/null; then
-        echo "[INFO] $tool 已安装: $(command -v "$tool")"
+        echo "[INFO] $tool already installed: $(command -v "$tool")"
         continue
     fi
 
-    echo "[INFO] 安装 $tool ($pkg)..."
+    if [[ -z "$pkg" ]]; then
+        echo "[INFO] Skipping $tool (no package for ${PLATFORM}/${PACKAGE_MANAGER})"
+        SKIPPED=$((SKIPPED + 1))
+        continue
+    fi
+
+    echo "[INFO] Installing $tool ($pkg)..."
     if [[ "$tool" == "fastfetch" ]] && [[ "$PLATFORM" == "linux" ]] && [[ "$PACKAGE_MANAGER" == "apt" ]]; then
         if install_fastfetch_apt; then
-            echo "[SUCCESS] $tool 安装成功"
+            echo "[SUCCESS] $tool installed"
             INSTALLED=$((INSTALLED + 1))
         else
-            echo "[WARNING] $tool 安装失败（可稍后手动: PPA / snap / 或从 https://github.com/fastfetch-cli/fastfetch/releases 下载 .deb）"
+            echo "[WARNING] $tool install failed (try PPA / snap / GitHub .deb later)"
             FAILED=$((FAILED + 1))
         fi
-    elif install_package "$pkg"; then
-        echo "[SUCCESS] $tool 安装成功"
+    elif install_common_tool_with_fallback "$tool" "$pkg"; then
+        echo "[SUCCESS] $tool installed"
         INSTALLED=$((INSTALLED + 1))
     else
-        echo "[WARNING] $tool 安装失败"
+        echo "[WARNING] $tool install failed"
         FAILED=$((FAILED + 1))
     fi
 done
 
-echo "[INFO] 安装完成: $INSTALLED 个工具安装成功, $FAILED 个工具安装失败"
+echo "[INFO] Done: $INSTALLED installed, $FAILED failed, $SKIPPED skipped"
 {{- end -}}
-

@@ -75,7 +75,7 @@ check_package_installed() {
             rpm -q "$package_name" &> /dev/null
             ;;
         winget)
-            winget list --id "$package_name" &> /dev/null 2>&1
+            winget list --id "$package_name" --source winget &> /dev/null 2>&1
             ;;
         *)
             return 1
@@ -393,9 +393,116 @@ check_script_software_installed() {
             fi
             return 1
             ;;
+        neovim|install-neovim)
+            # 仅检测二进制 nvim（>=0.11）；配置归属 ~/.config/nvim 独立仓库，缺失不算未安装
+            check_neovim_binary_installed
+            return $?
+            ;;
+        windows-terminal|install-windows-terminal)
+            check_windows_terminal_installed
+            return $?
+            ;;
+        nerd-fonts|install-nerd-fonts)
+            check_nerd_fonts_firamono_installed
+            return $?
+            ;;
         *)
             # 默认使用软件名作为命令名
             check_software_installed "$command_name"
+            ;;
+    esac
+}
+
+# Neovim：command -v nvim + 版本 >= 0.11；不要求 ~/.config/nvim
+check_neovim_binary_installed() {
+    if ! check_command_exists "nvim"; then
+        return 1
+    fi
+    if type is_nvim_version_ge_0_11 &>/dev/null; then
+        if ! is_nvim_version_ge_0_11; then
+            return 1
+        fi
+    else
+        local first_line major minor
+        first_line="$(nvim --version 2>/dev/null | head -n 1)" || return 1
+        major="$(echo "$first_line" | sed -n 's/.*[vV]\([0-9][0-9]*\)\.\([0-9][0-9]*\).*/\1/p')"
+        minor="$(echo "$first_line" | sed -n 's/.*[vV]\([0-9][0-9]*\)\.\([0-9][0-9]*\).*/\2/p')"
+        [[ -z "$major" || -z "$minor" ]] && return 1
+        if [[ "$major" -eq 0 && "$minor" -lt 11 ]]; then
+            return 1
+        fi
+    fi
+    if [[ ! -d "${HOME}/.config/nvim" ]]; then
+        echo "[INFO] nvim binary OK; config managed separately (~/.config/nvim)" >&2
+    fi
+    return 0
+}
+
+# Windows Terminal：wt 或 LocalState 旁的 WindowsApps\wt.exe
+check_windows_terminal_installed() {
+    if check_command_exists "wt"; then
+        return 0
+    fi
+    local wt_path=""
+    if [[ -n "${LOCALAPPDATA:-}" ]]; then
+        if command -v cygpath &>/dev/null; then
+            wt_path="$(cygpath -u "${LOCALAPPDATA}/Microsoft/WindowsApps/wt.exe" 2>/dev/null || true)"
+        else
+            wt_path="${LOCALAPPDATA}/Microsoft/WindowsApps/wt.exe"
+            wt_path="${wt_path//\\//}"
+        fi
+        if [[ -n "$wt_path" && -f "$wt_path" ]]; then
+            return 0
+        fi
+    fi
+    if [[ -f "/c/Users/${USER:-}/AppData/Local/Microsoft/WindowsApps/wt.exe" ]]; then
+        return 0
+    fi
+    return 1
+}
+
+# FiraMono Nerd Font（与 verify_installation.sh 路径探测对齐）
+check_nerd_fonts_firamono_installed() {
+    local os_name
+    os_name="$(uname -s 2>/dev/null || echo unknown)"
+    case "$os_name" in
+        Linux)
+            local font_dir="/usr/local/share/fonts/FiraMono-NerdFont"
+            if [[ -d "$font_dir" ]] && find "$font_dir" -name "*.ttf" -o -name "*.otf" 2>/dev/null | grep -q .; then
+                return 0
+            fi
+            if command -v fc-list &>/dev/null && fc-list 2>/dev/null | grep -qi FiraMono; then
+                return 0
+            fi
+            return 1
+            ;;
+        Darwin)
+            local dir
+            for dir in "/Library/Fonts" "${HOME}/Library/Fonts"; do
+                if [[ -d "$dir" ]] && find "$dir" -name "*FiraMono*" -type f \( -name "*.ttf" -o -name "*.otf" \) 2>/dev/null | grep -q .; then
+                    return 0
+                fi
+            done
+            return 1
+            ;;
+        MINGW*|MSYS*|CYGWIN*)
+            local fonts_dir="/c/Windows/Fonts"
+            if [[ -d "${fonts_dir}" ]] && find "${fonts_dir}" -name "*FiraMono*" -type f \( -name "*.ttf" -o -name "*.otf" \) 2>/dev/null | grep -q .; then
+                return 0
+            fi
+            # Win11 无管理员时常装到用户字体目录
+            local user_fonts=""
+            if [[ -n "${LOCALAPPDATA:-}" ]] && command -v cygpath &>/dev/null; then
+                user_fonts="$(cygpath -u "${LOCALAPPDATA}/Microsoft/Windows/Fonts" 2>/dev/null || true)"
+            fi
+            if [[ -n "$user_fonts" && -d "$user_fonts" ]] \
+                && find "$user_fonts" -name "*FiraMono*" -type f \( -name "*.ttf" -o -name "*.otf" \) 2>/dev/null | grep -q .; then
+                return 0
+            fi
+            return 1
+            ;;
+        *)
+            return 1
             ;;
     esac
 }
@@ -411,19 +518,25 @@ check_common_tools_installed_status() {
         return 1
     fi
     for cmd in $(get_common_tool_commands); do
-        if [[ "$cmd" == "trash" ]]; then
-            total=$((total + 1))
-            if command -v trash &>/dev/null || command -v trash-cli &>/dev/null; then
-                present=$((present + 1))
+        # 当前平台无包（packages.conf 为 "-"）则不计入（如 Windows 的 trash/btop）
+        if type get_common_tool_package &>/dev/null; then
+            local _pkg
+            _pkg="$(get_common_tool_package "$cmd" "${PLATFORM:-}" "${PACKAGE_MANAGER:-}")"
+            if [[ -z "$_pkg" ]]; then
+                continue
             fi
-            continue
-        fi
-        if [[ "$cmd" == "btop" || "$cmd" == "fastfetch" ]]; then
+        elif [[ "$cmd" == "btop" || "$cmd" == "fastfetch" || "$cmd" == "trash" ]]; then
             if [[ "${PLATFORM:-}" == "windows" ]]; then
                 continue
             fi
         fi
         total=$((total + 1))
+        if [[ "$cmd" == "trash" ]]; then
+            if command -v trash &>/dev/null || command -v trash-cli &>/dev/null; then
+                present=$((present + 1))
+            fi
+            continue
+        fi
         if command -v "$cmd" &>/dev/null; then
             present=$((present + 1))
         fi

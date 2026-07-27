@@ -62,6 +62,24 @@ assert_eq "bat pacman" "bat" "$pkg"
 pkg="$(get_common_tool_package fd linux apt)"
 assert_eq "fd apt" "fd-find" "$pkg"
 
+pkg="$(get_common_tool_package gh linux pacman)"
+assert_eq "gh pacman" "github-cli" "$pkg"
+
+pkg="$(get_common_tool_package bat windows winget)"
+assert_eq "bat winget" "sharkdp.bat" "$pkg"
+
+pkg="$(get_common_tool_package trash windows winget)"
+assert_eq "trash winget skip" "" "$pkg"
+
+cmds="$(get_common_tool_commands)"
+assert_eq "common tools include bat" "bat eza fd rg fzf lazygit delta gh trash btop fastfetch" "$cmds"
+
+pkg="$(get_common_tool_package rg windows winget)"
+assert_eq "rg winget id" "BurntSushi.ripgrep.MSVC" "$pkg"
+
+pkg="$(get_common_tool_package delta windows winget)"
+assert_eq "delta winget id" "dandavison.delta" "$pkg"
+
 # install.sh 使用 set -e；已安装项若用 return 1 会在 $() 中触发退出
 status_code="$(get_software_report_status "${CHEZMOI_DIR}/run_once_install-git.sh.tmpl" 0)"
 if [[ "$status_code" =~ ^[012]$ ]]; then
@@ -70,6 +88,37 @@ if [[ "$status_code" =~ ^[012]$ ]]; then
 else
     FAILED=$((FAILED + 1))
     echo "[FAIL] get_software_report_status returned invalid status: $status_code"
+fi
+
+# winget 须固定 --source winget（避开 msstore / 0x8a15005e）
+if grep -q 'winget install.*--source winget' "${PROJECT_ROOT}/scripts/chezmoi/package_install.sh" \
+    && grep -q 'winget upgrade.*--source winget' "${PROJECT_ROOT}/scripts/chezmoi/package_install.sh"; then
+    PASSED=$((PASSED + 1))
+    echo "[PASS] winget install/upgrade use --source winget"
+else
+    FAILED=$((FAILED + 1))
+    echo "[FAIL] winget install/upgrade missing --source winget"
+fi
+
+if grep -q 'install_github_release_zip_exe' "${PROJECT_ROOT}/scripts/chezmoi/package_install.sh" \
+    && grep -q 'install_rg_from_github' "${PROJECT_ROOT}/scripts/chezmoi/package_install.sh" \
+    && grep -q 'install_delta_from_github' "${PROJECT_ROOT}/scripts/chezmoi/package_install.sh"; then
+    PASSED=$((PASSED + 1))
+    echo "[PASS] GitHub release fallback helpers present"
+else
+    FAILED=$((FAILED + 1))
+    echo "[FAIL] GitHub release fallback helpers missing"
+fi
+
+# [5/6] 专项检测函数存在
+if type check_neovim_binary_installed &>/dev/null \
+    && type check_windows_terminal_installed &>/dev/null \
+    && type check_nerd_fonts_firamono_installed &>/dev/null; then
+    PASSED=$((PASSED + 1))
+    echo "[PASS] report detect helpers defined"
+else
+    FAILED=$((FAILED + 1))
+    echo "[FAIL] report detect helpers missing"
 fi
 
 echo "Summary: $PASSED passed, $FAILED failed"

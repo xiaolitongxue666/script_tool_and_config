@@ -134,6 +134,7 @@ Pi 的安装、Harness、文档 **不在本仓库**。唯一 SSOT：[agent-confi
 | 项 | 约定 |
 |----|------|
 | apply 参数 | **必须** `-v --force`；`chezmoi_run_apply` 与 `manage_dotfiles.sh apply` 已自动补 `--force` |
+| 全量安装 shell | Git Bash **`--noprofile --norc`**（避免 login 配置污染 stdout → override-data 空 / WT 模板失败） |
 | 禁止 | 对 apply 使用 `\| head` / `\| rg`（SIGPIPE）；在 Windows 依赖 `diagnose_deployment.sh` 的 `apply --dry-run` |
 | 锁 | 中断 apply 后可能残留 `chezmoi.exe` → `timeout obtaining persistent state lock` |
 | 修复 | `taskkill //F //IM chezmoi.exe` → `bash scripts/common/deploy_utils/fix_chezmoi_lock.sh` → 再 apply |
@@ -165,6 +166,24 @@ Git for Windows 可能装在 **C:** 或 **D:**（如 `D:\Program Files\Git`）�
 | apply 后 chezmoi 源正确、WT 仍 C: | `run_onchange_sync` 仅在源模板变更时触发 | 已修复：`chezmoi_run_apply` 成功后调用 `chezmoi_sync_windows_terminal_config` |
 | `.chezmoidata.toml` 写死 C: 覆盖检测 | 静态 data 优先级与注释误导 | 已移除硬编码；检测由 override-data-file 负责 |
 | `deploy.sh` / `diagnose` 报 `windows_git_bash_path` | 裸 `chezmoi status/diff/apply` 未注入 override | 已修复（2026-06）：`chezmoi_build_base_args` + `chezmoi_capture_*`；`deploy.sh` 设 `CHEZMOI_PROJECT_ROOT` 并走 `chezmoi_run_apply` |
+
+## Windows：winget + common-tools + [5/6] 检测（2026-07）
+
+| 项 | 约定 |
+|----|------|
+| 多 OS / WSL | winget 与 GitHub zip 回退 **仅 Windows Git Bash**；Linux/macOS/WSL 仍走 brew/pacman/apt（`packages.conf` 对应列） |
+| WSL 代理 | **宿主机** `:7890`（`chezmoi_detect_proxy` ← `/etc/resolv.conf` nameserver）；禁止把 WSL 代理写成 `127.0.0.1` 当唯一路径 |
+| winget | 安装/升级/list **必须** `--source winget`；默认 7890 MITM 扫 msstore 易 `0x8a15005e`；**勿**默认 BypassCertificatePinning |
+| 命令名 SSOT | `packages.conf`：检查用 `rg`/`delta`（非 `ripgrep`/`git-delta`）；winget id：`BurntSushi.ripgrep.MSVC`、`dandavison.delta` |
+| GitHub 回退 | Windows 上 winget 失败或装完不在 PATH → `install_github_release_zip_exe` → `~/.local/bin`（`rg.exe`/`delta.exe`）；**不**在 WSL/Linux/macOS 启用 |
+| [5/6] 检测 | `neovim`→`nvim`（>=0.11，**不**要求 `~/.config/nvim`）；`windows-terminal`→`wt`；`nerd-fonts`→FiraMono；common-tools 跳过 conf 中 `-` 的平台项 |
+| neovim 职责 | 本仓 Phase 1 只保二进制；配置/插件属用户 `~/.config/nvim` 独立仓库 |
+
+| 问题 | 原因 | 解决 |
+|------|------|------|
+| ripgrep/git-delta 反复 winget 失败 | `command -v ripgrep` 永远失败 + msstore 证书错误 | 改查 `rg`/`delta`；`--source winget`；失败则 GitHub zip |
+| [5/6] WT/neovim/nerd-fonts「未安装」 | 用软件名当命令名 | `install_helpers.sh` 专项检测 |
+| [5/6] common-tools 恒 partial（Win） | 仍统计 trash 等无 winget 包项 | 按 `get_common_tool_package` 空则跳过 |
 
 ## Windows：fnm + uv + Git Bash（2026-05）
 
@@ -253,7 +272,7 @@ macOS 默认 `/bin/bash` 为 **3.2**，不支持 `declare -A` / `local -n`。部
 | 项 | 约定 |
 |----|------|
 | 卡死主因 | `[4/6]` `brew upgrade` 在 tap 过期时隐式 `brew update`；清华 `origin` 高峰返回 `Waiting in queue`（实测 Position 300+） |
-| 代理策略 | macOS **有代理则保留**（勿 unset）；`common_install.sh` → `_brew_macos_prepare_env` |
+| 代理策略 | macOS **有代理则保留**（勿 unset）；`brew_macos_network.sh` → `_brew_macos_prepare_env` |
 | remote | 有代理时 `_brew_macos_prefer_github_remote` 将 tuna/ustc/aliyun → `https://github.com/Homebrew/brew.git` |
 | auto-update | `HOMEBREW_NO_AUTO_UPDATE=1`（与 `UPDATE_HOMEBREW` 默认跳过一致） |
 | 配置入口 | `run_on_darwin/run_once_configure-homebrew.sh.tmpl` 在跳过 update 时仍可切 remote |
