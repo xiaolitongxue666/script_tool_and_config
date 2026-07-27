@@ -94,6 +94,28 @@ get_common_tool_commands() {
     echo "${COMMON_TOOLS_COMMANDS}"
 }
 
+# 判断 common-tools 命令是否可用（含 Debian/Ubuntu 二进制别名）
+# bat → batcat；fd → fdfind；trash → trash-cli
+# 参数: tool_cmd
+# 返回: 0=可用, 1=不可用
+common_tool_command_present() {
+    local tool="$1"
+    case "$tool" in
+        bat)
+            command -v bat &>/dev/null || command -v batcat &>/dev/null
+            ;;
+        fd)
+            command -v fd &>/dev/null || command -v fdfind &>/dev/null
+            ;;
+        trash)
+            command -v trash &>/dev/null || command -v trash-cli &>/dev/null
+            ;;
+        *)
+            command -v "$tool" &>/dev/null
+            ;;
+    esac
+}
+
 # 从 COMMON_TOOLS_PKG_LINES 解析包名
 # 列: cmd|darwin|linux_pacman|linux_apt|linux_other|windows_winget|windows_pacman
 # 参数: command_name, platform, package_manager

@@ -144,6 +144,7 @@ Pi 的安装、Harness、文档 **不在本仓库**。唯一 SSOT：[agent-confi
 |------|------|------|
 | `deploy.sh` 长时间无输出 | 诊断阶段 `chezmoi apply --dry-run` 模拟全部 run_once | Windows 已跳过 dry-run；或直接用 `manage_dotfiles.sh apply` |
 | apply 停在 `.gitconfig has changed` | 缺 `--force`，等待交互 | 使用 `chezmoi apply -v --force` 或 `chezmoi_run_apply` |
+| apply 后丢失 `safe.directory` | `dot_gitconfig.tmpl` 整文件覆盖 `~/.gitconfig`，模板不含 `[safe]` | apply 后 `git config --global --add safe.directory <path>`；或私有项放 `~/.config/git/config` / `include.path`（见 CHEZMOI_USE_GUIDE） |
 | 多次 apply 报 lock timeout | 前次 chezmoi 进程未退出 | `taskkill //F //IM chezmoi.exe`，运行 `fix_chezmoi_lock.sh` |
 | `manage_dotfiles apply` 曾缺 force | 调用 `chezmoi_run_apply "-v"` 覆盖默认 | 已修复：`chezmoi_core` 自动补 `--force` |
 

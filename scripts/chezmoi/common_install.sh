@@ -20,6 +20,10 @@ source "${_COMMON_INSTALL_DIR}/brew_macos_network.sh"
 # shellcheck disable=SC1090
 source "${_COMMON_INSTALL_DIR}/package_install.sh"
 
+# common-tools 包名 / 命令检测（batcat/fdfind 等）
+# shellcheck disable=SC1090
+source "${_COMMON_INSTALL_DIR}/software_policies.sh"
+
 # ============================================
 # Neovim 版本检查（与 ~/.config/nvim 配置最低要求一致）
 # ============================================

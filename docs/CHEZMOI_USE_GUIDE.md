@@ -650,6 +650,11 @@ Git 全局配置（`~/.gitconfig`）由 `dot_gitconfig.tmpl` 管理，包含：
 
 **不纳入模板的项**（请在本机或单独配置中设置）：`safe.directory`、`credential.*`、`filter.lfs.*` 等机器/用户私有项。
 
+**重要：`apply --force` 会整文件覆盖 `~/.gitconfig`**。模板不含 `[safe] directory` 时，本机手工添加的 `safe.directory` **会被删除**（随后在对应目录可能再出现 `dubious ownership`）。需要保留时任选其一：
+
+1. apply 后重新执行：`git config --global --add safe.directory <path>`
+2. 将私有项放到**不被本仓库模板管理**的文件，例如 `~/.config/git/config`，并在其中配置；或通过 `git config --global include.path` 指向该私有文件（不要把私有路径写进仓库内的 `dot_gitconfig.tmpl`）
+
 **覆盖姓名与邮箱**：编辑 `~/.config/chezmoi/chezmoi.toml`（或已 ignore 的 `**/chezmoi.toml.local`）：
 
 ```toml

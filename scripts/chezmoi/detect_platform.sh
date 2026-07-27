@@ -88,3 +88,15 @@ chezmoi_is_wsl() {
 is_wsl() {
     chezmoi_is_wsl
 }
+
+# 是否为 Arch Linux（含 archarm；不含 Ubuntu/Debian/WSL-Ubuntu）
+is_arch_linux() {
+    [[ "$(uname -s 2>/dev/null || true)" == "Linux" ]] || return 1
+    [[ -f /etc/os-release ]] || return 1
+    local id id_like
+    # shellcheck disable=SC1091
+    id="$(. /etc/os-release 2>/dev/null; echo "${ID:-}")"
+    # shellcheck disable=SC1091
+    id_like="$(. /etc/os-release 2>/dev/null; echo "${ID_LIKE:-}")"
+    [[ "$id" == "arch" || "$id" == "archarm" || "$id_like" == *arch* ]]
+}

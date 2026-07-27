@@ -102,6 +102,18 @@ fi
 for tool in $(get_common_tool_commands); do
     pkg="$(get_common_tool_package "$tool" "${PLATFORM}" "${PACKAGE_MANAGER}")"
 
+    if type common_tool_command_present &>/dev/null && common_tool_command_present "$tool"; then
+        if command -v "$tool" &>/dev/null; then
+            echo "[INFO] $tool already installed: $(command -v "$tool")"
+        elif [[ "$tool" == "bat" ]] && command -v batcat &>/dev/null; then
+            echo "[INFO] $tool already installed: $(command -v batcat) (batcat)"
+        elif [[ "$tool" == "fd" ]] && command -v fdfind &>/dev/null; then
+            echo "[INFO] $tool already installed: $(command -v fdfind) (fdfind)"
+        else
+            echo "[INFO] $tool already installed"
+        fi
+        continue
+    fi
     if command -v "$tool" &> /dev/null; then
         echo "[INFO] $tool already installed: $(command -v "$tool")"
         continue

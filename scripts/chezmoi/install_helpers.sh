@@ -218,13 +218,17 @@ extract_software_name_from_script() {
     local basename=$(basename "$script_path")
     local base
 
-    # 支持 run_once_00-*、run_once_9x-*（Layer 4 AI）与 run_once_install-*
+    # 支持 run_once_00-*、run_once_9x-*（Layer 4 AI）、run_once_install-*、run_once_configure-*
     if [[ "$basename" == run_once_00-* ]]; then
         base="${basename#run_once_}"
         base="${base%.sh.tmpl}"
         base="${base%.sh}"
     elif [[ "$basename" == run_once_install-* ]]; then
         base="${basename#run_once_install-}"
+        base="${base%.sh.tmpl}"
+        base="${base%.sh}"
+    elif [[ "$basename" == run_once_configure-* ]]; then
+        base="${basename#run_once_}"
         base="${base%.sh.tmpl}"
         base="${base%.sh}"
     elif [[ "$basename" == run_once_[0-9]* ]]; then
@@ -234,6 +238,10 @@ extract_software_name_from_script() {
     else
         base="${basename%.sh.tmpl}"
         base="${base%.sh}"
+        # 兜底：仍带 run_once_ 前缀时去掉（如未覆盖的命名）
+        if [[ "$base" == run_once_* ]]; then
+            base="${base#run_once_}"
+        fi
     fi
     echo "$base"
 }
@@ -278,6 +286,33 @@ get_platform_display_name() {
     esac
 }
 
+# 内部：当前环境是否 WSL（供 script_applicable_to_platform 使用）
+_helpers_is_wsl() {
+    if type chezmoi_is_wsl &>/dev/null; then
+        chezmoi_is_wsl
+        return $?
+    fi
+    if type is_wsl &>/dev/null; then
+        is_wsl
+        return $?
+    fi
+    [[ "$(uname -s 2>/dev/null || true)" == "Linux" ]] \
+        && { grep -qEi "Microsoft|WSL" /proc/version 2>/dev/null || [[ -n "${WSL_DISTRO_NAME:-}" ]]; }
+}
+
+# 内部：当前环境是否 Arch Linux
+_helpers_is_arch() {
+    if type is_arch_linux &>/dev/null; then
+        is_arch_linux
+        return $?
+    fi
+    [[ "$(uname -s 2>/dev/null || true)" == "Linux" ]] || return 1
+    [[ -f /etc/os-release ]] || return 1
+    local id
+    id="$(awk -F= '/^ID=/{gsub(/"/,""); print $2; exit}' /etc/os-release 2>/dev/null)"
+    [[ "$id" == "arch" || "$id" == "archarm" ]]
+}
+
 # 判断安装脚本是否适用于当前平台（用于安装状态检查时过滤）
 # 参数: script_path, platform (linux|macos|windows)
 # 返回: 0=适用于当前平台应检查, 1=不适用应跳过
@@ -292,23 +327,29 @@ script_applicable_to_platform() {
     local plat="$platform"
     [[ "$plat" == "macos" ]] && plat="darwin"
     if [[ "$script_path" == *"/run_on_linux/"* ]]; then
-        [[ "$plat" != "darwin" && "$plat" != "linux" ]] && return 1
-        [[ "$plat" == "darwin" ]] && return 1
-        return 0
-    fi
-    if [[ "$script_path" == *"/run_on_darwin/"* ]]; then
+        [[ "$plat" != "linux" ]] && return 1
+    elif [[ "$script_path" == *"/run_on_darwin/"* ]]; then
         [[ "$plat" != "darwin" ]] && return 1
         return 0
-    fi
-    if [[ "$script_path" == *"/run_on_windows/"* ]]; then
+    elif [[ "$script_path" == *"/run_on_windows/"* ]]; then
         [[ "$plat" != "windows" ]] && return 1
         return 0
     fi
     local software_name
     software_name="$(extract_software_name_from_script "$script_path")"
     case "$software_name" in
-        # 仅 Linux（含 WSL 原生环境）
-        i3wm|alacritty|dwm|lazyssh)
+        # 仅 Arch Linux（Ubuntu/Debian/WSL 不适用，不列入 Missing）
+        configure-pacman|arch-base-packages|aur-helper|dwm)
+            [[ "$plat" != "linux" ]] && return 1
+            _helpers_is_arch || return 1
+            ;;
+        # 原生 Linux GUI：WSL 上跳过（用 Windows 终端 / 无本地 WM）
+        i3wm|alacritty)
+            [[ "$plat" != "linux" ]] && return 1
+            _helpers_is_wsl && return 1
+            ;;
+        # 仅 Linux（含 WSL）
+        lazyssh)
             [[ "$plat" != "linux" ]] && return 1
             ;;
         # 仅 Linux + macOS（不在 Windows 安装，与 SOFTWARE_LIST 一致）
@@ -512,7 +553,12 @@ check_nerd_fonts_firamono_installed() {
 check_common_tools_installed_status() {
     local cmd total=0 present=0
     if ! type get_common_tool_commands &>/dev/null; then
-        if check_command_exists "bat" || check_command_exists "eza" || check_command_exists "fd"; then
+        if type common_tool_command_present &>/dev/null; then
+            if common_tool_command_present "bat" || check_command_exists "eza" || common_tool_command_present "fd"; then
+                return 0
+            fi
+        elif check_command_exists "bat" || check_command_exists "eza" || check_command_exists "fd" \
+            || command -v batcat &>/dev/null || command -v fdfind &>/dev/null; then
             return 0
         fi
         return 1
@@ -531,8 +577,26 @@ check_common_tools_installed_status() {
             fi
         fi
         total=$((total + 1))
+        if type common_tool_command_present &>/dev/null; then
+            if common_tool_command_present "$cmd"; then
+                present=$((present + 1))
+            fi
+            continue
+        fi
         if [[ "$cmd" == "trash" ]]; then
             if command -v trash &>/dev/null || command -v trash-cli &>/dev/null; then
+                present=$((present + 1))
+            fi
+            continue
+        fi
+        if [[ "$cmd" == "bat" ]]; then
+            if command -v bat &>/dev/null || command -v batcat &>/dev/null; then
+                present=$((present + 1))
+            fi
+            continue
+        fi
+        if [[ "$cmd" == "fd" ]]; then
+            if command -v fd &>/dev/null || command -v fdfind &>/dev/null; then
                 present=$((present + 1))
             fi
             continue

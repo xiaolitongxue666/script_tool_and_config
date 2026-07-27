@@ -738,6 +738,9 @@ install_common_tool_with_fallback() {
 
     if [[ -n "$pkg" ]] && install_package "$pkg"; then
         hash -r 2>/dev/null || true
+        if type common_tool_command_present &>/dev/null && common_tool_command_present "$tool"; then
+            return 0
+        fi
         if command -v "$tool" &>/dev/null; then
             return 0
         fi
@@ -746,6 +749,9 @@ install_common_tool_with_fallback() {
 
     if try_windows_github_fallback_for_tool "$tool"; then
         hash -r 2>/dev/null || true
+        if type common_tool_command_present &>/dev/null && common_tool_command_present "$tool"; then
+            return 0
+        fi
         if command -v "$tool" &>/dev/null; then
             return 0
         fi
@@ -758,7 +764,12 @@ upgrade_common_tools_packages() {
     local cmd pkg
     if type get_common_tool_commands &>/dev/null; then
         for cmd in $(get_common_tool_commands); do
-            [[ "$cmd" == "trash" ]] && { command -v trash &>/dev/null || command -v trash-cli &>/dev/null; } && continue
+            if type common_tool_command_present &>/dev/null && common_tool_command_present "$cmd"; then
+                pkg="$(get_common_tool_package "$cmd" "${PLATFORM:-}" "${PACKAGE_MANAGER:-}")"
+                [[ -z "$pkg" ]] && continue
+                upgrade_package_by_manager "$pkg" || echo "[WARNING] Failed to upgrade tool: $cmd" >&2
+                continue
+            fi
             if ! command -v "$cmd" &>/dev/null; then
                 pkg="$(get_common_tool_package "$cmd" "${PLATFORM:-}" "${PACKAGE_MANAGER:-}")"
                 if [[ -n "$pkg" ]]; then
@@ -767,8 +778,16 @@ upgrade_common_tools_packages() {
                     fi
                     hash -r 2>/dev/null || true
                 fi
-                if ! command -v "$cmd" &>/dev/null; then
-                    try_windows_github_fallback_for_tool "$cmd" || true
+                if type common_tool_command_present &>/dev/null; then
+                    if common_tool_command_present "$cmd"; then
+                        continue
+                    fi
+                elif command -v "$cmd" &>/dev/null; then
+                    continue
+                fi
+                try_windows_github_fallback_for_tool "$cmd" || true
+                if type common_tool_command_present &>/dev/null; then
+                    common_tool_command_present "$cmd" && continue
                 fi
                 if ! command -v "$cmd" &>/dev/null; then
                     echo "[WARNING] Failed to install missing tool: $cmd" >&2

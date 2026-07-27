@@ -70,7 +70,9 @@ run_on_windows/*                      ← Layer 5（平台特有）
 
 - WSL 视为 Linux 子类型，脚本内通过 `WSL_DISTRO_NAME` 和 `/proc/version` 识别。
 - 代理检测：WSL 下从 `/etc/resolv.conf` 的 nameserver 推断宿主机 IP，自动补 :7890。
-- 窗口管理器（i3/dwm）在 WSL 下通常不安装，但脚本不会阻止。
+- **WSL 上不适用**（`ensure` / `[5/6]` 状态检查会跳过，不标 Missing）：`alacritty`、`i3wm`、`dwm`（用 Windows 终端；无本地 WM 需求）。
+- **非 Arch 的 Linux/WSL 上不适用**：`configure-pacman`、`arch-base-packages`、`aur-helper`、`dwm`（脚本内也会 skip）。
+- Debian/Ubuntu：`bat` / `fd` 包提供的命令名为 `batcat` / `fdfind`；安装检测与 shell alias（bashrc / zshrc）已兼容。
 - connect-proxy 依赖：Linux apt 场景需要 `apt install connect-proxy`。
 
 ---

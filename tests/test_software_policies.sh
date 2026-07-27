@@ -35,13 +35,53 @@ while IFS= read -r s; do
     count_linux=$((count_linux + 1))
 done < <(list_applicable_run_once_scripts "$CHEZMOI_DIR" linux)
 
-if [[ "$count_linux" -ge 19 ]]; then
+# 非 Arch 主机上会过滤 configure-pacman/arch-base/aur-helper/dwm，阈值略低于全量
+if [[ "$count_linux" -ge 15 ]]; then
     PASSED=$((PASSED + 1))
-    echo "[PASS] linux script count >= 19 ($count_linux)"
+    echo "[PASS] linux script count >= 15 ($count_linux)"
 else
     FAILED=$((FAILED + 1))
     echo "[FAIL] linux script count too low ($count_linux)"
 fi
+
+# Arch 专用脚本在非 Arch 上应被过滤
+arch_only_in_list=0
+while IFS= read -r s; do
+    [[ "$s" == *"configure-pacman"* || "$s" == *"arch-base-packages"* || "$s" == *"aur-helper"* || "$s" == *"install-dwm"* ]] && arch_only_in_list=1
+done < <(list_applicable_run_once_scripts "$CHEZMOI_DIR" linux)
+if type is_arch_linux &>/dev/null && is_arch_linux; then
+    PASSED=$((PASSED + 1))
+    echo "[PASS] on Arch: arch-only scripts may appear in linux list (skipped assert)"
+elif [[ "$arch_only_in_list" -eq 0 ]]; then
+    PASSED=$((PASSED + 1))
+    echo "[PASS] non-Arch host filters arch-only run_once from linux list"
+else
+    FAILED=$((FAILED + 1))
+    echo "[FAIL] non-Arch host still lists arch-only run_once scripts"
+fi
+
+# Debian/Ubuntu 二进制别名：batcat / fdfind 视为已安装
+_tmpdir="${PROJECT_ROOT}/logs/test_common_tool_cmd_$$"
+mkdir -p "$_tmpdir"
+printf '#!/bin/sh\nexit 0\n' > "${_tmpdir}/batcat"
+printf '#!/bin/sh\nexit 0\n' > "${_tmpdir}/fdfind"
+chmod +x "${_tmpdir}/batcat" "${_tmpdir}/fdfind"
+_old_path="$PATH"
+PATH="${_tmpdir}:${PATH}"
+hash -r 2>/dev/null || true
+if common_tool_command_present bat && common_tool_command_present fd; then
+    PASSED=$((PASSED + 1))
+    echo "[PASS] common_tool_command_present accepts batcat/fdfind"
+else
+    FAILED=$((FAILED + 1))
+    echo "[FAIL] common_tool_command_present should accept batcat/fdfind"
+fi
+PATH="$_old_path"
+hash -r 2>/dev/null || true
+rm -rf "$_tmpdir"
+
+name="$(extract_software_name_from_script "${CHEZMOI_DIR}/run_on_linux/run_once_configure-pacman.sh.tmpl")"
+assert_eq "configure-pacman name" "configure-pacman" "$name"
 
 has_layer4=0
 while IFS= read -r s; do

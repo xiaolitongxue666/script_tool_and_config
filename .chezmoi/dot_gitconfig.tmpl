@@ -1,6 +1,7 @@
 # Git 全局配置（由 chezmoi 管理）
 # git_user_* 默认见 .chezmoidata.toml；可在 ~/.config/chezmoi/chezmoi.toml [data] 覆盖
 # WSL 下 127.0.0.1 指本机无法访问宿主机代理，若 GitHub clone 失败请在 data 中设置 proxy 为宿主机地址，或 apply 后执行: git config --global --unset http.https://github.com.proxy
+# 注意：apply --force 整文件覆盖 ~/.gitconfig；本机手工 [safe] directory 会被清除（见 docs/CHEZMOI_USE_GUIDE.md）
 
 [user]
 	name = {{ .git_user_name | default "xiaolitongxue666" }}
