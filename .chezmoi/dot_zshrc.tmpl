@@ -506,3 +506,7 @@ claude-global() {
 # - dirhistory 在集成终端中可能不工作，建议使用独立终端应用
 # - 某些功能需要重新加载配置: source ~/.zshrc
 # - 详细说明见 CHEZMOI_USE_GUIDE.md
+
+# 本机私有配置（bun、额外 PATH 等）；不受 chezmoi 覆盖
+# 示例：echo 'export BUN_INSTALL="$HOME/.bun"; export PATH="$BUN_INSTALL/bin:$PATH"' >> ~/.zshrc.local
+[[ -f "${HOME}/.zshrc.local" ]] && source "${HOME}/.zshrc.local"

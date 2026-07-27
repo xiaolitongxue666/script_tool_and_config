@@ -23,5 +23,5 @@
 21) **Agent 体系**：Layer 4 四 CLI（存量）；Pi + MCP/Skills 在 agent-config Phase 2；权威长文 [PROJECT_AGENT_MEMORY.md](PROJECT_AGENT_MEMORY.md)。
 22) **全局配置**：中文回复 + 代理（WSL 宿主机 7890 / VPS 17890）；slash/commands canonical 在 agent-config；本仓 `.cursor/rules/` = 项目 rules。
 23) **`/commit-push` + `/summary-memory`**：`git-smart-commit` / `summary-project-memory`；写入 `docs/PROJECT_MEMORY.md`；备份 `.project-memory-backups/`（保留 2 份）。
-24) **SSH GitHub 密钥**：`github.com` 与 `xiaolitongxue-vps` 均 `id_ed25519_github_personal` 优先；`identity_file` 仅非 GitHub Host。
+24) **SSH GitHub 密钥**：`github.com` / `xiaolitongxue-vps` 按本机**已有文件**写 `IdentityFile`（personal 优先）；缺文件不写，避免 `no such identity`；`identity_file` 仅非 GitHub Host。
 25) **VPS**：Host `xiaolitongxue-vps`；仅用 git push/pull；dirty 时 `reset --hard` + `clean -fd` → Phase1/2；验收 `diagnose_vps_ssh_pi.sh`。

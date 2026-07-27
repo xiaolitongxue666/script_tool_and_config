@@ -767,7 +767,10 @@ upgrade_common_tools_packages() {
             if type common_tool_command_present &>/dev/null && common_tool_command_present "$cmd"; then
                 pkg="$(get_common_tool_package "$cmd" "${PLATFORM:-}" "${PACKAGE_MANAGER:-}")"
                 [[ -z "$pkg" ]] && continue
-                upgrade_package_by_manager "$pkg" || echo "[WARNING] Failed to upgrade tool: $cmd" >&2
+                if ! upgrade_package_by_manager "$pkg"; then
+                    # 已通过别的途径安装（如 ~/.local/bin），apt 无包时不算失败
+                    echo "[INFO] $cmd present; skip upgrade via ${PACKAGE_MANAGER:-pkg} (package unavailable or already newest)" >&2
+                fi
                 continue
             fi
             if ! command -v "$cmd" &>/dev/null; then
@@ -796,7 +799,9 @@ upgrade_common_tools_packages() {
             fi
             pkg="$(get_common_tool_package "$cmd" "${PLATFORM:-}" "${PACKAGE_MANAGER:-}")"
             [[ -z "$pkg" ]] && continue
-            upgrade_package_by_manager "$pkg" || echo "[WARNING] Failed to upgrade tool: $cmd" >&2
+            if ! upgrade_package_by_manager "$pkg"; then
+                echo "[INFO] $cmd present; skip upgrade via ${PACKAGE_MANAGER:-pkg} (package unavailable or already newest)" >&2
+            fi
         done
     fi
     return 0

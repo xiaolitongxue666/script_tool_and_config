@@ -14,9 +14,18 @@ Host github.com
     HostName ssh.github.com
     Port 443
     User git
-    # 个人 GitHub 优先；VPS 等无 id_rsa 的机器回退到 ed25519_github_personal
+    # 仅列出本机存在的密钥，避免 OpenSSH “no such identity” 警告
+    # 优先个人密钥；其次 id_rsa；再回退 id_ed25519
+{{- $ssh_dir := joinPath .chezmoi.homeDir ".ssh" }}
+{{- if stat (joinPath $ssh_dir "id_ed25519_github_personal") }}
     IdentityFile ~/.ssh/id_ed25519_github_personal
+{{- end }}
+{{- if stat (joinPath $ssh_dir "id_rsa") }}
     IdentityFile ~/.ssh/id_rsa
+{{- end }}
+{{- if and (not (stat (joinPath $ssh_dir "id_ed25519_github_personal"))) (not (stat (joinPath $ssh_dir "id_rsa"))) (stat (joinPath $ssh_dir "id_ed25519")) }}
+    IdentityFile ~/.ssh/id_ed25519
+{{- end }}
     IdentitiesOnly yes
 {{- if index . "ssh_use_proxy" }}
 {{- if eq .chezmoi.os "windows" }}
@@ -59,9 +68,14 @@ Host xiaolitongxue-vps
     HostName xiaolitongxue.com.cn
     User ubuntu
     Port 22
-    # 与 github.com 一致：个人密钥优先，通用 ed25519 回退
+    # 仅列出本机存在的密钥（个人优先，再 id_ed25519）
+{{- $ssh_dir := joinPath .chezmoi.homeDir ".ssh" }}
+{{- if stat (joinPath $ssh_dir "id_ed25519_github_personal") }}
     IdentityFile ~/.ssh/id_ed25519_github_personal
+{{- end }}
+{{- if stat (joinPath $ssh_dir "id_ed25519") }}
     IdentityFile ~/.ssh/id_ed25519
+{{- end }}
     IdentitiesOnly yes
     ServerAliveInterval 60
     ServerAliveCountMax 3
