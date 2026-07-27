@@ -319,8 +319,8 @@ install.sh
 | `common/shc/` | Shell 脚本编译器示例 |
 | `common/auto_edit_redis_config/` | Redis 配置自动编辑 |
 | `linux/` | Linux 专用脚本（系统基础环境、网络配置） |
-| `darwin/` | macOS 专用脚本 |
 | `windows/` | Windows 专用脚本（.bat/.ps1） |
+| （无 `scripts/darwin/`） | macOS 专用在 `.chezmoi/run_on_darwin/` |
 
 ### 脚本分类
 
@@ -332,7 +332,7 @@ install.sh
 ### 配置文件流程
 
 1. `.chezmoi/` 存放配置模板（`dot_*.tmpl`、`run_once_*.sh.tmpl`）
-2. `install.sh` / `deploy.sh` → `chezmoi apply` → 部署到 `~/`
+2. `install.sh` / `deploy.sh` → `chezmoi apply -v --force` → 部署到 `~/`
 3. 跨平台配置 → 所有系统应用
 4. `run_on_{linux,darwin,windows}/` → 仅对应平台应用
 

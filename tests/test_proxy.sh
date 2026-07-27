@@ -61,9 +61,16 @@ else
     FAILED=$((FAILED + 1))
 fi
 
-# 测试 3: 无环境变量时默认 127.0.0.1:7890
-echo -n "[Test 3] default proxy when unset ... "
-result=$(detect_proxy_in_subshell "unset http_proxy https_proxy PROXY;")
+# 测试 3: 无环境变量时平台默认代理
+# WSL → resolv.conf nameserver:7890；非 WSL 默认见 Test 9/10（此处强制非 WSL 测本地默认）
+echo -n "[Test 3] default proxy when unset (non-WSL local) ... "
+result=$(bash -c "
+source '${CORE_SCRIPT}'
+chezmoi_is_wsl() { return 1; }
+chezmoi_is_headless_native_linux() { return 1; }
+unset PROXY http_proxy https_proxy HTTP_PROXY HTTPS_PROXY NO_PROXY
+chezmoi_detect_proxy
+" 2>/dev/null)
 
 if [[ "$result" == "http://127.0.0.1:7890" ]]; then
     echo "PASS (got: $result)"

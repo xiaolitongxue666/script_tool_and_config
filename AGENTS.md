@@ -432,8 +432,7 @@ ensure_directory() {
 │   ├── linux/                  # Linux 特定脚本
 │   │   ├── system_basic_env/   # 系统基础环境配置
 │   │   └── network/            # 网络配置
-│   ├── darwin/                 # macOS 特定脚本
-│   └── windows/                # Windows 特定脚本
+│   └── windows/                # Windows 特定脚本（macOS 在 .chezmoi/run_on_darwin/，无 scripts/darwin/）
 ├── tests/                      # 测试目录
 │   ├── test_syntax.sh          # 批量语法检查
 │   └── test_proxy.sh           # 代理逻辑测试
@@ -873,7 +872,7 @@ git push
 
 项目完整目录结构见 [docs/PROJECT_STRUCTURE.md](docs/PROJECT_STRUCTURE.md)。
 
-脚本目录概览：`scripts/` 下为 `common/`（deploy_utils、standalone_tool_script、project_tools、ffmpeg-magic、git_templates 等）、`linux/`、`darwin/`、`windows/`、`chezmoi/`。
+脚本目录概览：`scripts/` 下为 `common/`（deploy_utils、standalone_tool_script、project_tools、ffmpeg-magic、git_templates 等）、`linux/`、`windows/`、`chezmoi/`；macOS 平台脚本在 `.chezmoi/run_on_darwin/`。
 
 ## 脚本分类和命名规范
 

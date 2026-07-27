@@ -492,3 +492,6 @@ tests/*.log
 
 # Literal %SystemDrive% directory (Windows cmd expansion artifact)
 %SystemDrive%/
+
+# Literal ${APPDATA}\npm directory (Windows env expansion artifact under repo root)
+${APPDATA}\npm/

@@ -35,13 +35,17 @@ while IFS= read -r s; do
     count_linux=$((count_linux + 1))
 done < <(list_applicable_run_once_scripts "$CHEZMOI_DIR" linux)
 
-# 非 Arch 主机上会过滤 configure-pacman/arch-base/aur-helper/dwm，阈值略低于全量
-if [[ "$count_linux" -ge 15 ]]; then
+# 非 Arch：过滤 configure-pacman/arch-base/aur-helper/dwm；WSL 另过滤 i3wm/alacritty
+min_linux_count=15
+if type _helpers_is_wsl &>/dev/null && _helpers_is_wsl; then
+    min_linux_count=13
+fi
+if [[ "$count_linux" -ge "$min_linux_count" ]]; then
     PASSED=$((PASSED + 1))
-    echo "[PASS] linux script count >= 15 ($count_linux)"
+    echo "[PASS] linux script count >= ${min_linux_count} ($count_linux)"
 else
     FAILED=$((FAILED + 1))
-    echo "[FAIL] linux script count too low ($count_linux)"
+    echo "[FAIL] linux script count too low ($count_linux, need >= ${min_linux_count})"
 fi
 
 # Arch 专用脚本在非 Arch 上应被过滤

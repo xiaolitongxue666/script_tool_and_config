@@ -34,7 +34,8 @@ bash scripts/chezmoi/install_chezmoi.sh
 export CHEZMOI_SOURCE_DIR="$(pwd)/.chezmoi"
 
 # 3. 应用所有配置（首次应用前建议备份 ~/.ssh/config 与 ~/.gitconfig，参见 scripts/common/deploy_utils 下 backup_ssh_config.sh、backup_git_config.sh）
-chezmoi apply -v
+# 须 --force，避免 Windows 上外部修改触发交互卡住；日常推荐 ./deploy.sh 或 ./scripts/manage_dotfiles.sh apply
+chezmoi apply -v --force
 ```
 
 SSH 配置由 `.chezmoi/dot_ssh/config.tmpl` 管理，预置包含 `github.com`、`alchemy-vnc`（正式）、`moicen-vnc`（测试）；使用 `ssh alchemy-vnc` / `ssh moicen-vnc` 便捷登录，lazyssh 会直接识别。
@@ -217,8 +218,8 @@ script_tool_and_config/
 ### 使用 chezmoi 命令
 
 ```bash
-# 应用所有配置
-chezmoi apply -v
+# 应用所有配置（须 --force；推荐经 deploy.sh / manage_dotfiles.sh）
+chezmoi apply -v --force
 
 # 查看配置差异
 chezmoi diff
