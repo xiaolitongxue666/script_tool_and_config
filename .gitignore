@@ -290,11 +290,15 @@ chezmoi.toml.local
 .claude/settings.local.json
 .project-memory-backups/
 
-# CodeWhale / DeepSeek-TUI 用户态（若误拷入仓库根或子目录）
+# CodeWhale / DeepSeek-TUI 用户态（已从本仓与 agent-config 移除；忽略误拷残留）
 .codewhale/
 .deepseek/
 **/.codewhale/
 **/.deepseek/
+
+# CodeGraph 项目索引（`codegraph init` 产物；机器本地）
+.codegraph/
+**/.codegraph/
 
 # Pi coding agent 用户态（auth.json 含 API key、sessions；Harness 由 agent-config 管理）
 .pi/

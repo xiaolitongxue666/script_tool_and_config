@@ -18,8 +18,7 @@
 | [DEPLOY_TWO_PHASE.md](DEPLOY_TWO_PHASE.md) | 两阶段部署（本仓库 Phase 1 + agent-config Phase 2） |
 | [SOFTWARE_LIST.md](SOFTWARE_LIST.md) | 完整软件清单与 run_once 脚本对应关系（按 OS / WSL 区分） |
 | [PROJECT_MEMORY.md](PROJECT_MEMORY.md) | 项目级紧凑记忆（Agent 快速索引，详情见 PROJECT_AGENT_MEMORY） |
-| [CODEWHALE.md](CODEWHALE.md) | CodeWhale 安装、WSL 快速流程与排错 |
-| Pi | 见 [agent-config/docs/PI.md](../../AI/agent-config/docs/PI.md)（Phase 2 安装与 Harness） |
+| AI Agent / Pi | 见 [agent-config](../../AI/agent-config)（Claude / Cursor / Codex / Pi + CodeGraph）；**CodeWhale 已移除（勿恢复）** |
 | [PROJECT_AGENT_MEMORY.md](PROJECT_AGENT_MEMORY.md) | 项目 Agent 可提交记忆（含 WSL 部署实测） |
 | [RMUX_WINDOWS.md](RMUX_WINDOWS.md) | Windows rmux 安装、手动使用与排错（含 chezmoi 部署陷阱） |
 | [TMUX_KEYBINDINGS.md](TMUX_KEYBINDINGS.md) | Tmux (Linux/macOS) 与 rmux (Windows) 快捷键速查 |

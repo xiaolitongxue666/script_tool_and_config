@@ -76,7 +76,6 @@ install.sh
 | [docs/PROJECT_MEMORY.md](docs/PROJECT_MEMORY.md) | 项目级 Agent 紧凑记忆 |
 | [docs/CHEZMOI_USE_GUIDE.md](docs/CHEZMOI_USE_GUIDE.md) | chezmoi 详细使用指南 |
 | [docs/SOFTWARE_LIST.md](docs/SOFTWARE_LIST.md) | 完整软件清单与 run_once 对应关系 |
-| [docs/CODEWHALE.md](docs/CODEWHALE.md) | CodeWhale 安装与 WSL 快速流程 |
 | [docs/PROJECT_AGENT_MEMORY.md](docs/PROJECT_AGENT_MEMORY.md) | 项目 Agent 记忆（含 WSL 排错） |
 | [docs/PROJECT_STRUCTURE.md](docs/PROJECT_STRUCTURE.md) | 详细项目结构说明 |
 | [AGENTS.md](AGENTS.md) | 代码代理开发指南 |

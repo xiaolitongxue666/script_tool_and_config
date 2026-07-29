@@ -15,7 +15,6 @@ run_once_install-nerd-fonts           ← Layer 2
 run_once_install-neovim               ← Layer 3（仅安装二进制）
 run_once_90-install-claude-code       ← Layer 4（AI agent CLI，fnm/node 已就绪）
 run_once_91-install-codex             ← Layer 4（AI agent CLI，npm @openai/codex）
-run_once_92-install-codewhale         ← Layer 4（AI agent CLI，npm codewhale）
 run_once_93-install-cursor            ← Layer 4（GUI 检测，有 GUI 才装）
 run_once_install-{tmux,i3wm,...} ← Layer 5（平台特有）
 run_on_linux/* / run_on_darwin/*      ← Layer 5（平台特有）
@@ -37,12 +36,11 @@ run_on_windows/*                      ← Layer 5（平台特有）
 | Layer 3 | `run_once_install-neovim` | Neovim 二进制（>= 0.11.0） | all |
 | Layer 4 | `run_once_90-install-claude-code` | Claude Code CLI（npm i -g @anthropic-ai/claude-code，依赖 fnm/node） | all |
 | Layer 4 | `run_once_91-install-codex` | OpenAI Codex CLI（npm i -g @openai/codex） | all |
-| Layer 4 | `run_once_92-install-codewhale` | CodeWhale CLI（`npm install -g codewhale`，`codewhale` + `codewhale-tui`；代理默认 7890） | all（含 WSL）；详见 [CODEWHALE.md](CODEWHALE.md) |
 | Layer 4 | `run_once_93-install-cursor` | Cursor 编辑器（仅 GUI 环境） | all（检测 GUI） |
 
-> **Pi** 已迁入 [agent-config](../../AI/agent-config)（Phase 2）；本仓库不再包含 `run_once_94` 或 `dot_pi/`。
+> **CodeWhale 已从本仓与 agent-config 移除（勿恢复）**；已删除 `run_once_92-install-codewhale`。**Pi** 仅 [agent-config](../../AI/agent-config) Phase 2；本仓库不再包含 `run_once_94` 或 `dot_pi/`。历史：已删除 `run_once_92-install-deepseek`（勿恢复 cargo 安装路径）。
 
-**Layer 4 职责（存量双路径）**：本仓库 `run_once_90`–`93` 仍安装部分 Agent **二进制**/Cursor GUI；**agent-config** `install-tools.sh` 也会安装全部 Agent CLI（含 Pi）并负责 MCP/Skills/Harness。两侧 CLI 安装为已知冗余，**当前保留**（后续再收敛）；Pi 仅 Phase 2。
+**Layer 4 职责（存量双路径）**：本仓库 `run_once_90` / `91` / `93` 仍安装部分 Agent **二进制**/Cursor GUI；**agent-config** `install-tools.sh` 也会安装全部 Agent CLI（Claude / Cursor / Codex / Pi）并负责 MCP/Skills/Harness + CodeGraph。两侧 CLI 安装为已知冗余，**当前保留**（后续再收敛）；Pi 仅 Phase 2。
 
 ### 两阶段部署（本仓库 + agent-config）
 

@@ -11,15 +11,14 @@
 | Phase 1（本仓库） | `./deploy.sh` | fnm/uv、dotfiles、Layer 4 CLI（存量双路径，**当前保留**） |
 | Phase 2（agent-config） | `bash scripts/install-tools.sh` | 全部 AI Agent CLI + MCP/Skills + Harness（含 **Pi**） |
 
-agent-config 路径：`../../AI/agent-config`（相对本仓库）；详见 [DEPLOY_TWO_PHASE.md](DEPLOY_TWO_PHASE.md)。Layer 4 与 Phase 2 均可装 CLI（除 Pi 仅 Phase 2）；后续再收敛，本轮不删 `run_once_90`–`93`。
+agent-config 路径：`../../AI/agent-config`（相对本仓库）；详见 [DEPLOY_TWO_PHASE.md](DEPLOY_TWO_PHASE.md)。Layer 4（`90`/`91`/`93`）与 Phase 2 均可装部分 CLI；**Pi 仅 Phase 2**；**CodeWhale 已从本仓与 agent-config 移除（勿恢复）**；后续再收敛。
 
-### Layer 4 主 Agent（5 个）
+### Layer 4 主 Agent
 
 | Agent | Phase 1 安装 | Phase 2 | 项目知识文件 |
 |-------|-------------|---------|--------------|
 | Claude Code | `run_once_90-install-claude-code`（存量） | CLI + MCP + Skills + hooks + slash | `CLAUDE.md` |
 | Codex | `run_once_91-install-codex`（存量） | CLI + `~/.codex/config.toml`；prompts 桥接 | `.codex/AGENTS.md` → `AGENTS.md` |
-| CodeWhale | `run_once_92-install-codewhale`（存量） | CLI + MCP + Skills + slash | `.cursor/rules/codewhale.mdc` |
 | Cursor | `run_once_93-install-cursor`（GUI，存量） | MCP + Skills + **Cursor Commands** | 本仓库 `.cursor/rules/*.mdc` |
 | Pi | 无（已迁出） | CLI + Harness `~/.pi/agent/` | [agent-config/docs/PI.md](../../AI/agent-config/docs/PI.md) |
 
@@ -44,11 +43,10 @@ Pacman/apt 直连国内源。**macOS Homebrew 例外**：有 7890 代理时保�
 |-------|:--------------:|:-----------------:|----------|
 | Cursor | ✅ | ✅ | Cursor Commands → `~/.cursor/commands/*.md` |
 | Claude Code | ✅ | ✅ | Slash → `~/.claude/commands/*.md` |
-| CodeWhale | ✅ | ✅ | Slash → `~/.codewhale/commands/*.md` |
 | Codex | ⚠️ | ⚠️ | prompts → `platforms/codex/prompts/`（v0.128+ 无 slash 注册；自然语言或 `/commit-push` 同义触发） |
 | Pi | ✅ | ✅ | agent-config `platforms/pi/harness/COMMANDS.md` → `~/.pi/agent/COMMANDS.md` |
 
-canonical 源：agent-config `platforms/{cursor,claude-code,codewhale,pi}/` 与 `platforms/codex/prompts/`。
+canonical 源：agent-config `platforms/{cursor,claude-code,codex,pi}/` 与 `platforms/codex/prompts/`。
 
 #### `/commit-push` 核心描述
 
@@ -64,66 +62,13 @@ canonical 源：agent-config `platforms/{cursor,claude-code,codewhale,pi}/` 与 
 - 机械层：`summary-project-memory.sh`（`--gather` / `--validate` / `--apply`）
 - 写入目标：**`docs/PROJECT_MEMORY.md`**（≤25 条）；`--gather` 默认查仓库根 `PROJECT_MEMORY.md`（本仓已删除），validate 后 apply 至 `docs/`；备份 `.project-memory-backups/`（保留最近 2 份）
 
-## CodeWhale 迁移（DeepSeek-TUI → CodeWhale，2026-05）
+## CodeWhale / DeepSeek（已移除，2026-07）
 
-### 背景
-
-- 上游 [Hmbown/CodeWhale](https://github.com/Hmbown/CodeWhale) 由原 DeepSeek-TUI 更名。
-- 命令：`codewhale` + `codewhale-tui`（成对二进制）；**不再**使用 `cargo install deepseek`。
-- 项目脚本：`.chezmoi/run_once_92-install-codewhale.sh.tmpl`（已删除 `run_once_92-install-deepseek.sh.tmpl`）。
-
-### 安装约定（Agent 修改代码时必须遵守）
-
-| 项 | 约定 |
-|----|------|
-| 路径 | 全平台含 WSL **仅** `npm install -g codewhale`（WSL 内 fnm/npm 全局，非 Windows 互操作 npm） |
-| 禁止 | run_once 内 cargo / brew / winget / Scoop 安装 CodeWhale |
-| 禁止 | **从 WSL 调用 `cmd.exe` / Windows npm 卸载或修改 Windows 侧包**（含 legacy `deepseek`） |
-| 前置 | Layer 0 `fnm` + `node`；Layer 4 字母序在 claude-code 之后 |
-| 代理 | 统一 `chezmoi_setup_proxy`（`chezmoi_core.sh`）；WSL 宿主机 `:7890`；headless Linux 扫描 `7890 17890 …` 并注入 chezmoi override-data；桌面默认 `127.0.0.1:7890`；禁用 `PROXY=none/false` 或 `NO_PROXY=1` |
-| 失败 | `[WARNING]` + `exit 0`；无 fnm/node 时 `[ERROR]` + `exit 1` |
-| 部署入口 | 增量：`./deploy.sh` 或 `./scripts/manage_dotfiles.sh apply`（**勿**对 apply 使用 `\| rg \| head` 管道，会 SIGPIPE 中断） |
-
-### WSL 专用（2026-05 部署实测）
-
-| 项 | 说明 |
-|----|------|
-| 安装判定 | `run_once_92` 与 `install_helpers.sh` 要求 WSL 内 `npm root -g` 下存在 `codewhale` 包；`command -v` 指向 `/mnt/c/.../AppData/Roaming/npm` 时**不算**已安装 |
-| 推荐流程 | `eval "$(fnm env)"` → `./deploy.sh` 或 `./scripts/manage_dotfiles.sh apply` |
-| 状态迁移 | apply 触发 `run_once_92` 后，`~/.deepseek` → `~/.codewhale` 非破坏性复制；legacy 目录保留 |
-| 验证 | `npm list -g codewhale`、`which codewhale`（应为 fnm multishell bin）、`codewhale doctor`、`chezmoi status`（空=已同步） |
-| Windows 分工 | WSL 只维护 WSL 内 fnm/npm；Windows CodeWhale 在 Windows 终端自行维护，Agent **不要跨平台清理** |
-
-### 状态目录
-
-| 路径 | 角色 |
-|------|------|
-| `~/.codewhale/` | 默认写入 |
-| `~/.deepseek/` | 上游只读回退；迁移后**不删除** |
-
-`run_once_92` 在安装成功或已安装时执行非破坏性复制（目标已存在则跳过）。上游 v0.8.47 **无** `codewhale setup --migrate` 子命令，勿在文档中写该命令。
-
-### 遇到的问题与解决
-
-| 问题 | 原因 | 解决 |
-|------|------|------|
-| 只改仓库脚本，本机仍无 `codewhale` | chezmoi 模板 ≠ 已执行安装 | WSL：`eval "$(fnm env)"` 后 `./scripts/manage_dotfiles.sh apply` |
-| 旧 `run_once_92-install-deepseek` 装不上 | `cargo install deepseek` 包名失效 | 改用 `run_once_92-install-codewhale` + npm |
-| WSL apply 后仍无本机 codewhale | PATH 先命中 Windows `/mnt/.../npm/codewhale`，run_once 误判已安装 | 脚本已修复：WSL 须 `npm root -g/codewhale` 存在；或手动 `npm install -g codewhale` |
-| 从 WSL 卸载 Windows deepseek | 误用 `cmd.exe npm uninstall` | **禁止**；WSL 任务只装 WSL fnm/npm；Windows 清理在 Windows 终端做 |
-| apply 长时间无输出/中断 | `apply \| rg \| head` 导致 SIGPIPE | 直接运行 `./scripts/manage_dotfiles.sh apply`，勿管道截断 |
-| npm 装完找不到命令（Windows） | 全局包装在 `~/AppData/Roaming/npm` 未进 PATH | `_bash_profile_windows.tmpl` 已加入该目录 |
-| `doctor` 仍显示 `~/.deepseek` | 仅有 legacy 状态根 | 运行 apply 触发 run_once 迁移；primary 应为 `~/.codewhale` |
-| WSL 下载 postinstall 失败 | 代理指向 127.0.0.1 而非宿主机 | `chezmoi_setup_proxy` / WSL 检测 nameserver → `http://<host>:7890`（勿在 install/deploy 重复内联逻辑） |
-| 误以为要 commit API Key | config 在用户目录 | chezmoi **不**托管 `~/.codewhale/config.toml` |
-
-### 相关文档与规则
-
-- 用户向说明：[CODEWHALE.md](CODEWHALE.md)（含 WSL 快速流程）
-- 软件清单：[SOFTWARE_LIST.md](SOFTWARE_LIST.md) Layer 4
-- 两阶段部署：[DEPLOY_TWO_PHASE.md](DEPLOY_TWO_PHASE.md)
-- Cursor 规则：`.cursor/rules/codewhale.mdc`
-- 安装检测：`scripts/chezmoi/install_helpers.sh` → `92-install-codewhale`
+- **CodeWhale 已从本仓与 agent-config 移除（勿恢复）**；已删除 `run_once_92-install-codewhale.sh.tmpl`、`docs/CODEWHALE.md`、`.cursor/rules/codewhale.mdc`。
+- **历史**：已删除 `run_once_92-install-deepseek.sh.tmpl`（勿恢复 `cargo install deepseek`）。
+- AI Agent 配置见 [agent-config](../../AI/agent-config)（Claude / Cursor / Codex / Pi + CodeGraph）。
+- WSL：用户明确 WSL 场景时，**禁止**从 WSL 调用 `cmd.exe` / Windows npm 修改 Windows 侧包。
+- 部署：`./deploy.sh` 或 `./scripts/manage_dotfiles.sh apply`（**勿**对 apply 使用 `| rg | head` 管道，会 SIGPIPE 中断）。
 
 ## Pi（已迁入 agent-config，2026-06）
 
@@ -193,13 +138,12 @@ Git for Windows 可能装在 **C:** 或 **D:**（如 `D:\Program Files\Git`）�
 |----|------|
 | Node | **fnm**（Layer 0）；新开 Git Bash 自动 `fnm env`，无需手敲 eval |
 | Python | **uv**（Layer 0）；`uv python install` 默认 **3.12**（`UV_DEFAULT_PYTHON` 覆盖） |
-| CodeWhale 命令 | **`codewhale`**（全小写），非 `CodeWhale` |
 | 多 Windows 用户 | **Administrator / xiaoli** 等各跑一遍 Phase 1 + Phase 2（`AppData` 不共享） |
 | WT 配置 | `settings.json.tmpl` + `detect_windows_git_paths.sh` + apply 后 `chezmoi_sync_windows_terminal_config`（C/D 盘 Git 路径） |
 
 | 问题 | 解法 |
 |------|------|
-| 重启后无 node/codewhale | 确认当前 Windows 用户已 `deploy.sh`；检查 `fnm --version`、`which node` |
+| 重启后无 node | 确认当前 Windows 用户已 `deploy.sh`；检查 `fnm --version`、`which node` |
 | 有 fnm 无 python | `uv python install 3.12` 或重跑 apply 触发 `run_once_00` |
 | 旁路 Node（如 D:\\Software\\nodejs）抢 PATH | 以 `which node` 为准；优先 fnm multishell |
 
@@ -210,13 +154,13 @@ Git for Windows 可能装在 **C:** 或 **D:**（如 `D:\Program Files\Git`）�
 | fnm/uv、dotfiles、Layer 4 CLI（存量双路径，当前保留） | **全部** Agent CLI + MCP/Skills + Harness（含 Pi） |
 | **不**写 Agent 全局配置 | `apply-config` 写入各 Agent 配置 |
 | WT Git Bash 默认 profile（**仅 Windows**） | Cursor 集成终端 Git Bash：`platforms/cursor/settings/editor-settings.jsonc` + `@WINDOWS_GIT_BASH_PATH@`（与 `detect_windows_git_paths.sh` 同源） |
-| `run_once_90`–`93` 字母序（存量） | `bash scripts/install-tools.sh` 在对应 OS/WSL 各执行一次 |
+| `run_once_90` / `91` / `93` 字母序（存量） | `bash scripts/install-tools.sh` 在对应 OS/WSL 各执行一次 |
 
-\* Cursor 仅 GUI 环境（`run_once_93-install-cursor`）。
+\* Cursor 仅 GUI 环境（`run_once_93-install-cursor`）。Pi 仅 Phase 2。CodeWhale 已移除（勿恢复）。
 
 | 问题 | 解法 |
 |------|------|
-| 只改 chezmoi 未装 codewhale | Phase 1：`eval "$(fnm env)" && ./deploy.sh` |
+| 只改 chezmoi 未装 Agent CLI | Phase 1：`eval "$(fnm env)" && ./deploy.sh`；Pi / MCP 再跑 Phase 2 |
 | 只 deploy 无 MCP/全局 skills | Phase 2：agent-config `install-tools.sh` |
 | Cursor Remote SSH 主机名进仓库 | 已从 chezmoi `data` 移除；用 agent-config `config/local.env` |
 
@@ -242,7 +186,7 @@ macOS 默认 `/bin/bash` 为 **3.2**，不支持 `declare -A` / `local -n`。部
 | Phase 1 | `eval "$(fnm env)" && ./deploy.sh` → exit 0；`verify_installation` 通过 5/0/0 |
 | Phase 2 | agent-config `bash scripts/install-tools.sh` → exit 0；`validate-quality` 与 `run-all-tests` 通过 |
 | 代理 | 默认启用：`chezmoi_setup_proxy`；WSL → resolv nameserver:7890；headless Linux → 17890 等端口探测；桌面 → 127.0.0.1:7890 |
-| Layer 4 | claude / codex / codewhale / cursor 均在 PATH |
+| Layer 4 | claude / codex / cursor 均在 PATH（Pi + CodeGraph 见 Phase 2；CodeWhale 已移除） |
 
 | 问题 | 原因 | 解决 |
 |------|------|------|

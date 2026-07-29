@@ -43,12 +43,11 @@
 - Windows 只通过 Git Bash 使用 bash，不涉及 zsh
 - 所有模板中的 claude-mem 逻辑保持一致
 
-## CodeWhale（终端 AI，Layer 4）
+## CodeWhale / DeepSeek（已移除）
 
-- 安装：`.chezmoi/run_once_92-install-codewhale.sh.tmpl`（`npm install -g codewhale`；已移除 `install-deepseek`）；agent-config `install-tools.sh` 亦可安装（存量双路径）
-- WSL：fnm/npm 全局安装；勿从 WSL 修改 Windows npm；部署用 `./deploy.sh` 或 `manage_dotfiles.sh apply`
-- 状态：`~/.codewhale/` 默认；`~/.deepseek/` 只读回退；7890 代理
-- 文档：`docs/CODEWHALE.md`、`docs/PROJECT_AGENT_MEMORY.md`
+- **CodeWhale 已从本仓与 agent-config 移除（勿恢复）**；已删除 `run_once_92-install-codewhale`、`docs/CODEWHALE.md`、`.cursor/rules/codewhale.mdc`。
+- **历史**：已删除 `run_once_92-install-deepseek.sh.tmpl`（勿恢复 cargo 安装路径）。
+- AI Agent 配置见 [agent-config](../../AI/agent-config)（Claude / Cursor / Codex / Pi + CodeGraph）。
 
 ## Pi
 
@@ -61,7 +60,7 @@
 | Agent | 识别文件 |
 |-------|---------|
 | Claude Code | `CLAUDE.md`（本文件） |
-| Cursor | `.cursor/rules/project-rules.mdc`、`.cursor/rules/codewhale.mdc` |
+| Cursor | `.cursor/rules/project-rules.mdc` |
 | GitHub Copilot / Codex | `.github/copilot-instructions.md` |
 | 项目 Agent 记忆（可提交） | `docs/PROJECT_AGENT_MEMORY.md`（权威）、`docs/PROJECT_MEMORY.md`（紧凑） |
 
@@ -92,7 +91,7 @@ Layer 0: run_once_00-install-version-managers      ← fnm + uv
 Layer 1: install-common-tools, install-git
 Layer 2: install-zsh, install-starship, install-nerd-fonts
 Layer 3: install-neovim                             ← 仅安装二进制
-Layer 4: run_once_90-{claude-code}, _91-{codex}, _92-{codewhale}
+Layer 4: run_once_90-{claude-code}, _91-{codex}
          run_once_93-install-cursor                 ← 仅 GUI 环境
 Layer 5: install-tmux + run_on_{linux,darwin}；Windows：`install-rmux`、`install-oh-my-posh`、`install-windows-terminal`
 ```
@@ -135,7 +134,7 @@ Layer 0: fnm/uv（版本管理器，必须最先）
 Layer 1: git + common-tools
 Layer 2: zsh（二进制）+ OMZ/插件（`.chezmoiexternal.toml.tmpl`，linux/darwin）+ starship + nerd-fonts
 Layer 3: neovim（仅安装二进制，配置由其他项目管理）
-Layer 4: claude-code + codex + codewhale（AI agent CLI，仅二进制）
+Layer 4: claude-code + codex（AI agent CLI，仅二进制）
 Layer 4+: cursor（仅 GUI 环境，Linux/WSL 检测 DISPLAY）
 Layer 5: tmux + 平台特定（linux/darwin/windows 下的 run_on_*）
 

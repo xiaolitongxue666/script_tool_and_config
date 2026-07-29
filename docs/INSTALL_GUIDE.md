@@ -169,7 +169,7 @@ STRICT_AGENT_PREFLIGHT=1 bash scripts/install-tools.sh
 ./scripts/manage_dotfiles.sh apply  # 应用变更
 ```
 
-**WSL + CodeWhale（DeepSeek-TUI 已迁移）**：apply 前建议 `eval "$(fnm env)"`；`run_once_92-install-codewhale` 会在 WSL fnm/npm 全局安装 `codewhale` 并迁移 `~/.deepseek` → `~/.codewhale`。勿从 WSL 修改 Windows npm。详见 [CODEWHALE.md](CODEWHALE.md) 与 [PROJECT_AGENT_MEMORY.md](PROJECT_AGENT_MEMORY.md)。
+**WSL**：apply 前建议 `eval "$(fnm env)"`。Layer 4 为本仓 `90` claude → `91` codex → `93` cursor；Pi + CodeGraph 在 agent-config Phase 2；**CodeWhale 已移除（勿恢复）**。勿从 WSL 修改 Windows npm。详见 [DEPLOY_TWO_PHASE.md](DEPLOY_TWO_PHASE.md) 与 [PROJECT_AGENT_MEMORY.md](PROJECT_AGENT_MEMORY.md)。
 
 **注意**：运行 apply 时不要使用 `| head` / `| rg` 管道截断输出，否则可能 SIGPIPE 中断 chezmoi。
 

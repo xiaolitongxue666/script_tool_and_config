@@ -37,7 +37,7 @@ get_software_policy() {
         zsh|starship|tmux|alacritty|lazyssh|i3wm|dwm) echo "latest" ;;
         oh-my-posh|windows-terminal|install-windows-terminal) echo "latest" ;;
         ghostty|connect|maccy|yabai|skhd) echo "latest" ;;
-        90-install-claude-code|91-install-codex|92-install-codewhale|93-install-cursor) echo "latest" ;;
+        90-install-claude-code|91-install-codex|93-install-cursor) echo "latest" ;;
         install-rmux|rmux)         echo "pinned:0.5.0" ;;
         neovim|install-neovim)     echo "minimum:0.11.0" ;;
         nerd-fonts|install-nerd-fonts) echo "skip" ;;
@@ -177,13 +177,6 @@ get_npm_global_spec() {
     case "$name" in
         90-install-claude-code) echo "@anthropic-ai/claude-code" ;;
         91-install-codex)       echo "@openai/codex" ;;
-        92-install-codewhale)
-            if [[ -n "${CODEWHALE_NPM_VERSION:-}" ]]; then
-                echo "codewhale@${CODEWHALE_NPM_VERSION}"
-            else
-                echo "codewhale"
-            fi
-            ;;
         *) echo "" ;;
     esac
 }

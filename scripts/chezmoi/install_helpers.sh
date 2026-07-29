@@ -261,7 +261,7 @@ get_software_category() {
         system-basic-env)             echo "系统基础" ;;
         yabai|skhd|maccy)             echo "macOS 专属" ;;
         i3wm|dwm|arch-base-packages|aur-helper|configure-pacman)  echo "Linux 专属" ;;
-        90-install-claude-code|91-install-codex|92-install-codewhale|93-install-cursor)  echo "AI 工具" ;;
+        90-install-claude-code|91-install-codex|93-install-cursor)  echo "AI 工具" ;;
         *)                            echo "其他" ;;
     esac
 }
@@ -407,29 +407,6 @@ check_script_software_installed() {
             ;;
         91-install-codex|codex)
             if check_command_exists "codex"; then
-                return 0
-            fi
-            return 1
-            ;;
-        92-install-codewhale|codewhale)
-            # WSL：须 fnm/npm 全局存在 codewhale，不能仅因 Windows 互操作 PATH 判定为已安装
-            if grep -qEi "Microsoft|WSL" /proc/version 2>/dev/null || [[ -n "${WSL_DISTRO_NAME:-}" ]]; then
-                local npm_root cw_path
-                cw_path="$(command -v codewhale 2>/dev/null || true)"
-                case "${cw_path}" in
-                    /mnt/c/*|/mnt/host/c/*|*AppData/Roaming/npm*) return 1 ;;
-                esac
-                if command -v npm &>/dev/null; then
-                    npm_root="$(npm root -g 2>/dev/null || true)"
-                    if [[ -n "${npm_root}" && -d "${npm_root}/codewhale" ]] \
-                        && check_command_exists "codewhale" \
-                        && check_command_exists "codewhale-tui"; then
-                        return 0
-                    fi
-                fi
-                return 1
-            fi
-            if check_command_exists "codewhale" && check_command_exists "codewhale-tui"; then
                 return 0
             fi
             return 1

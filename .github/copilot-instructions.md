@@ -36,13 +36,13 @@ Template mapping:
 - `.chezmoi/dot_bashrc.tmpl` — Linux bash + Windows Git Bash
 - `.chezmoi/run_on_windows/_bash_profile_windows.tmpl` — Windows login shell
 
-## CodeWhale（replaces DeepSeek-TUI)
+## CodeWhale / DeepSeek (removed)
 
-- Install: `run_once_92-install-codewhale.sh.tmpl` via `npm install -g codewhale` (WSL: fnm global; not Windows interop npm).
+- **CodeWhale is fully removed from this repo and agent-config** (do not restore). Deleted: `run_once_92-install-codewhale`, `docs/CODEWHALE.md`, `.cursor/rules/codewhale.mdc`.
+- Do **not** restore `cargo install deepseek` or `run_once_92-install-deepseek` (removed).
+- AI Agent config: agent-config (Claude / Cursor / Codex / Pi + CodeGraph).
 - WSL: Do **not** modify Windows npm from WSL (`cmd.exe npm uninstall`, etc.).
 - Deploy: `./deploy.sh` or `./scripts/manage_dotfiles.sh apply` — do not pipe apply through `head`/`rg` (SIGPIPE).
 - OMZ/plugins: `.chezmoi/.chezmoiexternal.toml.tmpl` (linux/darwin); common-tools packages: `scripts/chezmoi/packages.conf`.
-- Binaries: `codewhale` + `codewhale-tui`; state root `~/.codewhale` (legacy `~/.deepseek` read-only fallback).
-- Do **not** use `cargo install deepseek` or `run_once_92-install-deepseek` (removed).
-- Agent notes: `docs/PROJECT_AGENT_MEMORY.md`, `docs/PROJECT_MEMORY.md`, `docs/CODEWHALE.md`.
+- Agent notes: `docs/PROJECT_AGENT_MEMORY.md`, `docs/PROJECT_MEMORY.md`.
 - Pi: [agent-config/docs/PI.md](../../AI/agent-config/docs/PI.md) (Phase 2 only; not in this repo).

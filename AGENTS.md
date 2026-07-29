@@ -29,11 +29,10 @@
 
 - 部署只能通过 chezmoi 应用模板的方式进行。
 
-## 项目 Agent 记忆与 CodeWhale
+## 项目 Agent 记忆
 
-- **可提交记忆**（本仓库）：[`docs/PROJECT_AGENT_MEMORY.md`](docs/PROJECT_AGENT_MEMORY.md) — 含 CodeWhale / WSL 排错；Cursor 细则见 [`.cursor/rules/codewhale.mdc`](.cursor/rules/codewhale.mdc)。
-- **用户向文档**：[`docs/CODEWHALE.md`](docs/CODEWHALE.md)（WSL 快速流程）。
-- **已删除**：`.chezmoi/run_once_92-install-deepseek.sh.tmpl`（勿恢复 cargo 安装路径）。
+- **可提交记忆**（本仓库）：[`docs/PROJECT_AGENT_MEMORY.md`](docs/PROJECT_AGENT_MEMORY.md)（权威）、[`docs/PROJECT_MEMORY.md`](docs/PROJECT_MEMORY.md)（紧凑）。
+- **已删除**：`.chezmoi/run_once_92-install-deepseek.sh.tmpl`、`run_once_92-install-codewhale`（勿恢复）。**CodeWhale 已从本仓与 agent-config 移除（勿恢复）**；AI Agent 配置见 agent-config（Claude / Cursor / Codex / Pi + CodeGraph）。
 - **claude-mem 运行时数据**：`.claude-mem/` 仍 gitignore，与可提交的 `PROJECT_AGENT_MEMORY.md` 分工不同。
 
 ## 构建/检查/测试命令
@@ -144,7 +143,7 @@ Layer 0: run_once_00-install-version-managers  ← fnm/uv（必须最先）
 Layer 1: run_once_install-git, run_once_install-common-tools
 Layer 2: run_once_install-zsh, run_once_install-starship, run_once_install-nerd-fonts
 Layer 3: run_once_install-neovim（仅安装二进制，配置由其他项目管理）
-Layer 4: run_once_90-install-claude-code, run_once_91-install-codex, run_once_92-install-codewhale（AI agent CLI，仅二进制）
+Layer 4: run_once_90-install-claude-code, run_once_91-install-codex（AI agent CLI，仅二进制）
 Layer 4+: run_once_93-install-cursor（仅 GUI 环境）
 Layer 5: run_once_install-tmux + run_on_linux/* + run_on_darwin/*；Windows：run_on_windows/install-rmux、install-windows-terminal、install-oh-my-posh
 ```
