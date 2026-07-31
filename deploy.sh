@@ -5,7 +5,7 @@
 # 应用所有配置到当前系统
 # ============================================
 
-set -e
+set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 COMMON_SH="${SCRIPT_DIR}/scripts/common.sh"
@@ -291,7 +291,7 @@ log_info ""
 log_info "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 log_info "配置应用说明"
 log_info "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-log_info "chezmoi 会自动根据当前系统（$PLATFORM_NAME）应用对应的配置："
+log_info "chezmoi 会自动根据当前系统（${PLATFORM_NAME}）应用对应的配置："
 log_info "  ✓ 跨平台配置 → 应用到所有系统（Linux/macOS/Windows）"
 log_info "  ✓ $PLATFORM_NAME 特定配置 → 仅应用到当前系统"
 log_info "  ✓ 模板文件（.tmpl）→ 根据系统变量自动生成对应内容"
@@ -412,7 +412,7 @@ if [ -z "$MANAGED_FILES" ]; then
         "$FORCE_APPLY_SCRIPT" || log_warning "强制应用脚本执行失败"
     else
         log_warning "强制应用脚本不可用，尝试直接应用..."
-        log_info "chezmoi 将根据当前系统（$PLATFORM_NAME）自动应用对应的配置："
+        log_info "chezmoi 将根据当前系统（${PLATFORM_NAME}）自动应用对应的配置："
         log_info "  ✓ Cross-platform configs (Git, Neovim, Starship, Tmux, etc.)"
         log_info "  ✓ $PLATFORM_NAME 特定配置（仅当前系统）"
         log_info "  ✓ 模板文件会根据系统变量自动生成对应内容"
@@ -457,7 +457,7 @@ if [ -z "$MANAGED_FILES" ]; then
     fi
 else
     log_info "发现已管理的文件，直接应用配置..."
-    log_info "chezmoi 将根据当前系统（$PLATFORM_NAME）自动应用对应的配置："
+    log_info "chezmoi 将根据当前系统（${PLATFORM_NAME}）自动应用对应的配置："
     log_info "  ✓ 跨平台配置（Git, Neovim, Starship, Alacritty, Tmux 等）"
     log_info "  ✓ $PLATFORM_NAME 特定配置（仅当前系统）"
     log_info "  ✓ 模板文件会根据系统变量自动生成对应内容"

@@ -194,7 +194,7 @@ macOS 默认 `/bin/bash` 为 **3.2**，不支持 `declare -A` / `local -n`。部
 **脚本约束（新增/修改脚本时）**：
 - `$变量` 后紧跟中文/全角字符（`【】（）` 等）必须写 `${变量}`
 - `[ -f glob ]` 类检查用 `compgen -G` 替代（多文件 glob 不会 too many arguments）
-- 回归检查（已固化到 `tests/test_syntax.sh`，勿用 `grep -P` — macOS BSD grep 不支持）：`LC_ALL=C grep -rn '\$[a-zA-Z_][a-zA-Z0-9_]*[一-龥【】（）]' scripts/ .chezmoi/ --include='*.sh' --include='*.tmpl'`
+- 回归检查（已固化到 `tests/test_syntax.sh`，扫全仓含根目录 `install.sh`/`deploy.sh`；勿用 `grep -P` — macOS BSD grep 不支持）：`LC_ALL=C grep -rn '\$[a-zA-Z_][a-zA-Z0-9_]*[一-龥【】（）]' . --include='*.sh' --include='*.tmpl'`（从仓库根执行）
 
 ## WSL 两阶段部署实测（2026-05-29）
 

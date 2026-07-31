@@ -348,7 +348,7 @@ ensure_directory() {
 
 - **规则**：`$变量` 后紧跟中文/全角字符（`【】（）`、`）`、`：` 等）时，**必须**写 `${变量}` 花括号形式。
 - **原因**：macOS（BSD libc）在 UTF-8 locale 下，`isalpha()` 会把 CJK 字符首字节（如 `】` 的 `0xe3`）判为字母，Bash 将变量名错扩为 `$var` + 完整 UTF-8 字节序列，`set -u` 下报 `unbound variable` 崩溃（2026-08 实测：`install.sh [5/6]` 软件报告因此崩溃）。Linux/WSL（glibc）通常不受影响，但为跨平台一致**统一遵守**。
-- **回归检查**（已固化到 `tests/test_syntax.sh`，勿用 `grep -P` — macOS BSD grep 不支持）：`LC_ALL=C grep -rn '\$[a-zA-Z_][a-zA-Z0-9_]*[一-龥【】（）]' scripts/ .chezmoi/ --include='*.sh' --include='*.tmpl'`
+- **回归检查**（已固化到 `tests/test_syntax.sh`，扫全仓含根目录 `install.sh`/`deploy.sh`；勿用 `grep -P` — macOS BSD grep 不支持）：`LC_ALL=C grep -rn '\$[a-zA-Z_][a-zA-Z0-9_]*[一-龥【】（）]' . --include='*.sh' --include='*.tmpl'`（从仓库根执行）
 
 ### 平台特定代码
 

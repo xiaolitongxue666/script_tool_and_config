@@ -6,7 +6,7 @@
 # 核心功能：智能软件检查、配置差异检测和应用
 # ============================================
 
-set -e
+set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 COMMON_SH="${SCRIPT_DIR}/scripts/common.sh"

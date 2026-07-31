@@ -85,8 +85,8 @@ while IFS= read -r -d '' file; do
     else
         LOCALE_PASSED=$((LOCALE_PASSED + 1))
     fi
-done < <(find "$PROJECT_ROOT/scripts" "$PROJECT_ROOT/.chezmoi" \( -name "*.sh" -o -name "*.tmpl" \) \
-    -not -path "*/node_modules/*" -print0 2>/dev/null || true)
+done < <(find "$PROJECT_ROOT" \( -name "*.sh" -o -name "*.tmpl" \) \
+    -not -path "*/.git/*" -not -path "*/node_modules/*" -not -path "*/target/*" -print0 2>/dev/null || true)
 
 echo ""
 echo "=========================================="
