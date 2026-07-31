@@ -178,7 +178,7 @@ while true; do
     select opt in "${options[@]}"; do
         case $opt in
             "设置环境变量")
-                echo -e "\e[33m您选择了 $REPLY，即 $opt\e[0m"
+                echo -e "\e[33m您选择了 ${REPLY}，即 $opt\e[0m"
 
                 sudo grep -qxF 'Defaults    secure_path = /sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin' /etc/sudoers ||
                 sudo `which sed` -i '/^Defaults    secure_path = /s/$/:\/usr\/local\/sbin:\/usr\/local\/bin/' /etc/sudoers &&
@@ -195,14 +195,14 @@ while true; do
                 break
             ;;
             "解锁 CPU 调速器")
-                echo -e "\e[33m您选择了 $REPLY，即 $opt\e[0m"
+                echo -e "\e[33m您选择了 ${REPLY}，即 $opt\e[0m"
                 grep -qxF 'for (( i=0; i<`nproc`; i++ )); do sudo sh -c "echo performance > /sys/devices/system/cpu/cpu${i}/cpufreq/scaling_governor"; done 2> /dev/null' ~/.bashrc ||
                 echo 'for (( i=0; i<`nproc`; i++ )); do sudo sh -c "echo performance > /sys/devices/system/cpu/cpu${i}/cpufreq/scaling_governor"; done 2> /dev/null' >> ~/.bashrc
                 print_eval_rc $? "${opt}"
                 break
             ;;
             "安装 Linux 先决条件包 (CentOS)")
-                echo -e "\e[33m您选择了 $REPLY，即 $opt\e[0m"
+                echo -e "\e[33m您选择了 ${REPLY}，即 $opt\e[0m"
                 sudo yum --enablerepo=extras install -y epel-release &&
                 sudo yum install -y pkgconfig git redhat-lsb-core make gcc &&
                 # sudo yum install -y yasm
@@ -211,7 +211,7 @@ while true; do
                 break
             ;;
             "安装 Linux 先决条件包 (Ubuntu)")
-                echo -e "\e[33m您选择了 $REPLY，即 $opt\e[0m"
+                echo -e "\e[33m您选择了 ${REPLY}，即 $opt\e[0m"
                 sudo apt-get install -y pkg-config git gcc &&
                 # sudo apt-get install -y yasm
                 install_yasm
@@ -219,20 +219,20 @@ while true; do
                 break
             ;;
             "安装 NVMe CLI")
-                echo -e "\e[33m您选择了 $REPLY，即 $opt\e[0m"
+                echo -e "\e[33m您选择了 ${REPLY}，即 $opt\e[0m"
                 git clone -b v1.6 --depth=1 https://gitee.com/mirrors/nvme-cli.git &&
                 cd nvme-cli*/ && sudo make && sudo make install && cd ..
                 print_eval_rc $? "${opt}"
                 break
             ;;
             "安装 Libxcoder")
-                echo -e "\e[33m您选择了 $REPLY，即 $opt\e[0m"
+                echo -e "\e[33m您选择了 ${REPLY}，即 $opt\e[0m"
                 install_libxcoder
                 print_eval_rc $? "Libxcoder 安装"
                 break
             ;;
             安装\ FFmpeg-*)
-                echo -e "\e[33m您选择了 $REPLY，即 $opt\e[0m"
+                echo -e "\e[33m您选择了 ${REPLY}，即 $opt\e[0m"
                 # 从 $opt 获取 FFmpeg 版本号
                 ver_num=$(echo ${opt} | grep -Poh '安装 FFmpeg-\K.*')
                 install_ffmpeg_ver $ver_num
@@ -240,7 +240,7 @@ while true; do
                 break
             ;;
             "固件更新")
-                echo -e "\e[33m您选择了 $REPLY，即 $opt\e[0m"
+                echo -e "\e[33m您选择了 ${REPLY}，即 $opt\e[0m"
                 sudo tar -zxf $fw_pack
                 cd ${fw_pack%.tar.gz} && sudo ./t4xx_auto_upgrade.sh &&
                 cd .. &&

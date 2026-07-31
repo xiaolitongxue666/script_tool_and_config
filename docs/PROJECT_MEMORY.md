@@ -24,3 +24,4 @@
 22) **`/commit-push` + `/summary-memory`**：`git-smart-commit` / `summary-project-memory`；写入 `docs/PROJECT_MEMORY.md`；备份 `.project-memory-backups/`（保留 2 份）。
 23) **SSH GitHub 密钥**：`github.com` / `xiaolitongxue-vps` 按本机**已有文件**写 `IdentityFile`（personal 优先）；缺文件不写，避免 `no such identity`；`identity_file` 仅非 GitHub Host。
 24) **VPS**：Host `xiaolitongxue-vps`；仅用 git push/pull；dirty 时 `reset --hard` + `clean -fd` → Phase1/2；验收 `diagnose_vps_ssh_pi.sh`。
+25) **macOS UTF-8 locale 变量名**：`$var` 后紧跟中文/全角标点（`【】（）` 等）须写 `${var}`；BSD libc 把 CJK 字符首字节当字母 → 变量名错扩 → `set -u` 报 unbound（2026-08 修 `install_helpers.sh [5/6]` 报告 + `container_install.sh`/`run.sh`/`check_and_fix_encoding.sh`/`install_netint_t4xx.sh`/`lazyssh tmpl` 等 20 处）；glob 检查用 `compgen -G` 勿 `[ -f glob 2>/dev/null ]`；回归已固化 `tests/test_syntax.sh`（勿用 `grep -P`，macOS 不支持）。

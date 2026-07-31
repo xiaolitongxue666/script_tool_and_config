@@ -180,7 +180,7 @@ backup_ssh_files() {
 
     # 检查 SSH 目录
     if [[ ! -d "$ssh_dir" ]]; then
-        log_warning "SSH 目录不存在: $ssh_dir，跳过备份"
+        log_warning "SSH 目录不存在: ${ssh_dir}，跳过备份"
         return 1
     fi
 
@@ -228,7 +228,7 @@ ensure_ssh_key_loaded() {
 
     # 检查私钥文件是否存在
     if [[ ! -f "$private_key" ]]; then
-        log_warning "私钥文件不存在: $private_key，跳过加载"
+        log_warning "私钥文件不存在: ${private_key}，跳过加载"
         return 1
     fi
 
@@ -310,14 +310,14 @@ setup_ssh_agent_forwarding() {
         log_info "3. 或从 Windows 访问 WSL2 项目目录后运行 run-wsl.sh"
         return 1
     else
-        log_warning "不支持的操作系统: $OSTYPE，跳过 SSH Agent Forwarding"
+        log_warning "不支持的操作系统: ${OSTYPE}，跳过 SSH Agent Forwarding"
         return 1
     fi
 
     # 检查套接字文件是否存在（Linux 需要检查，macOS 由 Docker Desktop 处理）
     if [[ "$OSTYPE" == "linux-gnu"* ]]; then
         if [[ ! -S "$ssh_sock_path" ]]; then
-            log_warning "SSH Agent 套接字不存在: $ssh_sock_path，跳过 SSH Agent Forwarding"
+            log_warning "SSH Agent 套接字不存在: ${ssh_sock_path}，跳过 SSH Agent Forwarding"
             return 1
         fi
     fi

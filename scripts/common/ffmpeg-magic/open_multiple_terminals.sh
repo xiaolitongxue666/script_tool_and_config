@@ -40,7 +40,7 @@ set -x
 #     select opt in "${options[@]}"; do
 #         case $opt in
 #             "设置输入多路数量 (1~8)")
-#                 echo -e "\e[33m您选择了 $REPLY，即 $opt\e[0m"
+#                 echo -e "\e[33m您选择了 ${REPLY}，即 $opt\e[0m"
 #
 #                 read -p "按 [1~8] 确认使用多路输入数量。 " -n 1 -r
 #                 echo ""

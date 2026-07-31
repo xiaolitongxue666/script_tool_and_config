@@ -14,6 +14,8 @@
 
 修改 Shell 配置时，需要根据目标平台选择对应的模板文件。Fish Shell 已不再使用。
 
+**变量展开（跨平台强制）**：`$var` 后紧跟中文/全角标点（如 `【】（）`）必须写 `${var}`。macOS UTF-8 locale 下 Bash 会把 CJK 字符首字节当变量名字符，`set -u` 下报 `unbound variable` 崩溃（2026-08 修 install_helpers.sh [5/6] 报告；详见 AGENTS.md「变量展开与全角标点」）。
+
 ### Windows rmux（与 tmux 分工）
 
 - **仅 Windows**：`run_on_windows/run_once_install-rmux.sh.tmpl` 安装 rmux v0.5.0；`dot_rmux.conf.tmpl` → `~/.rmux.conf`（由 tmux 配置精简，**无插件**）。

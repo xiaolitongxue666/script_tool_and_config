@@ -35,7 +35,7 @@ if [[ "$PLATFORM" != "linux" ]]; then
     exit 0
 fi
 
-echo "[INFO] 安装 lazyssh（OS: Linux, 包管理器: $PACKAGE_MANAGER）..."
+echo "[INFO] 安装 lazyssh（OS: Linux, 包管理器: ${PACKAGE_MANAGER}）..."
 
 if [[ "$PACKAGE_MANAGER" == "pacman" ]]; then
     # Arch: 先尝试官方/archlinuxcn，再尝试 AUR
@@ -46,7 +46,7 @@ if [[ "$PACKAGE_MANAGER" == "pacman" ]]; then
     for aur in yay paru; do
         if command -v "$aur" &>/dev/null; then
             if "$aur" -S --noconfirm lazyssh-bin 2>/dev/null || "$aur" -S --noconfirm lazyssh 2>/dev/null; then
-                echo "[SUCCESS] lazyssh 安装完成（$aur）"
+                echo "[SUCCESS] lazyssh 安装完成（${aur}）"
                 exit 0
             fi
         fi
@@ -59,6 +59,6 @@ elif [[ "$PACKAGE_MANAGER" == "apt" ]]; then
         log_warning "apt 源中可能无 lazyssh，跳过；可从 GitHub Releases 手动安装"
     fi
 else
-    log_warning "未支持的包管理器 $PACKAGE_MANAGER，跳过 lazyssh"
+    log_warning "未支持的包管理器 ${PACKAGE_MANAGER}，跳过 lazyssh"
 fi
 {{- end -}}

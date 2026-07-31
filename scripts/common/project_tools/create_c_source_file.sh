@@ -64,7 +64,8 @@ main() {
             echo ""
             echo "#endif /* _${header_guard}_H_ */"
         } >> "$file_path"
-        log_success "已创建头文件: $file_path（包含头文件保护）"
+        # ${file_path} 花括号：macOS UTF-8 locale 下 "$file_path" 后紧跟 （ 会吞掉其首字节 → set -u unbound
+        log_success "已创建头文件: ${file_path}（包含头文件保护）"
     else
         log_success "已创建源文件: $file_path"
     fi

@@ -277,7 +277,7 @@ apply_config_with_chezmoi() {
         CHEZMOI_SOURCE_PATH=$(chezmoi source-path)
         log_info "chezmoi 识别的源路径: $CHEZMOI_SOURCE_PATH"
         if [ "$CHEZMOI_SOURCE_PATH" != "$CHEZMOI_SOURCE_DIR" ]; then
-            log_warning "chezmoi 源路径不匹配: 期望 $CHEZMOI_SOURCE_DIR，实际 $CHEZMOI_SOURCE_PATH"
+            log_warning "chezmoi 源路径不匹配: 期望 ${CHEZMOI_SOURCE_DIR}，实际 $CHEZMOI_SOURCE_PATH"
         fi
     else
         log_warning "chezmoi source-path 命令失败"
@@ -576,7 +576,7 @@ ZPROFILE_EOF
                         fi
                     fi
                 else
-                    log_warning "chezmoi 配置文件不存在: $CHEZMOI_CONFIG_FILE，无法应用模板"
+                    log_warning "chezmoi 配置文件不存在: ${CHEZMOI_CONFIG_FILE}，无法应用模板"
                     # 对于 .bashrc，如果配置文件不存在，至少创建一个基本版本
                     if [ "$config_name" = ".bashrc" ]; then
                         log_info "为 .bashrc 创建基本配置..."
@@ -782,7 +782,7 @@ ZPROFILE_EOF
                         fi
                     fi
                 else
-                    log_warning "chezmoi 配置文件不存在: $CHEZMOI_CONFIG_FILE，跳过 $rel_path"
+                    log_warning "chezmoi 配置文件不存在: ${CHEZMOI_CONFIG_FILE}，跳过 $rel_path"
                 fi
             else
                 log_info "配置已存在: $dest_file"
@@ -1026,7 +1026,8 @@ install_tpm() {
                 # 提取插件名称（例如：catppuccin/tmux -> catppuccin-tmux）
                 PLUGIN_NAME=$(echo "$plugin" | sed 's/\//-/g')
                 PLUGIN_DIR="/root/.tmux/plugins/$PLUGIN_NAME"
-                if [ -d "$PLUGIN_DIR" ] && [ -f "$PLUGIN_DIR"/*.tmux 2>/dev/null ] || [ -f "$PLUGIN_DIR"/*.sh 2>/dev/null ]; then
+                # compgen -G：glob 多匹配不会 too many arguments（勿用 [ -f glob 2>/dev/null ]）
+                if [ -d "$PLUGIN_DIR" ] && (compgen -G "$PLUGIN_DIR"/*.tmux >/dev/null 2>&1 || compgen -G "$PLUGIN_DIR"/*.sh >/dev/null 2>&1); then
                     log_info "  插件已安装: $plugin"
                 else
                     log_info "  安装插件: $plugin -> $PLUGIN_NAME"
@@ -1036,7 +1037,7 @@ install_tpm() {
                         if git clone "$GITHUB_URL" "$PLUGIN_DIR" 2>&1; then
                             log_success "  插件安装成功: $plugin"
                         else
-                            log_warning "  插件安装失败: $plugin（需要在 tmux 中按 prefix + I 手动安装）"
+                            log_warning "  插件安装失败: ${plugin}（需要在 tmux 中按 prefix + I 手动安装）"
                         fi
                     fi
                 fi

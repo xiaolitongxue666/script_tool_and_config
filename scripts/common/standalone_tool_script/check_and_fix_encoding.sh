@@ -123,7 +123,7 @@ fix_file() {
 
     # 读取文件内容
     if [[ "$encoding" != "utf-8" ]] && [[ "$encoding" != "us-ascii" ]] && [[ "$encoding" != "binary" ]]; then
-        echo -e "${YELLOW}  警告: 文件编码为 $encoding，尝试转换为 UTF-8${NC}"
+        echo -e "${YELLOW}  警告: 文件编码为 ${encoding}，尝试转换为 UTF-8${NC}"
         # 尝试使用 iconv 转换（如果可用）
         if command -v iconv >/dev/null 2>&1; then
             if iconv -f "$encoding" -t "UTF-8" "$file" > "$temp_file" 2>/dev/null; then

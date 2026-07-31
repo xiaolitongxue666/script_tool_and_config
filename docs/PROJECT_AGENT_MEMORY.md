@@ -179,6 +179,23 @@ macOS 默认 `/bin/bash` 为 **3.2**，不支持 `declare -A` / `local -n`。部
 - `set -u` 下勿对可能为空的数组做 `"${arr[@]}"` 参数展开；用字符串或 `[[ ${#arr[@]} -gt 0 ]]` 守卫
 - 诊断/审计 zsh 源路径以 `config_mappings.sh` 为准，勿硬编码过时文件名
 
+## macOS UTF-8 locale 变量名解析（2026-08 实测修复）
+
+`$var` 后紧跟中文/全角标点时，macOS（BSD libc）UTF-8 locale 下 Bash 会把 CJK 字符首字节并入变量名，导致 `set -u` 崩溃。
+
+| 问题 | 现象 | 解决 |
+|------|------|------|
+| `install.sh [5/6]` 报告崩溃 | `install_helpers.sh:724 "【$cat】"` → `cat<字节>: unbound variable`；`test_install_report_status.sh` 最后一项 FAIL（exit 1） | `"【${cat}】"` 花括号（已修） |
+| 同类隐患 20 处 | `$var，` / `$var（` / `$var）` 全角标点模式（container_install.sh、run.sh、check_and_fix_encoding.sh、install_netint_t4xx.sh、lazyssh tmpl 等） | 全部改 `${var}`（已修，含首次 5 处） |
+| `container_install.sh:1029` | `[ -f glob 2>/dev/null ]` 重定向写在 `[ ]` 内无效，glob 多匹配报 too many arguments | 改用 `compgen -G`（已修） |
+
+**根因**：BSD libc `isalpha()` 在 UTF-8 locale 下把 CJK 字符首字节（如 `】` 的 `0xe3`）判为字母，Bash 将 `$cat】` 解析为变量 `cat` + `】` 完整 UTF-8 字节序列（`cat\xe3\x80\x91`），该变量未定义 → `set -u` unbound。Linux/WSL（glibc）通常不受影响，但统一遵守。
+
+**脚本约束（新增/修改脚本时）**：
+- `$变量` 后紧跟中文/全角字符（`【】（）` 等）必须写 `${变量}`
+- `[ -f glob ]` 类检查用 `compgen -G` 替代（多文件 glob 不会 too many arguments）
+- 回归检查（已固化到 `tests/test_syntax.sh`，勿用 `grep -P` — macOS BSD grep 不支持）：`LC_ALL=C grep -rn '\$[a-zA-Z_][a-zA-Z0-9_]*[一-龥【】（）]' scripts/ .chezmoi/ --include='*.sh' --include='*.tmpl'`
+
 ## WSL 两阶段部署实测（2026-05-29）
 
 | 项 | 结果 |

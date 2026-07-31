@@ -87,7 +87,7 @@ check_container_or_image() {
             USE_CONTAINER=true
             return 0
         else
-            log_info "发现已停止的容器: $CONTAINER_NAME，启动它..."
+            log_info "发现已停止的容器: ${CONTAINER_NAME}，启动它..."
             docker start "$CONTAINER_NAME" >/dev/null 2>&1
             sleep 2
             USE_CONTAINER=true

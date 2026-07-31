@@ -71,13 +71,31 @@ while IFS= read -r -d '' file; do
     rm -f "$tmp_file"
 done < <(find "$PROJECT_ROOT/.chezmoi" -name "*.tmpl" -print0 2>/dev/null || true)
 
+# ============================================
+# macOS UTF-8 locale 变量名回归检查
+# "$var" 后紧跟中文/全角标点 → 变量名错扩 → set -u unbound
+# 规则见 AGENTS.md「变量展开与全角标点」（2026-08）
+# ============================================
+LOCALE_PASSED=0
+LOCALE_FAILED=0
+while IFS= read -r -d '' file; do
+    if LC_ALL=C grep -n '\$[a-zA-Z_][a-zA-Z0-9_]*[一-龥【】（）]' "$file" 2>/dev/null; then
+        echo "[FAIL] $file: \$var 后紧跟中文/全角标点，应写 \${var}"
+        LOCALE_FAILED=$((LOCALE_FAILED + 1))
+    else
+        LOCALE_PASSED=$((LOCALE_PASSED + 1))
+    fi
+done < <(find "$PROJECT_ROOT/scripts" "$PROJECT_ROOT/.chezmoi" \( -name "*.sh" -o -name "*.tmpl" \) \
+    -not -path "*/node_modules/*" -print0 2>/dev/null || true)
+
 echo ""
 echo "=========================================="
 echo "Summary"
 echo "=========================================="
 echo ".sh files: $PASSED passed, $FAILED failed"
 echo ".tmpl files: $TMPL_PASSED passed, $TMPL_FAILED failed"
-echo "Total: $((PASSED + TMPL_PASSED)) passed, $((FAILED + TMPL_FAILED)) failed"
+echo "locale: $LOCALE_PASSED passed, $LOCALE_FAILED failed"
+echo "Total: $((PASSED + TMPL_PASSED)) passed, $((FAILED + TMPL_FAILED + LOCALE_FAILED)) failed"
 
 if [ -n "$FAILED_FILES" ]; then
     echo ""
@@ -85,4 +103,4 @@ if [ -n "$FAILED_FILES" ]; then
     printf "%b" "$FAILED_FILES"
 fi
 
-exit $((FAILED + TMPL_FAILED))
+exit $((FAILED + TMPL_FAILED + LOCALE_FAILED))

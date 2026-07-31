@@ -721,7 +721,8 @@ report_install_status_by_platform() {
             [[ "$first_field" == "$cat" ]] && lines+="$line"$'\n'
         done < "$tmp_list"
         [[ -z "$lines" ]] && continue
-        log_info "【$cat】"
+        # ${cat} 必须花括号：macOS UTF-8 locale 下 "$cat" 后紧跟 】 会把其首字节并入变量名 → set -u unbound
+        log_info "【${cat}】"
         while IFS= read -r line; do
             line="${line//$'\r'/}"
             [[ -z "$line" ]] && continue
