@@ -45,22 +45,28 @@ chezmoi_proxy_verify_url() {
     [[ "$code" != "000" && -n "$code" ]]
 }
 
-# stdout: 探测到的 proxy URL；失败时 stdout 为空
-chezmoi_discover_headless_proxy_url() {
+# stdout: 在指定 host 上按 PROXY_PROBE_PORTS 顺序探测到的 proxy URL；失败时 stdout 为空
+chezmoi_discover_proxy_url_on_host() {
+    local host="${1:-127.0.0.1}"
     [[ "${PROXY_AUTO_DISCOVER:-true}" != "false" ]] || return 1
     local ports="${PROXY_PROBE_PORTS:-7890 17890 7897 10808 1080}"
     local port url
     for port in $ports; do
-        if ! chezmoi_proxy_port_is_listening "127.0.0.1" "$port"; then
+        if ! chezmoi_proxy_port_is_listening "$host" "$port"; then
             continue
         fi
-        url="http://127.0.0.1:${port}"
+        url="http://${host}:${port}"
         if chezmoi_proxy_verify_url "$url"; then
             echo "$url"
             return 0
         fi
     done
     return 1
+}
+
+# stdout: 探测到的 proxy URL；失败时 stdout 为空（默认 127.0.0.1）
+chezmoi_discover_headless_proxy_url() {
+    chezmoi_discover_proxy_url_on_host "127.0.0.1"
 }
 
 # 根据平台自动检测代理
@@ -86,9 +92,16 @@ chezmoi_detect_proxy() {
     fi
 
     if chezmoi_is_wsl; then
-        local host_ip
+        local host_ip discovered
         host_ip=$(awk '/^nameserver / {print $2; exit}' /etc/resolv.conf 2>/dev/null)
         if [[ -n "$host_ip" ]]; then
+            # WSL：在宿主机(nameserver)上按 PROXY_PROBE_PORTS 顺序探测（7890 优先，兼容 17890）
+            discovered="$(chezmoi_discover_proxy_url_on_host "$host_ip" 2>/dev/null || true)"
+            if [[ -n "$discovered" ]]; then
+                _chezmoi_log_proxy_detect "Proxy source: wsl_host_probe (nameserver=${host_ip}, url=${discovered}, OS=${os})"
+                echo "$discovered"
+                return 0
+            fi
             _chezmoi_log_proxy_detect "Proxy source: wsl_host (nameserver=${host_ip}, OS=${os})"
             echo "http://${host_ip}:7890"
             return 0

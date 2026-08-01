@@ -276,7 +276,7 @@ get_platform_display_name() {
         windows)  echo "Windows" ;;
         darwin|macos)    echo "macOS" ;;
         linux)
-            if grep -qEi "Microsoft|WSL" /proc/version 2>/dev/null || [[ -n "${WSL_DISTRO_NAME:-}" ]]; then
+            if grep -qEi "Microsoft|WSL" /proc/version 2>/dev/null || [[ -n "${WSL_DISTRO_NAME:-}" || -n "${WSLENV:-}" ]]; then
                 echo "Linux (WSL, ${pkg:-apt})"
             else
                 echo "Linux (原生, ${pkg:-})"
@@ -297,7 +297,7 @@ _helpers_is_wsl() {
         return $?
     fi
     [[ "$(uname -s 2>/dev/null || true)" == "Linux" ]] \
-        && { grep -qEi "Microsoft|WSL" /proc/version 2>/dev/null || [[ -n "${WSL_DISTRO_NAME:-}" ]]; }
+        && { grep -qEi "Microsoft|WSL" /proc/version 2>/dev/null || [[ -n "${WSL_DISTRO_NAME:-}" || -n "${WSLENV:-}" ]]; }
 }
 
 # 内部：当前环境是否 Arch Linux

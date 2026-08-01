@@ -81,7 +81,7 @@ chezmoi_is_wsl() {
     if [[ "$(uname -s)" != "Linux" ]]; then
         return 1
     fi
-    grep -qEi "Microsoft|WSL" /proc/version 2>/dev/null || [[ -n "${WSL_DISTRO_NAME:-}" ]]
+    grep -qEi "Microsoft|WSL" /proc/version 2>/dev/null || [[ -n "${WSL_DISTRO_NAME:-}" || -n "${WSLENV:-}" ]]
 }
 
 # 兼容旧名

@@ -309,7 +309,8 @@ if [[ -f "$ENSURE_SOFTWARE_SCRIPT" ]]; then
     if [[ "$NO_UPGRADE" == "true" ]]; then
         ENSURE_ARGS+=(--no-upgrade)
     fi
-    if bash "$ENSURE_SOFTWARE_SCRIPT" "${ENSURE_ARGS[@]}"; then
+    # bash 3.2: 空数组展开需用 ${arr[@]+"${arr[@]}"} 避免 set -u 下 unbound variable
+    if bash "$ENSURE_SOFTWARE_SCRIPT" ${ENSURE_ARGS[@]+"${ENSURE_ARGS[@]}"}; then
         log_success "Platform software ensure completed"
     else
         log_warning "Platform software ensure finished with warnings"

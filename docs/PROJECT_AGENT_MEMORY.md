@@ -173,6 +173,7 @@ macOS 默认 `/bin/bash` 为 **3.2**，不支持 `declare -A` / `local -n`。部
 | `deploy.sh` exit 2 | `check_zsh_omz.sh: declare -A: invalid option` | 插件检查改用平行数组（已修复） |
 | `diagnose_deployment.sh` 警告 | 同上 + zsh 源文件误报不存在 | `config_mappings.sh` 改平行数组；`dot_zshrc` 统一为 `dot_zshrc.tmpl` |
 | agent-config 测试 3 项失败 | `set -u` 下空数组 `"${arr[@]}"` → unbound variable | `git-smart-commit.sh` / `summary-project-memory.sh` 用空格分隔字符串；`test-peon-install.sh` 用无 git 的 PATH |
+| `install.sh [4/6]` 崩溃（2026-08-01） | `set -u` 下空数组 `"${ENSURE_ARGS[@]}"` → unbound variable | `${ENSURE_ARGS[@]+"${ENSURE_ARGS[@]}"}` 守卫（勿直接 `"${arr[@]}"`） |
 
 **脚本约束（新增/修改 deploy 辅助脚本时）**：
 - 禁止 `declare -A`；映射用 `config_mappings.sh` 的 `CHEZMOI_MAP_*` 平行数组
@@ -218,10 +219,11 @@ macOS 默认 `/bin/bash` 为 **3.2**，不支持 `declare -A` / `local -n`。部
 |----|------|
 | 唯一入口 | `scripts/chezmoi/chezmoi_core.sh` → `chezmoi_detect_proxy` / `chezmoi_setup_proxy` |
 | 调用方 | `install.sh`、`deploy.sh`、`manage_dotfiles.sh`（`prepare_chezmoi_session_env`）、`install_chezmoi.sh` |
-| 默认行为 | 无 env 时：WSL → `http://<resolv nameserver>:7890`；headless 原生 Linux → 探测 `PROXY_PROBE_PORTS`（VPS mihomo **17890**）；Windows/macOS/桌面 Linux → `127.0.0.1:7890` |
+| 默认行为 | 无 env 时：WSL → 先在宿主机（resolv nameserver）按 `PROXY_PROBE_PORTS` 探测（7890 优先、兼容 17890），失败回退 `http://<nameserver>:7890`；headless 原生 Linux → 探测 `PROXY_PROBE_PORTS`（VPS mihomo **17890**）；Windows/macOS/桌面 Linux → `127.0.0.1:7890` |
+| 通用探测（2026-08-01） | `chezmoi_discover_proxy_url_on_host <host>` 对任意 host 按 `PROXY_PROBE_PORTS` 探测；`chezmoi_discover_headless_proxy_url` 为其 127.0.0.1 封装；WSL 判定已补 `WSLENV`（detect_platform.sh / install_helpers.sh，与 agent-config os.sh 对齐） |
 | 禁用 | `PROXY=none/false` 或 `NO_PROXY=1` → unset 全部代理变量 |
 | 日志 | 检测来源写 stderr；`chezmoi_detect_proxy` stdout 仅 URL（避免 `$()` 污染） |
-| 测试 | `bash tests/test_proxy.sh`（8 项含 none/NO_PROXY/WSL mock）+ `test_syntax.sh` |
+| 测试 | `bash tests/test_proxy.sh`（12 项：none/NO_PROXY/WSL mock/headless 17890/指定 host 探测/WSL 宿主机 17890）+ `test_syntax.sh` |
 | 不变 | Pacman/apt 直连国内源；chezmoi 模板内 proxy 仍用静态 `awk`/`grep`（无新增 exec） |
 | macOS brew | 有代理 → 保留代理 + origin→GitHub；`HOMEBREW_NO_AUTO_UPDATE=1`；无代理才可用 tuna |
 

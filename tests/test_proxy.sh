@@ -216,6 +216,63 @@ else
     FAILED=$((FAILED + 1))
 fi
 
+# 测试 11: chezmoi_discover_proxy_url_on_host 在指定 host 上探测 17890
+# 与 agent-config 对齐：VPS/WSL 均可按 PROXY_PROBE_PORTS 顺序探测（17890 覆盖）
+echo -n "[Test 11] discover on host finds 17890 ... "
+_mock_bin2="$(mktemp -d 2>/dev/null || mktemp -d -t chezmoi_proxy_test)"
+cat > "${_mock_bin2}/ss" <<MOCKSS2
+#!/usr/bin/env bash
+echo "192.168.1.1:17890"
+MOCKSS2
+chmod +x "${_mock_bin2}/ss"
+result=$(bash -c "
+source '${CORE_SCRIPT}'
+chezmoi_proxy_verify_url() { return 0; }
+PATH='${_mock_bin2}:'\"\$PATH\"
+chezmoi_discover_proxy_url_on_host '192.168.1.1'
+" 2>/dev/null)
+rm -rf "${_mock_bin2}"
+
+if [[ "$result" == "http://192.168.1.1:17890" ]]; then
+    echo "PASS (got: $result)"
+    PASSED=$((PASSED + 1))
+else
+    echo "FAIL (expected: http://192.168.1.1:17890, got: $result)"
+    FAILED=$((FAILED + 1))
+fi
+
+# 测试 12: WSL mock 在宿主机(nameserver)上探测到 17890
+# （新逻辑：WSL 分支先按 PROXY_PROBE_PORTS 在 nameserver 上探测，而非硬编码 7890）
+echo -n "[Test 12] WSL host probe discovers 17890 ... "
+_wsl_ns12="$(awk '/^nameserver / {print $2; exit}' /etc/resolv.conf 2>/dev/null || true)"
+if [[ -z "$_wsl_ns12" ]]; then
+    echo "SKIP (no nameserver in resolv.conf)"
+else
+    _mock_bin3="$(mktemp -d 2>/dev/null || mktemp -d -t chezmoi_proxy_test)"
+    cat > "${_mock_bin3}/ss" <<MOCKSS3
+#!/usr/bin/env bash
+echo "${_wsl_ns12}:17890"
+MOCKSS3
+    chmod +x "${_mock_bin3}/ss"
+    result=$(bash -c "
+source '${CORE_SCRIPT}'
+chezmoi_is_wsl() { return 0; }
+chezmoi_proxy_verify_url() { return 0; }
+unset PROXY http_proxy https_proxy HTTP_PROXY HTTPS_PROXY NO_PROXY
+PATH='${_mock_bin3}:'\"\$PATH\"
+chezmoi_detect_proxy
+" 2>/dev/null)
+    rm -rf "${_mock_bin3}"
+
+    if [[ "$result" == "http://${_wsl_ns12}:17890" ]]; then
+        echo "PASS (got: $result)"
+        PASSED=$((PASSED + 1))
+    else
+        echo "FAIL (expected: http://${_wsl_ns12}:17890, got: $result)"
+        FAILED=$((FAILED + 1))
+    fi
+fi
+
 echo ""
 echo "=========================================="
 echo "Result: $PASSED passed, $FAILED failed"
