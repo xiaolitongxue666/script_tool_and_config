@@ -224,6 +224,16 @@ macOS 默认 `/bin/bash` 为 **3.2**，不支持 `declare -A` / `local -n`。部
 | `check_script_software_installed` 新增 | `93-install-cursor\|cursor`：命令 / macOS `Cursor.app` / Windows winget `Anysphere.Cursor`；`ghostty`：命令 / macOS `Ghostty.app`（GUI app 命令可能不在 PATH） |
 | AI 工具分类不显示 bug | `report_install_status_by_platform` 的 `category_order` 原为空格字符串，`for cat in $category_order` 会把 “AI 工具” 拆成 `AI`/`工具` → claude/codex/cursor 从未在 [5/6] 报告显示；已改**数组** `("..." "AI 工具" ...)` + `for cat in "${category_order[@]}"` |
 
+### uv / common-tools 噪音修复（2026-08-03 Windows 实测）
+
+| 项 | 约定 |
+|----|------|
+| uv self-update 失败 | uv 官方仅 standalone 安装支持 `uv self update`；choco/brew/winget 安装会失败（`uv 0.9.2` chocolatey 路径实测 exit 2）→ 不应每次 install 刷 `[WARNING] uv self update failed` |
+| 修复 | `ensure_uv_latest` 按 `command -v uv` 路径特征（`*chocolatey*`/`*choco*`/`*brew*`/`*Cellar*`/`*WinGet*`/`*winget*`/`/usr/bin`/`/usr/local/bin`）识别包管理器安装 → 输出 `[INFO] uv installed via package manager; upgrade via package manager if needed` 并 return 0；standalone 仍走 self-update + 版本核对 |
+| common-tools 误报 | `upgrade_common_tools_packages` 的 missing 分支：pkg 为空（packages.conf 该平台列为 `-`，如 Windows 的 trash/btop/fastfetch）时曾继续走 GitHub fallback 并报 `[WARNING] Failed to install missing tool: trash/btop` |
+| 修复 | pkg 为空 → `continue` 跳过（与 [5/6] `get_common_tool_package` 空则跳过一致） |
+| 测试 | `test_software_policies.sh` 新增静态断言（upgrade_common_tools_packages 无包跳过 guard；ensure_uv_latest 包管理器路径识别） |
+
 ## WSL 两阶段部署实测（2026-05-29）
 
 | 项 | 结果 |

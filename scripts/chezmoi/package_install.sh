@@ -604,11 +604,35 @@ ensure_uv_latest() {
     if ! command -v uv &>/dev/null; then
         return 1
     fi
-    echo "[INFO] Updating uv..." >&2
+
+    local before after uv_path
+    before="$(uv --version 2>/dev/null | head -n1 || true)"
+    uv_path="$(command -v uv || true)"
+
+    echo "[INFO] Updating uv (current: ${before:-unknown})..." >&2
+
+    # standalone 安装（官方安装脚本）支持 self-update
     if uv self update 2>/dev/null; then
+        hash -r 2>/dev/null || true
+        after="$(uv --version 2>/dev/null | head -n1 || true)"
+        if [[ -n "$after" && -n "$before" && "$after" != "$before" ]]; then
+            echo "[SUCCESS] uv upgraded: ${after}" >&2
+        else
+            echo "[INFO] uv is up to date: ${before:-unknown}" >&2
+        fi
         return 0
     fi
-    echo "[WARNING] uv self update failed" >&2
+
+    # 包管理器安装（choco/brew/winget 等）：uv self-update 仅对 standalone 安装可用
+    # 按路径特征识别（避免每次 install 刷 WARNING）
+    case "$uv_path" in
+        *chocolatey*|*choco*|*brew*|*Cellar*|*WinGet*|*winget*|*/usr/bin/*|*/usr/local/bin/*)
+            echo "[INFO] uv installed via package manager (${uv_path}); upgrade via package manager if needed (current: ${before:-unknown})" >&2
+            return 0
+            ;;
+    esac
+
+    echo "[WARNING] uv self update failed; manual: https://docs.astral.sh/uv/getting-started/installation/ (current: ${before:-unknown})" >&2
     return 1
 }
 
@@ -833,12 +857,14 @@ upgrade_common_tools_packages() {
             fi
             if ! command -v "$cmd" &>/dev/null; then
                 pkg="$(get_common_tool_package "$cmd" "${PLATFORM:-}" "${PACKAGE_MANAGER:-}")"
-                if [[ -n "$pkg" ]]; then
-                    if ! upgrade_package_by_manager "$pkg"; then
-                        echo "[WARNING] Failed to install missing tool via package manager: $cmd" >&2
-                    fi
-                    hash -r 2>/dev/null || true
+                if [[ -z "$pkg" ]]; then
+                    # 当前平台无此包（packages.conf 为 "-"），跳过（与 [5/6] 检测一致）
+                    continue
                 fi
+                if ! upgrade_package_by_manager "$pkg"; then
+                    echo "[WARNING] Failed to install missing tool via package manager: $cmd" >&2
+                fi
+                hash -r 2>/dev/null || true
                 if type common_tool_command_present &>/dev/null; then
                     if common_tool_command_present "$cmd"; then
                         continue

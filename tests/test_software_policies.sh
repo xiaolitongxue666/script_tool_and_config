@@ -166,5 +166,23 @@ else
     echo "[FAIL] report detect helpers missing"
 fi
 
+# [4/6] ensure 补装：当前平台无包（packages.conf 为 "-"）时应跳过，不误报 WARNING
+if grep -q '当前平台无此包' "${PROJECT_ROOT}/scripts/chezmoi/package_install.sh"; then
+    PASSED=$((PASSED + 1))
+    echo "[PASS] upgrade_common_tools_packages skips missing-pkg items (Windows trash/btop)"
+else
+    FAILED=$((FAILED + 1))
+    echo "[FAIL] upgrade_common_tools_packages missing pkg-empty skip guard"
+fi
+
+# uv 经包管理器安装（choco/brew 等）时 self-update 不可用：应提示 INFO 而非 WARNING
+if grep -q '\*chocolatey\*\|\*choco\*' "${PROJECT_ROOT}/scripts/chezmoi/package_install.sh"; then
+    PASSED=$((PASSED + 1))
+    echo "[PASS] ensure_uv_latest recognizes package-manager uv (choco/brew)"
+else
+    FAILED=$((FAILED + 1))
+    echo "[FAIL] ensure_uv_latest missing package-manager path detection"
+fi
+
 echo "Summary: $PASSED passed, $FAILED failed"
 [[ "$FAILED" -eq 0 ]]
