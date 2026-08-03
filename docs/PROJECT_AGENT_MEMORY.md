@@ -197,6 +197,33 @@ macOS 默认 `/bin/bash` 为 **3.2**，不支持 `declare -A` / `local -n`。部
 - `[ -f glob ]` 类检查用 `compgen -G` 替代（多文件 glob 不会 too many arguments）
 - 回归检查（已固化到 `tests/test_syntax.sh`，扫全仓含根目录 `install.sh`/`deploy.sh`；勿用 `grep -P` — macOS BSD grep 不支持）：`LC_ALL=C grep -rn '\$[a-zA-Z_][a-zA-Z0-9_]*[一-龥【】（）]' . --include='*.sh' --include='*.tmpl'`（从仓库根执行）
 
+## fnm 升级与 ensure 二次验证（2026-08）
+
+### fnm `self-update` 已废弃（≥1.36 移除）
+
+| 项 | 约定 |
+|----|------|
+| 现象 | fnm 1.38.1 实测 `fnm self-update` → `unrecognized subcommand`；旧版仍有该子命令（保留尝试兼容旧安装） |
+| 升级路径 | ① 包管理器：`brew upgrade fnm`（macOS）/ `winget upgrade Schniz.fnm`（Windows）/ pacman（Arch）→ ② 官方安装脚本 `curl -fsSL https://fnm.vercel.app/install \| bash -s -- --skip-shell`（Linux/WSL/Git Bash；`--skip-shell` 不污染 shell rc；自动检测 `$HOME/.fnm` 等现有安装目录） |
+| macOS 例外 | 官方安装脚本默认走 Homebrew（`USE_HOMEBREW=true`），故 macOS 跳过脚本路径避免重复 |
+| 已最新 | 输出 `[INFO] fnm is up to date` 而非 WARNING（避免每次 install 刷警告）；`_fnm_verify_upgrade` 做版本前后核对 |
+| 代理 | 升级前 `ensure_proxy_for_download`（WSL 访问 GitHub 必需） |
+
+### [4/6] ensure 补装二次验证（2026-08）
+
+| 项 | 约定 |
+|----|------|
+| 误报场景 | `run_once_install-lazyssh.sh.tmpl` 在 apt 源无 lazyssh 时仅输出 WARNING 并 exit 0（符合「非关键失败不阻断」规范）→ 外层曾误报 `[SUCCESS] Installed: lazyssh` |
+| 修复 | `_process_one_script` 的 missing/upgrade 分支：模板 exit 0 后再 `check_script_software_installed` 二次验证；命令仍不可用 → 计 SKIPPED + WARNING，不误报 SUCCESS |
+| 模板不变 | run_once 模板保持 exit 0（chezmoi apply 场景 exit≠0 会触发 `install.sh` set -e 阻断）；验证只放在 `ensure_platform_software.sh` 层 |
+
+### [5/6] 检测与报告（2026-08）
+
+| 项 | 约定 |
+|----|------|
+| `check_script_software_installed` 新增 | `93-install-cursor\|cursor`：命令 / macOS `Cursor.app` / Windows winget `Anysphere.Cursor`；`ghostty`：命令 / macOS `Ghostty.app`（GUI app 命令可能不在 PATH） |
+| AI 工具分类不显示 bug | `report_install_status_by_platform` 的 `category_order` 原为空格字符串，`for cat in $category_order` 会把 “AI 工具” 拆成 `AI`/`工具` → claude/codex/cursor 从未在 [5/6] 报告显示；已改**数组** `("..." "AI 工具" ...)` + `for cat in "${category_order[@]}"` |
+
 ## WSL 两阶段部署实测（2026-05-29）
 
 | 项 | 结果 |

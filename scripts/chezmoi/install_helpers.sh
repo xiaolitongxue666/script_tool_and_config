@@ -416,6 +416,32 @@ check_script_software_installed() {
             check_neovim_binary_installed
             return $?
             ;;
+        93-install-cursor|cursor)
+            # 命令：Linux/macOS 安装后 cursor 在 PATH；macOS 也可能是 .app
+            if check_command_exists "cursor"; then
+                return 0
+            fi
+            if [[ "${PLATFORM:-}" == "darwin" ]] || [[ "$(uname -s)" == "Darwin" ]]; then
+                if [[ -d "/Applications/Cursor.app" ]]; then
+                    return 0
+                fi
+            fi
+            # Windows：winget 安装的 Cursor
+            if [[ "${PACKAGE_MANAGER:-}" == "winget" ]] && check_package_installed "Anysphere.Cursor"; then
+                return 0
+            fi
+            return 1
+            ;;
+        ghostty)
+            # macOS GUI app：命令可能不在 PATH，检查 .app
+            if check_command_exists "ghostty"; then
+                return 0
+            fi
+            if [[ -d "/Applications/Ghostty.app" ]]; then
+                return 0
+            fi
+            return 1
+            ;;
         windows-terminal|install-windows-terminal)
             check_windows_terminal_installed
             return $?
@@ -707,12 +733,12 @@ report_install_status_by_platform() {
 
     [[ ! -s "$tmp_list" ]] && { log_info "无适用于当前平台的 run_once 安装项"; return 0; }
 
-    local category_order="版本管理 终端/Shell 文件/搜索与通用 开发 字体 系统基础 macOS 专属 Linux 专属 Windows 专属 AI 工具 其他"
+    local category_order=(版本管理 终端/Shell 文件/搜索与通用 开发 字体 系统基础 macOS 专属 Linux 专属 Windows 专属 "AI 工具" 其他)
     local total_installed=0
     local total_not=0
     local total_partial=0
 
-    for cat in $category_order; do
+    for cat in "${category_order[@]}"; do
         local lines=""
         while IFS= read -r line; do
             line="${line//$'\r'/}"

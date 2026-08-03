@@ -227,7 +227,13 @@ _process_one_script() {
         else
             log_info "Re-running install template: $name"
             if run_chezmoi_install_script "$script" "$CHEZMOI_DIR"; then
-                STATS_UPGRADED=$((STATS_UPGRADED + 1))
+                # 二次验证：重跑后命令仍不可用则不算升级成功（如 apt 源无此包）
+                if check_script_software_installed "$script"; then
+                    STATS_UPGRADED=$((STATS_UPGRADED + 1))
+                else
+                    STATS_SKIPPED=$((STATS_SKIPPED + 1))
+                    log_warning "Template re-run finished but '$name' still not available (may need manual install)"
+                fi
             else
                 STATS_FAILED=$((STATS_FAILED + 1))
             fi
@@ -235,8 +241,14 @@ _process_one_script() {
     else
         log_info "Missing software, installing: $name"
         if run_chezmoi_install_script "$script" "$CHEZMOI_DIR"; then
-            STATS_INSTALLED=$((STATS_INSTALLED + 1))
-            log_success "Installed: $name"
+            # 二次验证：模板 exit 0 不代表命令真的可用（如 apt 无 lazyssh 时模板仅 WARNING）
+            if check_script_software_installed "$script"; then
+                STATS_INSTALLED=$((STATS_INSTALLED + 1))
+                log_success "Installed: $name"
+            else
+                STATS_SKIPPED=$((STATS_SKIPPED + 1))
+                log_warning "Template finished but '$name' still not available (may need manual install)"
+            fi
         else
             STATS_FAILED=$((STATS_FAILED + 1))
             log_warning "Install failed: $name"

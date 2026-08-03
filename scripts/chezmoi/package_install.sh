@@ -530,16 +530,74 @@ _ensure_fnm_env() {
     fi
 }
 
+# fnm 升级（多 OS/WSL 兼容）
+# 注意：新版 fnm（>=1.36）已移除 self-update 子命令（1.38.1 实测 unrecognized subcommand），
+# 升级路径：包管理器（brew/winget/pacman）→ 官方安装脚本（Linux/WSL/Git Bash）
+# 返回: 0=已最新或升级完成, 1=升级失败（非关键，调用方勿阻断）
 ensure_fnm_latest() {
     if ! command -v fnm &>/dev/null; then
         return 1
     fi
-    echo "[INFO] Updating fnm..." >&2
+
+    local before after
+    before="$(fnm --version 2>/dev/null | head -n1 || true)"
+
+    # 兼容旧版 fnm：仍有 self-update 子命令的安装直接用它
     if fnm self-update 2>/dev/null; then
         return 0
     fi
-    echo "[WARNING] fnm self-update not available or failed" >&2
+
+    ensure_proxy_for_download
+    echo "[INFO] Updating fnm (current: ${before:-unknown})..." >&2
+
+    # 1) 包管理器优先：brew（macOS）/ winget（Windows）/ pacman（Arch）
+    case "${PACKAGE_MANAGER:-}" in
+        brew)
+            upgrade_brew_package "fnm" 2>/dev/null && _fnm_verify_upgrade "$before" && return 0
+            ;;
+        winget)
+            upgrade_winget_id "Schniz.fnm" 2>/dev/null && _fnm_verify_upgrade "$before" && return 0
+            ;;
+        pacman)
+            upgrade_pacman_package "fnm" 2>/dev/null && _fnm_verify_upgrade "$before" && return 0
+            ;;
+    esac
+
+    # 2) 官方安装脚本回退（Linux/WSL 下载 release 二进制；Git Bash 下载 fnm-windows.zip）
+    #    macOS 官方脚本默认走 Homebrew，已在上方尝试，跳过避免重复
+    if [[ "${PLATFORM:-}" != "darwin" ]]; then
+        # --skip-shell：不修改 shell rc；脚本自动检测现有安装目录（$HOME/.fnm 等）
+        if curl -fsSL --max-time 120 "https://fnm.vercel.app/install" 2>/dev/null \
+            | bash -s -- --skip-shell >/dev/null 2>&1; then
+            if _fnm_verify_upgrade "$before"; then
+                return 0
+            fi
+        fi
+    fi
+
+    # 3) 最终版本核对：未变化视为已最新（不刷 WARNING）；变化则成功
+    hash -r 2>/dev/null || true
+    after="$(fnm --version 2>/dev/null | head -n1 || true)"
+    if [[ -n "$after" && -n "$before" && "$after" != "$before" ]]; then
+        echo "[SUCCESS] fnm upgraded: ${after}" >&2
+        return 0
+    fi
+    if [[ -n "$before" ]]; then
+        echo "[INFO] fnm is up to date: ${before} (manual upgrade: https://github.com/Schniz/fnm/releases)" >&2
+        return 0
+    fi
+    echo "[WARNING] fnm upgrade failed; manual: https://github.com/Schniz/fnm/releases" >&2
     return 1
+}
+
+# 升级后核对 fnm 版本是否变化（变化即升级成功）
+# 返回: 0=版本已变化
+_fnm_verify_upgrade() {
+    local before="$1"
+    local after
+    hash -r 2>/dev/null || true
+    after="$(fnm --version 2>/dev/null | head -n1 || true)"
+    [[ -n "$after" && -n "$before" && "$after" != "$before" ]]
 }
 
 ensure_uv_latest() {
