@@ -24,7 +24,7 @@ agent-config 路径：`../../AI/agent-config`（相对本仓库）；详见 [DEP
 
 辅助层：GitHub Copilot（`.github/copilot-instructions.md`）、claude-mem（Shell `claude()`）、OpenSpec（`openspec/AGENTS.md`）。
 
-**Cursor 分工**：本仓库 `.cursor/` 仅 **rules**（项目级）；全局 **Cursor Commands**（`/commit-push` 等）在 `~/.cursor/commands/`，由 agent-config `apply-config.sh` 写入。
+**Cursor 分工**：本仓库 `.cursor/` 仅 **rules**（项目级）；全局 **Cursor Commands**（`/commit-push` 等）在 `~/.cursor/commands/`，由 agent-config `apply-config.sh` 写入。clangd 二进制 / 扩展：`docs/CURSOR_CLANGD.md` + `scripts/common/cursor_clangd/`（`run_once_install-clangd`；`93` 无 GUI 不装 Cursor）。
 
 ### 全局配置（每个 Agent 必备）
 

@@ -76,6 +76,7 @@ install.sh
 | [docs/PROJECT_MEMORY.md](docs/PROJECT_MEMORY.md) | 项目级 Agent 紧凑记忆 |
 | [docs/CHEZMOI_USE_GUIDE.md](docs/CHEZMOI_USE_GUIDE.md) | chezmoi 详细使用指南 |
 | [docs/SOFTWARE_LIST.md](docs/SOFTWARE_LIST.md) | 完整软件清单与 run_once 对应关系 |
+| [docs/CURSOR_CLANGD.md](docs/CURSOR_CLANGD.md) | Cursor + clangd（多 OS/WSL；无 GUI 不装 Cursor） |
 | [docs/PROJECT_AGENT_MEMORY.md](docs/PROJECT_AGENT_MEMORY.md) | 项目 Agent 记忆（含 WSL 排错） |
 | [docs/PROJECT_STRUCTURE.md](docs/PROJECT_STRUCTURE.md) | 详细项目结构说明 |
 | [AGENTS.md](AGENTS.md) | 代码代理开发指南 |
@@ -125,7 +126,7 @@ install.sh
 | zsh, oh-my-zsh | Z shell；OMZ/插件经 chezmoi external（linux/darwin；Windows 跳过 OMZ） | 多平台共有 |
 <!-- fish 已移除 -->
 | bat, eza, fd, ripgrep, fzf, trash-cli | 文件/搜索工具（cat/ls/find/grep 替代与模糊查找、回收站） | 多平台共有；Ubuntu 下 bat→batcat、fd→fdfind 已别名 |
-| git, neovim, lazygit, git-delta, gh | 版本控制、编辑器、Git TUI、diff 增强、GitHub CLI | 多平台共有 |
+| git, neovim, clangd, lazygit, git-delta, gh | 版本控制、编辑器、C/C++ LSP、Git TUI、diff 增强、GitHub CLI | 多平台共有；clangd 见 [docs/CURSOR_CLANGD.md](docs/CURSOR_CLANGD.md) |
 | btop, fastfetch | 系统监控与信息展示 | 多平台共有；Ubuntu &lt; 24.10 的 fastfetch 可能走 PPA/Snap/.deb |
 | Nerd Fonts (FiraMono) | 编程字体（图标支持） | 多平台共有 |
 | Windows Terminal | Windows 默认终端（Git Bash + Catppuccin Mocha） | 仅 Windows |

@@ -36,10 +36,10 @@ while IFS= read -r s; do
 done < <(list_applicable_run_once_scripts "$CHEZMOI_DIR" linux)
 
 # 非 Arch：过滤 configure-pacman/arch-base/aur-helper/dwm；WSL 另过滤 i3wm/alacritty
-# Layer 4 无 run_once_92（CodeWhale 已移除）后基线为 14 / WSL 12
-min_linux_count=14
+# 含 run_once_install-clangd 后基线为 15 / WSL 13（无 run_once_92 CodeWhale）
+min_linux_count=15
 if type _helpers_is_wsl &>/dev/null && _helpers_is_wsl; then
-    min_linux_count=12
+    min_linux_count=13
 fi
 if [[ "$count_linux" -ge "$min_linux_count" ]]; then
     PASSED=$((PASSED + 1))

@@ -93,6 +93,7 @@ Layer 0: run_once_00-install-version-managers      ← fnm + uv
 Layer 1: install-common-tools, install-git
 Layer 2: install-zsh, install-starship, install-nerd-fonts
 Layer 3: install-neovim                             ← 仅安装二进制
+Layer 3: install-clangd                             ← clangd 二进制（无 GUI 也可；见 docs/CURSOR_CLANGD.md）
 Layer 4: run_once_90-{claude-code}, _91-{codex}
          run_once_93-install-cursor                 ← 仅 GUI 环境
 Layer 5: install-tmux + run_on_{linux,darwin}；Windows：`install-rmux`、`install-oh-my-posh`、`install-windows-terminal`
@@ -135,7 +136,7 @@ Layer 5: install-tmux + run_on_{linux,darwin}；Windows：`install-rmux`、`inst
 Layer 0: fnm/uv（版本管理器，必须最先）
 Layer 1: git + common-tools
 Layer 2: zsh（二进制）+ OMZ/插件（`.chezmoiexternal.toml.tmpl`，linux/darwin）+ starship + nerd-fonts
-Layer 3: neovim（仅安装二进制，配置由其他项目管理）
+Layer 3: neovim（仅安装二进制，配置由其他项目管理）+ clangd（无 GUI 也可）
 Layer 4: claude-code + codex（AI agent CLI，仅二进制）
 Layer 4+: cursor（仅 GUI 环境，Linux/WSL 检测 DISPLAY）
 Layer 5: tmux + 平台特定（linux/darwin/windows 下的 run_on_*）

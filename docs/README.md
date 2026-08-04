@@ -21,6 +21,7 @@
 | AI Agent / Pi | 见 [agent-config](../../AI/agent-config)（Claude / Cursor / Codex / Pi + CodeGraph）；**CodeWhale 已移除（勿恢复）** |
 | [PROJECT_AGENT_MEMORY.md](PROJECT_AGENT_MEMORY.md) | 项目 Agent 可提交记忆（含 WSL 部署实测） |
 | [RMUX_WINDOWS.md](RMUX_WINDOWS.md) | Windows rmux 安装、手动使用与排错（含 chezmoi 部署陷阱） |
+| [CURSOR_CLANGD.md](CURSOR_CLANGD.md) | Cursor + clangd：多 OS/WSL 安装、扩展、无 GUI 不装 Cursor |
 | [TMUX_KEYBINDINGS.md](TMUX_KEYBINDINGS.md) | Tmux (Linux/macOS) 与 rmux (Windows) 快捷键速查 |
 | [PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md) | 项目结构说明 |
 

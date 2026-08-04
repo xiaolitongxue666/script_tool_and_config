@@ -673,6 +673,9 @@ Cursor 编辑器 `User/settings.json` **不由本仓库 chezmoi 管理**（已�
 |------|--------|----------------|
 | Cursor 编辑器 User settings | 已迁移至 **agent-config** | `platforms/cursor/settings/editor-settings.jsonc` + `render-cursor-editor-settings.sh` |
 | macOS / Windows | agent-config 同步 | `sync-cursor-editor-settings.sh` → App Support / `%APPDATA%` |
+| clangd 二进制 / Cursor clangd 扩展 | 本仓库 | [CURSOR_CLANGD.md](CURSOR_CLANGD.md) + `scripts/common/cursor_clangd/`；`run_once_install-clangd`（无 GUI 也可装二进制） |
+
+**无 GUI（Linux/WSL 无 DISPLAY/WAYLAND）**：`run_once_93-install-cursor` **跳过**，不装 Cursor。clangd 仍可由 `run_once_install-clangd` 安装。WSL 上需把扩展装到 **Remote（WSL）侧**，详见 [CURSOR_CLANGD.md](CURSOR_CLANGD.md)。
 
 VPS Host 名与路径在 **agent-config** 的 `config/local.env`（复制 `config/local.env.example`），由 `render-cursor-editor-settings.sh` 渲染。
 
@@ -680,6 +683,12 @@ VPS Host 名与路径在 **agent-config** 的 `config/local.env`（复制 `confi
 
 ```bash
 ./scripts/manage_dotfiles.sh apply
+```
+
+手动装扩展（已有 `cursor` CLI 时，含 WSL Remote）：
+
+```bash
+bash scripts/common/cursor_clangd/setup_cursor_clangd.sh
 ```
 
 ### Remote SSH CLI

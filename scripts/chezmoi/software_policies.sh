@@ -40,6 +40,7 @@ get_software_policy() {
         90-install-claude-code|91-install-codex|93-install-cursor) echo "latest" ;;
         install-rmux|rmux)         echo "pinned:0.5.0" ;;
         neovim|install-neovim)     echo "minimum:0.11.0" ;;
+        clangd|install-clangd)     echo "latest" ;;
         nerd-fonts|install-nerd-fonts) echo "skip" ;;
         configure-pacman|configure-homebrew|aur-helper|install-aur-helper) echo "skip" ;;
         arch-base-packages|install-arch-base-packages) echo "latest" ;;

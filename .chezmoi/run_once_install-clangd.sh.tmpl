@@ -1,0 +1,26 @@
+{{- if or (eq .chezmoi.os "linux") (eq .chezmoi.os "darwin") (eq .chezmoi.os "windows") -}}
+#!/usr/bin/env bash
+
+# ============================================
+# clangd 安装（chezmoi run_once_）
+# 仅安装语言服务二进制；不安装 Cursor
+# 无 GUI / headless / WSL 无 DISPLAY 均可执行
+# 扩展见 scripts/common/cursor_clangd/ + docs/CURSOR_CLANGD.md
+# ============================================
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="${CHEZMOI_PROJECT_ROOT:-$(cd "${SCRIPT_DIR}/../.." && pwd 2>/dev/null || echo "$HOME")}"
+INSTALL_CLANGD="${PROJECT_ROOT}/scripts/common/cursor_clangd/install_clangd.sh"
+
+if [[ ! -f "$INSTALL_CLANGD" ]]; then
+    INSTALL_CLANGD="$HOME/.local/share/chezmoi/scripts/common/cursor_clangd/install_clangd.sh"
+fi
+
+if [[ ! -f "$INSTALL_CLANGD" ]]; then
+    echo "[WARNING] install_clangd.sh not found; skip clangd install"
+    echo "[INFO] See docs/CURSOR_CLANGD.md"
+    exit 0
+fi
+
+bash "$INSTALL_CLANGD"
+{{- end -}}

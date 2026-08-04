@@ -152,6 +152,17 @@ _upgrade_software_by_name() {
             ensure_neovim_minimum && return 0
             return 1
             ;;
+        install-clangd|clangd)
+            # 复用 run_once 脚本路径（ensure 上层会 execute-template）；此处仅升级已装包
+            if command -v clangd >/dev/null 2>&1; then
+                upgrade_package_by_manager "clangd" 2>/dev/null \
+                    || upgrade_package_by_manager "clang" 2>/dev/null \
+                    || upgrade_package_by_manager "clang-tools-extra" 2>/dev/null \
+                    || true
+                return 0
+            fi
+            return 1
+            ;;
         install-rmux|rmux)
             ensure_rmux_pinned "0.5.0" && return 0
             return 1

@@ -13,7 +13,7 @@ Layer 0: fnm + uv（版本管理器，为 Neovim 提供 node/python 环境）
 Layer 3: run_once_install-neovim（仅安装 Neovim 二进制）
 ```
 
-Neovim 具体的配置、插件、语言服务器由 `~/.config/nvim` 项目自行管理。
+Neovim 具体的配置、插件、语言服务器由 `~/.config/nvim` 项目自行管理。系统级 `clangd` 可由本仓 `run_once_install-clangd` 安装（见 [CURSOR_CLANGD.md](CURSOR_CLANGD.md)），供 nvim LSP 与 Cursor 共用。
 
 ## 验证清单
 

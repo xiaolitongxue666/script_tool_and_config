@@ -236,6 +236,7 @@ install.sh
   │       ├─ run_once_install-zsh.sh.tmpl (zsh 二进制；OMZ/插件见 .chezmoiexternal)
   │       ├─ run_once_install-git.sh.tmpl
   │       ├─ run_once_install-neovim.sh.tmpl (>= 0.11.0，仅安装二进制)
+  │       ├─ run_once_install-clangd.sh.tmpl (clangd 二进制；无 GUI 也可)
   │       ├─ run_once_install-starship.sh.tmpl
   │       ├─ run_once_install-nerd-fonts.sh.tmpl (FiraMono Nerd Font)
   │       ├─ run_once_90-install-claude-code.sh.tmpl
@@ -275,6 +276,7 @@ install.sh
 | `run_once_install-starship.sh.tmpl` | starship 提示符 | 多平台 |
 | `run_once_install-nerd-fonts.sh.tmpl` | FiraMono Nerd Font | 多平台 |
 | `run_once_install-neovim.sh.tmpl` | neovim (>= 0.11.0，仅二进制) | 多平台 |
+| `run_once_install-clangd.sh.tmpl` | clangd 二进制（扩展见 docs/CURSOR_CLANGD.md） | 多平台 |
 | `run_once_90-install-claude-code.sh.tmpl` | Claude Code CLI | 多平台 |
 | `run_once_91-install-codex.sh.tmpl` | OpenAI Codex CLI | 多平台 |
 | `run_once_93-install-cursor.sh.tmpl` | Cursor 编辑器 | 有 GUI 时 |

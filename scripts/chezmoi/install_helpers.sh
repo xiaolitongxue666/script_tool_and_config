@@ -256,7 +256,7 @@ get_software_category() {
         common-tools)                 echo "文件/搜索与通用" ;;
         starship|tmux|zsh|fish|alacritty|oh-my-posh|windows-terminal)  echo "终端/Shell" ;;
         ghostty|connect)              echo "macOS 专属" ;;
-        git|neovim|neovim-config|lazyssh)  echo "开发" ;;
+        git|neovim|neovim-config|lazyssh|clangd|install-clangd)  echo "开发" ;;
         nerd-fonts)                   echo "字体" ;;
         system-basic-env)             echo "系统基础" ;;
         yabai|skhd|maccy)             echo "macOS 专属" ;;
@@ -415,6 +415,13 @@ check_script_software_installed() {
             # 仅检测二进制 nvim（>=0.11）；配置归属 ~/.config/nvim 独立仓库，缺失不算未安装
             check_neovim_binary_installed
             return $?
+            ;;
+        clangd|install-clangd)
+            # 仅检测 clangd 二进制；Cursor 扩展由 scripts/common/cursor_clangd/ 另装
+            if check_command_exists "clangd"; then
+                return 0
+            fi
+            return 1
             ;;
         93-install-cursor|cursor)
             # 命令：Linux/macOS 安装后 cursor 在 PATH；macOS 也可能是 .app
