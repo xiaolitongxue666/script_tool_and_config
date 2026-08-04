@@ -61,8 +61,8 @@ if ! xcode-select -p &>/dev/null; then
     echo "[INFO] 请等待 Xcode Command Line Tools 安装完成后再继续"
 fi
 
-# 安装 skhd
-brew install koekeishiya/formulae/skhd
+# 安装 skhd（官方源 koekeishiya/formulae 已于 2025 年迁移至 asmvik/formulae，见 GitHub 301 重定向）
+brew install asmvik/formulae/skhd
 
 if command -v skhd &> /dev/null; then
     echo "[SUCCESS] skhd 安装成功: $(skhd --version)"

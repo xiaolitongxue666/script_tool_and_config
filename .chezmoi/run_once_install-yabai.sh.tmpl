@@ -61,8 +61,8 @@ if ! xcode-select -p &>/dev/null; then
     echo "[INFO] 请等待 Xcode Command Line Tools 安装完成后再继续"
 fi
 
-# 安装 Yabai
-brew install koekeishiya/formulae/yabai
+# 安装 Yabai（官方源 koekeishiya/formulae 已于 2025 年迁移至 asmvik/formulae，见 GitHub 301 重定向）
+brew install asmvik/formulae/yabai
 
 if command -v yabai &> /dev/null; then
     echo "[SUCCESS] Yabai 安装成功: $(yabai --version)"
