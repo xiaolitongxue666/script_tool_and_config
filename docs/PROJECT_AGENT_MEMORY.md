@@ -132,6 +132,23 @@ Git for Windows 可能装在 **C:** 或 **D:**（如 `D:\Program Files\Git`）�
 | [5/6] WT/neovim/nerd-fonts「未安装」 | 用软件名当命令名 | `install_helpers.sh` 专项检测 |
 | [5/6] common-tools 恒 partial（Win） | 仍统计 trash 等无 winget 包项 | 按 `get_common_tool_package` 空则跳过 |
 
+## Windows：Windows Terminal winget 升级失败 0x80070422（2026-08 实测）
+
+**现象**：`install.sh [4/6]` winget 升级 `Microsoft.WindowsTerminal` 报 `安装程序失败，退出代码为: 0x80070422 : 无法启动服务，因为服务已被禁用...`；ensure 按非致命处理（SUCCESS attempted），`[5/6]` 仍显示 installed (OK)。
+
+**根因**：Windows Terminal 为 **MSIX 包**，winget 升级走 MSIX 安装流程，依赖 `InstallService`（Microsoft Store 安装服务）；该服务 `StartType=Disabled`（`wuauserv` 亦 Disabled 但不影响）。
+
+| 项 | 约定 |
+|----|------|
+| 诊断服务 | `Get-Service InstallService,AppXSvc,ClipSVC,wuauserv,msiserver,TrustedInstaller`；MSIX 部署需要 `AppXSvc`（Running）+/`InstallService`；`ClipSVC` Manual 按需启动 |
+| 修复受阻 | `sc config` / `Set-Service` / 直写注册表 `Start` 均拒绝访问（即使 IsInRole(Admin)=True）：`InstallService` 注册表键 ACL 被改**全员 ReadKey 只读**（非 Windows 默认，Owner=Administrators）；SD（`sc sdshow`）虽给 BA 完全控制，但键 ACL 挡了写路径 → **勿在无权限环境强改服务** |
+| 绕过方案 ✅ | `winget download Microsoft.WindowsTerminal --source winget`（下载 MSIX + 依赖到 `~/Downloads/<pkg>/`）→ `Add-AppxPackage -Path <主包.msix>`（**仅需 AppXSvc**，用户级无需管理员） |
+| 依赖 | Windows Terminal 1.24 需 `Microsoft.UI.Xaml.2.8 >= 8.2306.22001.0`；本机已有 `8.2501.31001.0` → 无需装依赖 |
+| 0x80073D02 | 旧版 WT **正在运行**时覆盖安装报 `无法安装，因为需要关闭...应用`；需先关闭 WindowsTerminal.exe 再 Add-AppxPackage（**pi 会话运行在 WT 内时暂缓**，避免中断会话） |
+| msstore 证书 | `0x8a15005e`（服务器证书不匹配）只影响 msstore 源搜索；升级/下载用 `--source winget` 规避（与既有约定一致） |
+
+**当前状态**：已下载 `C:\Users\Administrator\Downloads\Microsoft.WindowsTerminal_1.24.11911.0\`（主包 zh-CN msix + 依赖 UI.Xaml msix）；待退出 WT 会话后 `Add-AppxPackage` 完成升级（或按需启用 `InstallService` 恢复 winget 常规升级）。
+
 ## Windows：fnm + uv + Git Bash（2026-05）
 
 | 项 | 约定 |
