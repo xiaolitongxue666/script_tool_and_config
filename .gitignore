@@ -231,6 +231,9 @@ chezmoi-override-merged.*.toml
 .chezmoi/run_on_windows/run_onchange_sync_cursor_settings_to_appdata.sh.tmpl
 .chezmoi/run_on_darwin/run_onchange_sync_cursor_settings_to_app_support.sh.tmpl
 
+# 仓库内误创建的 XDG/本地状态（勿提交；真用户态在 $HOME/.local）
+.local/
+
 # rmux 安装下载/解压缓存（run_once_install-rmux 或本地测试）
 .local/share/rmux-install/
 .local/share/rmux-install-test/
