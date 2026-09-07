@@ -148,7 +148,7 @@ Git for Windows 可能装在 **C:** 或 **D:**（如 `D:\Program Files\Git`）�
 | 0x80073D02 | 旧版 WT **正在运行**时覆盖安装报 `无法安装，因为需要关闭...应用`；需先关闭 WindowsTerminal.exe 再 Add-AppxPackage（**pi 会话运行在 WT 内时暂缓**，避免中断会话） |
 | msstore 证书 | `0x8a15005e`（服务器证书不匹配）只影响 msstore 源搜索；升级/下载用 `--source winget` 规避（与既有约定一致） |
 
-**当前状态**：已下载 `C:\Users\Administrator\Downloads\Microsoft.WindowsTerminal_1.24.11911.0\`（主包 zh-CN msix + 依赖 UI.Xaml msix）；待退出 WT 会话后 `Add-AppxPackage` 完成升级（或按需启用 `InstallService` 恢复 winget 常规升级）。
+**当前状态（2026-09）**：`upgrade_winget_id` 仅在输出含 `0x80070422` /「安装技术」时 sideload（`winget download` + `Add-AppxPackage`）；**勿**把 exit 43 当充分条件——「找不到可用的升级」也是 43。WT 进程在跑则跳过 sideload（`0x80073D02`）。OMP：`install_oh_my_posh_from_github` 从 winget MSIX 抽 exe → `~/.local/bin`（Git Bash `/tmp` 上 unzip 会丢文件）。回归：`tests/test_winget_msix_fallback.sh`。
 
 ## Windows：fnm + uv + Git Bash（2026-05）
 

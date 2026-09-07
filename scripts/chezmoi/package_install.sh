@@ -485,8 +485,170 @@ upgrade_apt_package() {
     return 0
 }
 
+# winget 升级失败是否应走 MSIX 用户级 sideload（InstallService 禁用 / 安装技术不一致）
+# 参数: output [exit_code]
+# 返回: 0=应 sideload, 1=否
+winget_output_needs_msix_sideload() {
+    local output="$1"
+    local rc="${2:-1}"
+
+    if [[ "$rc" -eq 0 ]]; then
+        return 1
+    fi
+    # 已最新：中文 winget 也常返回 43，不能单凭 exit code 判断
+    if printf '%s' "$output" | grep -qiE \
+        'No applicable update|No available upgrade|No newer package versions|找不到可用的升级|没有可用的升级|没有可用的较新|已是最新'; then
+        return 1
+    fi
+    if printf '%s' "$output" | grep -qiE \
+        '0x80070422|InstallService|无法启动服务|安装技术|installer technology'; then
+        return 0
+    fi
+    return 1
+}
+
+# 从 winget download 目录选出主包（排除 UI.Xaml / VCLibs 等依赖）
+# 参数: dir
+# stdout: 主包路径
+find_primary_msix_in_dir() {
+    local dir="$1"
+    local f base
+    [[ -n "$dir" && -d "$dir" ]] || return 1
+
+    while IFS= read -r f; do
+        [[ -z "$f" || ! -f "$f" ]] && continue
+        echo "$f"
+        return 0
+    done < <(find "$dir" -type f \( \
+        -iname '*WindowsTerminal*.msix' -o \
+        -iname '*WindowsTerminal*.msixbundle' -o \
+        -iname '*WindowsTerminal*.appxbundle' -o \
+        -iname 'install-x64.msix' -o \
+        -iname 'install-arm64.msix' -o \
+        -iname '*OhMyPosh*.msix' -o \
+        -iname '*OhMyPosh*.msixbundle' -o \
+        -iname '*Oh My Posh*.msix' -o \
+        -iname '*posh*.msix' \
+        \) 2>/dev/null | LC_ALL=C sort)
+
+    while IFS= read -r f; do
+        [[ -z "$f" || ! -f "$f" ]] && continue
+        base="${f##*/}"
+        case "$base" in
+            *UI.Xaml*|*VCLibs*|*NET.Native*|*DesktopAppInstaller*) continue ;;
+        esac
+        echo "$f"
+        return 0
+    done < <(find "$dir" -type f \( \
+        -iname '*.msix' -o -iname '*.msixbundle' -o -iname '*.appxbundle' \
+        \) 2>/dev/null | LC_ALL=C sort)
+    return 1
+}
+
+# 列出目录中的 MSIX 依赖包（须先于主包 Add-AppxPackage）
+# 参数: dir
+# stdout: 每行一个路径
+find_msix_dependency_files() {
+    local dir="$1"
+    [[ -n "$dir" && -d "$dir" ]] || return 1
+    find "$dir" -type f \( \
+        -iname '*UI.Xaml*.msix' -o -iname '*UI.Xaml*.appx' -o \
+        -iname '*VCLibs*.msix' -o -iname '*VCLibs*.appx' -o \
+        -iname '*NET.Native*.msix' -o -iname '*NET.Native*.appx' \
+        \) 2>/dev/null | LC_ALL=C sort
+}
+
+_windows_process_running() {
+    local name="$1"
+    [[ -n "$name" ]] || return 1
+    powershell.exe -NoProfile -Command \
+        "if (Get-Process -Name '${name}' -ErrorAction SilentlyContinue) { exit 0 } else { exit 1 }" \
+        >/dev/null 2>&1
+}
+
+_win_path_for_powershell() {
+    local path="$1"
+    if command -v cygpath >/dev/null 2>&1; then
+        cygpath -w "$path"
+    else
+        printf '%s\n' "$path"
+    fi
+}
+
+# 用户级 Add-AppxPackage（无需管理员，仅需 AppXSvc）
+# 参数: windows_path
+_add_appx_package() {
+    local win_path="$1"
+    local ps_path
+    ps_path="${win_path//\'/\'\'}"
+    powershell.exe -NoProfile -ExecutionPolicy Bypass -Command \
+        "Add-AppxPackage -Path '${ps_path}'"
+}
+
+# 对目录内依赖 + 主包执行 Add-AppxPackage
+# 参数: dir
+_add_appx_packages_from_dir() {
+    local dir="$1"
+    local dep primary dep_win primary_win
+    [[ -n "$dir" && -d "$dir" ]] || return 1
+
+    primary="$(find_primary_msix_in_dir "$dir" || true)"
+    if [[ -z "$primary" || ! -f "$primary" ]]; then
+        echo "[WARNING] No primary MSIX package found in ${dir}" >&2
+        return 1
+    fi
+
+    while IFS= read -r dep; do
+        [[ -z "$dep" || ! -f "$dep" ]] && continue
+        dep_win="$(_win_path_for_powershell "$dep")"
+        echo "[INFO] Adding AppX dependency: ${dep##*/}" >&2
+        _add_appx_package "$dep_win" >/dev/null 2>&1 || true
+    done < <(find_msix_dependency_files "$dir" || true)
+
+    primary_win="$(_win_path_for_powershell "$primary")"
+    echo "[INFO] Adding AppX package: ${primary##*/}" >&2
+    if _add_appx_package "$primary_win"; then
+        echo "[SUCCESS] MSIX sideload installed: ${primary##*/}" >&2
+        return 0
+    fi
+    echo "[WARNING] Add-AppxPackage failed for ${primary##*/}" >&2
+    return 1
+}
+
+# winget download + Add-AppxPackage，绕过 InstallService / 安装技术不一致
+# 参数: winget_id
+upgrade_winget_msix_sideload() {
+    local id="$1"
+    local dest
+    [[ -n "$id" ]] || return 1
+    if ! command -v winget &>/dev/null; then
+        echo "[WARNING] winget not found, skip MSIX sideload: $id" >&2
+        return 1
+    fi
+
+    if [[ "$id" == "Microsoft.WindowsTerminal" ]] && _windows_process_running WindowsTerminal; then
+        echo "[WARNING] Windows Terminal is running; skip MSIX sideload to avoid 0x80073D02. Close WT and retry." >&2
+        return 1
+    fi
+
+    dest="${HOME}/Downloads/${id}_winget_msix"
+    mkdir -p "$dest" || return 1
+    ensure_proxy_for_download
+
+    echo "[INFO] Downloading MSIX via winget: $id -> ${dest}" >&2
+    if ! winget download --id "$id" --source winget --download-directory "$dest" \
+        --accept-source-agreements --accept-package-agreements; then
+        echo "[WARNING] winget download failed: $id" >&2
+        return 1
+    fi
+
+    _add_appx_packages_from_dir "$dest"
+}
+
 upgrade_winget_id() {
     local id="$1"
+    local output=""
+    local rc=0
     [[ -z "$id" ]] && return 1
     if ! command -v winget &>/dev/null; then
         echo "[WARNING] winget not found, skip upgrade: $id" >&2
@@ -495,11 +657,21 @@ upgrade_winget_id() {
     echo "[INFO] Upgrading via winget: $id" >&2
     # --source winget：避开 msstore（7890 MITM 易触发 0x8a15005e）
     if winget list --id "$id" --source winget &>/dev/null 2>&1; then
-        winget upgrade --id "$id" -e --source winget --accept-source-agreements --accept-package-agreements 2>/dev/null || return 1
+        output="$(winget upgrade --id "$id" -e --source winget --accept-source-agreements --accept-package-agreements 2>&1)" || rc=$?
     else
-        winget install --id "$id" -e --source winget --accept-source-agreements --accept-package-agreements 2>/dev/null || return 1
+        output="$(winget install --id "$id" -e --source winget --accept-source-agreements --accept-package-agreements 2>&1)" || rc=$?
     fi
-    return 0
+    if [[ -n "$output" ]]; then
+        printf '%s\n' "$output" >&2
+    fi
+    if [[ "$rc" -eq 0 ]]; then
+        return 0
+    fi
+    if winget_output_needs_msix_sideload "$output" "$rc"; then
+        echo "[INFO] winget upgrade failed (rc=${rc}), trying MSIX sideload: $id" >&2
+        upgrade_winget_msix_sideload "$id" && return 0
+    fi
+    return 1
 }
 
 upgrade_package_by_manager() {
@@ -789,6 +961,116 @@ install_github_release_zip_exe() {
         return 0
     fi
     echo "[WARNING] ${exe_base} copied to ${dest_dir} but not on PATH yet" >&2
+    return 0
+}
+
+# Oh My Posh Windows GitHub asset（非 zip，官方 posh-windows-*.exe）
+oh_my_posh_windows_github_asset() {
+    case "$(uname -m 2>/dev/null || echo x86_64)" in
+        aarch64|arm64|ARM64) echo "posh-windows-arm64.exe" ;;
+        *) echo "posh-windows-amd64.exe" ;;
+    esac
+}
+
+# 从 MSIX 抽出 oh-my-posh.exe 到 dest
+# 参数: msix_path dest_exe
+_extract_oh_my_posh_exe_from_msix() {
+    local msix="$1"
+    local dest_exe="$2"
+    local tmp found dest_dir
+    [[ -f "$msix" ]] || return 1
+    command -v unzip >/dev/null 2>&1 || return 1
+    dest_dir="$(dirname "$dest_exe")"
+    mkdir -p "$dest_dir" || return 1
+    # 勿用 Git Bash /tmp：unzip 报成功但文件会被清掉
+    tmp="${dest_exe}.extract.$$"
+    rm -rf "$tmp"
+    mkdir -p "$tmp" || return 1
+    if ! unzip -qo "$msix" "oh-my-posh.exe" -d "$tmp" 2>/dev/null; then
+        unzip -qo "$msix" -d "$tmp" 2>/dev/null || {
+            rm -rf "$tmp"
+            return 1
+        }
+    fi
+    found="$(find "$tmp" -type f -name 'oh-my-posh.exe' 2>/dev/null | head -n 1)"
+    if [[ -z "$found" || ! -f "$found" ]]; then
+        rm -rf "$tmp"
+        return 1
+    fi
+    cp -f "$found" "$dest_exe" || {
+        rm -rf "$tmp"
+        return 1
+    }
+    rm -rf "$tmp"
+    return 0
+}
+
+# 将 Oh My Posh 装到 ~/.local/bin（无管理员；绕过 EXE→MSIX 安装技术不一致）
+# 优先 winget download + 从 MSIX 抽 exe（本机代理下比 GitHub 直连稳）
+# 返回: 0=已写入, 1=失败
+install_oh_my_posh_from_github() {
+    local dest_dir="${HOME}/.local/bin"
+    local dest download_dir primary asset url tmp_dir api_json
+
+    if [[ "${PLATFORM:-}" != "windows" ]]; then
+        local _uname
+        _uname="$(uname -s 2>/dev/null || true)"
+        if [[ ! "$_uname" =~ ^(MINGW|MSYS|CYGWIN) ]]; then
+            echo "[WARNING] Oh My Posh GitHub exe install is Windows-only" >&2
+            return 1
+        fi
+    fi
+
+    mkdir -p "$dest_dir" || return 1
+    ensure_proxy_for_download
+    dest="${dest_dir}/oh-my-posh.exe"
+
+    if command -v winget >/dev/null 2>&1; then
+        download_dir="${HOME}/Downloads/JanDeDobbeleer.OhMyPosh_winget_msix"
+        mkdir -p "$download_dir" || return 1
+        echo "[INFO] Downloading Oh My Posh MSIX via winget..." >&2
+        if winget download --id JanDeDobbeleer.OhMyPosh --source winget \
+            --download-directory "$download_dir" \
+            --accept-source-agreements --accept-package-agreements; then
+            primary="$(find_primary_msix_in_dir "$download_dir" || true)"
+            if [[ -n "$primary" && -f "$primary" ]] && _extract_oh_my_posh_exe_from_msix "$primary" "$dest"; then
+                chmod +x "$dest" 2>/dev/null || true
+                export PATH="${dest_dir}:${PATH}"
+                hash -r 2>/dev/null || true
+                _add_appx_packages_from_dir "$download_dir" >/dev/null 2>&1 || true
+                echo "[SUCCESS] oh-my-posh installed to ${dest} ($(oh-my-posh --version 2>/dev/null || echo ok))" >&2
+                return 0
+            fi
+            echo "[WARNING] Failed to extract oh-my-posh.exe from MSIX, trying GitHub..." >&2
+        fi
+    fi
+
+    asset="$(oh_my_posh_windows_github_asset)"
+    tmp_dir="$(mktemp -d 2>/dev/null || mktemp -d -t ompgh)" || return 1
+    echo "[INFO] Installing oh-my-posh from GitHub (${asset})..." >&2
+    api_json="$(curl -fsSL "https://api.github.com/repos/JanDeDobbeleer/oh-my-posh/releases/latest" 2>/dev/null || true)"
+    url="$(printf '%s\n' "$api_json" | grep -oE "https://[^\"]*/${asset}" | head -n 1 || true)"
+    if [[ -z "$url" ]]; then
+        url="https://github.com/JanDeDobbeleer/oh-my-posh/releases/latest/download/${asset}"
+    fi
+    if ! download_with_progress "$url" "${tmp_dir}/${asset}" 180 3; then
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+    cp -f "${tmp_dir}/${asset}" "$dest" || {
+        rm -rf "$tmp_dir"
+        return 1
+    }
+    chmod +x "$dest" 2>/dev/null || true
+    export PATH="${dest_dir}:${PATH}"
+    hash -r 2>/dev/null || true
+    rm -rf "$tmp_dir"
+
+    if command -v oh-my-posh &>/dev/null; then
+        echo "[SUCCESS] oh-my-posh installed to ${dest} ($(oh-my-posh --version 2>/dev/null || echo ok))" >&2
+        return 0
+    fi
+    echo "[WARNING] oh-my-posh copied to ${dest} but not on PATH yet" >&2
     return 0
 }
 

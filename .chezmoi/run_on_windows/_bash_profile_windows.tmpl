@@ -13,6 +13,12 @@ fi
 # ============================================
 # 登录 shell 工具 PATH（须在 source .bashrc 之前，以便 Starship 可初始化）
 # ============================================
+# 用户级 CLI 必须优先于 Program Files 旧副本（oh-my-posh EXE / winget 残留）
+for _d in \
+    "$HOME/.local/bin" \
+    "$HOME/AppData/Local/Programs/oh-my-posh/bin"; do
+    [ -d "$_d" ] && export PATH="$_d:$PATH"
+done
 for _d in \
     "$HOME/.local/bin" \
     "$HOME/.local/share/fnm" \
@@ -21,7 +27,7 @@ for _d in \
     "$HOME/AppData/Local/Microsoft/WinGet/Links" \
     "/c/Program Files/starship/bin" \
     "/d/Program Files/starship/bin" \
-    "$HOME/AppData/Local/Programs/oh-my-posh"; do
+    "$HOME/AppData/Local/Programs/oh-my-posh/bin"; do
     [ -d "$_d" ] && [[ ":$PATH:" != *":$_d:"* ]] && export PATH="$PATH:$_d"
 done
 for _fnm_pkg in "$HOME/AppData/Local/Microsoft/WinGet/Packages"/Schniz.fnm_*; do

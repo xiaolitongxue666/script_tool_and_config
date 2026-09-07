@@ -182,10 +182,13 @@ _upgrade_software_by_name() {
             fi
             ;;
         install-windows-terminal|windows-terminal)
+            # winget MSIX 依赖 InstallService；禁用时 upgrade_winget_id 会 sideload
             upgrade_winget_id "Microsoft.WindowsTerminal" || true
             ;;
         oh-my-posh|install-oh-my-posh)
-            upgrade_winget_id "JanDeDobbeleer.OhMyPosh" || upgrade_package_by_manager "oh-my-posh" || true
+            # 新版 winget 包改为 MSIX，与旧 EXE 安装技术不一致（exit 43）
+            # ~/.local/bin 优先于 Program Files 旧副本，GitHub exe 才是用户可见升级
+            install_oh_my_posh_from_github || upgrade_winget_id "JanDeDobbeleer.OhMyPosh" || true
             ;;
         *)
             local cmd="$name"
