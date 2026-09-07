@@ -280,27 +280,32 @@ macOS 默认 `/bin/bash` 为 **3.2**，不支持 `declare -A` / `local -n`。部
 | 日志 | 检测来源写 stderr；`chezmoi_detect_proxy` stdout 仅 URL（避免 `$()` 污染） |
 | 测试 | `bash tests/test_proxy.sh`（12 项：none/NO_PROXY/WSL mock/headless 17890/指定 host 探测/WSL 宿主机 17890）+ `test_syntax.sh` |
 | 不变 | Pacman/apt 直连国内源；chezmoi 模板内 proxy 仍用静态 `awk`/`grep`（无新增 exec） |
-| macOS brew | 有代理 → 保留代理 + origin→GitHub；`HOMEBREW_NO_AUTO_UPDATE=1`；无代理才可用 tuna |
+| macOS brew | 有代理 → 保留代理 + origin→GitHub；`HOMEBREW_NO_AUTO_UPDATE=1` + `HOMEBREW_NO_ENV_HINTS=1`；Intel 默认仍 upgrade（2026-09 起无 bottle 则源码编译）；`HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK=1`；无代理才可用 tuna |
 
 | 问题 | 原因 | 解决 |
 |------|------|------|
 | 非 WSL 平台默认直连 | `install.sh`/`deploy.sh` 内联逻辑仅在 WSL 设 PROXY | 删除重复块，统一 `chezmoi_setup_proxy` |
 | Git 克隆未走代理 | deploy 曾单独 export `GIT_*_PROXY` | 迁入 `chezmoi_setup_proxy` |
 
-## macOS Homebrew 网络（2026-07）
+## macOS Homebrew 网络（2026-07，Intel 2026-09）
 
 | 项 | 约定 |
 |----|------|
 | 卡死主因 | `[4/6]` `brew upgrade` 在 tap 过期时隐式 `brew update`；清华 `origin` 高峰返回 `Waiting in queue`（实测 Position 300+） |
+| Intel 假卡死 | Homebrew 2026-09 起不提供 x86_64 bottle；`brew upgrade gh/lazygit/fastfetch` 走 `go build`/`cmake`/`make`，可数分钟。日志：`macOS Intel: brew upgrade …` |
 | 代理策略 | macOS **有代理则保留**（勿 unset）；`brew_macos_network.sh` → `_brew_macos_prepare_env` |
 | remote | 有代理时 `_brew_macos_prefer_github_remote` 将 tuna/ustc/aliyun → `https://github.com/Homebrew/brew.git` |
 | auto-update | `HOMEBREW_NO_AUTO_UPDATE=1`（与 `UPDATE_HOMEBREW` 默认跳过一致） |
-| 配置入口 | `run_on_darwin/run_once_configure-homebrew.sh.tmpl` 在跳过 update 时仍可切 remote |
+| Intel 升级 | **默认仍 upgrade**（含源码）；`HOMEBREW_NO_ENV_HINTS=1`；`HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK=1` 不顺带升级 unrelated dependents |
+| clangd | brew **无** `clangd` formula；ensure 已装则跳过 `clangd`/`clang`/`clang-tools-extra` 模糊搜索 |
+| 配置入口 | `run_on_darwin/run_once_configure-homebrew.sh.tmpl` 在跳过 update 时仍可切 remote；[5/6] 报 Missing 可忽略（非命令） |
 | 文档 | [INSTALL_GUIDE.md](INSTALL_GUIDE.md)「macOS Homebrew 网络」 |
 
 | 问题 | 原因 | 解决 |
 |------|------|------|
 | `Upgrading via brew: connect` 表面挂死 | 隐式 update + tuna 排队 + 曾 `2>/dev/null` | `NO_AUTO_UPDATE` + 切 GitHub + 保留代理/可见日志 |
+| Intel `brew upgrade gh` 表面挂死 | 无 bottle，正在 `make bin/gh` | 默认继续源码升级；Ctrl+C 后下次 ensure 会再编 |
+| `fastfetch` 升了 ImageMagick/glib 等一堆包 | `brew upgrade` 会升级 formula 自己的 outdated 依赖 | Intel 设 `HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK=1`；目标 formula 仍 upgrade |
 | 卸代理「直连镜像」仍慢/卡 | tuna git 限流排队，非代理本身 | 有 7890 时走 GitHub；无代理再考虑镜像 |
 
 ## chezmoi 源文件命名（2026-05）

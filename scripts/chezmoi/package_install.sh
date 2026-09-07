@@ -432,8 +432,14 @@ upgrade_brew_package() {
     _brew_macos_prepare_env
     local ret=0
     if brew list "$name" &>/dev/null; then
+        if type _brew_is_intel_macos &>/dev/null && _brew_is_intel_macos; then
+            echo "[INFO] macOS Intel: brew upgrade $name (no bottles; may compile from source for several minutes)" >&2
+        fi
         brew upgrade "$name" || ret=1
     else
+        if type _brew_is_intel_macos &>/dev/null && _brew_is_intel_macos; then
+            echo "[INFO] macOS Intel: brew install $name (no bottles; may compile from source for several minutes)" >&2
+        fi
         brew install "$name" || ret=1
     fi
     _brew_macos_restore_env

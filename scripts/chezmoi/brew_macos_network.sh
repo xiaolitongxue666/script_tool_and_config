@@ -64,14 +64,43 @@ _brew_macos_prefer_github_remote() {
     unset HOMEBREW_API_DOMAIN HOMEBREW_BOTTLE_DOMAIN HOMEBREW_BREW_GIT_REMOTE 2>/dev/null || true
 }
 
+# Intel Mac：Homebrew 2026-09 起不再提供 x86_64 bottle，upgrade 常走源码编译
+_brew_is_intel_macos() {
+    [[ "$(uname -s)" == "Darwin" ]] || return 1
+    case "$(uname -m)" in
+        x86_64|i386|i686) return 0 ;;
+        *) return 1 ;;
+    esac
+}
+
+_brew_macos_restore_one() {
+    local var_name="$1"
+    local saved="$2"
+    if [[ -n "$saved" ]]; then
+        export "${var_name}=${saved}"
+    else
+        unset "$var_name"
+    fi
+}
+
 # macOS Homebrew：保留已设置的代理（7890→GitHub 通常稳于卸代理直连清华）；始终禁隐式 auto-update
 _brew_macos_prepare_env() {
     __BREW_MACOS_SAVED_NO_AUTO="${HOMEBREW_NO_AUTO_UPDATE:-}"
+    __BREW_MACOS_SAVED_NO_HINTS="${HOMEBREW_NO_ENV_HINTS:-}"
+    __BREW_MACOS_SAVED_NO_DEPS="${HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK:-}"
     export HOMEBREW_NO_AUTO_UPDATE=1
+    export HOMEBREW_NO_ENV_HINTS=1
 
     if [[ "$(uname -s)" != "Darwin" ]]; then
         return 0
     fi
+
+    case "$(uname -m)" in
+        x86_64|i386|i686)
+            # 仍升级目标 formula；不顺带检查/升级 installed dependents
+            export HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK=1
+            ;;
+    esac
 
     local proxy_url="${http_proxy:-${HTTP_PROXY:-${https_proxy:-${HTTPS_PROXY:-}}}}"
     if [[ -n "$proxy_url" && "${NO_PROXY:-0}" != "1" ]]; then
@@ -84,12 +113,10 @@ _brew_macos_prepare_env() {
 }
 
 _brew_macos_restore_env() {
-    if [[ -n "${__BREW_MACOS_SAVED_NO_AUTO:-}" ]]; then
-        export HOMEBREW_NO_AUTO_UPDATE="$__BREW_MACOS_SAVED_NO_AUTO"
-    else
-        unset HOMEBREW_NO_AUTO_UPDATE
-    fi
-    unset __BREW_MACOS_SAVED_NO_AUTO
+    _brew_macos_restore_one HOMEBREW_NO_AUTO_UPDATE "${__BREW_MACOS_SAVED_NO_AUTO:-}"
+    _brew_macos_restore_one HOMEBREW_NO_ENV_HINTS "${__BREW_MACOS_SAVED_NO_HINTS:-}"
+    _brew_macos_restore_one HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK "${__BREW_MACOS_SAVED_NO_DEPS:-}"
+    unset __BREW_MACOS_SAVED_NO_AUTO __BREW_MACOS_SAVED_NO_HINTS __BREW_MACOS_SAVED_NO_DEPS
 }
 
 # 检查代理是否可用

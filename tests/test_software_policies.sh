@@ -184,5 +184,43 @@ else
     echo "[FAIL] ensure_uv_latest missing package-manager path detection"
 fi
 
+# macOS Intel：默认仍 brew upgrade（可源码编译）；clangd 无 brew formula，不模糊搜索
+if grep -q 'brew upgrade "$name"' "${PROJECT_ROOT}/scripts/chezmoi/package_install.sh" \
+    && grep -q 'macOS Intel: brew upgrade' "${PROJECT_ROOT}/scripts/chezmoi/package_install.sh"; then
+    PASSED=$((PASSED + 1))
+    echo "[PASS] Intel still brew-upgrades installed formulae (source compile allowed)"
+else
+    FAILED=$((FAILED + 1))
+    echo "[FAIL] Intel brew upgrade path missing or skipped"
+fi
+
+if grep -q '_brew_should_skip_installed_upgrade' "${PROJECT_ROOT}/scripts/chezmoi/package_install.sh" \
+    || grep -q '_brew_should_skip_installed_upgrade' "${PROJECT_ROOT}/scripts/chezmoi/brew_macos_network.sh"; then
+    FAILED=$((FAILED + 1))
+    echo "[FAIL] leftover Intel skip-upgrade helper"
+else
+    PASSED=$((PASSED + 1))
+    echo "[PASS] Intel skip-upgrade helper removed"
+fi
+
+if grep -q 'clangd already present, skip brew formula search' \
+    "${PROJECT_ROOT}/scripts/chezmoi/ensure_platform_software.sh"; then
+    PASSED=$((PASSED + 1))
+    echo "[PASS] clangd ensure skips nonexistent brew formula search"
+else
+    FAILED=$((FAILED + 1))
+    echo "[FAIL] clangd still searches brew for clangd/clang/clang-tools-extra"
+fi
+
+if grep -q 'HOMEBREW_NO_ENV_HINTS=1' "${PROJECT_ROOT}/scripts/chezmoi/brew_macos_network.sh" \
+    && grep -q 'HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK=1' \
+        "${PROJECT_ROOT}/scripts/chezmoi/brew_macos_network.sh"; then
+    PASSED=$((PASSED + 1))
+    echo "[PASS] brew env suppresses hints and Intel dependents check"
+else
+    FAILED=$((FAILED + 1))
+    echo "[FAIL] brew_macos_network.sh missing Intel brew env flags"
+fi
+
 echo "Summary: $PASSED passed, $FAILED failed"
 [[ "$FAILED" -eq 0 ]]
