@@ -65,6 +65,13 @@ has_gui() {
     return 1
 }
 
+# 检测 Windows 会话是否已提权（UAC 提升后的管理员 token；非提权会话返回 1）。
+# 提权会话下经 winget 安装 Cursor 会得到 User setup，自动更新会被禁用，见下方 windows 分支说明。
+_is_windows_elevated() {
+    [[ "$PLATFORM" != "windows" ]] && return 1
+    net session >/dev/null 2>&1
+}
+
 if ! has_gui; then
     echo "[INFO] No GUI detected (Linux without DISPLAY/WAYLAND_DISPLAY), skipping Cursor install"
     exit 0
@@ -127,15 +134,28 @@ case "$PLATFORM" in
         fi
         ;;
     windows)
-        # Windows：通过 winget 安装
+        # Windows：安装策略须保证自动更新可用，不能用 User setup 糊弄。
+        # winget 的 Cursor.Cursor 实际安装的是 User setup；当登录账号是 Administrator 或以提权
+        # 方式运行 Cursor 时，更新器会被硬编码禁用（main.log 每次启动：
+        # "update#ctor - updates are disabled due to running as Admin in user setup"），
+        # Help → Check for Updates 也随之消失（2026-09 实测：D:\Program Files\cursor 3.9.16
+        # User setup + Administrator 账号复现该问题）。要恢复自动更新只能装官方 System setup：
+        # https://cursor.com/download → Windows (x64) (System)；User setup 无法修复。
+        # 因此：提权会话直接跳过 winget（装了也只是复现同一问题），并引导安装 System 包；
+        # 仅非提权的普通用户会话才回退到 winget（User setup 非提权运行时自动更新正常）。
+        if _is_windows_elevated; then
+            echo "[WARNING] Elevated Windows session detected: winget (Cursor.Cursor) installs the User setup, whose auto-update is disabled when Cursor runs as Admin."
+            echo "[INFO] Please install Cursor System setup instead: https://cursor.com/download (Windows (x64) (System))"
+            exit 0
+        fi
         if [[ "$PACKAGE_MANAGER" == "winget" ]]; then
             if winget install -e --id Cursor.Cursor --accept-source-agreements --accept-package-agreements 2>/dev/null; then
-                echo "[SUCCESS] Cursor installed via winget"
+                echo "[SUCCESS] Cursor installed via winget (User setup)"
             else
-                echo "[WARNING] winget install failed, please install manually from https://cursor.sh"
+                echo "[WARNING] winget install failed, please install Cursor System setup manually from https://cursor.com/download"
             fi
         else
-            echo "[INFO] Please install Cursor manually from https://cursor.sh"
+            echo "[INFO] Please install Cursor manually from https://cursor.com/download"
         fi
         ;;
 esac
