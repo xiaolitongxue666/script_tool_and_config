@@ -300,4 +300,7 @@ claude() {
   done
   command claude "$@"
 }
-{{- end -}}
+
+# 本机私有配置（不受 chezmoi 覆盖）；须置于文件最末尾以便生效
+[[ -f "${HOME}/.bashrc.local" ]] && source "${HOME}/.bashrc.local"
+{{ end }}

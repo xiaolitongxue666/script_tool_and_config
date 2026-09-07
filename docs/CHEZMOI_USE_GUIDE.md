@@ -754,8 +754,10 @@ claude() {
 | 配置文件 | 适用平台 | 源模板 |
 |---------|---------|--------|
 | `~/.zshrc` | macOS / Linux / WSL（zsh 环境） | `.chezmoi/dot_zshrc.tmpl` |
+| `~/.zshrc.local` | macOS / Linux / WSL 本机私有（不受 apply 覆盖） | 无（本机文件；`dot_zshrc.tmpl` 末尾 source） |
 | `~/.bashrc` | Linux bash 环境 | `.chezmoi/dot_bashrc.tmpl` |
 | `~/.bashrc` | Windows Git Bash 环境 | `.chezmoi/dot_bashrc.tmpl`（windows 分支） |
+| `~/.bashrc.local` | Windows Git Bash / Linux bash 本机私有（不受 apply 覆盖） | 无（本机文件；`dot_bashrc.tmpl` 末尾 source） |
 
 ### 相关参考
 
