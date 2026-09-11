@@ -67,7 +67,7 @@ canonical 源：agent-config `platforms/{cursor,claude-code,codex,pi}/` 与 `pla
 - **CodeWhale 已从本仓与 agent-config 移除（勿恢复）**；已删除 `run_once_92-install-codewhale.sh.tmpl`、`docs/CODEWHALE.md`、`.cursor/rules/codewhale.mdc`。
 - **历史**：已删除 `run_once_92-install-deepseek.sh.tmpl`（勿恢复 `cargo install deepseek`）。
 - AI Agent 配置见 [agent-config](../../AI/agent-config)（Claude / Cursor / Codex / Pi + CodeGraph）。
-- WSL 与 Windows **独立**：当前在 WSL 只用 WSL fnm/npm（含 `/mnt/host/wslg/.../fnm_multishells`）；**禁止**从 WSL 调用 `cmd.exe` 或改 `/mnt/c` Windows npm。见 `.cursor/rules/wsl-windows-isolation.mdc`。
+- WSL 与 Windows **完全独立**：各环境 `$HOME`/fnm/npm/chezmoi 目标不共享。WSL 里 `install.sh` **只装 WSL**，与宿主机 npm **无关**（`:7890` 只是网络出口）。`/mnt/host/wslg/.../fnm_multishells` 是 WSL 本机 fnm；`/mnt/c`、`/mnt/host/c` 才是 Windows。**禁止**从 WSL 调用 `cmd.exe` 或改 Windows npm。见 `.cursor/rules/wsl-windows-isolation.mdc`。
 - 部署：`./deploy.sh` 或 `./scripts/manage_dotfiles.sh apply`（**勿**对 apply 使用 `| rg | head` 管道，会 SIGPIPE 中断）。
 
 ## Pi（已迁入 agent-config，2026-06）
@@ -238,7 +238,7 @@ macOS 默认 `/bin/bash` 为 **3.2**，不支持 `declare -A` / `local -n`。部
 | 误报场景 | `run_once_install-lazyssh.sh.tmpl` 在 apt 源无 lazyssh 时仅输出 WARNING 并 exit 0（符合「非关键失败不阻断」规范）→ 外层曾误报 `[SUCCESS] Installed: lazyssh` |
 | 修复 | `_process_one_script` 的 missing/upgrade 分支：模板 exit 0 后再 `check_script_software_installed` 二次验证；命令仍不可用 → 计 SKIPPED + WARNING，不误报 SUCCESS |
 | 模板不变 | run_once 模板保持 exit 0（chezmoi apply 场景 exit≠0 会触发 `install.sh` set -e 阻断）；验证只放在 `ensure_platform_software.sh` 层 |
-| Layer4 npm | `ensure_npm_global_latest`：已最新跳过；`_run_with_timeout` 默认 180s（macOS 无 GNU timeout）；可见日志（勿 `2>/dev/null` 整段）；`_is_windows_interop_path` **仅** Windows 盘符（`/mnt/c`、`/mnt/host/c`）与 WSL 可见的 `AppData/Roaming/npm`；**勿**把 `/mnt/host/wslg/.../fnm_multishells` 当 Windows |
+| Layer4 npm | `ensure_npm_global_latest`：已最新跳过；`_run_with_timeout` 默认 180s（macOS 无 GNU timeout）；可见日志（勿 `2>/dev/null` 整段）；默认 `npm_config_registry=npmmirror` + `NO_PROXY`（不写 `~/.npmrc`）；`_is_windows_interop_path` **仅** Windows 盘符（`/mnt/c`、`/mnt/host/c`）与 WSL 可见的 `AppData/Roaming/npm`；**勿**把 `/mnt/host/wslg/.../fnm_multishells` 当 Windows；`_wsl_prepend_npm_global_bin` **始终置顶**本地 prefix/bin |
 
 ### [5/6] 检测与报告（2026-08）
 
@@ -327,5 +327,5 @@ macOS 默认 `/bin/bash` 为 **3.2**，不支持 `declare -A` / `local -n`。部
 2. 部署变更仅通过 chezmoi 模板 + `manage_dotfiles.sh` / `install.sh` / `deploy.sh`。
 3. 运行时日志英文；注释与文档中文。
 4. Windows run_once **无管理员**依赖。
-5. **WSL 与 Windows 宿主机独立**：当前在哪一侧只改哪一侧。WSL 本机 fnm 可在 `/mnt/host/wslg/runtime-dir/fnm_multishells`；Windows npm 在 `/mnt/c` / `AppData/Roaming/npm`。禁止从 WSL 改 Windows 包或调用 `cmd.exe`。见 `.cursor/rules/wsl-windows-isolation.mdc`。
+5. **WSL 与 Windows 完全独立**：各 OS 的 `$HOME`/fnm/npm/chezmoi 目标不共享。WSL 里 `install.sh` **只装 WSL**，与宿主机 npm **无关**。WSL 本机 fnm 可在 `/mnt/host/wslg/runtime-dir/fnm_multishells`；Windows npm 在 `/mnt/c`、`/mnt/host/c`、`AppData/Roaming/npm`。禁止从 WSL 改 Windows 包或调用 `cmd.exe`。见 `.cursor/rules/wsl-windows-isolation.mdc`。
 6. 紧凑记忆索引：[PROJECT_MEMORY.md](PROJECT_MEMORY.md)；变更时同步 `AGENTS.md`、`CLAUDE.md`、`.cursor/rules/`。

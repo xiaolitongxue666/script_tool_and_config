@@ -761,9 +761,7 @@ _wsl_prepend_npm_global_bin() {
     if _is_windows_interop_path "$npm_prefix"; then
         return 1
     fi
-    case ":${PATH:-}:" in
-        *:"${npm_prefix}/bin":*) return 0 ;;
-    esac
+    # 始终置顶：路径可能已在 PATH 后面，Windows AppData npm 会抢先
     export PATH="${npm_prefix}/bin:${PATH}"
     hash -r 2>/dev/null || true
 }
@@ -793,6 +791,34 @@ _run_with_timeout() {
     return "$rc"
 }
 
+# 会话内走国内 npm 镜像（不写 ~/.npmrc）。官方 Cloudflare 经 7890 约 1 Mbps；
+# npmmirror 在 FIClash Domestic/DIRECT。覆盖：NPM_REGISTRY=https://registry.npmjs.org
+_npm_apply_china_mirror() {
+    export npm_config_registry="${NPM_REGISTRY:-https://registry.npmmirror.com}"
+    local hosts="registry.npmmirror.com,cdn.npmmirror.com,npmmirror.com"
+    local current="${NO_PROXY:-${no_proxy:-}}"
+    local host
+    if [[ "$npm_config_registry" != *npmmirror.com* ]]; then
+        return 0
+    fi
+    local IFS=','
+    for host in $hosts; do
+        [[ -n "$host" ]] || continue
+        case ",${current}," in
+            *",${host},"*) ;;
+            *)
+                if [[ -n "$current" ]]; then
+                    current="${current},${host}"
+                else
+                    current="$host"
+                fi
+                ;;
+        esac
+    done
+    export NO_PROXY="$current"
+    export no_proxy="$current"
+}
+
 _npm_global_installed_version() {
     local pkg="$1"
     local line
@@ -810,6 +836,7 @@ _npm_latest_version() {
     local pkg="$1"
     local line
     local timeout_secs="${NPM_VIEW_TIMEOUT_SECS:-30}"
+    _npm_apply_china_mirror
     line="$(_run_with_timeout "$timeout_secs" npm view "$pkg" version || true)"
     line="$(printf '%s' "$line" | tr -d '\r' | awk 'NF { line=$0 } END { gsub(/[[:space:]]+/, "", line); print line }')"
     printf '%s' "$line"
@@ -939,6 +966,7 @@ ensure_npm_global_latest() {
     fi
 
     ensure_proxy_for_download
+    _npm_apply_china_mirror
     local npm_target="$spec"
     if [[ "$spec" != *"@"* ]] || [[ "$spec" == @* ]]; then
         npm_target="${spec}@latest"

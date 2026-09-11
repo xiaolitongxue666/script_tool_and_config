@@ -354,7 +354,7 @@ ensure_directory() {
 ### 平台特定代码
 
 - 项目支持多 OS（Win10、macOS Intel、Linux Ubuntu/Arch）与 WSL（Ubuntu）；WSL 视为 Linux，共用 `run_on_linux/`，脚本内通过 WSL 检测区分代理与路径。
-- **WSL 与 Windows 宿主机独立**：`$HOME`/fnm/npm 不共享。`/mnt/host/wslg/.../fnm_multishells` 是 WSL 本机 fnm；`/mnt/c` 才是 Windows。禁止从 WSL 改 Windows npm 或调用 `cmd.exe`。见 `.cursor/rules/wsl-windows-isolation.mdc`。
+- **WSL 与 Windows 宿主机完全独立**：`$HOME`/fnm/npm/chezmoi 目标不共享。WSL 里跑 `install.sh` **只装 WSL**，与宿主机 npm **无关**（宿主机仅 Clash `:7890` 出口）。`/mnt/host/wslg/.../fnm_multishells` 是 WSL 本机 fnm；`/mnt/c`、`/mnt/host/c` 才是 Windows。禁止从 WSL 改 Windows npm 或调用 `cmd.exe`。见 `.cursor/rules/wsl-windows-isolation.mdc`。
 - 平台特定配置使用 `run_on_linux/`、`run_on_darwin/`、`run_on_windows/`
 - 安装脚本中的平台特定逻辑使用模板条件判断
 - Win10 下推荐在 Git Bash 中执行 `install.sh`；若使用 Alacritty，需保证其 shell 与 PATH 与 Git Bash 一致（见 [docs/INSTALL_GUIDE.md](docs/INSTALL_GUIDE.md)）。

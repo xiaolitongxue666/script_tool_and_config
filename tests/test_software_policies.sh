@@ -228,12 +228,24 @@ if grep -q '_is_windows_interop_path' "$_pkg_install" \
     && grep -q '_wsl_prepend_npm_global_bin' "$_pkg_install" \
     && grep -q '_run_with_timeout' "$_pkg_install" \
     && grep -q 'already up-to-date' "$_pkg_install" \
-    && grep -q -- '--no-fund --no-audit' "$_pkg_install"; then
+    && grep -q -- '--no-fund --no-audit' "$_pkg_install" \
+    && grep -q '始终置顶' "$_pkg_install" \
+    && ! grep -q ':"${npm_prefix}/bin":*) return 0' "$_pkg_install"; then
     PASSED=$((PASSED + 1))
-    echo "[PASS] ensure_npm_global_latest has timeout, skip-if-latest, WSL prepend"
+    echo "[PASS] ensure_npm_global_latest has timeout, skip-if-latest, WSL always-prepend"
 else
     FAILED=$((FAILED + 1))
-    echo "[FAIL] ensure_npm_global_latest missing timeout/interop/skip-if-latest"
+    echo "[FAIL] ensure_npm_global_latest missing timeout/interop/skip-if-latest/always-prepend"
+fi
+
+if grep -q '_npm_apply_china_mirror' "$_pkg_install" \
+    && grep -q 'registry.npmmirror.com' "$_pkg_install" \
+    && grep -q 'npm_config_registry' "$_pkg_install"; then
+    PASSED=$((PASSED + 1))
+    echo "[PASS] package_install.sh uses npmmirror for npm view/install"
+else
+    FAILED=$((FAILED + 1))
+    echo "[FAIL] package_install.sh missing npmmirror registry helper"
 fi
 
 if grep -q '_command_exists_local_not_interop' \

@@ -5,6 +5,10 @@ globs:
 
 # script_tool_and_config 项目规则
 
+## WSL / Windows 隔离（必读）
+
+Win 与 WSL 是两套独立环境。WSL 安装不得使用或修改 Windows npm。详见 [wsl-windows-isolation.mdc](wsl-windows-isolation.mdc)。
+
 ## 跨平台 Shell 策略
 
 不同平台使用不同的默认 Shell，模板文件按平台分别维护：
@@ -59,7 +63,7 @@ Shell 配置模板中内置了 claude-mem 项目级记忆自动检测：
 - **CodeWhale 已从本仓与 agent-config 移除（勿恢复）**；已删除 `run_once_92-install-codewhale`、`docs/CODEWHALE.md`、`.cursor/rules/codewhale.mdc`。
 - **历史**：已删除 `run_once_92-install-deepseek`（勿恢复 cargo 安装路径）。
 - AI Agent 配置见 agent-config（Claude / Cursor / Codex / Pi + CodeGraph）。
-- WSL 与 Windows **独立**：当前在 WSL 只改 WSL fnm/npm；`/mnt/host/wslg/.../fnm_multishells` 是 WSL 本机，**不是** Windows。禁止从 WSL 改 `/mnt/c` npm 或调用 `cmd.exe`。见 `.cursor/rules/wsl-windows-isolation.mdc`。
+- WSL 与 Windows **完全独立**：WSL 里 `install.sh` 只装 WSL，与宿主机 npm 无关。`/mnt/host/wslg/.../fnm_multishells` 是 WSL 本机；`/mnt/c`、`/mnt/host/c` 才是 Windows。禁止从 WSL 改 Windows npm 或调用 `cmd.exe`。见 `.cursor/rules/wsl-windows-isolation.mdc`。
 
 ## Pi
 

@@ -126,9 +126,10 @@ Layer 5: install-tmux + run_on_{linux,darwin}；Windows：`install-rmux`、`inst
 
 ### WSL 与 Windows 隔离
 
-- 各 OS / WSL 的 `$HOME`、fnm、npm global **独立**，须在对应环境各跑一遍 install/apply
+- 各 OS / WSL 的 `$HOME`、fnm、npm global **完全独立**，须在对应环境各跑一遍 install/apply
+- WSL 里跑 `install.sh` **只装 WSL**，与宿主机 Windows npm **无关**（`:7890` 只是网络出口）
 - 当前在 WSL：只用 WSL fnm/npm。`/mnt/host/wslg/runtime-dir/fnm_multishells` 是 **WSL 本机**，不是 Windows
-- `/mnt/c`、`C:\`、`AppData/Roaming/npm` 在 WSL 里不算已装；禁止从 WSL 改 Windows npm 或调用 `cmd.exe`
+- `/mnt/c`、`/mnt/host/c`、`C:\`、`AppData/Roaming/npm` 在 WSL 里不算已装；禁止从 WSL 改 Windows npm 或调用 `cmd.exe`
 - 规则文件：`.cursor/rules/wsl-windows-isolation.mdc`
 
 ### 代理策略
