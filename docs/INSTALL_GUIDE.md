@@ -270,7 +270,7 @@ sudo sed -i 's|http://archive.ubuntu.com|https://mirrors.tuna.tsinghua.edu.cn|g'
 - 安装脚本在 macOS 上：
   1. `brew install/upgrade` **保留代理**，并设 `HOMEBREW_NO_AUTO_UPDATE=1`（避免 upgrade 隐式 update）；
   2. 检测到代理时，自动把 Homebrew `origin` 从 tuna/ustc/aliyun **切回** `https://github.com/Homebrew/brew.git`。
-- **Intel (x86_64)**：Homebrew 2026-09 起不再提供 bottle，`brew upgrade` **仍会执行**，可能源码编译数分钟（日志会提示 `macOS Intel: brew upgrade …`）。`HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK=1` 避免顺带升级无关 dependents。关闭升级：`./install.sh --no-upgrade`。
+- **Intel (x86_64)**：Homebrew 2026-09 起不再提供 bottle，`brew upgrade` **仍会执行**（叶子 formula 可源码编译）。`HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK=1` 避免顺带升级无关 dependents。若 dry-run 显示会源码编译 **imagemagick/llvm** 等重型依赖（如 `fastfetch` 拖 ImageMagick），**跳过该 formula 升级**并保留已装版本。`Xcode is outdated` 只是警告，其后 cmake/make 可数分钟无输出（脚本会每 20s 打心跳）。关闭升级：`./install.sh --no-upgrade`。
 - 无代理时仍可用清华镜像作备选。
 - 需要显式更新：`UPDATE_HOMEBREW=true ./install.sh`（或 `brew update`）。
 

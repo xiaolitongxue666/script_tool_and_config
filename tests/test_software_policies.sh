@@ -203,6 +203,67 @@ else
     echo "[PASS] Intel skip-upgrade helper removed"
 fi
 
+# shellcheck disable=SC1091
+source "${PROJECT_ROOT}/scripts/chezmoi/brew_macos_network.sh"
+_fastfetch_dryrun=$(cat <<'EOF'
+==> Would install 2 dependencies:
+vulkan-headers  1.4.357.0
+vulkan-loader   1.4.357.0
+==> Would upgrade 3 dependencies:
+libheif      1.23.3    -> 1.23.4
+imagemagick  7.1.2-8_1 -> 7.1.2-31
+lua          5.4.8     -> 5.5.1
+==> Would upgrade 1 requested outdated package
+fastfetch 2.67.1 -> 2.68.1
+EOF
+)
+_bat_dryrun=$(cat <<'EOF'
+==> Would upgrade 1 requested outdated package
+bat 0.26.1 -> 0.26.2
+EOF
+)
+_lua_dep_dryrun=$(cat <<'EOF'
+==> Would upgrade 1 dependencies:
+lua          5.4.8     -> 5.5.1
+==> Would upgrade 1 requested outdated package
+fastfetch 2.67.1 -> 2.68.1
+EOF
+)
+if _brew_intel_dryrun_mentions_heavy_dep "$_fastfetch_dryrun"; then
+    PASSED=$((PASSED + 1))
+    echo "[PASS] Intel dry-run parser skips fastfetch when imagemagick is a dep"
+else
+    FAILED=$((FAILED + 1))
+    echo "[FAIL] Intel dry-run parser missed imagemagick dep"
+fi
+if ! _brew_intel_dryrun_mentions_heavy_dep "$_bat_dryrun"; then
+    PASSED=$((PASSED + 1))
+    echo "[PASS] Intel dry-run parser does not skip requested formula itself"
+else
+    FAILED=$((FAILED + 1))
+    echo "[FAIL] Intel dry-run parser treated requested package as heavy dep"
+fi
+if ! _brew_intel_dryrun_mentions_heavy_dep "$_lua_dep_dryrun"; then
+    PASSED=$((PASSED + 1))
+    echo "[PASS] Intel dry-run parser allows non-heavy deps (lua)"
+else
+    FAILED=$((FAILED + 1))
+    echo "[FAIL] Intel dry-run parser treated lua as heavy dep"
+fi
+if grep -q '_brew_intel_run_with_heartbeat' "${PROJECT_ROOT}/scripts/chezmoi/package_install.sh" \
+    && grep -q '_brew_intel_should_skip_heavy_dep_upgrade' \
+        "${PROJECT_ROOT}/scripts/chezmoi/package_install.sh" \
+    && grep -q 'upgrade_brew_package "$package_name"' \
+        "${PROJECT_ROOT}/scripts/chezmoi/package_install.sh" \
+    && grep -q '_brew_link_existing_keg' \
+        "${PROJECT_ROOT}/scripts/chezmoi/brew_macos_network.sh"; then
+    PASSED=$((PASSED + 1))
+    echo "[PASS] Intel brew upgrade uses heartbeat, heavy-dep skip, install_package reuse, keg relink"
+else
+    FAILED=$((FAILED + 1))
+    echo "[FAIL] Intel brew upgrade missing heartbeat, skip, install_package reuse, or keg relink"
+fi
+
 if grep -q 'clangd already present, skip brew formula search' \
     "${PROJECT_ROOT}/scripts/chezmoi/ensure_platform_software.sh"; then
     PASSED=$((PASSED + 1))

@@ -119,6 +119,99 @@ _brew_macos_restore_env() {
     unset __BREW_MACOS_SAVED_NO_AUTO __BREW_MACOS_SAVED_NO_HINTS __BREW_MACOS_SAVED_NO_DEPS
 }
 
+# Intel 无 bottle 时，这些依赖源码编译常 10–30+ 分钟且 Xcode 警告后几乎无输出
+_brew_intel_is_heavy_dep() {
+    local name="${1:-}"
+    [[ -n "$name" ]] || return 1
+    case "$name" in
+        imagemagick|ghostscript|llvm|gcc|rust|boost|ffmpeg|opencv|glib|harfbuzz|pango|qt|qt@5|qt@6|node|openjdk|openjdk@*|python@*|webkitgtk)
+            return 0
+            ;;
+    esac
+    return 1
+}
+
+# 解析 brew upgrade --dry-run 文本：仅看「依赖」段，不看 requested package 自身
+# 返回 0 = 会升级/新装重型依赖
+_brew_intel_dryrun_mentions_heavy_dep() {
+    local text="${1:-}"
+    local in_deps=0
+    local line name
+    while IFS= read -r line || [[ -n "$line" ]]; do
+        case "$line" in
+            "==> Would install"*"dependencies:"*|*"Would install"*"dependencies:"*)
+                in_deps=1
+                continue
+                ;;
+            "==> Would upgrade"*"dependencies:"*|*"Would upgrade"*"dependencies:"*)
+                in_deps=1
+                continue
+                ;;
+            "==>"*|*"Would upgrade"*"requested"*|*"Would install"*"requested"*)
+                in_deps=0
+                continue
+                ;;
+        esac
+        [[ "$in_deps" -eq 1 ]] || continue
+        name="${line%% *}"
+        [[ -n "$name" ]] || continue
+        _brew_intel_is_heavy_dep "$name" && return 0
+    done <<< "$text"
+    return 1
+}
+
+# 已装 formula 的 Intel 升级：若 dry-run 会源码编重型依赖则跳过（非致命）
+# 仅 Darwin x86_64；Linux / Windows / Apple Silicon 不调用
+_brew_intel_should_skip_heavy_dep_upgrade() {
+    local name="${1:-}"
+    [[ -n "$name" ]] || return 1
+    _brew_is_intel_macos || return 1
+    command -v brew >/dev/null 2>&1 || return 1
+    local dry_out
+    dry_out="$(brew upgrade --dry-run --formula "$name" 2>&1 || true)"
+    _brew_intel_dryrun_mentions_heavy_dep "$dry_out"
+}
+
+# Intel：brew 在 "Xcode is outdated" 后可能数分钟无输出。心跳避免被当成卡死。
+# 参数: label command [args...]
+_brew_intel_run_with_heartbeat() {
+    local label="$1"
+    shift
+    if [[ $# -lt 1 ]]; then
+        return 1
+    fi
+    if ! _brew_is_intel_macos; then
+        "$@"
+        return $?
+    fi
+    echo "[INFO] Starting brew for ${label}. 'Xcode is outdated' is a warning, not a hang; Intel source compile may print nothing for several minutes." >&2
+    "$@" &
+    local brew_pid=$!
+    local elapsed=0
+    local interval=20
+    local rc=0
+    while kill -0 "$brew_pid" 2>/dev/null; do
+        sleep "$interval"
+        if kill -0 "$brew_pid" 2>/dev/null; then
+            elapsed=$((elapsed + interval))
+            echo "[INFO] brew still running for ${label} (${elapsed}s). Not stuck; compiling after Xcode warning." >&2
+        fi
+    done
+    wait "$brew_pid" || rc=$?
+    return "$rc"
+}
+
+# 中断 upgrade 后 keg 可能仍在 Cellar 但未 link（command -v 失败 → common-tools 被当成 Missing）
+_brew_link_existing_keg() {
+    local name="${1:-}"
+    [[ -n "$name" ]] || return 0
+    command -v brew >/dev/null 2>&1 || return 0
+    brew list --formula "$name" >/dev/null 2>&1 || return 0
+    if brew link --overwrite "$name" >/dev/null 2>&1; then
+        echo "[INFO] Linked existing keg: $name" >&2
+    fi
+}
+
 # 检查代理是否可用
 check_proxy() {
     local proxy_url="${1:-${http_proxy:-http://127.0.0.1:7890}}"

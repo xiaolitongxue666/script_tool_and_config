@@ -22,7 +22,12 @@ install_package() {
 
     case "$PACKAGE_MANAGER" in
         brew)
-            brew install "$package_name" || return 1
+            # 与 upgrade_brew_package 同一路径：NO_AUTO_UPDATE、Intel 重型依赖跳过、断链 keg 重 link
+            if type upgrade_brew_package &>/dev/null; then
+                upgrade_brew_package "$package_name" || return 1
+            else
+                brew install "$package_name" || return 1
+            fi
             ;;
         pacman)
             if [[ "$PLATFORM" == "windows" ]]; then
@@ -434,13 +439,39 @@ upgrade_brew_package() {
     if brew list "$name" &>/dev/null; then
         if type _brew_is_intel_macos &>/dev/null && _brew_is_intel_macos; then
             echo "[INFO] macOS Intel: brew upgrade $name (no bottles; may compile from source for several minutes)" >&2
+            # HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK 不拦 formula 自己的 outdated 依赖；
+            # fastfetch 会拖 imagemagick 源码编译，Xcode 警告后长时间无输出（易被当成卡死）
+            if type _brew_intel_should_skip_heavy_dep_upgrade &>/dev/null \
+                && _brew_intel_should_skip_heavy_dep_upgrade "$name"; then
+                echo "[INFO] Skip brew upgrade $name: would rebuild heavy deps from source (imagemagick/llvm/...). Keep installed version." >&2
+                if type _brew_link_existing_keg &>/dev/null; then
+                    _brew_link_existing_keg "$name"
+                fi
+                _brew_macos_restore_env
+                return 0
+            fi
+            if type _brew_intel_run_with_heartbeat &>/dev/null; then
+                _brew_intel_run_with_heartbeat "$name" brew upgrade "$name" || ret=1
+            else
+                brew upgrade "$name" || ret=1
+            fi
+        else
+            brew upgrade "$name" || ret=1
         fi
-        brew upgrade "$name" || ret=1
     else
         if type _brew_is_intel_macos &>/dev/null && _brew_is_intel_macos; then
             echo "[INFO] macOS Intel: brew install $name (no bottles; may compile from source for several minutes)" >&2
+            if type _brew_intel_run_with_heartbeat &>/dev/null; then
+                _brew_intel_run_with_heartbeat "$name" brew install "$name" || ret=1
+            else
+                brew install "$name" || ret=1
+            fi
+        else
+            brew install "$name" || ret=1
         fi
-        brew install "$name" || ret=1
+    fi
+    if type _brew_link_existing_keg &>/dev/null; then
+        _brew_link_existing_keg "$name"
     fi
     _brew_macos_restore_env
     return $ret
