@@ -108,6 +108,24 @@ assert_eq "OMP windows amd64 asset name" \
     "posh-windows-amd64.exe" \
     "$(oh_my_posh_windows_github_asset)"
 
+# Windows PATH 上可能仍是旧 oh-my-posh；成功日志必须报刚写入的 dest 版本
+if grep -q 'oh-my-posh installed to ${dest} ($("$dest" --version' \
+    "${PROJECT_ROOT}/scripts/chezmoi/package_install.sh"; then
+    PASSED=$((PASSED + 1))
+    echo "[PASS] OMP success reports dest exe version"
+else
+    FAILED=$((FAILED + 1))
+    echo "[FAIL] OMP success must use dest --version, not PATH oh-my-posh"
+fi
+if grep -n 'oh-my-posh installed to' "${PROJECT_ROOT}/scripts/chezmoi/package_install.sh" \
+    | grep -q '$(oh-my-posh --version'; then
+    FAILED=$((FAILED + 1))
+    echo "[FAIL] OMP success still reports PATH oh-my-posh --version"
+else
+    PASSED=$((PASSED + 1))
+    echo "[PASS] OMP success does not report PATH oh-my-posh --version"
+fi
+
 rm -rf "$_tmpdir"
 
 echo "=========================================="

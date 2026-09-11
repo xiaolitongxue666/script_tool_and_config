@@ -1212,7 +1212,7 @@ install_oh_my_posh_from_github() {
                 export PATH="${dest_dir}:${PATH}"
                 hash -r 2>/dev/null || true
                 _add_appx_packages_from_dir "$download_dir" >/dev/null 2>&1 || true
-                echo "[SUCCESS] oh-my-posh installed to ${dest} ($(oh-my-posh --version 2>/dev/null || echo ok))" >&2
+                echo "[SUCCESS] oh-my-posh installed to ${dest} ($("$dest" --version 2>/dev/null || echo ok))" >&2
                 return 0
             fi
             echo "[WARNING] Failed to extract oh-my-posh.exe from MSIX, trying GitHub..." >&2
@@ -1241,7 +1241,7 @@ install_oh_my_posh_from_github() {
     rm -rf "$tmp_dir"
 
     if command -v oh-my-posh &>/dev/null; then
-        echo "[SUCCESS] oh-my-posh installed to ${dest} ($(oh-my-posh --version 2>/dev/null || echo ok))" >&2
+        echo "[SUCCESS] oh-my-posh installed to ${dest} ($("$dest" --version 2>/dev/null || echo ok))" >&2
         return 0
     fi
     echo "[WARNING] oh-my-posh copied to ${dest} but not on PATH yet" >&2
