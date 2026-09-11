@@ -1,0 +1,23 @@
+---
+description: WSL 与 Windows 宿主机环境隔离（多 OS 独立）
+alwaysApply: true
+---
+
+# WSL / Windows 环境隔离
+
+本仓兼容 Windows Git Bash、WSL、macOS、Linux。**每个环境独立**：`$HOME`、fnm、npm global、chezmoi 目标目录都不共享。用户在 WSL 时，只操作 WSL；在 Windows 时，只操作 Windows。
+
+## 必须
+
+- WSL 安装/升级只用 **WSL 内** fnm/npm（含 `/mnt/host/wslg/runtime-dir/fnm_multishells`，这是 WSLg 下的 **WSL 本机** fnm，不是 Windows）。
+- 已装判定看当前环境的 `command -v` / `npm root -g`。Windows 盘符路径（`/mnt/c`、`/mnt/d`、`C:\`、`AppData/Roaming/npm`）在 WSL 里 **不算已装**。
+- 各 OS / 各 WSL distro 分别跑 `install.sh` / `deploy.sh` / Phase 2 `install-tools.sh`。
+
+## 禁止
+
+- 从 WSL 改 Windows npm（`/mnt/c/.../npm`、`cmd.exe npm`、`npm.cmd`）。
+- 从 WSL 调用 `cmd.exe` / `powershell.exe` 装、卸、清 Windows 包。
+- 把 `/mnt/host/*`、`/mnt/wslg/*` 一律当成 Windows（会误伤 WSL fnm，[4/6] 会 skip claude/codex）。
+- 用 Windows 上的 `claude`/`codex` 证明 WSL 已装。
+
+判定实现：`_is_windows_interop_path`（[`scripts/chezmoi/package_install.sh`](../../scripts/chezmoi/package_install.sh)）。

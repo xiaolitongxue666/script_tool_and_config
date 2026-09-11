@@ -124,6 +124,13 @@ Layer 5: install-tmux + run_on_{linux,darwin}；Windows：`install-rmux`、`inst
 - **chezmoi 不读取 `CHEZMOI_SOURCE_DIR` 环境变量**；`sourceDir` 须写在 `~/.config/chezmoi/chezmoi.toml`（`chezmoi_ensure_user_config`）。配置路径映射单一来源：`scripts/chezmoi/config_mappings.sh`
 - Windows：`[interpreters.sh]` 必须指向 Git Bash，否则 run_once 报 `%1 is not a valid Win32 application`
 
+### WSL 与 Windows 隔离
+
+- 各 OS / WSL 的 `$HOME`、fnm、npm global **独立**，须在对应环境各跑一遍 install/apply
+- 当前在 WSL：只用 WSL fnm/npm。`/mnt/host/wslg/runtime-dir/fnm_multishells` 是 **WSL 本机**，不是 Windows
+- `/mnt/c`、`C:\`、`AppData/Roaming/npm` 在 WSL 里不算已装；禁止从 WSL 改 Windows npm 或调用 `cmd.exe`
+- 规则文件：`.cursor/rules/wsl-windows-isolation.mdc`
+
 ### 代理策略
 
 - 包管理器操作（pacman/apt/brew）：使用国内源，**不**走代理

@@ -222,5 +222,57 @@ else
     echo "[FAIL] brew_macos_network.sh missing Intel brew env flags"
 fi
 
+# Layer 4 npm：超时、已最新跳过、WSL 不走 Windows interop
+_pkg_install="${PROJECT_ROOT}/scripts/chezmoi/package_install.sh"
+if grep -q '_is_windows_interop_path' "$_pkg_install" \
+    && grep -q '_wsl_prepend_npm_global_bin' "$_pkg_install" \
+    && grep -q '_run_with_timeout' "$_pkg_install" \
+    && grep -q 'already up-to-date' "$_pkg_install" \
+    && grep -q -- '--no-fund --no-audit' "$_pkg_install"; then
+    PASSED=$((PASSED + 1))
+    echo "[PASS] ensure_npm_global_latest has timeout, skip-if-latest, WSL prepend"
+else
+    FAILED=$((FAILED + 1))
+    echo "[FAIL] ensure_npm_global_latest missing timeout/interop/skip-if-latest"
+fi
+
+if grep -q '_command_exists_local_not_interop' \
+    "${PROJECT_ROOT}/scripts/chezmoi/install_helpers.sh"; then
+    PASSED=$((PASSED + 1))
+    echo "[PASS] claude/codex installed-check ignores Windows interop paths"
+else
+    FAILED=$((FAILED + 1))
+    echo "[FAIL] install_helpers missing _command_exists_local_not_interop"
+fi
+
+if grep -q 'ensure_npm_global_latest "@anthropic-ai/claude-code"' \
+    "${PROJECT_ROOT}/.chezmoi/run_once_90-install-claude-code.sh.tmpl" \
+    && grep -q 'ensure_npm_global_latest "@openai/codex"' \
+        "${PROJECT_ROOT}/.chezmoi/run_once_91-install-codex.sh.tmpl" \
+    && ! grep -qE '^[[:space:]]*npm install -g' \
+        "${PROJECT_ROOT}/.chezmoi/run_once_90-install-claude-code.sh.tmpl" \
+    && ! grep -qE '^[[:space:]]*npm install -g' \
+        "${PROJECT_ROOT}/.chezmoi/run_once_91-install-codex.sh.tmpl"; then
+    PASSED=$((PASSED + 1))
+    echo "[PASS] run_once 90/91 call ensure_npm_global_latest (no bare npm install -g)"
+else
+    FAILED=$((FAILED + 1))
+    echo "[FAIL] run_once 90/91 still use bare npm install -g"
+fi
+
+if _is_windows_interop_path "/mnt/c/Users/x/AppData/Roaming/npm/claude" \
+    && _is_windows_interop_path "/mnt/d/Program Files/nodejs/npm" \
+    && _is_windows_interop_path "/mnt/host/c/Users/x/AppData/Roaming/npm/claude" \
+    && ! _is_windows_interop_path "/mnt/host/wslg/runtime-dir/fnm_multishells/1/bin/npm" \
+    && ! _is_windows_interop_path "/mnt/wslg/runtime-dir/fnm_multishells/1/bin/npm" \
+    && ! _is_windows_interop_path "/usr/local/bin/claude" \
+    && ! _is_windows_interop_path "${HOME}/.local/share/fnm/aliases/default/bin/claude"; then
+    PASSED=$((PASSED + 1))
+    echo "[PASS] _is_windows_interop_path: Windows drives only; WSLg fnm is local"
+else
+    FAILED=$((FAILED + 1))
+    echo "[FAIL] _is_windows_interop_path misclassifies WSL vs Windows paths"
+fi
+
 echo "Summary: $PASSED passed, $FAILED failed"
 [[ "$FAILED" -eq 0 ]]

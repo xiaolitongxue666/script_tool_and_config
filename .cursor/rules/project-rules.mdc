@@ -59,7 +59,7 @@ Shell 配置模板中内置了 claude-mem 项目级记忆自动检测：
 - **CodeWhale 已从本仓与 agent-config 移除（勿恢复）**；已删除 `run_once_92-install-codewhale`、`docs/CODEWHALE.md`、`.cursor/rules/codewhale.mdc`。
 - **历史**：已删除 `run_once_92-install-deepseek`（勿恢复 cargo 安装路径）。
 - AI Agent 配置见 agent-config（Claude / Cursor / Codex / Pi + CodeGraph）。
-- WSL：用户明确 WSL 场景时，**禁止**从 WSL 改 Windows npm / 调用 `cmd.exe`。
+- WSL 与 Windows **独立**：当前在 WSL 只改 WSL fnm/npm；`/mnt/host/wslg/.../fnm_multishells` 是 WSL 本机，**不是** Windows。禁止从 WSL 改 `/mnt/c` npm 或调用 `cmd.exe`。见 `.cursor/rules/wsl-windows-isolation.mdc`。
 
 ## Pi
 

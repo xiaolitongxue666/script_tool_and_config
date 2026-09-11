@@ -78,9 +78,15 @@ export PATH="${HOME}/.local/share/fnm:${HOME}/.local/bin:${PATH}"
 if command -v fnm &>/dev/null; then
     eval "$(fnm env 2>/dev/null)" || true
 fi
+if type _wsl_prepend_npm_global_bin &>/dev/null; then
+    _wsl_prepend_npm_global_bin || true
+fi
 
-if command -v codex &>/dev/null; then
-    if codex --version &>/dev/null; then
+_codex_path="$(command -v codex 2>/dev/null || true)"
+if [[ -n "$_codex_path" ]]; then
+    if type _is_windows_interop_path &>/dev/null && _is_windows_interop_path "$_codex_path"; then
+        echo "[INFO] codex resolves via Windows interop; installing in WSL npm global"
+    elif codex --version &>/dev/null; then
         echo "[INFO] Codex CLI already installed: $(codex --version 2>/dev/null | head -n1)"
         exit 0
     fi
@@ -114,10 +120,12 @@ if ! command -v npm &>/dev/null; then
     exit 1
 fi
 
-echo "[INFO] Installing @openai/codex globally via npm..."
-if npm install -g @openai/codex; then
+echo "[INFO] Installing/upgrading npm global: @openai/codex"
+if type ensure_npm_global_latest &>/dev/null && ensure_npm_global_latest "@openai/codex"; then
     hash -r 2>/dev/null || true
-    if command -v codex &>/dev/null && codex --version &>/dev/null; then
+    _codex_path="$(command -v codex 2>/dev/null || true)"
+    if [[ -n "$_codex_path" ]] && { ! type _is_windows_interop_path &>/dev/null || ! _is_windows_interop_path "$_codex_path"; } \
+        && codex --version &>/dev/null; then
         echo "[SUCCESS] Codex CLI available: $(codex --version 2>/dev/null | head -n1)"
     else
         echo "[WARNING] npm install finished but codex not on PATH; try: npm install -g @openai/codex"

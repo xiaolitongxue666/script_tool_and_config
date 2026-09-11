@@ -48,6 +48,47 @@ check_command_exists() {
     return 1
 }
 
+# WSL：忽略 Windows interop 路径上的 claude/codex/npm（与 package_install.sh 同语义）
+if ! type _is_windows_interop_path &>/dev/null; then
+    _is_windows_interop_path() {
+        local cmd_path="${1:-}"
+        [[ -z "$cmd_path" ]] && return 1
+        case "$cmd_path" in
+            /mnt/[a-z]/*|/mnt/[A-Z]/*)
+                return 0
+                ;;
+            /mnt/host/[a-z]/*|/mnt/host/[A-Z]/*)
+                return 0
+                ;;
+        esac
+        if type chezmoi_is_wsl &>/dev/null && chezmoi_is_wsl; then
+            :
+        elif type is_wsl &>/dev/null && is_wsl; then
+            :
+        else
+            return 1
+        fi
+        case "$cmd_path" in
+            *AppData/Roaming/npm*|[A-Za-z]:[\\/]*)
+                return 0
+                ;;
+        esac
+        return 1
+    }
+fi
+
+# 命令在 PATH 且不是 Windows interop（WSL 已装判定用）
+_command_exists_local_not_interop() {
+    local command_name="$1"
+    local cmd_path
+    cmd_path="$(command -v "$command_name" 2>/dev/null || true)"
+    [[ -z "$cmd_path" ]] && return 1
+    if _is_windows_interop_path "$cmd_path"; then
+        return 1
+    fi
+    return 0
+}
+
 # 检查包管理器中的安装状态
 # 参数: package_name
 check_package_installed() {
@@ -400,13 +441,13 @@ check_script_software_installed() {
             return 0
             ;;
         90-install-claude-code|claude-code)
-            if check_command_exists "claude"; then
+            if _command_exists_local_not_interop "claude"; then
                 return 0
             fi
             return 1
             ;;
         91-install-codex|codex)
-            if check_command_exists "codex"; then
+            if _command_exists_local_not_interop "codex"; then
                 return 0
             fi
             return 1

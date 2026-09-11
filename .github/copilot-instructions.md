@@ -41,7 +41,7 @@ Template mapping:
 - **CodeWhale is fully removed from this repo and agent-config** (do not restore). Deleted: `run_once_92-install-codewhale`, `docs/CODEWHALE.md`, `.cursor/rules/codewhale.mdc`.
 - Do **not** restore `cargo install deepseek` or `run_once_92-install-deepseek` (removed).
 - AI Agent config: agent-config (Claude / Cursor / Codex / Pi + CodeGraph).
-- WSL: Do **not** modify Windows npm from WSL (`cmd.exe npm uninstall`, etc.).
+- WSL and Windows are **independent**: use WSL fnm/npm inside WSL (`/mnt/host/wslg/.../fnm_multishells` is WSL-local). Do **not** treat `/mnt/c` npm as installed in WSL, and do **not** modify Windows npm via `cmd.exe`. See `.cursor/rules/wsl-windows-isolation.mdc`.
 - Deploy: `./deploy.sh` or `./scripts/manage_dotfiles.sh apply` — do not pipe apply through `head`/`rg` (SIGPIPE).
 - OMZ/plugins: `.chezmoi/.chezmoiexternal.toml.tmpl` (linux/darwin); common-tools packages: `scripts/chezmoi/packages.conf`.
 - Agent notes: `docs/PROJECT_AGENT_MEMORY.md`, `docs/PROJECT_MEMORY.md`.

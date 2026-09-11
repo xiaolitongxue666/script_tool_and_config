@@ -708,6 +708,113 @@ _ensure_fnm_env() {
     fi
 }
 
+# WSL 与 Windows 宿主机独立：只有 Windows 盘符上的路径才算 interop
+# /mnt/c、/mnt/d：Windows 盘；/mnt/host/c：少见的盘符暴露
+# /mnt/host/wslg/.../fnm_multishells、/mnt/wslg/...：WSL 本机（WSLg），不是 Windows npm
+# Git Bash 的 /c/Users/... 不是 interop（本就在 Windows 里）
+_is_windows_interop_path() {
+    local cmd_path="${1:-}"
+    [[ -z "$cmd_path" ]] && return 1
+    case "$cmd_path" in
+        /mnt/[a-z]/*|/mnt/[A-Z]/*)
+            return 0
+            ;;
+        /mnt/host/[a-z]/*|/mnt/host/[A-Z]/*)
+            return 0
+            ;;
+    esac
+    if type chezmoi_is_wsl &>/dev/null && chezmoi_is_wsl; then
+        :
+    elif type is_wsl &>/dev/null && is_wsl; then
+        :
+    else
+        return 1
+    fi
+    case "$cmd_path" in
+        *AppData/Roaming/npm*|[A-Za-z]:[\\/]*)
+            return 0
+            ;;
+    esac
+    return 1
+}
+
+# WSL：把本地 fnm npm global bin 前置；当前 npm 已是 interop 则拒绝
+_wsl_prepend_npm_global_bin() {
+    local npm_prefix npm_path
+    if type chezmoi_is_wsl &>/dev/null; then
+        chezmoi_is_wsl || return 0
+    elif type is_wsl &>/dev/null; then
+        is_wsl || return 0
+    else
+        return 0
+    fi
+
+    command -v npm >/dev/null 2>&1 || return 0
+    npm_path="$(command -v npm 2>/dev/null || true)"
+    if _is_windows_interop_path "$npm_path"; then
+        echo "[WARNING] npm resolves via Windows interop (${npm_path}); skip Windows npm prefix" >&2
+        return 1
+    fi
+
+    npm_prefix="$(npm prefix -g 2>/dev/null || true)"
+    [[ -n "$npm_prefix" && -d "${npm_prefix}/bin" ]] || return 0
+    if _is_windows_interop_path "$npm_prefix"; then
+        return 1
+    fi
+    case ":${PATH:-}:" in
+        *:"${npm_prefix}/bin":*) return 0 ;;
+    esac
+    export PATH="${npm_prefix}/bin:${PATH}"
+    hash -r 2>/dev/null || true
+}
+
+# 便携超时（macOS 无 GNU timeout；Git Bash / Linux 通用）
+# 参数: seconds command [args...]
+# 超时或命令失败返回非 0
+_run_with_timeout() {
+    local secs="$1"
+    shift
+    local cmd_pid watchdog_pid rc=0
+    "$@" </dev/null &
+    cmd_pid=$!
+    (
+        sleep "$secs"
+        if kill -0 "$cmd_pid" 2>/dev/null; then
+            echo "[WARNING] Command timed out after ${secs}s" >&2
+            kill "$cmd_pid" 2>/dev/null || true
+            sleep 3
+            kill -0 "$cmd_pid" 2>/dev/null && kill -9 "$cmd_pid" 2>/dev/null || true
+        fi
+    ) &
+    watchdog_pid=$!
+    wait "$cmd_pid" || rc=$?
+    kill "$watchdog_pid" 2>/dev/null || true
+    wait "$watchdog_pid" 2>/dev/null || true
+    return "$rc"
+}
+
+_npm_global_installed_version() {
+    local pkg="$1"
+    local line
+    line="$(npm list -g --depth=0 "$pkg" 2>/dev/null | tr -d '\r')"
+    printf '%s\n' "$line" | awk -v p="$pkg" '
+        index($0, p "@") {
+            sub(".*" p "@", "", $0)
+            gsub(/[[:space:]]+/, "", $0)
+            print $0
+            exit
+        }'
+}
+
+_npm_latest_version() {
+    local pkg="$1"
+    local line
+    local timeout_secs="${NPM_VIEW_TIMEOUT_SECS:-30}"
+    line="$(_run_with_timeout "$timeout_secs" npm view "$pkg" version || true)"
+    line="$(printf '%s' "$line" | tr -d '\r' | awk 'NF { line=$0 } END { gsub(/[[:space:]]+/, "", line); print line }')"
+    printf '%s' "$line"
+}
+
 # fnm 升级（多 OS/WSL 兼容）
 # 注意：新版 fnm（>=1.36）已移除 self-update 子命令（1.38.1 实测 unrecognized subcommand），
 # 升级路径：包管理器（brew/winget/pacman）→ 官方安装脚本（Linux/WSL/Git Bash）
@@ -818,17 +925,50 @@ ensure_npm_global_latest() {
     local spec="$1"
     [[ -z "$spec" ]] && return 1
     _ensure_fnm_env
+    _wsl_prepend_npm_global_bin || true
     if ! command -v npm &>/dev/null; then
         echo "[WARNING] npm not found, skip: $spec" >&2
         return 1
     fi
+
+    local npm_path
+    npm_path="$(command -v npm 2>/dev/null || true)"
+    if _is_windows_interop_path "$npm_path"; then
+        echo "[WARNING] npm resolves via Windows interop (${npm_path}); skip $spec (use WSL fnm npm)" >&2
+        return 1
+    fi
+
     ensure_proxy_for_download
     local npm_target="$spec"
     if [[ "$spec" != *"@"* ]] || [[ "$spec" == @* ]]; then
         npm_target="${spec}@latest"
     fi
-    echo "[INFO] Installing/upgrading npm global: $npm_target" >&2
-    npm install -g "$npm_target" 2>/dev/null || return 1
+
+    local installed latest
+    installed="$(_npm_global_installed_version "$spec" || true)"
+    if [[ -n "$installed" ]]; then
+        latest="$(_npm_latest_version "$spec" || true)"
+        if [[ -z "$latest" ]]; then
+            echo "[WARNING] Failed to resolve latest version for $spec; skip reinstall" >&2
+            return 0
+        fi
+        if compare_semver "$installed" eq "$latest" || compare_semver "$installed" ge "$latest"; then
+            echo "[INFO] $spec already up-to-date (${installed})" >&2
+            return 0
+        fi
+        echo "[INFO] Updating npm global: $spec (${installed} -> ${latest})" >&2
+        npm_target="${spec}@${latest}"
+    else
+        echo "[INFO] Installing/upgrading npm global: $npm_target" >&2
+    fi
+
+    local timeout_secs="${NPM_GLOBAL_INSTALL_TIMEOUT_SECS:-180}"
+    local rc=0
+    _run_with_timeout "$timeout_secs" npm install -g --no-fund --no-audit "$npm_target" || rc=$?
+    if [[ "$rc" -ne 0 ]]; then
+        echo "[WARNING] npm install -g ${npm_target} failed or timed out (${timeout_secs}s)" >&2
+        return 1
+    fi
     return 0
 }
 
