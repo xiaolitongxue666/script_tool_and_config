@@ -46,6 +46,7 @@
 - **starship** - 主提示符（Git Bash 层，`~/.config/starship/starship.toml`）
 - **oh-my-posh** - 备选（仅当 starship 不可用时，由 `~/.bashrc` 加载）
   - **注意**：Windows 默认 **Windows Terminal + Git Bash + Starship**；WT 与 Shell 配置分开维护
+  - Cursor GUI 集成终端与 WT 共用 `~/.bashrc` Starship；用户终端也会 `CURSOR_AGENT=1`+`TERM=dumb`，不得据此跳过
 
 ### 开发工具
 - **gcc** - MinGW-w64 GCC 编译器（C/C++ 开发，与 Linux GCC 行为一致）

@@ -206,6 +206,8 @@ CC_GIT_BASH_CANDS
         "$HOME/.cargo/bin" \
         "$HOME/AppData/Roaming/npm" \
         "$HOME/AppData/Local/Microsoft/WinGet/Links" \
+        "/c/Program Files/starship/bin" \
+        "/d/Program Files/starship/bin" \
         "$HOME/AppData/Local/Programs/oh-my-posh/bin"; do
         [ -d "$_d" ] && [[ ":$PATH:" != *":$_d:"* ]] && export PATH="$PATH:$_d"
     done
@@ -227,9 +229,18 @@ CC_GIT_BASH_CANDS
     fi
 
     # Windows 提示符：Starship（优先，配置完善）/ Oh My Posh（备选）
+    # Cursor 仅 GUI；用户 Git Bash 实际是 --init-file shellIntegration（不是 bash -l），
+    # 仍会 VSCODE_SHELL_LOGIN source /etc/profile + ~/.bash_profile，并注入
+    # CURSOR_AGENT=1 与 TERM=dumb。不得用 CURSOR_AGENT 跳过 Starship。
+    # dumb/空 TERM 回退 xterm-256color，勿覆盖已有 xterm-256color/tmux 等。
+    # unset MSYS2_PS1：避免 /etc/bash.bashrc 把 Git 默认 PS1 抢回来
+    if [[ -z "${TERM:-}" || "${TERM}" == "dumb" ]]; then
+        export TERM=xterm-256color
+    fi
     if command -v starship &> /dev/null; then
         export STARSHIP_CONFIG="$HOME/.config/starship/starship.toml"
         eval "$(starship init bash)"
+        unset MSYS2_PS1
     elif command -v oh-my-posh &> /dev/null; then
         _omp_config="$HOME/AppData/Local/Programs/oh-my-posh/themes/montys.omp.json"
         if [ -f "$_omp_config" ]; then
@@ -237,7 +248,7 @@ CC_GIT_BASH_CANDS
         else
             eval "$(oh-my-posh --init --shell bash)"
         fi
-        unset _omp_config
+        unset _omp_config MSYS2_PS1
     fi
 
     # 打开默认路径：仅在非编辑器终端中执行，避免 Cursor/VS Code 终端被切到固定目录（保持项目根目录）
@@ -283,9 +294,13 @@ elif [[ "$OS" == "linux" ]]; then
             fi
         fi
     fi
-    # Cursor/VS Code 连接 WSL 时默认可能启动 bash；交互式下自动切到 zsh 以加载 Starship（Agent 模式保留 bash）
-    if [[ -o interactive ]] && [[ -z "${CURSOR_AGENT:-}" ]] && command -v zsh &>/dev/null; then
+    # Cursor 仅 GUI。用户终端也会注入 CURSOR_AGENT=1，不能当「非用户」信号。
+    # 交互式有 zsh 则切过去（提示符在 zsh）；无 zsh 时只回退 dumb/空 TERM，不在 bash init Starship。
+    if [[ -o interactive ]] && command -v zsh &>/dev/null; then
         exec zsh
+    fi
+    if [[ -z "${TERM:-}" || "${TERM}" == "dumb" ]]; then
+        export TERM=xterm-256color
     fi
 fi
 

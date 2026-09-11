@@ -114,6 +114,7 @@ fi
 # ============================================
 # 不在此处设置 PROMPT_COMMAND：.bashrc 中已配置 history -a，并由 starship init 链式挂载；
 # 若在此覆盖会冲掉 Starship，导致回退为 Git Bash 默认 PS1。
+# Cursor GUI 用户终端走 --init-file，会先 source /etc/profile（export PS1 / MSYS2_PS1）再 source 本文件。
 
 # 历史记录设置
 export HISTSIZE=10000

@@ -176,6 +176,10 @@ Git for Windows 可能装在 **C:** 或 **D:**（如 `D:\Program Files\Git`）�
 
 \* Cursor 仅 GUI 环境（`run_once_93-install-cursor`）。Pi 仅 Phase 2。CodeWhale 已移除（勿恢复）。
 
+### Cursor 集成终端与 Starship（2026-09 实测）
+
+Cursor **用户** Git Bash（3.19）实际命令是 `bash.exe --init-file .../shellIntegration-bash.sh`，并用 `VSCODE_SHELL_LOGIN=1` 模仿登录（先 `/etc/profile` 再 `~/.bash_profile`）。settings 里的 `args: ["-l"]` 会被盖掉。用户终端也会注入 `CURSOR_AGENT=1` 与 `TERM=dumb`，**不能**把 `CURSOR_AGENT` 当成 Agent-only。`dumb`/空 `TERM` 回退 `xterm-256color` 后照常 `starship init`，并 `unset MSYS2_PS1`（否则 `/etc/bash.bashrc` 把 Git `MINGW64` PS1 抢回）。Linux/WSL 交互 bash `exec zsh` 同样不看 `CURSOR_AGENT`。无 GUI 环境不会开 Cursor，不走这条路径。
+
 | 问题 | 解法 |
 |------|------|
 | 只改 chezmoi 未装 Agent CLI | Phase 1：`eval "$(fnm env)" && ./deploy.sh`；Pi / MCP 再跑 Phase 2 |

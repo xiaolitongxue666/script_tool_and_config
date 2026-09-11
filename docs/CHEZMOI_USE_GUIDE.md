@@ -373,7 +373,7 @@ macOS 特定的配置和脚本位于 `run_on_darwin/` 目录：
 Windows 特定的配置和脚本位于 `run_on_windows/` 目录：
 
 - `_bash_profile_windows.tmpl` - Git Bash 登录配置
-- `dot_bashrc.tmpl` - Git Bash 非登录配置
+- `dot_bashrc.tmpl` - Git Bash 交互配置（非登录直接 source；Cursor `--init-file` + `VSCODE_SHELL_LOGIN` 会先 `/etc/profile` 再 source 本 profile → bashrc）
 - `run_once_install-zsh.sh.tmpl` - Zsh 安装脚本（通过 MSYS2）
 
 ## SSH 配置管理
@@ -756,7 +756,7 @@ claude() {
 | `~/.zshrc` | macOS / Linux / WSL（zsh 环境） | `.chezmoi/dot_zshrc.tmpl` |
 | `~/.zshrc.local` | macOS / Linux / WSL 本机私有（不受 apply 覆盖） | 无（本机文件；`dot_zshrc.tmpl` 末尾 source） |
 | `~/.bashrc` | Linux bash 环境 | `.chezmoi/dot_bashrc.tmpl` |
-| `~/.bashrc` | Windows Git Bash 环境 | `.chezmoi/dot_bashrc.tmpl`（windows 分支） |
+| `~/.bashrc` | Windows Git Bash 环境 | `.chezmoi/dot_bashrc.tmpl`（windows 分支；Cursor 经 `--init-file` + `VSCODE_SHELL_LOGIN` 模仿登录并 source bash_profile） |
 | `~/.bashrc.local` | Windows Git Bash / Linux bash 本机私有（不受 apply 覆盖） | 无（本机文件；`dot_bashrc.tmpl` 末尾 source） |
 
 ### 相关参考

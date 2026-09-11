@@ -80,6 +80,11 @@ if [[ "$OSTYPE" =~ ^(msys|mingw|cygwin) ]]; then
     fi
 fi
 
+# Cursor 仅 GUI。用户终端也可能 TERM=dumb；只回退 dumb/空，不覆盖 Ghostty/tmux 等
+if [[ -z "${TERM:-}" || "${TERM}" == "dumb" ]]; then
+    export TERM=xterm-256color
+fi
+
 # ============================================
 # 字符编码设置（确保中文正确显示）
 # ============================================

@@ -128,8 +128,11 @@ fi
 export LANG=zh_CN.UTF-8
 export LC_ALL=zh_CN.UTF-8
 export LC_CTYPE=zh_CN.UTF-8
-export TERM=xterm-256color
 {{ end }}
+# Cursor GUI 用户终端可能注入 TERM=dumb；只回退 dumb/空，不覆盖 Ghostty/tmux 等
+if [[ -z "${TERM:-}" || "${TERM}" == "dumb" ]]; then
+    export TERM=xterm-256color
+fi
 
 # ============================================
 # 加载 .zshrc（交互式 shell 配置）

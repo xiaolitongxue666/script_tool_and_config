@@ -186,6 +186,14 @@ STRICT_AGENT_PREFLIGHT=1 bash scripts/install-tools.sh
 | `timeout obtaining persistent state lock` | 残留 `chezmoi.exe` 或锁文件 | `taskkill //F //IM chezmoi.exe` 后 `bash scripts/common/deploy_utils/fix_chezmoi_lock.sh` |
 | apply 被管道中断 | `\| head` / `\| rg` 导致 SIGPIPE | 勿截断 apply 输出 |
 
+### Cursor 集成终端：Git Bash 变成默认 MINGW64 提示符
+
+Cursor 仅 GUI。用户点开的 Git Bash 也会注入 `CURSOR_AGENT=1` 与 `TERM=dumb`，实际是 `--init-file` shellIntegration，不是 settings 里的 `bash -l`。
+
+- 看到 `Administrator@... MINGW64 ... $`：Starship 被跳过，或 `/etc/bash.bashrc` 用 `MSYS2_PS1` 抢回 Git 默认 PS1。
+- 不要用 `CURSOR_AGENT` 关 Starship。`dumb`/空 `TERM` 只回退 `xterm-256color`。
+- `./scripts/manage_dotfiles.sh apply` 后必须 **新开** 终端；旧进程仍是旧 rc。
+
 ### Windows Terminal：Git Bash 启动失败（0x80070002）
 
 | 现象 | 原因 | 处理 |
