@@ -11,6 +11,9 @@ git_user_email = "leonpa1987@gmail.com"
 # （可在 ~/.config/chezmoi/chezmoi.toml.local 的 [data] 覆盖）
 macos_connect_path = "/opt/homebrew/bin/connect"
 macos_proxy_connect_opt = "-S"
-macos_zsh_path = "/opt/homebrew/bin/zsh"
+# macos_zsh_path：**默认不设置** —— 由 dot_config/ghostty/config.tmpl 运行时探测
+# command -v zsh（Intel 为 /usr/local/bin/zsh，Apple Silicon 为 /opt/homebrew/bin/zsh）。
+# 如需强制指定，请在 ~/.config/chezmoi/chezmoi.toml.local 的 [data] 中覆盖；
+# 不要在此写死，否则会覆盖掉另一架构机器的正确探测结果（2026-09 修复）。
 identity_file = "~/.ssh/id_rsa"
 # Cursor Remote SSH：见 agent-config config/local.env.example

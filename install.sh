@@ -9,9 +9,9 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-COMMON_SH="${SCRIPT_DIR}/scripts/common.sh"
-INSTALL_HELPERS_SH="${SCRIPT_DIR}/scripts/chezmoi/install_helpers.sh"
-COMMON_INSTALL_SH="${SCRIPT_DIR}/scripts/chezmoi/common_install.sh"
+COMMON_SH="${SCRIPT_DIR}/scripts/lib/common.sh"
+INSTALL_HELPERS_SH="${SCRIPT_DIR}/scripts/lib/chezmoi/install_helpers.sh"
+COMMON_INSTALL_SH="${SCRIPT_DIR}/scripts/lib/chezmoi/common_install.sh"
 
 # 加载通用函数库
 if [ -f "$COMMON_SH" ]; then
@@ -35,7 +35,7 @@ if [ -f "$COMMON_INSTALL_SH" ]; then
 fi
 
 # 加载 chezmoi 核心操作封装
-CHEZMOI_CORE_SH="${SCRIPT_DIR}/scripts/chezmoi/chezmoi_core.sh"
+CHEZMOI_CORE_SH="${SCRIPT_DIR}/scripts/lib/chezmoi/chezmoi_core.sh"
 if [ -f "$CHEZMOI_CORE_SH" ]; then
     source "$CHEZMOI_CORE_SH"
     if type chezmoi_normalize_windows_env &>/dev/null; then
@@ -266,10 +266,12 @@ STATUS_OUTPUT=$(chezmoi_run_status)
 HAS_STATUS_DIFF=false
 if [[ -n "$STATUS_OUTPUT" ]] && [[ "$STATUS_OUTPUT" != *"All configs are up-to-date"* ]]; then
     HAS_STATUS_DIFF=true
-    modified=$(echo "$STATUS_OUTPUT" | grep -c "^M" || echo "0")
-    added=$(echo "$STATUS_OUTPUT" | grep -c "^A" || echo "0")
-    deleted=$(echo "$STATUS_OUTPUT" | grep -c "^D" || echo "0")
-    run=$(echo "$STATUS_OUTPUT" | grep -c "^R" || echo "0")
+    # 注意：grep -c 无匹配时已输出 0 且 exit 1，故用 || true 吞掉退出码，
+    # 若写成 || echo "0" 会导致变量变成 "0\n0"（换行污染日志）
+    modified=$(echo "$STATUS_OUTPUT" | grep -c "^M" || true)
+    added=$(echo "$STATUS_OUTPUT" | grep -c "^A" || true)
+    deleted=$(echo "$STATUS_OUTPUT" | grep -c "^D" || true)
+    run=$(echo "$STATUS_OUTPUT" | grep -c "^R" || true)
     log_info "Config changes: M=$modified, A=$added, D=$deleted, R=$run"
 fi
 
@@ -277,7 +279,7 @@ DIFF_OUTPUT=$(chezmoi_run_diff)
 HAS_DIFF=false
 if [[ -n "$DIFF_OUTPUT" ]] && [[ "$DIFF_OUTPUT" != *"template and local config match"* ]]; then
     HAS_DIFF=true
-    file_count=$(echo "$DIFF_OUTPUT" | grep -c "^diff --git" || echo "0")
+    file_count=$(echo "$DIFF_OUTPUT" | grep -c "^diff --git" || true)
     log_info "$file_count file(s) have differences"
 fi
 
@@ -389,7 +391,7 @@ if [ "$TEST_REMOTE" = true ]; then
     log_info "Running remote tests"
     log_info "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
-    TEST_SCRIPT="${SCRIPT_DIR}/scripts/common/deploy_utils/test_tmux_remote.sh"
+    TEST_SCRIPT="${SCRIPT_DIR}/scripts/deploy_utils/test_tmux_remote.sh"
 
     if [ ! -f "$TEST_SCRIPT" ]; then
         log_error "Remote test script not found: $TEST_SCRIPT"
@@ -479,4 +481,4 @@ log_info "  View diff:            ./scripts/manage_dotfiles.sh diff"
 log_info "  Edit config:          ./scripts/manage_dotfiles.sh edit ~/.zshrc"
 log_info ""
 log_info "  Help:                 ./scripts/manage_dotfiles.sh help"
-log_info "  Deployment guide:     scripts/common/deploy_utils/DEPLOYMENT_GUIDE.md"
+log_info "  Deployment guide:     docs/DEPLOYMENT_GUIDE.md"

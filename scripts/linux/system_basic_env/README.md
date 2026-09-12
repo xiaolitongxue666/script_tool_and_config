@@ -59,7 +59,7 @@ sudo ./configure_china_mirrors.sh
 
 ## 脚本依赖
 
-- `configure_china_mirrors.sh` 需 root，依赖 `scripts/common.sh`
+- `configure_china_mirrors.sh` 需 root，依赖 `scripts/lib/common.sh`
 - 系统要求：Arch Linux、网络连接、足够磁盘空间
 
 ---
@@ -80,7 +80,7 @@ sudo ./configure_china_mirrors.sh
 - `get_wsl_system_info.sh` - 获取 WSL/Linux 详细版本与环境信息（只读）
 - `configure_china_mirrors.sh` - 镜像源配置脚本
 - 跨平台安装：项目根 `./install.sh` / `./deploy.sh`
-- `scripts/common.sh` - 通用脚本库
+- `scripts/lib/common.sh` - 通用脚本库
 - `logs/system_basic_env/` - 日志目录
 - `~/.config/system_basic_env/path.env` - PATH 环境变量配置
 

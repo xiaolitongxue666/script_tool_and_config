@@ -8,7 +8,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../../.." && pwd)"
 
-COMMON_LIB="${PROJECT_ROOT}/scripts/common.sh"
+COMMON_LIB="${PROJECT_ROOT}/scripts/lib/common.sh"
 if [[ -f "${COMMON_LIB}" ]]; then
     # shellcheck disable=SC1090
     source "${COMMON_LIB}"

@@ -18,7 +18,7 @@
 | [DEPLOY_TWO_PHASE.md](DEPLOY_TWO_PHASE.md) | 两阶段部署（本仓库 Phase 1 + agent-config Phase 2） |
 | [SOFTWARE_LIST.md](SOFTWARE_LIST.md) | 完整软件清单与 run_once 脚本对应关系（按 OS / WSL 区分） |
 | [PROJECT_MEMORY.md](PROJECT_MEMORY.md) | 项目级紧凑记忆（Agent 快速索引，详情见 PROJECT_AGENT_MEMORY） |
-| AI Agent / Pi | 见 [agent-config](../../AI/agent-config)（Claude / Cursor / Codex / Pi + CodeGraph）；**CodeWhale 已移除（勿恢复）** |
+| AI Agent / Pi | 见 [agent-config](../../../AI/agent-config)（Claude / Cursor / Codex / Pi + CodeGraph）；**CodeWhale 已移除（勿恢复）** |
 | [PROJECT_AGENT_MEMORY.md](PROJECT_AGENT_MEMORY.md) | 项目 Agent 可提交记忆（含 WSL 部署实测） |
 | [RMUX_WINDOWS.md](RMUX_WINDOWS.md) | Windows rmux 安装、手动使用与排错（含 chezmoi 部署陷阱） |
 | [CURSOR_CLANGD.md](CURSOR_CLANGD.md) | Cursor + clangd：多 OS/WSL 安装、扩展、无 GUI 不装 Cursor |
@@ -50,8 +50,8 @@
 
 以下文档位于各脚本目录，从本目录可快速跳转：
 
-- [scripts/common/deploy_utils/DEPLOYMENT_GUIDE.md](../scripts/common/deploy_utils/DEPLOYMENT_GUIDE.md) — 部署流程（Windows / Arch）
-- [scripts/common/deploy_utils/MANUAL_ZSH_SETUP_GUIDE.md](../scripts/common/deploy_utils/MANUAL_ZSH_SETUP_GUIDE.md) — Zsh/OMZ 手工修复（次要；日常用 apply + `.chezmoiexternal.toml.tmpl`）
+- [docs/DEPLOYMENT_GUIDE.md](../docs/DEPLOYMENT_GUIDE.md) — 部署流程（Windows / Arch）
+- [docs/MANUAL_ZSH_SETUP_GUIDE.md](../docs/MANUAL_ZSH_SETUP_GUIDE.md) — Zsh/OMZ 手工修复（次要；日常用 apply + `.chezmoiexternal.toml.tmpl`）
 
 > 软件安装状态与验证命令见 [SOFTWARE_LIST.md](SOFTWARE_LIST.md) 与 `tests/`、`scripts/chezmoi/verify_installation.sh`（已移除冗余 `INSTALL_STATUS.md`）。
 

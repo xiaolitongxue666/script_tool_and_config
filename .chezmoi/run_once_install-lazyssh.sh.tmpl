@@ -14,9 +14,9 @@ fi
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="${CHEZMOI_PROJECT_ROOT:-$(cd "${SCRIPT_DIR}/../.." && pwd 2>/dev/null || echo "$HOME")}"
-COMMON_INSTALL="${PROJECT_ROOT}/scripts/chezmoi/common_install.sh"
+COMMON_INSTALL="${PROJECT_ROOT}/scripts/lib/chezmoi/common_install.sh"
 if [[ ! -f "$COMMON_INSTALL" ]]; then
-    COMMON_INSTALL="$HOME/.local/share/chezmoi/scripts/chezmoi/common_install.sh"
+    COMMON_INSTALL="$HOME/.local/share/chezmoi/scripts/lib/chezmoi/common_install.sh"
 fi
 
 if [[ -f "$COMMON_INSTALL" ]]; then

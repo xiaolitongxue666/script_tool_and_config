@@ -9,7 +9,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 
 # 加载通用函数库（含 log_setup）
-COMMON_SH="${PROJECT_ROOT}/scripts/common.sh"
+COMMON_SH="${PROJECT_ROOT}/scripts/lib/common.sh"
 if [ -f "$COMMON_SH" ]; then
     source "$COMMON_SH"
 fi
@@ -26,7 +26,7 @@ echo "=========================================="
 PASSED=0
 FAILED=0
 
-CORE_SCRIPT="${PROJECT_ROOT}/scripts/chezmoi/chezmoi_core.sh"
+CORE_SCRIPT="${PROJECT_ROOT}/scripts/lib/chezmoi/chezmoi_core.sh"
 
 # 辅助函数：在子 shell 中执行 chezmoi_detect_proxy
 detect_proxy_in_subshell() {

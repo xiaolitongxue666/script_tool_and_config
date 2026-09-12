@@ -1,0 +1,80 @@
+# ============================================
+# CI：语法 / 契约 / 单元测试 / 编码规范
+# ============================================
+# 设计原则：
+#   - 只跑**只读**检查，绝不执行 install.sh / chezmoi apply（会改 runner 环境）
+#   - 硬性阻断项：语法、契约、已固化的单元测试
+#   - 软性提示项：shellcheck（历史存量告警，先用 continue-on-error 观测，再逐步收紧）
+name: CI
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Show environment
+        run: |
+          uname -a
+          bash --version | head -1
+          command -v chezmoi || echo "chezmoi not installed (expected)"
+
+      # ---------- 硬性：语法 + 契约 ----------
+      - name: Syntax check (bash -n over all .sh/.tmpl)
+        run: bash tests/test_syntax.sh
+
+      - name: Contract tests (structure / naming / links / format)
+        run: bash tests/test_contracts.sh
+
+      # ---------- 硬性：单元测试 ----------
+      - name: Unit tests
+        run: |
+          rc=0
+          for t in tests/test_*.sh; do
+            case "$t" in
+              tests/test_syntax.sh|tests/test_contracts.sh) continue ;;
+            esac
+            echo "=== $t"
+            if ! bash "$t"; then
+              echo "::error file=$t::test failed"
+              rc=1
+            fi
+          done
+          exit $rc
+
+      # ---------- 硬性：编码与换行符 ----------
+      - name: Encoding / line endings
+        run: bash scripts/tools/standalone_tool_script/check_and_fix_encoding.sh
+
+      # ---------- 软性：shellcheck 观测 ----------
+      - name: shellcheck (advisory)
+        continue-on-error: true
+        run: |
+          if ! command -v shellcheck >/dev/null 2>&1; then
+            if [ "$RUNNER_OS" = "Linux" ]; then
+              sudo apt-get update -qq && sudo apt-get install -y -qq shellcheck
+            else
+              brew install shellcheck
+            fi
+          fi
+          echo "=== severity=error ==="
+          find scripts .chezmoi tests install.sh deploy.sh -name '*.sh' -print0 2>/dev/null \
+            | xargs -0 shellcheck -f gcc -S error || true
+          echo "=== warning 计数（仅观测，不阻断）==="
+          find scripts tests -name '*.sh' -print0 \
+            | xargs -0 shellcheck -f gcc -S warning 2>/dev/null | wc -l || true

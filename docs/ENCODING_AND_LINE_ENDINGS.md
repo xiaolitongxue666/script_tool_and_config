@@ -39,14 +39,14 @@
 
 ```bash
 # 检查所有文件的编码和换行符
-./scripts/common/standalone_tool_script/check_and_fix_encoding.sh
+./scripts/tools/standalone_tool_script/check_and_fix_encoding.sh
 ```
 
 ### 2. 规范化换行符脚本
 
 ```bash
 # 确保所有文件使用 LF 换行符
-./scripts/common/standalone_tool_script/ensure_lf_line_endings.sh
+./scripts/tools/standalone_tool_script/ensure_lf_line_endings.sh
 ```
 
 ### 3. Git 规范化
@@ -85,7 +85,7 @@ git config core.autocrlf input
 RUN pacman -S --noconfirm dos2unix || true
 
 # 转换特定文件
-RUN dos2unix /tmp/project/scripts/common.sh 2>/dev/null || true
+RUN dos2unix /tmp/project/scripts/lib/common.sh 2>/dev/null || true
 # Neovim install.sh 位于 ~/.config/nvim/install.sh（由 run_once 克隆后），若在容器内使用需单独处理
 ```
 
@@ -155,6 +155,6 @@ find . -type f -name "*.sh" -exec grep -l $'\r' {} \;
 - `.gitattributes` - Git 换行符配置
 - `.editorconfig` - 编辑器配置
 - `.vscode/settings.json` - VS Code 配置
-- `scripts/common/standalone_tool_script/check_and_fix_encoding.sh` - 检查脚本
-- `scripts/common/standalone_tool_script/ensure_lf_line_endings.sh` - 规范化脚本
+- `scripts/tools/standalone_tool_script/check_and_fix_encoding.sh` - 检查脚本
+- `scripts/tools/standalone_tool_script/ensure_lf_line_endings.sh` - 规范化脚本
 

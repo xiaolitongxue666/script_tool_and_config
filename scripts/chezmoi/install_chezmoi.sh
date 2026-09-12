@@ -9,7 +9,7 @@ set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
-COMMON_SH="${PROJECT_ROOT}/scripts/common.sh"
+COMMON_SH="${PROJECT_ROOT}/scripts/lib/common.sh"
 
 # 加载通用函数库
 if [ -f "$COMMON_SH" ]; then
@@ -23,7 +23,7 @@ else
 fi
 
 # 加载 chezmoi 核心封装（代理检测 WSL/本机 7890）
-CHEZMOI_CORE_SH="${PROJECT_ROOT}/scripts/chezmoi/chezmoi_core.sh"
+CHEZMOI_CORE_SH="${PROJECT_ROOT}/scripts/lib/chezmoi/chezmoi_core.sh"
 if [ -f "$CHEZMOI_CORE_SH" ]; then
     # shellcheck disable=SC1090
     source "$CHEZMOI_CORE_SH"

@@ -7,7 +7,7 @@
 | 项 | 选择 |
 |----|------|
 | 平台 | 仅 Windows（`chezmoi.os == windows`） |
-| 安装 | `run_on_windows/run_once_install-rmux.sh.tmpl` → `~/.local/bin/rmux.exe` |
+| 安装 | `run_once_windows-install-rmux.sh.tmpl` → `~/.local/bin/rmux.exe` |
 | 配置 | `dot_rmux.conf.tmpl` → `~/.rmux.conf`（无 TPM/插件/`run-shell`） |
 | 终端 | WT 仍默认 **Git Bash**，**不**新增 profile、**不**在 bashrc 自动 attach |
 | 使用 | 手动：`rmux new -s work`、`rmux a -t work` |
@@ -57,7 +57,7 @@
     command = "C:/Program Files/Git/usr/bin/bash.exe"
 ```
 
-由 `install.sh` / `scripts/chezmoi/chezmoi_core.sh` 的 `chezmoi_ensure_user_config` 自动写入。
+由 `install.sh` / `scripts/lib/chezmoi/chezmoi_core.sh` 的 `chezmoi_ensure_user_config` 自动写入。
 
 ### 3. `force_apply_configs.sh` 跳过 tmux / 找不到源文件
 
@@ -65,7 +65,7 @@
 
 **原因**：`force_apply_configs.sh` 与 `audit_configs.sh` 映射表不一致且路径过时。
 
-**解决**：已统一到 `scripts/chezmoi/config_mappings.sh`；Windows 校验 `~/.rmux.conf`，Linux/macOS 校验 `~/.tmux.conf`。
+**解决**：已统一到 `scripts/lib/chezmoi/config_mappings.sh`；Windows 校验 `~/.rmux.conf`，Linux/macOS 校验 `~/.tmux.conf`。
 
 ### 4. 预编译包解压路径
 
@@ -77,7 +77,11 @@
 
 **现象**：`~/chezmoi.toml` 与 `~/.config/chezmoi/chezmoi.toml` 并存，易混淆。
 
-**解决**：以 **`~/.config/chezmoi/chezmoi.toml`** 为准；可删除仓库外的 `~/chezmoi.toml` 副本（勿提交到本仓库）。
+**解决（2026-09 已从根因修复）**：`.chezmoi/chezmoi.toml` 是 chezmoi 源内配置文件，此前被当作普通文件部署成 `~/chezmoi.toml`。
+现已在 `.chezmoi/.chezmoiignore` 中忽略，**apply 不再生成该副本**。
+- 以 **`~/.config/chezmoi/chezmoi.toml`** 为唯一生效配置；
+- 历史遗留的 `~/chezmoi.toml` 副本可安全删除（勿提交到本仓库）。
+- 同理修复：`~/detect_windows_git_paths.sh`（无消费者，代码只读源内路径）也不再生成。
 
 ## 配置说明（相对 tmux）
 
@@ -124,8 +128,8 @@ rmux a -t mywork
 
 | 文件 | 作用 |
 |------|------|
-| `.chezmoi/run_on_windows/run_once_install-rmux.sh.tmpl` | 安装 |
+| `.chezmoi/run_once_windows-install-rmux.sh.tmpl` | 安装 |
 | `.chezmoi/dot_rmux.conf.tmpl` | 配置模板 |
-| `scripts/chezmoi/config_mappings.sh` | 审计/强制应用映射单一来源 |
-| `scripts/chezmoi/chezmoi_core.sh` | `chezmoi_ensure_user_config`、`chezmoi_run_apply` |
+| `scripts/lib/chezmoi/config_mappings.sh` | 审计/强制应用映射单一来源 |
+| `scripts/lib/chezmoi/chezmoi_core.sh` | `chezmoi_ensure_user_config`、`chezmoi_run_apply` |
 | `docs/SOFTWARE_LIST.md` | 安装清单 |

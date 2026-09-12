@@ -1,2 +1,45 @@
-# 废弃的模板片段目录（请使用 templates/）
+# ============================================
+# chezmoi 源忽略清单（**模板**，按 OS 条件渲染）
+# ============================================
+# 渲染验证：chezmoi --source .chezmoi execute-template < .chezmoi/.chezmoiignore
+# 说明：本文件是 Go 模板，可用 .chezmoi.os 等数据；匹配规则与 .gitignore 一致，
+#       路径相对于**目标路径**（即 $HOME 下的相对路径）。
+#       注意：chezmoiignore **不支持 `!` 取反**（实测取反会让脚本一起被忽略、永不执行）。
+
+# ---------- 平台专属 dotfile：仅在本平台部署 ----------
+# 此前这些文件放在 run_on_linux/ run_on_darwin/ run_on_windows/ 下，
+# 而 chezmoi 只按 basename 识别 run_once_/run_onchange_ 脚本前缀，
+# 子目录会被**原样部署**，导致它们落到 ~/run_on_*/ 而非真实配置路径（2026-09 修复）。
+
+{{ if ne .chezmoi.os "linux" }}
+.config/alacritty
+.config/i3
+{{ end }}
+{{ if ne .chezmoi.os "darwin" }}
+.yabairc
+.skhdrc
+.config/ghostty
+{{ end }}
+{{ if ne .chezmoi.os "windows" }}
+secure_crt
+{{ end }}
+
+# ---------- 仅作模板 include 用，不部署到 $HOME ----------
+# dot_bash_profile.tmpl 用 include 函数引用这两个片段（相对**源根**解析）；
+# 若不忽略，它们会被当作普通文件部署成 ~/_bash_profile_windows 等无意义文件。
+# 注意：本文件是模板，注释中不可出现双花括号模板语法（会被真实执行）。
+_bash_profile_darwin
+_bash_profile_windows
+
+# ---------- 源自身文件，不部署到 $HOME ----------
+# 否则会在 $HOME 生成 ~/chezmoi.toml 与 ~/detect_windows_git_paths.sh（2026-09 修复）：
+#   - ~/chezmoi.toml 与 ~/.config/chezmoi/chezmoi.toml 并存，易混淆（见 docs/RMUX_WINDOWS.md）
+#   - ~/detect_windows_git_paths.sh 无任何消费者；scripts/lib/chezmoi/chezmoi_apply.sh 只读源内路径
+chezmoi.toml
+detect_windows_git_paths.sh
+
+# ---------- 防御：这两个普通名目录不是 chezmoi 特殊目录 ----------
+# chezmoi 的模板片段目录是 `.chezmoitemplates/`（带 chezmoi 前缀）。
+# 普通名 templates/、includes/ 会被原样部署到 ~/templates、~/includes（2026-09 实测已发生）。
 includes
+templates

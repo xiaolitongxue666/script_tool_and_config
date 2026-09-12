@@ -1,0 +1,25 @@
+#!/bin/bash
+{{- if eq .chezmoi.os "darwin" }}
+# 把 chezmoi 管理的 ghostty 配置镜像到 Ghostty 实际读取的 Application Support 路径。
+#
+# 为什么需要这一步：
+#   Ghostty 读取两处配置，Application Support 后加载、优先级更高；
+#   而 chezmoi 只管理 ~/.config/ghostty/config，写不到 Application Support。
+#
+# ⚠️ 禁止回写 ~/.config/ghostty/config：
+#   该文件由 chezmoi 管理，回写会造成永久 drift（chezmoi status 持续显示 MM）。
+#   zsh 路径的机器差异已由 dot_config/ghostty/config.tmpl 在渲染时解析。
+set -e
+SRC="$HOME/.config/ghostty/config"
+if [[ ! -f "$SRC" ]]; then
+    echo "[INFO] ghostty config not found at $SRC, skipping mirror" >&2
+    exit 0
+fi
+DEST_DIR="$HOME/Library/Application Support/com.mitchellh.ghostty"
+mkdir -p "$DEST_DIR"
+cp "$SRC" "$DEST_DIR/config"
+echo "[INFO] Mirrored ghostty config to Application Support" >&2
+{{- else }}
+# 非 macOS：无操作（脚本本身按 OS 门控，此处为兜底）
+exit 0
+{{- end }}

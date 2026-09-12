@@ -5,15 +5,15 @@
 # Cursor 编辑器安装（chezmoi run_once_）
 # 仅在有 GUI 的环境下安装（全平台，但 Linux/WSL 需检测 DISPLAY）
 # clangd 二进制 / 扩展见 docs/CURSOR_CLANGD.md 与
-# scripts/common/cursor_clangd/（run_once_install-clangd，无 GUI 也可装 clangd）
+# scripts/tools/cursor_clangd/（run_once_install-clangd，无 GUI 也可装 clangd）
 # ============================================
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="${CHEZMOI_PROJECT_ROOT:-$(cd "${SCRIPT_DIR}/../.." && pwd 2>/dev/null || echo "$HOME")}"
-COMMON_INSTALL="${PROJECT_ROOT}/scripts/chezmoi/common_install.sh"
+COMMON_INSTALL="${PROJECT_ROOT}/scripts/lib/chezmoi/common_install.sh"
 
 if [[ ! -f "$COMMON_INSTALL" ]]; then
-    COMMON_INSTALL="$HOME/.local/share/chezmoi/scripts/chezmoi/common_install.sh"
+    COMMON_INSTALL="$HOME/.local/share/chezmoi/scripts/lib/chezmoi/common_install.sh"
 fi
 
 if [[ -f "$COMMON_INSTALL" ]]; then

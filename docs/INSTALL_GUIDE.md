@@ -142,7 +142,7 @@ ssh -T git@github.com
 
 ## 两阶段部署（Agent CLI + 全局 MCP）
 
-Phase 1 在本仓库（dotfiles + Layer 4 CLI），Phase 2 在 [agent-config](../../AI/agent-config) 仓库。详见 [DEPLOY_TWO_PHASE.md](DEPLOY_TWO_PHASE.md)。
+Phase 1 在本仓库（dotfiles + Layer 4 CLI），Phase 2 在 [agent-config](../../../AI/agent-config) 仓库。详见 [DEPLOY_TWO_PHASE.md](DEPLOY_TWO_PHASE.md)。
 
 ```bash
 # Phase 1（Windows Git Bash）
@@ -183,7 +183,7 @@ STRICT_AGENT_PREFLIGHT=1 bash scripts/install-tools.sh
 |------|------|------|
 | 长时间无输出 | `diagnose_deployment.sh` 的 `apply --dry-run` 模拟全部 run_once | Windows 已自动跳过；日常用 `./deploy.sh` 或 `manage_dotfiles.sh apply` |
 | 停在 `.gitconfig has changed...` | chezmoi 等待交互 overwrite | 使用 `--force`（脚本已默认）；手动：`chezmoi apply -v --force` |
-| `timeout obtaining persistent state lock` | 残留 `chezmoi.exe` 或锁文件 | `taskkill //F //IM chezmoi.exe` 后 `bash scripts/common/deploy_utils/fix_chezmoi_lock.sh` |
+| `timeout obtaining persistent state lock` | 残留 `chezmoi.exe` 或锁文件 | `taskkill //F //IM chezmoi.exe` 后 `bash scripts/deploy_utils/fix_chezmoi_lock.sh` |
 | apply 被管道中断 | `\| head` / `\| rg` 导致 SIGPIPE | 勿截断 apply 输出 |
 
 ### Cursor 集成终端：Git Bash 变成默认 MINGW64 提示符
@@ -209,7 +209,7 @@ Cursor 仅 GUI。用户点开的 Git Bash 也会注入 `CURSOR_AGENT=1` 与 `TER
 taskkill //F //IM chezmoi.exe
 
 # 修复脚本（推荐）
-bash scripts/common/deploy_utils/fix_chezmoi_lock.sh
+bash scripts/deploy_utils/fix_chezmoi_lock.sh
 
 # 手动清理锁文件
 rm -f ~/.local/share/chezmoi/.lock ~/.local/share/chezmoi/.chezmoi.lock

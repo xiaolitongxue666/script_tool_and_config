@@ -1,5 +1,10 @@
 # script_tool_and_config
 
+> ⚠️ **命令已更正（2026-09）**：chezmoi CLI **不读** `CHEZMOI_SOURCE_DIR` 环境变量。
+> 本文档历史版本中的 `export CHEZMOI_SOURCE_DIR=... && chezmoi ...` 写法**无效**，
+> 已统一替换为 `./scripts/manage_dotfiles.sh <cmd>`（内部用 `--config` 指定 sourceDir）。
+> 直接调 chezmoi 时须显式带 `--source <repo>/.chezmoi`（或 `--config ~/.config/chezmoi/chezmoi.toml`）。
+
 个人软件配置和常用脚本集合，使用 [chezmoi](https://www.chezmoi.io/) 统一管理 dotfiles。
 
 ## ✨ 核心特性
@@ -28,12 +33,12 @@ cd script_tool_and_config
 
 ```bash
 # 1. 安装 chezmoi
-bash scripts/chezmoi/install_chezmoi.sh
+bash scripts/chezmoi/install_chezmoi.sh  # 或直接跑 ./install.sh
 
 # 2. 设置源状态目录
-export CHEZMOI_SOURCE_DIR="$(pwd)/.chezmoi"
+# chezmoi 不读 CHEZMOI_SOURCE_DIR；用 ./scripts/manage_dotfiles.sh <status|diff|apply>
 
-# 3. 应用所有配置（首次应用前建议备份 ~/.ssh/config 与 ~/.gitconfig，参见 scripts/common/deploy_utils 下 backup_ssh_config.sh、backup_git_config.sh）
+# 3. 应用所有配置（首次应用前建议备份 ~/.ssh/config 与 ~/.gitconfig，参见 scripts/deploy_utils/ 下 backup_ssh_config.sh、backup_git_config.sh）
 # 须 --force，避免 Windows 上外部修改触发交互卡住；日常推荐 ./deploy.sh 或 ./scripts/manage_dotfiles.sh apply
 chezmoi apply -v --force
 ```
@@ -57,13 +62,14 @@ SSH 配置由 `.chezmoi/dot_ssh/config.tmpl` 管理，预置包含 `github.com`�
 ```
 install.sh
   ├── scripts/chezmoi/install_chezmoi.sh          ← 安装 chezmoi
-  ├── scripts/chezmoi/detect_platform.sh           ← 平台/包管理器 SSOT
-  ├── scripts/chezmoi/common_install.sh            ← 安装函数聚合入口
+  ├── scripts/lib/chezmoi/detect_platform.sh           ← 平台/包管理器 SSOT
+  ├── scripts/lib/chezmoi/common_install.sh            ← 安装函数聚合入口
   ├── chezmoi apply -v --force                     ← 核心部署
   │   ├── .chezmoi/run_once_install-*.sh.tmpl     ← 跨平台软件（git/neovim/zsh/tmux/...）
-  │   ├── .chezmoi/run_on_linux/                   ← Linux 独有（pacman/AUR/i3wm/...）
-  │   ├── .chezmoi/run_on_darwin/                  ← macOS 独有（Homebrew/Ghostty/yabai/...）
-  │   └── .chezmoi/run_on_windows/                 ← Windows 独有（Windows Terminal/Oh My Posh）
+  │   ├── .chezmoi/run_once_install-*.sh.tmpl     ← 跨平台工具
+  │   ├── .chezmoi/run_once_linux-*.sh.tmpl        ← Linux 独有（pacman/AUR）
+  │   ├── .chezmoi/run_once_macos-*.sh.tmpl        ← macOS 独有（Homebrew/Ghostty/connect）
+  │   └── .chezmoi/run_once_windows-*.sh.tmpl      ← Windows 独有（rmux/WT）
   └── scripts/chezmoi/verify_installation.sh       ← 验证安装结果
 ```
 
@@ -81,8 +87,8 @@ install.sh
 | [docs/PROJECT_STRUCTURE.md](docs/PROJECT_STRUCTURE.md) | 详细项目结构说明 |
 | [AGENTS.md](AGENTS.md) | 代码代理开发指南 |
 | [docs/ENCODING_AND_LINE_ENDINGS.md](docs/ENCODING_AND_LINE_ENDINGS.md) | 文件编码与换行符规范 |
-| [scripts/common/deploy_utils/DEPLOYMENT_GUIDE.md](scripts/common/deploy_utils/DEPLOYMENT_GUIDE.md) | 部署流程（Windows/Arch） |
-| [scripts/common/deploy_utils/SFTP_SYNC_GUIDE.md](scripts/common/deploy_utils/SFTP_SYNC_GUIDE.md) | SFTP 与同步指南 |
+| [docs/DEPLOYMENT_GUIDE.md](docs/DEPLOYMENT_GUIDE.md) | 部署流程（Windows/Arch） |
+| [docs/SFTP_SYNC_GUIDE.md](docs/SFTP_SYNC_GUIDE.md) | SFTP 与同步指南 |
 
 ## 💻 支持的平台
 
@@ -168,9 +174,9 @@ script_tool_and_config/
 │   ├── dot_*                       # 通用配置文件（模板格式）
 │   ├── dot_config/                 # ~/.config 目录下的配置
 │   ├── run_once_install-*.sh.tmpl  # 自动安装脚本（仅首次执行）
-│   ├── run_on_linux/               # Linux 特定配置
-│   ├── run_on_darwin/              # macOS 特定配置
-│   └── run_on_windows/             # Windows 特定配置
+│   ├── run_once_linux-*.tmpl       # Linux 专属脚本
+│   ├── run_once_macos-*.tmpl       # macOS 专属脚本
+│   └── run_once_windows-*.tmpl     # Windows 专属脚本
 │
 ├── scripts/                        # 脚本工具集合
 │   ├── common.sh                    # 通用函数库
@@ -254,7 +260,7 @@ chezmoi add ~/.new_config
 ### 3. 脚本工具集合
 按平台分类的实用脚本：
 
-**跨平台脚本**（`scripts/common/`）
+**独立工具**（`scripts/tools/`）与**部署辅助**（`scripts/deploy_utils/`）
 - **utils/**: 通用工具脚本
 - **project_tools/**: 项目生成和管理工具
 - **media_tools/**: 媒体处理工具
@@ -323,10 +329,10 @@ cd ~/.config/nvim && git pull && ./install.sh
 
 ```bash
 # 检查所有文件的编码和换行符
-./scripts/common/standalone_tool_script/check_and_fix_encoding.sh
+./scripts/tools/standalone_tool_script/check_and_fix_encoding.sh
 
 # 规范化换行符为 LF
-./scripts/common/standalone_tool_script/ensure_lf_line_endings.sh
+./scripts/tools/standalone_tool_script/ensure_lf_line_endings.sh
 ```
 
 详细说明请参考：[docs/ENCODING_AND_LINE_ENDINGS.md](docs/ENCODING_AND_LINE_ENDINGS.md)
@@ -344,7 +350,7 @@ cd ~/.config/nvim && git pull && ./install.sh
 - [chezmoi 官方文档](https://www.chezmoi.io/docs/)
 - [Neovim 官方文档](https://neovim.io/doc/)
 - [AGENTS.md](AGENTS.md) - 代码代理开发指南
-- [部署流程指南](scripts/common/deploy_utils/DEPLOYMENT_GUIDE.md) - Windows 和 Arch Linux 之间的配置部署流程
+- [部署流程指南](docs/DEPLOYMENT_GUIDE.md) - Windows 和 Arch Linux 之间的配置部署流程
 
 ## 📝 更新日志
 

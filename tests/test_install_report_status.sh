@@ -11,11 +11,11 @@ PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 CHEZMOI_DIR="${PROJECT_ROOT}/.chezmoi"
 
 # shellcheck disable=SC1091
-source "${PROJECT_ROOT}/scripts/common.sh"
+source "${PROJECT_ROOT}/scripts/lib/common.sh"
 # shellcheck disable=SC1091
-source "${PROJECT_ROOT}/scripts/chezmoi/install_helpers.sh"
+source "${PROJECT_ROOT}/scripts/lib/chezmoi/install_helpers.sh"
 # shellcheck disable=SC1091
-source "${PROJECT_ROOT}/scripts/chezmoi/common_install.sh"
+source "${PROJECT_ROOT}/scripts/lib/chezmoi/common_install.sh"
 
 PASSED=0
 FAILED=0

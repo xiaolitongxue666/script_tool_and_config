@@ -9,9 +9,9 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
-COMMON_SH="${PROJECT_ROOT}/scripts/common.sh"
-HELPERS_SH="${SCRIPT_DIR}/chezmoi/helpers.sh"
-CHEZMOI_CORE_SH="${SCRIPT_DIR}/chezmoi/chezmoi_core.sh"
+COMMON_SH="${PROJECT_ROOT}/scripts/lib/common.sh"
+HELPERS_SH="${SCRIPT_DIR}/lib/chezmoi/helpers.sh"
+CHEZMOI_CORE_SH="${SCRIPT_DIR}/lib/chezmoi/chezmoi_core.sh"
 
 # 加载通用函数库
 if [ -f "$COMMON_SH" ]; then

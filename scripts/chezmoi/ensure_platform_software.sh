@@ -10,7 +10,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 
-COMMON_SH="${PROJECT_ROOT}/scripts/common.sh"
+COMMON_SH="${PROJECT_ROOT}/scripts/lib/common.sh"
 if [[ -f "$COMMON_SH" ]]; then
     # shellcheck disable=SC1090
     source "$COMMON_SH"
@@ -22,13 +22,13 @@ else
 fi
 
 # shellcheck disable=SC1090
-source "${SCRIPT_DIR}/common_install.sh"
+source "${SCRIPT_DIR}/../lib/chezmoi/common_install.sh"
 # shellcheck disable=SC1090
-source "${SCRIPT_DIR}/install_helpers.sh"
+source "${SCRIPT_DIR}/../lib/chezmoi/install_helpers.sh"
 # shellcheck disable=SC1090
-source "${SCRIPT_DIR}/software_policies.sh"
+source "${SCRIPT_DIR}/../lib/chezmoi/software_policies.sh"
 
-CHEZMOI_CORE="${SCRIPT_DIR}/chezmoi_core.sh"
+CHEZMOI_CORE="${SCRIPT_DIR}/../lib/chezmoi/chezmoi_core.sh"
 if [[ -f "$CHEZMOI_CORE" ]]; then
     # shellcheck disable=SC1090
     source "$CHEZMOI_CORE"

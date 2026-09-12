@@ -8,8 +8,8 @@
 
 | 组成部分 | 目录 | 说明 | 处理原则 |
 |---------|------|------|---------|
-| **独立工具脚本** | `scripts/common/standalone_tool_script/`、`project_tools/`、`ffmpeg-magic/`、`git_templates/`、`shc/`、`patch_examples/`、`auto_edit_redis_config/` | 通用独立工具，可脱离项目单独使用 | **永不删除** |
-| **多系统部署配置** | `install.sh`、`deploy.sh`、`scripts/chezmoi/`、`scripts/common/deploy_utils/`、`.chezmoi/` | 通过脚本 + chezmoi 安装软件和部署配置 | 删除仅限废弃项 |
+| **独立工具脚本** | `scripts/tools/standalone_tool_script/`、`project_tools/`、`ffmpeg_magic/`、`git_templates/`、`shc/`、`patch_examples/`、`auto_edit_redis_config/` | 通用独立工具，可脱离项目单独使用 | **永不删除** |
+| **多系统部署配置** | `install.sh`、`deploy.sh`、`scripts/chezmoi/`（入口）、`scripts/lib/`（库）、`scripts/deploy_utils/`、`.chezmoi/` | 通过脚本 + chezmoi 安装软件和部署配置 | 删除仅限废弃项 |
 
 使用场景：在全新 OS 上，通过脚本安装该 OS 所需工具软件，用 chezmoi 模板生成配置文件并部署到正确位置。
 
@@ -27,9 +27,11 @@ script_tool_and_config/
 │   ├── run_once_00-*.sh.tmpl        # 优先安装脚本（版本管理器等，字母序最先执行）
 │   ├── run_once_install-*.sh.tmpl   # 一次性安装脚本模板
 │   ├── run_sync_*.sh.tmpl           # 同步脚本（如 Windows Terminal、Ghostty 配置同步）
-│   ├── run_on_linux/                # Linux 特定配置（含 run_once_*、dot_config/）
-│   ├── run_on_darwin/               # macOS 特定配置（含 run_once_*、dot_config/）
-│   └── run_on_windows/              # Windows 特定配置（含 run_once_*、dot_config/）
+│   ├── .chezmoiignore               # 模板：按 OS 过滤平台专属 dotfile
+│   ├── _bash_profile_{darwin,windows}.tmpl  # 仅 include 用（已 ignore，不部署）
+│   ├── run_once_linux-*.tmpl        # Linux 专属脚本（禁止放 dotfile）
+│   ├── run_once_macos-*.tmpl        # macOS 专属脚本（禁止放 dotfile）
+│   └── run_once_windows-*.tmpl      # Windows 专属脚本（禁止放 dotfile）
 │
 ├── .chezmoi.toml.tmpl               # chezmoi 用户级配置参考模板（实际运行时由 install.sh 覆盖写入 ~/.config/chezmoi/chezmoi.toml）
 ├── .chezmoiignore                   # chezmoi 忽略规则
@@ -89,7 +91,7 @@ script_tool_and_config/
 │   │   │   ├── measure_zsh_startup.sh     # Zsh 启动时间测量
 │   │   │   ├── nvim_checkhealth_to_log.sh # Neovim checkhealth 日志
 │   │   │   ├── diagnose_deployment.sh     # 部署诊断
-│   │   │   ├── force_apply_configs.sh     # 强制应用配置（映射见 scripts/chezmoi/config_mappings.sh）
+│   │   │   ├── force_apply_configs.sh     # 强制应用配置（映射见 scripts/lib/chezmoi/config_mappings.sh）
 │   │   │   ├── ensure_chezmoi_unlocked.sh # chezmoi 锁检测
 │   │   │   ├── fix_chezmoi_lock.sh        # chezmoi 锁修复
 │   │   │   ├── remote_init.sh             # 远程项目初始化
@@ -138,7 +140,7 @@ script_tool_and_config/
 │   │   │   ├── merge_static_libraries.sh
 │   │   │   └── cpp_project_generator/
 │   │   │
-│   │   ├── ffmpeg-magic/             # FFmpeg 相关脚本工具
+│   │   ├── ffmpeg_magic/             # FFmpeg 相关脚本工具
 │   │   │   ├── open_multiple_ffmpeg_srt.sh
 │   │   │   ├── open_multiple_ffmpeg_udp.sh
 │   │   │   ├── open_multiple_terminals.sh
@@ -184,7 +186,6 @@ script_tool_and_config/
 │           ├── open_multi_vlc.bat
 │           └── open_16_vlc.bat
 │
-├── openspec/                         # OpenSpec 规范驱动开发
 │   ├── AGENTS.md
 │   └── PROJECT.md
 │
@@ -204,7 +205,6 @@ script_tool_and_config/
 - **README.md**: 项目主文档，包含快速开始、使用说明等
 - **AGENTS.md**: 代理与编码规范，包含代码风格、命名规范、最佳实践
 - **docs/**: 文档目录，含 PROJECT_STRUCTURE.md（本文件）、SOFTWARE_LIST.md、PROJECT_AGENT_MEMORY.md、INSTALL_GUIDE.md 等
-- **openspec/**: OpenSpec 规范驱动开发（与 chezmoi 部署无关，独立 CLI `openspec`）
 <!-- ai-unified-config/ 已删除 -->
 - **graphify-out/**: Graphify 知识图谱分析输出缓存
 
@@ -243,9 +243,9 @@ install.sh
   │       ├─ run_once_91-install-codex.sh.tmpl
   │       ├─ run_once_93-install-cursor.sh.tmpl (GUI 环境)
   │       ├─ run_once_install-tmux.sh.tmpl (Linux/macOS)
-  │       ├─ run_on_linux/run_once_*.sh.tmpl (仅 Linux)
-  │       ├─ run_on_darwin/run_once_*.sh.tmpl (仅 macOS)
-  │       └─ run_on_windows/run_once_*.sh.tmpl (仅 Windows)
+  │       ├─ run_once_linux-*.sh.tmpl  (仅 Linux，排在 install-* 之后)
+  │       ├─ run_once_macos-*.sh.tmpl  (仅 macOS，同上)
+  │       └─ run_once_windows-*.sh.tmpl (仅 Windows，同上)
   │
   ├─ [4/5] 软件安装状态检查
   │   └─ report_install_status_by_platform()
@@ -263,7 +263,9 @@ install.sh
 - `run_once_00-install-*.sh.tmpl` → 优先安装脚本（按字母序最先执行，如版本管理器）
 - `run_once_install-*.sh.tmpl` → 一次性安装脚本（按目标名字母序执行）
 - `run_sync_*.sh.tmpl` → 每次 apply 均执行的同步脚本（如 Windows Terminal 配置同步）
-- `run_on_linux/`、`run_on_darwin/`、`run_on_windows/` → 平台特定配置
+- `run_on_linux/`、`run_on_darwin/`、`run_on_windows/` → 平台特定**脚本**（**不是** chezmoi 平台目录）
+  ⚠️ 这三个目录会被原样当作目标目录，故**只允许放脚本**；平台专属 dotfile 必须放源根，
+  由 `.chezmoiignore` 的 `{{ "{{" }} if ne .chezmoi.os ... {{ "}}" }}` 条件过滤。详见 `AGENTS.md` §「run_on_* 的真实语义」。
 
 **run_once 脚本按执行顺序：**
 
@@ -289,15 +291,15 @@ install.sh
 | `run_once_install-skhd.sh.tmpl` | skhd 快捷键 | 仅 macOS |
 | `run_once_install-yabai.sh.tmpl` | yabai 窗口管理器 | 仅 macOS |
 | `run_once_install-oh-my-posh.sh.tmpl` | oh-my-posh | 仅 Windows |
-| `run_on_linux/run_once_configure-pacman.sh.tmpl` | Arch 镜像与 pacman 配置 | 仅 Linux(Arch) |
-| `run_on_linux/run_once_install-arch-base-packages.sh.tmpl` | base-devel, gcc 等 | 仅 Linux(Arch) |
-| `run_on_linux/run_once_install-aur-helper.sh.tmpl` | yay/paru AUR 助手 | 仅 Linux |
-| `run_on_darwin/run_once_configure-homebrew.sh.tmpl` | Homebrew 配置 | 仅 macOS |
-| `run_on_darwin/run_once_install-connect.sh.tmpl` | connect (SSH 代理) | 仅 macOS |
-| `run_on_darwin/run_once_install-ghostty.sh.tmpl` | Ghostty 终端 | 仅 macOS |
-| `run_on_darwin/run_onchange_sync_ghostty_config_to_app_support.sh.tmpl` | Ghostty 配置同步 | 仅 macOS |
-| `run_on_windows/run_once_install-windows-terminal.sh.tmpl` | Windows Terminal | 仅 Windows |
-| `run_on_windows/run_onchange_sync_windows_terminal_config.sh.tmpl` | WT 配置同步 | 仅 Windows |
+| `run_once_linux-configure-pacman.sh.tmpl` | Arch 镜像与 pacman 配置 | 仅 Linux(Arch) |
+| `run_once_linux-install-arch-base-packages.sh.tmpl` | base-devel, gcc 等 | 仅 Linux(Arch) |
+| `run_once_linux-install-aur-helper.sh.tmpl` | yay/paru AUR 助手 | 仅 Linux |
+| `run_once_macos-configure-homebrew.sh.tmpl` | Homebrew 配置 | 仅 macOS |
+| `run_once_macos-install-connect.sh.tmpl` | connect (SSH 代理) | 仅 macOS |
+| `run_once_macos-install-ghostty.sh.tmpl` | Ghostty 终端 | 仅 macOS |
+| `run_onchange_macos-sync-ghostty-config-to-app-support.sh.tmpl` | Ghostty 配置同步 | 仅 macOS |
+| `run_once_windows-install-windows-terminal.sh.tmpl` | Windows Terminal | 仅 Windows |
+| `run_onchange_windows-sync-terminal-config.sh.tmpl` | WT 配置同步 | 仅 Windows |
 
 **注意**：`run_onchange_*` 类型的脚本仅在脚本内容变化时执行（非 run_once），用于确保配置文件同步到应用实际路径并减少 `chezmoi status` 噪音。
 
@@ -310,24 +312,25 @@ install.sh
 | `common.sh` | 通用函数库（颜色、日志、错误处理），所有脚本共享 |
 | `manage_dotfiles.sh` | dotfiles 管理入口（status/diff/apply/edit） |
 | `chezmoi/` | chezmoi 安装、验证、诊断脚本 |
-| `common/deploy_utils/` | 部署辅助脚本（SSH/Zsh/OMZ 备份、诊断、同步） |
-| `common/standalone_tool_script/` | 独立工具脚本（文本处理、编码检查、文件操作） |
-| `common/container_dev_env/` | Docker 容器开发环境 |
-| `common/project_tools/` | C/C++ 项目生成和构建工具 |
-| `common/ffmpeg-magic/` | FFmpeg 流媒体工具 |
-| `common/git_templates/` | Git 配置和 .gitignore 模板 |
-| `common/patch_examples/` | diff/patch 使用示例 |
-| `common/shc/` | Shell 脚本编译器示例 |
-| `common/auto_edit_redis_config/` | Redis 配置自动编辑 |
+| `deploy_utils/` | 部署辅助脚本（SSH/Zsh/OMZ 备份、诊断、同步） |
+| `tools/standalone_tool_script/` | 独立工具脚本（文本处理、编码检查、文件操作） |
+| `tools/container_dev_env/` | Docker 容器开发环境 |
+| `tools/project_tools/` | C/C++ 项目生成和构建工具 |
+| `tools/ffmpeg_magic/` | FFmpeg 流媒体工具 |
+| `tools/git_templates/` | Git 配置和 .gitignore 模板 |
+| `tools/patch_examples/` | diff/patch 使用示例 |
+| `tools/shc/` | Shell 脚本编译器示例 |
+| `tools/auto_edit_redis_config/` | Redis 配置自动编辑 |
 | `linux/` | Linux 专用脚本（系统基础环境、网络配置） |
 | `windows/` | Windows 专用脚本（.bat/.ps1） |
-| （无 `scripts/darwin/`） | macOS 专用在 `.chezmoi/run_on_darwin/` |
+| （无 `scripts/darwin/`） | macOS 专属脚本为 `.chezmoi/run_once_macos-*`，dotfile 在源根 |
 
 ### 脚本分类
 
 - **系统基础环境安装**：`scripts/linux/system_basic_env/`、`scripts/windows/system_basic_env/`
-- **部署辅助**：`scripts/common/deploy_utils/`（备份、诊断、同步、SSH/Zsh 配置）
-- **独立工具**：`scripts/common/standalone_tool_script/`、`scripts/common/project_tools/`、`scripts/common/ffmpeg-magic/` 等
+- **部署辅助**：`scripts/deploy_utils/`（备份、诊断、同步、SSH/Zsh 配置）
+- **契约测试**：`tests/test_contracts.sh`（目录分层、库 vs 入口、文档链接、文件格式；CI 硬性阻断）
+- **独立工具**：`scripts/tools/standalone_tool_script/`、`scripts/tools/project_tools/`、`scripts/tools/ffmpeg_magic/` 等
 - **平台特定**：Linux network、Windows windows_scripts
 
 ### 配置文件流程
@@ -342,8 +345,30 @@ install.sh
 1. `.chezmoi/` 目录包含所有配置文件模板，由 chezmoi 统一管理
 2. Layer 4 AI 工具脚本使用 `run_once_9x-*` 命名以排在 neovim 之后、tmux 之前
 3. 所有配置统一通过 `.chezmoi/*.tmpl` → `chezmoi apply` → `~/.` 流程部署
-4. 跨平台通用脚本位于 `scripts/common/` 目录下
+4. 目录分层（P4 重构后）：
+
+```text
+scripts/
+├── lib/                    # ★ 纯函数库（被 source；不设 +x、不写 set -euo pipefail）
+│   ├── common.sh           # 公共函数库（颜色、日志、错误处理）
+│   └── chezmoi/            # chezmoi 库：core/proxy/lock/apply、detect_platform、
+│                           #   packages.conf、software_policies、package_install、
+│                           #   install_helpers、brew_macos_network、config_mappings、
+│                           #   helpers、common_install（聚合入口）
+├── chezmoi/                # chezmoi 可执行入口（install/verify/diagnose/ensure_*/audit）
+├── deploy_utils/           # 部署辅助（备份、诊断、SSH/Zsh 同步）
+├── tools/                  # ★ 独立工具（永不删除，与部署无关）
+│   ├── standalone_tool_script/  project_tools/  ffmpeg_magic/
+│   ├── git_templates/  shc/  patch_examples/
+│   └── auto_edit_redis_config/  cursor_clangd/  container_dev_env/
+├── linux/                  # Linux 专属（system_basic_env、network）
+├── windows/                # Windows 专属（system_basic_env、windows_scripts）
+├── manage_dotfiles.sh      # dotfiles 运维入口
+└── README.md
+```
+
+   规则：**库只放 `scripts/lib/`**（被 source，不设 +x、不写 `set -euo pipefail`）；**入口放 `scripts/chezmoi/`、`scripts/deploy_utils/`、`scripts/{linux,windows}/`**（独立进程）。详见 `AGENTS.md` 的「库 vs 可执行：两份契约」。
 5. 所有脚本注释使用中文，打印输出使用英文
 6. 普通脚本区遵循 snake_case；`.chezmoi/run_once_*` 保留既有 kebab-case
 7. `.gitignore` 已忽略 `logs/`、`chezmoistate.boltdb` 等
-8. OpenCode 已从安装链与 Shell PATH 中移除；规范开发见根目录 `openspec/`（独立 CLI）
+8. OpenCode 已从安装链与 Shell PATH 中移除；`openspec/` 因 CLI 未安装、`specs/` 从未建立已于 2026-09 删除（如需规范驱动开发，重新 `openspec init` 即可）

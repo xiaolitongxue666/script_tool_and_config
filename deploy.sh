@@ -8,7 +8,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-COMMON_SH="${SCRIPT_DIR}/scripts/common.sh"
+COMMON_SH="${SCRIPT_DIR}/scripts/lib/common.sh"
 
 # 加载通用函数库
 if [ -f "$COMMON_SH" ]; then
@@ -22,12 +22,12 @@ else
 fi
 
 # 加载通用安装函数库（提供 detect_platform 等）
-COMMON_INSTALL_SH="${SCRIPT_DIR}/scripts/chezmoi/common_install.sh"
+COMMON_INSTALL_SH="${SCRIPT_DIR}/scripts/lib/chezmoi/common_install.sh"
 if [ -f "$COMMON_INSTALL_SH" ]; then
     source "$COMMON_INSTALL_SH"
 fi
 
-CHEZMOI_CORE_SH="${SCRIPT_DIR}/scripts/chezmoi/chezmoi_core.sh"
+CHEZMOI_CORE_SH="${SCRIPT_DIR}/scripts/lib/chezmoi/chezmoi_core.sh"
 if [ -f "$CHEZMOI_CORE_SH" ]; then
     # shellcheck disable=SC1090
     source "$CHEZMOI_CORE_SH"
@@ -46,10 +46,10 @@ start_script "Quick Deploy"
 # ============================================
 log_info "Checking and setting execute permissions for sub-scripts..."
 
-DIAGNOSE_SCRIPT="${SCRIPT_DIR}/scripts/common/deploy_utils/diagnose_deployment.sh"
-FORCE_APPLY_SCRIPT="${SCRIPT_DIR}/scripts/common/deploy_utils/force_apply_configs.sh"
-CHECK_ZSH_OMZ_SCRIPT="${SCRIPT_DIR}/scripts/common/deploy_utils/check_zsh_omz.sh"
-FIX_LOCK_SCRIPT="${SCRIPT_DIR}/scripts/common/deploy_utils/fix_chezmoi_lock.sh"
+DIAGNOSE_SCRIPT="${SCRIPT_DIR}/scripts/deploy_utils/diagnose_deployment.sh"
+FORCE_APPLY_SCRIPT="${SCRIPT_DIR}/scripts/deploy_utils/force_apply_configs.sh"
+CHECK_ZSH_OMZ_SCRIPT="${SCRIPT_DIR}/scripts/deploy_utils/check_zsh_omz.sh"
+FIX_LOCK_SCRIPT="${SCRIPT_DIR}/scripts/deploy_utils/fix_chezmoi_lock.sh"
 
 if [ -f "$DIAGNOSE_SCRIPT" ]; then
     if [ ! -x "$DIAGNOSE_SCRIPT" ]; then
@@ -98,7 +98,7 @@ fi
 if type chezmoi_ensure_unlocked &>/dev/null; then
     chezmoi_ensure_unlocked 30
 else
-    ENSURE_UNLOCKED="${SCRIPT_DIR}/scripts/common/deploy_utils/ensure_chezmoi_unlocked.sh"
+    ENSURE_UNLOCKED="${SCRIPT_DIR}/scripts/deploy_utils/ensure_chezmoi_unlocked.sh"
     if [ -f "$ENSURE_UNLOCKED" ]; then
         [ ! -x "$ENSURE_UNLOCKED" ] && chmod +x "$ENSURE_UNLOCKED"
         bash "$ENSURE_UNLOCKED" || true
@@ -106,10 +106,10 @@ else
 fi
 
 # ============================================
-# 检测操作系统（SSOT: scripts/chezmoi/detect_platform.sh）
+# 检测操作系统（SSOT: scripts/lib/chezmoi/detect_platform.sh）
 # ============================================
 if ! type detect_platform &> /dev/null; then
-    error_exit "detect_platform unavailable; ensure scripts/chezmoi/common_install.sh or detect_platform.sh is sourced"
+    error_exit "detect_platform unavailable; ensure scripts/lib/chezmoi/common_install.sh or detect_platform.sh is sourced"
 fi
 detect_platform || error_exit "Unsupported operating system"
 
@@ -158,9 +158,10 @@ fi
 FILE_COUNT=$(find "$CHEZMOI_DIR" -type f ! -path '*/.git/*' 2>/dev/null | wc -l)
 log_info "源状态目录包含 $FILE_COUNT 个文件"
 
-# 显示当前系统对应的配置文件
+# 平台专属配置统一用「源根 + 过滤」表达，已废弃 run_on_*/ 子目录：
+#   脚本    -> 文件名前缀 run_once_{linux,macos,windows}-
+#   dotfile -> 放源根，由 .chezmoiignore 模板按 .chezmoi.os 过滤
 log_info "检查 $PLATFORM_NAME 系统对应的配置文件..."
-PLATFORM_DIR="${CHEZMOI_DIR}/run_on_${PLATFORM}"
 
 # ============================================
 # 1. 跨平台软件配置（三系统都支持）
@@ -172,7 +173,7 @@ log_info "━━━━━━━━━━━━━━━━━━━━━━━�
 
 # 跨平台配置文件（根目录下的文件，排除平台特定目录）
 CROSS_PLATFORM_FILES=$(find "$CHEZMOI_DIR" -maxdepth 1 -type f ! -path '*/.git/*' ! -name 'chezmoi.toml' ! -name '*.swp' ! -name '*.swo' 2>/dev/null)
-CROSS_PLATFORM_DIRS=$(find "$CHEZMOI_DIR" -maxdepth 1 -type d ! -path "$CHEZMOI_DIR" ! -path '*/.git/*' ! -name 'run_on_*' 2>/dev/null)
+CROSS_PLATFORM_DIRS=$(find "$CHEZMOI_DIR" -maxdepth 1 -type d ! -path "$CHEZMOI_DIR" ! -path '*/.git/*' 2>/dev/null)
 
 CROSS_PLATFORM_COUNT=0
 
@@ -232,60 +233,66 @@ log_info "━━━━━━━━━━━━━━━━━━━━━━━�
 log_info "$PLATFORM_NAME 特定配置（仅当前系统）"
 log_info "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
-if [ -d "$PLATFORM_DIR" ]; then
-    PLATFORM_FILE_COUNT=$(find "$PLATFORM_DIR" -type f ! -path '*/.git/*' 2>/dev/null | wc -l)
-    if [ "$PLATFORM_FILE_COUNT" -gt 0 ]; then
-        log_info "发现 $PLATFORM_FILE_COUNT 个 $PLATFORM_NAME 特定配置文件："
-        find "$PLATFORM_DIR" -type f ! -path '*/.git/*' ! -name '*.swp' ! -name '*.swo' 2>/dev/null | while IFS= read -r file; do
-            REL_PATH="${file#$PLATFORM_DIR/}"
-            # 识别配置类型
-            if [[ "$REL_PATH" =~ ^run_once_install- ]]; then
-                SOFTWARE_NAME="${REL_PATH#run_once_install-}"
-                SOFTWARE_NAME="${SOFTWARE_NAME%.sh.tmpl}"
-                SOFTWARE_NAME="${SOFTWARE_NAME%.sh}"
-                log_info "  📦 安装脚本: $SOFTWARE_NAME"
-            elif [[ "$REL_PATH" =~ ^dot_ ]]; then
-                CONFIG_NAME="${REL_PATH#dot_}"
-                CONFIG_NAME="${CONFIG_NAME%.tmpl}"
-                log_info "  ⚙️  配置文件: $CONFIG_NAME"
-            elif [[ "$REL_PATH" =~ ^run_once_configure- ]]; then
-                CONFIG_NAME="${REL_PATH#run_once_configure-}"
-                CONFIG_NAME="${CONFIG_NAME%.sh.tmpl}"
-                CONFIG_NAME="${CONFIG_NAME%.sh}"
-                log_info "  🔧 配置脚本: $CONFIG_NAME"
-            else
-                log_info "  📄 $REL_PATH"
-            fi
-        done
+# 平台专属脚本：源根 + run_once_{linux,macos,windows}- 前缀（排序落在 install-* 之后）
+# 注意 macOS 的 $PLATFORM 为 darwin，脚本前缀为 macos-（同 install_helpers.sh 的归一规则）
+case "$PLATFORM" in
+    darwin) SCRIPT_PLATFORM="macos" ;;
+    *)      SCRIPT_PLATFORM="$PLATFORM" ;;
+esac
 
-        # 显示平台特定软件说明
-        log_info ""
-        case "$PLATFORM" in
-            linux)
-                log_info "$PLATFORM_NAME 特定软件包括："
-                log_info "  • 窗口管理器: i3wm, dwm"
-                log_info "  • 包管理器配置: pacman 镜像源"
-                log_info "  • AUR 助手: yay"
-                ;;
-            darwin)
-                log_info "$PLATFORM_NAME 特定软件包括："
-                log_info "  • 窗口管理器: Yabai, skhd"
-                log_info "  • 包管理器配置: Homebrew"
-                log_info "  • 系统工具: Maccy (剪贴板管理)"
-                ;;
-            windows)
-                log_info "$PLATFORM_NAME 特定软件包括："
-                log_info "  • Shell 配置: Git Bash"
-                log_info "  • 提示符工具: Oh My Posh"
-                log_info "  • 系统工具: SecureCRT 脚本"
-                ;;
-        esac
-    else
-        log_info "$PLATFORM_NAME 特定配置目录存在但为空"
-    fi
+PLATFORM_SCRIPTS=$(find "$CHEZMOI_DIR" -maxdepth 1 -type f \
+    \( -name "run_once_${SCRIPT_PLATFORM}-*" -o -name "run_onchange_${SCRIPT_PLATFORM}-*" \) 2>/dev/null | sort)
+
+if [ -n "$PLATFORM_SCRIPTS" ]; then
+    PLATFORM_SCRIPT_COUNT=$(printf '%s\n' "$PLATFORM_SCRIPTS" | grep -c . || true)
+    log_info "发现 $PLATFORM_SCRIPT_COUNT 个 $PLATFORM_NAME 专属脚本："
+    printf '%s\n' "$PLATFORM_SCRIPTS" | while IFS= read -r file; do
+        SCRIPT_BASENAME=$(basename "$file")
+        # 剥掉 run_once_/run_onchange_ 与平台前缀，得到语义名
+        SOFTWARE_NAME="${SCRIPT_BASENAME#run_once_}"
+        SOFTWARE_NAME="${SOFTWARE_NAME#run_onchange_}"
+        SOFTWARE_NAME="${SOFTWARE_NAME#"${SCRIPT_PLATFORM}"-}"
+        SOFTWARE_NAME="${SOFTWARE_NAME%.sh.tmpl}"
+        SOFTWARE_NAME="${SOFTWARE_NAME%.sh}"
+        log_info "  📦 安装脚本: $SOFTWARE_NAME ($SCRIPT_BASENAME)"
+    done
 else
-    log_info "$PLATFORM_NAME 特定配置目录不存在（这是正常的，如果该平台没有特定配置）"
+    log_info "$PLATFORM_NAME 专属脚本：无"
 fi
+
+# 平台专属 dotfile：放源根，由 .chezmoiignore 模板按 OS 过滤。
+# 直接问 chezmoi「本平台忽略了什么」，避免在脚本里硬编码平台文件清单。
+IGNORED_TARGETS=$(chezmoi --source "$CHEZMOI_DIR" ignored 2>/dev/null | sort || true)
+if [ -n "$IGNORED_TARGETS" ]; then
+    IGNORED_COUNT=$(printf '%s\n' "$IGNORED_TARGETS" | grep -c . || true)
+    log_info "本平台不部署（由 .chezmoiignore 过滤）的 $IGNORED_COUNT 项："
+    printf '%s\n' "$IGNORED_TARGETS" | while IFS= read -r ignored_path; do
+        log_info "      └─ $ignored_path"
+    done
+fi
+
+# 当前平台专属软件说明
+log_info ""
+case "$PLATFORM" in
+    linux)
+        log_info "$PLATFORM_NAME 特定软件包括："
+        log_info "  • 窗口管理器: i3wm, dwm"
+        log_info "  • 包管理器配置: pacman 镜像源"
+        log_info "  • AUR 助手: yay"
+        ;;
+    darwin)
+        log_info "$PLATFORM_NAME 特定软件包括："
+        log_info "  • 窗口管理器: Yabai, skhd"
+        log_info "  • 包管理器配置: Homebrew"
+        log_info "  • 系统工具: Maccy (剪贴板管理)"
+        ;;
+    windows)
+        log_info "$PLATFORM_NAME 特定软件包括："
+        log_info "  • Shell 配置: Git Bash"
+        log_info "  • 提示符工具: Oh My Posh"
+        log_info "  • 系统工具: SecureCRT 脚本"
+        ;;
+esac
 
 log_info ""
 log_info "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
@@ -639,7 +646,7 @@ if [ -f "$CHECK_ZSH_OMZ_SCRIPT" ] && [ -x "$CHECK_ZSH_OMZ_SCRIPT" ]; then
         log_warning "Check found issues"
         log_info "Prefer: re-run chezmoi apply (OMZ/plugins via .chezmoiexternal.toml.tmpl on linux/darwin)"
         log_info "  ./scripts/manage_dotfiles.sh apply"
-        log_info "Repair fallback (manual): ./scripts/common/deploy_utils/manual_zsh_setup.sh"
+        log_info "Repair fallback (manual): ./scripts/deploy_utils/manual_zsh_setup.sh"
 
         log_info "Re-check after noting fix path..."
         "$CHECK_ZSH_OMZ_SCRIPT" 2>&1 | tail -20
@@ -672,7 +679,7 @@ log_info "  - 如果修改了 Shell 配置（如 ~/.zshrc），运行: source ~/
 log_info "  - 切换到 zsh: chsh -s \$(which zsh) 然后重新打开终端"
 log_info "  - 查看配置状态: ./scripts/manage_dotfiles.sh status"
 log_info "  - 查看配置差异: ./scripts/manage_dotfiles.sh diff"
-log_info "  - 检查 Zsh/OMZ: ./scripts/common/deploy_utils/check_zsh_omz.sh"
+log_info "  - 检查 Zsh/OMZ: ./scripts/deploy_utils/check_zsh_omz.sh"
 
 end_script
 

@@ -2,13 +2,14 @@
 
 本文件包含面向该 shell 脚本和 dotfiles 仓库的编码代理指南。
 
+
 ## 项目两大组成部分
 
 本项目包含两类完全不同的脚本，修改时必须严格区分：
 
 ### 一、独立工具脚本 (Standalone Tools)
 
-位置：`scripts/common/standalone_tool_script/`、`scripts/common/project_tools/`、`scripts/common/ffmpeg-magic/`、`scripts/common/git_templates/`、`scripts/common/shc/`、`scripts/common/patch_examples/`、`scripts/common/auto_edit_redis_config/`
+位置：`scripts/tools/standalone_tool_script/`、`scripts/tools/project_tools/`、`scripts/tools/ffmpeg_magic/`、`scripts/tools/git_templates/`、`scripts/tools/shc/`、`scripts/tools/patch_examples/`、`scripts/tools/auto_edit_redis_config/`
 
 - 通用独立工具，与项目部署/配置无关，每个脚本可单独使用
 - 不依赖 chezmoi 或项目其他部署设施
@@ -16,7 +17,7 @@
 
 ### 二、多系统部署和配置工具 (Deployment & Configuration)
 
-位置：`install.sh`、`deploy.sh`、`scripts/chezmoi/`、`scripts/common/deploy_utils/`、`.chezmoi/`
+位置：`install.sh`、`deploy.sh`、`scripts/chezmoi/`、`scripts/deploy_utils/`、`.chezmoi/`
 
 - 自动检测 OS，安装该 OS 所需的工具软件
 - 通过 chezmoi 模板生成配置文件并部署到正确位置
@@ -29,11 +30,15 @@
 
 - 部署只能通过 chezmoi 应用模板的方式进行。
 
+
 ## 项目 Agent 记忆
 
 - **可提交记忆**（本仓库）：[`docs/PROJECT_AGENT_MEMORY.md`](docs/PROJECT_AGENT_MEMORY.md)（权威）、[`docs/PROJECT_MEMORY.md`](docs/PROJECT_MEMORY.md)（紧凑）。
+- **已删除**：`openspec/`（2026-09 — CLI 从未安装、`specs/`/`changes/` 从未建立、零代码引用；如需规范驱动开发重新 `openspec init`）。
 - **已删除**：`.chezmoi/run_once_92-install-deepseek.sh.tmpl`、`run_once_92-install-codewhale`（勿恢复）。**CodeWhale 已从本仓与 agent-config 移除（勿恢复）**；AI Agent 配置见 agent-config（Claude / Cursor / Codex / Pi + CodeGraph）。
-- **claude-mem 运行时数据**：`.claude-mem/` 仍 gitignore，与可提交的 `PROJECT_AGENT_MEMORY.md` 分工不同。
+- **claude-mem 运行时数据**：`.claude-mem/` 已在 `.gitignore` 中忽略（与可提交的 `PROJECT_AGENT_MEMORY.md` 分工不同）；
+  注意该目录**当前在本机并不存在**（仅忽略规则存在），不要假设它已初始化。
+
 
 ## 构建/检查/测试命令
 
@@ -50,10 +55,10 @@ bash tests/test_syntax.sh
 bash tests/test_proxy.sh
 
 # 验证编码和换行符
-./scripts/common/standalone_tool_script/check_and_fix_encoding.sh
+./scripts/tools/standalone_tool_script/check_and_fix_encoding.sh
 
 # 规范化换行符为 LF（Windows 脚本除外）
-./scripts/common/standalone_tool_script/ensure_lf_line_endings.sh
+./scripts/tools/standalone_tool_script/ensure_lf_line_endings.sh
 ```
 
 ### 配置管理
@@ -65,7 +70,7 @@ bash tests/test_proxy.sh
 ./scripts/manage_dotfiles.sh apply   # 应用更改
 ./scripts/chezmoi/diagnose_chezmoi.sh  # 验证配置
 
-# Chezmoi 核心操作由 scripts/chezmoi/chezmoi_core.sh 统一封装，
+# Chezmoi 核心操作由 scripts/lib/chezmoi/chezmoi_core.sh 统一封装，
 # install.sh 和 deploy.sh 共享此封装层。
 ```
 
@@ -74,7 +79,7 @@ bash tests/test_proxy.sh
 一键安装后可选生成 checkhealth 日志并据此修复：
 
 ```bash
-./scripts/common/deploy_utils/nvim_checkhealth_to_log.sh   # 生成 nvim_checkhealth.log
+./scripts/deploy_utils/nvim_checkhealth_to_log.sh   # 生成 nvim_checkhealth.log
 # 查看 log 中 ERROR/WARNING，按 ~/.config/nvim 内 README 或上游 nvim 仓库「常见 checkhealth 问题与处理」修复
 ```
 
@@ -85,11 +90,17 @@ bash tests/test_proxy.sh
 for t in tests/test_*.sh; do bash "$t"; done
 
 # 单测试运行示例
-bash tests/test_syntax.sh   # 所有 .sh 文件语法检查
-bash tests/test_proxy.sh    # 代理地址检测/补全逻辑测试
+bash tests/test_syntax.sh      # 所有 .sh/.tmpl 语法检查 + 全角标点回归
+bash tests/test_contracts.sh   # ★ 结构与命名契约（目录分层/库vs入口/链接/格式）
+bash tests/test_proxy.sh       # 代理地址检测/补全逻辑测试
 ```
 
+**CI**：`.github/workflows/ci.yml` 在 ubuntu + macos 上跑 `test_syntax` / `test_contracts` /
+全部单元测试 / 编码检查（**硬性阻断**），shellcheck 为**软性观测**（历史存量告警，逐步收紧）。
+CI **只跑只读检查**，不执行 `install.sh` 或 `chezmoi apply`。
+
 nvim 独立化相关改动后，可按 [docs/NEOVIM_AND_THIS_REPO.md](docs/NEOVIM_AND_THIS_REPO.md) §验证清单 做手动验证。
+
 
 ## 安装流程
 
@@ -106,48 +117,132 @@ nvim 独立化相关改动后，可按 [docs/NEOVIM_AND_THIS_REPO.md](docs/NEOVI
 ```
 install.sh
   ├── scripts/chezmoi/install_chezmoi.sh         安装 chezmoi
-  ├── scripts/chezmoi/detect_platform.sh          平台/包管理器 SSOT
-  ├── scripts/chezmoi/common_install.sh           安装函数聚合（packages/brew/proxy）
-  ├── scripts/chezmoi/chezmoi_core.sh             核心封装（锁检测、apply、验证）
+  ├── scripts/lib/chezmoi/detect_platform.sh          平台/包管理器 SSOT
+  ├── scripts/lib/chezmoi/common_install.sh           安装函数聚合（packages/brew/proxy）
+  ├── scripts/lib/chezmoi/chezmoi_core.sh             核心封装（锁检测、apply、验证）
   ├── chezmoi apply -v --force                    核心部署
-  │   ├── .chezmoi/run_once_install-*.sh.tmpl    跨平台软件（git/neovim/zsh/tmux/...）
-  │   ├── .chezmoi/run_on_linux/                  Linux 独有（pacman/AUR/i3wm/...）
-  │   ├── .chezmoi/run_on_darwin/                 macOS 独有（Homebrew/Ghostty/yabai/...）
-  │   └── .chezmoi/run_on_windows/                Windows 独有（Windows Terminal/Oh My Posh）
-  └── scripts/chezmoi/verify_installation.sh      验证安装结果
+  │   ├── run_once_00-install-version-managers  版本管理器（必须最先）
+  │   ├── run_once_{90,91,93}-*                 AI agent CLI
+  │   ├── run_once_install-*.sh.tmpl            跨平台工具（按目标名字母序）
+  │   └── run_once_{linux,macos,windows}-*.tmpl 平台专属（排序最后）
+  └── scripts/chezmoi/verify_installation.sh    验证安装结果
 ```
 
-### run_once 脚本分类
+### run_once 脚本分类（按模板首行的 `if` 门控）
 
-- **跨平台**：`run_once_install-common-tools`、`-neovim`、`-zsh`、`-tmux`、`-starship`、`-nerd-fonts` 等
-- **Arch Linux 独有**：`run_on_linux/run_once_configure-pacman`、`run_once_install-arch-base-packages`、`run_once_install-aur-helper`
-- **macOS 独有**：`run_on_darwin/run_once_configure-homebrew`、`run_once_install-ghostty`、`run_once_install-yabai` 等
-- **Windows 独有**：`run_on_windows/run_once_install-windows-terminal`、`run_once_install-oh-my-posh`
+平台归属由**模板内的 `if eq .chezmoi.os` 条件**决定；**全部 run_once 脚本都在 `.chezmoi/` 源根**，
+平台专属脚本用文件名前缀 `linux-` / `macos-` / `windows-` 标识（排序上落在 `install-*` 之后）。
+
+- **三平台通用**（linux/darwin/windows）：`run_once_00-install-version-managers`、`run_once_90-install-claude-code`、`run_once_91-install-codex`、`run_once_93-install-cursor`、`run_once_install-{clangd,common-tools,git,neovim,nerd-fonts,starship,zsh}`
+- **仅 linux + darwin**：`run_once_install-tmux`（**不含 Windows**）
+- **仅 linux**：`run_once_install-{alacritty,dwm,i3wm,lazyssh}`
+- **仅 darwin**：`run_once_install-{maccy,skhd,yabai}`
+- **仅 windows**：`run_once_install-oh-my-posh`
+- **仅 linux**（`run_once_linux-*`）：`configure-pacman`、`install-arch-base-packages`、`install-aur-helper`
+- **仅 macOS**（`run_once_macos-*`）：`configure-homebrew`、`install-connect`、`install-ghostty`
+- **仅 windows**（`run_once_windows-*`）：`install-rmux`、`install-windows-terminal`
+
+> 全部 run_once 脚本现均在 **`.chezmoi/` 源根**，平台专属以 `linux-`/`macos-`/`windows-` 前缀命名
+> （排在 `install-*` 之后，与"平台脚本最后执行"一致）。已废止的 `run_after_*` 在本仓**不存在任何文件**。
+
+### ⚠️ chezmoi 平台目录陷阱与平台专属配置的写法（必读）
+
+**`run_on_linux/` `run_on_darwin/` `run_on_windows/` 从来不是 chezmoi 的平台目录**——
+chezmoi 只按 **basename** 识别 `run_once_` / `run_onchange_` 脚本前缀，子目录会被当作**普通目标目录**
+原样部署到 `$HOME`。曾因此产生三类问题（2026-09 全部修复）：
+
+1. 平台专属 dotfile 落到 `~/run_on_*/` 而非真实路径 → **yabai / i3 / Ghostty 读不到配置**；
+2. 含脚本的源目录会在 `$HOME` 创建同名空目录（`~/run_on_{linux,darwin,windows}/`）；
+3. `.chezmoi/chezmoi.toml` 与 `.chezmoi/detect_windows_git_paths.sh` 被当作普通文件，
+   在 `$HOME` 生成 `~/chezmoi.toml`、`~/detect_windows_git_paths.sh`。
+
+**现行规则**：所有平台专属配置一律放**源根**，用下面两种机制之一做平台过滤。
+
+**机制 A：平台专属 dotfile → 模板化 `.chezmoiignore`**（推荐）
+
+| 原位置（错） | 现位置（对） | 过滤方式 |
+|---|---|---|
+| `run_on_linux/dot_config/alacritty/` | `dot_config/alacritty/` | `.chezmoiignore` 非 linux 时忽略 |
+| `run_on_linux/dot_config/i3/` | `dot_config/i3/` | 同上 |
+| `run_on_darwin/dot_yabairc.tmpl` | `dot_yabairc.tmpl` | 非 darwin 时忽略 |
+| `run_on_darwin/dot_skhdrc.tmpl` | `dot_skhdrc.tmpl` | 同上 |
+| `run_on_darwin/dot_config/ghostty/` | `dot_config/ghostty/` | 同上 |
+| `run_on_windows/secure_crt/` | `secure_crt/` | 非 windows 时忽略 |
+| `_bash_profile_*.tmpl` | `_bash_profile_*.tmpl`（源根） | 始终忽略（仅 include 用） |
+
+**机制 B：平台专属脚本 → 文件名平台前缀**
+
+```
+run_once_linux-configure-pacman.sh.tmpl            → configure-pacman.sh
+run_once_macos-install-ghostty.sh.tmpl             → ghostty.sh
+run_once_windows-install-rmux.sh.tmpl              → rmux.sh
+run_onchange_macos-sync-ghostty-config-to-app-support.sh.tmpl
+```
+
+- 排序：`'0' < '9' < 'i' < 'l' < 'm' < 'w'` → 版本管理器 → AI CLI → `install-*` → 平台专属（最后）✅
+- `scripts/lib/chezmoi/install_helpers.sh` 的 `extract_software_name_from_script()` 会剥掉平台前缀，
+  因此平台过滤、[5/6] 报告别名、升级策略都能正确取到 `ghostty` / `configure-pacman` 等语义名。
+
+**硬性规则**：
+
+1. **平台专属 dotfile 一律放源根** + `.chezmoiignore` OS 条件过滤。
+2. **平台专属脚本一律放源根** + `linux-`/`macos-`/`windows-` 前缀；**禁止**再建 `run_on_*/` 子目录。
+3. `.chezmoiignore` 是**模板**，可用 `.chezmoi.os`；但它**不支持 `!` 取反**
+   （实测：取反会让该目录下脚本一起被忽略、**永不执行**）。
+4. `include` 函数相对**源根**解析，**不是** `.chezmoitemplates/`。
+5. 重命名/移动 `run_once_*` 脚本**不会**导致重跑 —— 状态键是 `sha256(渲染后内容)`，与路径无关
+   （已实测验证）。改内容才会重跑。
+
+**实测验证方式**：
+
+```bash
+# 渲染后的忽略清单（当前 OS）
+chezmoi --source .chezmoi execute-template < .chezmoi/.chezmoiignore
+# 实际被忽略的目标
+chezmoi --source .chezmoi ignored
+# 不落盘验证：复制源 + 脚本 no-op 化 + 假 HOME apply
+```
 
 ### 辅助部署
 
 - `./deploy.sh`：快速重新部署，要求 chezmoi 已安装；OMZ/插件由 `.chezmoiexternal.toml.tmpl` + apply 负责，末尾仅 `check_zsh_omz` 诊断
 - `scripts/manage_dotfiles.sh`：配置管理入口（status/diff/apply/edit）
 
-### run_once 执行排序规则
+### run_once 执行排序规则（以 chezmoi 实际行为为准）
 
-run_once 脚本按文件名**字母序**执行，命名规则：
-- `run_once_00-`... → 先执行（版本管理器等前置依赖）
-- `run_once_install-`... → 按字母序安装各工具
-- `run_after_`... → 在所有 run_once 完成后执行配置合并
-
-执行优先层级（在 `run_once_install-system-basic-env.sh.tmpl 已移除`，由 chezmoi 直接排序）：
+chezmoi 按**目标名（剥掉 `run_once_` 前缀与 `.tmpl` 后的名字）的字母序**执行。ASCII 序 `'0' < '9' < 'i' < 'r'`，因此实测顺序为：
 
 ```
-Layer 0: run_once_00-install-version-managers  ← fnm/uv（必须最先）
-Layer 1: run_once_install-git, run_once_install-common-tools
-Layer 2: run_once_install-zsh, run_once_install-starship, run_once_install-nerd-fonts
-Layer 3: run_once_install-neovim（仅安装二进制，配置由其他项目管理）
-Layer 3: run_once_install-clangd（clangd 二进制；无 GUI 也可；扩展见 docs/CURSOR_CLANGD.md）
-Layer 4: run_once_90-install-claude-code, run_once_91-install-codex（AI agent CLI，仅二进制）
-Layer 4+: run_once_93-install-cursor（仅 GUI 环境）
-Layer 5: run_once_install-tmux + run_on_linux/* + run_on_darwin/*；Windows：run_on_windows/install-rmux、install-windows-terminal、install-oh-my-posh
+1. 00-install-version-managers.sh     ← fnm/uv（必须最先；后续依赖 node/uv）
+2. 90-install-claude-code.sh          ┐
+3. 91-install-codex.sh                ├ ★ AI CLI 在 install-* 之前执行，不是之后
+4. 93-install-cursor.sh               ┘
+5. install-alacritty.sh               ┐
+   install-clangd.sh                  │
+   install-common-tools.sh            │
+   install-dwm.sh                     │
+   install-git.sh                     │  按字母序
+   install-i3wm.sh                    │
+   install-lazyssh.sh                 │
+   install-maccy.sh                   │
+   install-neovim.sh                  │
+   install-nerd-fonts.sh              │
+   install-oh-my-posh.sh              │
+   install-skhd.sh                    │
+   install-starship.sh                │
+   install-tmux.sh                    │
+   install-yabai.sh                   │
+   install-zsh.sh                     ┘
+6. linux-*.sh  macos-*.sh  windows-*.sh                ← 平台专属，最后
 ```
+
+验证方式：`chezmoi --source .chezmoi managed | grep -E 'install-|^[0-9]' | sort`
+
+**推论**：
+
+- 编号脚本（`90-`/`91-`/`93-`）的数字前缀**只会让它们排到 `install-*` 之前**，不能表达"第 N 层之后"。
+- 想让某脚本真正最后执行，用排在 `w` 之后的前缀（如 `z-`），或在脚本内自行等待依赖。
+- 移动/重命名脚本**不触发重跑**（状态键 = `sha256(渲染后内容)`）；只有改内容才会重跑。
 
 ### 部署入口职责矩阵（必须遵守）
 
@@ -185,6 +280,7 @@ Layer 5: run_once_install-tmux + run_on_linux/* + run_on_darwin/*；Windows：ru
   - 每个 `exit 1` 是否确实为致命错误？
   - 非 Windows 平台是否有误判 Windows 并 exit？
 
+
 ## 代码风格指南
 
 ### 文件格式
@@ -193,6 +289,31 @@ Layer 5: run_once_install-tmux + run_on_linux/* + run_on_darwin/*；Windows：ru
 - **换行符**: LF (`\n`)，Windows 脚本（`.bat`, `.ps1`, `.cmd`）使用 CRLF
 - **缩进**: 4 个空格（不用制表符）
 - **末尾换行**: 所有文件必须以换行符结尾
+
+### 库 vs 可执行：两份契约（**先分类再写代码**）
+
+`AGENTS.md` 旧版只写了一句"所有脚本应可执行"，导致 45 个文件被误判违规。实际必须二分：
+
+| | **库（被 source）** | **可执行脚本（独立进程）** |
+|---|---|---|
+| 位置 | `scripts/lib/**`（含 `lib/chezmoi/`） | `scripts/chezmoi/**`、`scripts/deploy_utils/**`、`scripts/{linux,windows}/**`、`scripts/tools/**` |
+| shebang | 保留（便于语法检查），但不靠它运行 | `#!/usr/bin/env bash` **必需** |
+| `set -euo pipefail` | ❌ **禁止**（会污染调用方 shell 的选项） | ✅ **必需** |
+| `chmod +x` | ❌ 不设可执行位 | ✅ 必须可执行 |
+| `start_script`/`end_script` | ❌ 不调用（会 `exit`） | ✅ 成对调用 |
+| 副作用 | ❌ 加载时不得有副作用 | ✅ 无限制 |
+| 日志 | 通过 `log_*`；被 `$(...)` 捕获的函数，结果走 stdout、**日志必须走 stderr** | 同左 |
+
+**判断方法**：文件被别的脚本 `source` → 库；被 `bash <file>` 执行 → 可执行。
+目录已按此契约分离（2026-09 P4）：**库 = `scripts/lib/`**（含 `scripts/lib/chezmoi/`），**入口 = `scripts/chezmoi/`、`scripts/deploy_utils/`、`scripts/{linux,windows}/`**。
+
+**幂等要求**：库内 `readonly` 变量重复 source 会报错 → 加载前用独有函数探针守卫：
+
+```bash
+if ! declare -F echo_color_message >/dev/null 2>&1; then
+    source "${_COMMON_SH_PATH}"
+fi
+```
 
 ### Shell 脚本结构
 
@@ -205,7 +326,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../../.." && pwd)"
 
 # 引入公共库
-COMMON_LIB="${PROJECT_ROOT}/scripts/common.sh"
+COMMON_LIB="${PROJECT_ROOT}/scripts/lib/common.sh"
 if [[ -f "${COMMON_LIB}" ]]; then
     source "${COMMON_LIB}"
 else
@@ -275,7 +396,7 @@ DEBUG=1 log_debug "调试信息" # 青色（仅 DEBUG=1 时）
 
 ```bash
 {{- if or (eq .chezmoi.os "linux") (eq .chezmoi.os "darwin") -}}
-#!/bin/bash
+#!/usr/bin/env bash
 # Linux/macOS 特定
 {{- else if eq .chezmoi.os "windows" -}}
 # Windows 特定
@@ -334,15 +455,25 @@ ensure_directory() {
 
 ### 引入和源文件
 
-- 始终引入 `common.sh`: `source "${PROJECT_ROOT}/scripts/common.sh"`
+- 始终引入 `common.sh`: `source "${PROJECT_ROOT}/scripts/lib/common.sh"`
 - 引入动态路径时使用 `# shellcheck disable=SC1090`
 - 引入前检查文件是否存在
 - 优先使用 `${BASH_SOURCE[0]}` 而不是 `$0`
 
-### 注释与输出语言
+### 注释与输出语言（分而治之）
 
-- **注释、文档、函数说明**使用中文，便于阅读
-- **运行时输出**（log_info/log_success/log_warning/log_error/echo 等打到屏幕的消息）统一使用**英文**
+- **注释、文档、函数说明**：统一**中文**。
+- **运行时输出**（`log_*` / `echo` 打到屏幕的消息）按脚本类型二分
+  （旧规则一刀切要求全英文，但实测 **85/132 文件、1820 行**违反，规则本身不可执行）：
+
+| 脚本类别 | 输出语言 | 理由 |
+|---|---|---|
+| **库**（`scripts/lib/common.sh`、`scripts/chezmoi/**` 库文件） | **英文** | 输出会被上层脚本/CI 解析，须稳定可 grep |
+| **会被管道消费的脚本**（`tests/**`、`chezmoi` 包装层） | **英文** | 同上 |
+| **面向用户的交互脚本**（`install.sh`/`deploy.sh`、`deploy_utils/**`、`container_dev_env/**`、平台脚本） | **中文可接受** | 人读终端输出，中文更友好 |
+
+- **强制约束**：无论哪种，日志前缀必须用 `[INFO]`/`[SUCCESS]`/`[WARNING]`/`[ERROR]`（英文），
+  以便与 `install.sh [4/6]` 等流程日志对齐、便于 grep。
 - 主要章节分隔使用 `# ============================================`
 
 ### 变量展开与全角标点（跨平台强制）
@@ -353,9 +484,10 @@ ensure_directory() {
 
 ### 平台特定代码
 
-- 项目支持多 OS（Win10、macOS Intel、Linux Ubuntu/Arch）与 WSL（Ubuntu）；WSL 视为 Linux，共用 `run_on_linux/`，脚本内通过 WSL 检测区分代理与路径。
+- 项目支持多 OS（Win10、macOS Intel、Linux Ubuntu/Arch）与 WSL（Ubuntu）；WSL 视为 Linux，共用 Linux 专属脚本（`run_once_linux-*`），脚本内通过 WSL 检测区分代理与路径。
 - **WSL 与 Windows 宿主机完全独立**：`$HOME`/fnm/npm/chezmoi 目标不共享。WSL 里跑 `install.sh` **只装 WSL**，与宿主机 npm **无关**（宿主机仅 Clash `:7890` 出口）。`/mnt/host/wslg/.../fnm_multishells` 是 WSL 本机 fnm；`/mnt/c`、`/mnt/host/c` 才是 Windows。禁止从 WSL 改 Windows npm 或调用 `cmd.exe`。见 `.cursor/rules/wsl-windows-isolation.mdc`。
-- 平台特定配置使用 `run_on_linux/`、`run_on_darwin/`、`run_on_windows/`
+- 平台专属**脚本**：源根 + `run_once_{linux,macos,windows}-*` 前缀；平台专属 **dotfile**：源根 +
+  `.chezmoiignore` 的 OS 条件过滤。**禁止**新建 `run_on_*/` 子目录（详见上文「chezmoi 平台目录陷阱」）。
 - 安装脚本中的平台特定逻辑使用模板条件判断
 - Win10 下推荐在 Git Bash 中执行 `install.sh`；若使用 Alacritty，需保证其 shell 与 PATH 与 Git Bash 一致（见 [docs/INSTALL_GUIDE.md](docs/INSTALL_GUIDE.md)）。
 
@@ -366,17 +498,18 @@ ensure_directory() {
 
 ### 重要说明
 
-- 所有脚本应可执行: `chmod +x script.sh`
+- **可执行脚本**必须 `chmod +x`；**库文件不设可执行位**（见上文「库 vs 可执行：两份契约」）
 - Windows 脚本必须用 CRLF，其他必须用 LF
 - 绝不提交敏感数据（API 密钥、密码、私钥）
 - 提交前使用 `chezmoi apply` 测试配置更改
 - 修改系统配置文件前始终备份
 
+
 ## 架构说明
 
 ### 核心操作封装
 
-`scripts/chezmoi/chezmoi_core.sh` 为聚合入口（`chezmoi_proxy.sh` / `chezmoi_lock.sh` / `chezmoi_apply.sh`），统一封装：
+`scripts/lib/chezmoi/chezmoi_core.sh` 为聚合入口（`chezmoi_proxy.sh` / `chezmoi_lock.sh` / `chezmoi_apply.sh`），统一封装：
 
 | 函数 | 作用 | 使用方 |
 |------|------|--------|
@@ -390,18 +523,21 @@ ensure_directory() {
 
 三个入口脚本共享这个封装层：install.sh（首次安装）→ deploy.sh（增量）→ manage_dotfiles.sh（运维）。
 
-**chezmoi 注意**：CLI 不读 `CHEZMOI_SOURCE_DIR`；`sourceDir` 在 `~/.config/chezmoi/chezmoi.toml`（`chezmoi_ensure_user_config`）。配置映射见 `scripts/chezmoi/config_mappings.sh`。Windows Git/WT 路径 C/D 盘检测见 `docs/PROJECT_AGENT_MEMORY.md`；Windows rmux 见 `docs/RMUX_WINDOWS.md`。
+**chezmoi 注意**：CLI 不读 `CHEZMOI_SOURCE_DIR`；`sourceDir` 在 `~/.config/chezmoi/chezmoi.toml`（`chezmoi_ensure_user_config`）。配置映射见 `scripts/lib/chezmoi/config_mappings.sh`。Windows Git/WT 路径 C/D 盘检测见 `docs/PROJECT_AGENT_MEMORY.md`；Windows rmux 见 `docs/RMUX_WINDOWS.md`。
 
 ### connect.exe 路径检测（Windows）
 
-`scripts/chezmoi/ensure_ssh_prereqs.sh` 在 Windows 上检测顺序：
-1. 环境变量 `WINDOWS_GIT_CONNECT_PATH`
-2. `git` 命令同级目录的 `connect.exe`（原逻辑）
-3. **`git` 所在根目录的 `mingw64/bin/connect.exe`（本次修复 — Git for Windows 标准路径）**
-4. `MINGW_PREFIX` 环境变量
-5. `cmd //c "if exist ..."` 回退检查 C:/ 和 D:/ 盘
+`scripts/chezmoi/ensure_ssh_prereqs.sh` 在 Windows 上的**实际**检测顺序（行号对应源码）：
+
+1. 环境变量 `WINDOWS_GIT_CONNECT_PATH`（`:133`）
+2. `git` 命令**同级目录**的 `connect.exe`（`${git_bin}/connect.exe`，`:141`）
+3. `cmd //c "if exist ..."` 探测 **C:/ 与 D:/** 盘的 `mingw64\bin\connect.exe`（`:147`）
+4. `${git_root}/mingw64/bin/connect.exe` → `${git_root}/usr/bin/connect.exe` → `${MINGW_PREFIX}/bin/connect.exe`（`:158-163`）
+
+> 该顺序以源码为准；修改此函数后请同步本节（避免再次出现文档与实现颠倒）。
 
 部署入口职责矩阵见上文「部署入口职责矩阵（必须遵守）」。
+
 
 ## 项目结构
 
@@ -412,474 +548,108 @@ ensure_directory() {
 ├── install.sh                  # 一键安装入口（使用 chezmoi_core.sh）
 ├── deploy.sh                   # 快速部署入口（使用 chezmoi_core.sh）
 ├── .chezmoi/                   # chezmoi 源状态（配置模板）
-│   ├── run_once_*.tmpl         # 跨平台安装脚本（字母序执行）
-│   ├── run_on_linux/           # Linux 平台特定
-│   ├── run_on_darwin/          # macOS 平台特定
-│   ├── run_on_windows/         # Windows 平台特定
-│   └── dot_*.tmpl              # 配置文件模板
+│   ├── .chezmoiignore          # 模板：按 OS 过滤平台专属 dotfile
+│   ├── _bash_profile_*.tmpl    # 仅 include 用（已 ignore，不部署）
+│   ├── run_once_*.tmpl         # 全部安装脚本都在源根；按目标名字母序执行
+│   │                           #   00-/90-/91-/93- → install-* → linux-/macos-/windows-*
+│   ├── run_once_linux-*.tmpl   # Linux 专属（**禁止**再建 run_on_*/ 子目录）
+│   ├── run_once_macos-*.tmpl   # macOS 专属
+│   ├── run_once_windows-*.tmpl # Windows 专属
+│   ├── dot_config/             # 含平台专属子目录（alacritty/i3/ghostty），由 ignore 按 OS 过滤
+│   └── dot_*.tmpl              # 配置文件模板（含平台专属 .yabairc/.skhdrc）
 ├── .chezmoi.toml.tmpl          # chezmoi 用户级配置参考模板
 ├── scripts/                    # 所有脚本
-│   ├── common.sh               # 公共函数库（颜色输出、日志）
-│   ├── manage_dotfiles.sh      # dotfiles 管理入口
-│   ├── chezmoi/                # chezmoi 相关工具
-│   │   ├── chezmoi_core.sh     # 核心聚合（proxy/lock/apply）
-│   │   ├── detect_platform.sh  # 平台检测 SSOT
-│   │   ├── packages.conf       # common-tools 包名 SSOT
-│   │   ├── common_install.sh   # 通用安装函数库（含 load_run_once_context）
-│   │   ├── install_chezmoi.sh  # chezmoi 安装
-│   │   ├── verify_installation.sh  # 安装验证
-│   │   └── ...
-│   ├── common/                 # 跨平台通用脚本
-│   │   ├── deploy_utils/       # 部署辅助（备份、诊断、SSH/Zsh 配置）
-│   │   ├── standalone_tool_script/  # 独立工具脚本（永不删除）
-│   │   ├── container_dev_env/  # Docker 容器开发环境
-│   │   ├── project_tools/      # 项目生成和管理工具
-│   │   ├── ffmpeg-magic/       # FFmpeg 相关脚本
-│   │   └── ...
-│   ├── linux/                  # Linux 特定脚本
-│   │   ├── system_basic_env/   # 系统基础环境配置
-│   │   └── network/            # 网络配置
-│   └── windows/                # Windows 特定脚本（macOS 在 .chezmoi/run_on_darwin/，无 scripts/darwin/）
+│   ├── lib/                    # ★ 纯函数库（被 source；不设 +x、不写 set -euo pipefail）
+│   │   ├── common.sh           # 公共函数库（颜色、日志、错误处理）
+│   │   └── chezmoi/            # chezmoi 库：chezmoi_core/proxy/lock/apply、
+│   │                           #   detect_platform、packages.conf、software_policies、
+│   │                           #   package_install、install_helpers、brew_macos_network、
+│   │                           #   config_mappings、helpers、common_install（聚合入口）
+│   ├── chezmoi/                # chezmoi 可执行入口
+│   │   ├── install_chezmoi.sh  verify_installation.sh  diagnose_chezmoi.sh
+│   │   ├── ensure_ssh_prereqs.sh  ensure_platform_software.sh  audit_configs.sh
+│   │   └── README.md
+│   ├── deploy_utils/           # 部署辅助（备份、诊断、SSH/Zsh 同步）
+│   ├── tools/                  # ★ 独立工具（**永不删除**，与部署无关）
+│   │   ├── standalone_tool_script/  project_tools/  ffmpeg_magic/
+│   │   ├── git_templates/  shc/  patch_examples/
+│   │   └── auto_edit_redis_config/  cursor_clangd/  container_dev_env/
+│   ├── linux/                  # Linux 专属（system_basic_env、network）
+│   ├── windows/                # Windows 专属（system_basic_env、windows_scripts）
+│   ├── manage_dotfiles.sh      # dotfiles 运维入口
+│   └── README.md
 ├── tests/                      # 测试目录
 │   ├── test_syntax.sh          # 批量语法检查
 │   └── test_proxy.sh           # 代理逻辑测试
 ├── docs/                       # 文档目录
 │   └── PROJECT_STRUCTURE.md    # 项目结构权威文档
-└── openspec/                   # OpenSpec 规范驱动开发
 ```
 
-## 常用工具函数
 
-### 检查命令是否存在
+## 版本控制与提交规范
 
-```bash
-check_command() {
-    local cmd="$1"
-    if ! command -v "$cmd" &> /dev/null; then
-        error_exit "未找到命令: ${cmd}"
-    fi
-}
-```
-
-### 确认用户操作
-
-```bash
-confirm_action() {
-    local message="$1"
-    local default="${2:-n}"
-    local prompt="${message} [y/N]"
-    
-    if [[ "$default" == "y" ]]; then
-        prompt="${message} [Y/n]"
-    fi
-    
-    read -r -p "${prompt} " response
-    case "${response:-$default}" in
-        [yY][eE][sS]|[yY]) return 0 ;;
-        *) return 1 ;;
-    esac
-}
-```
-
-### 下载文件
-
-```bash
-download_file() {
-    local url="$1"
-    local output="$2"
-    
-    if command -v wget &> /dev/null; then
-        wget -q -O "$output" "$url"
-    elif command -v curl &> /dev/null; then
-        curl -s -o "$output" "$url"
-    else
-        error_exit "需要 wget 或 curl 来下载文件"
-    fi
-}
-```
-
-### 获取发行版信息
-
-```bash
-get_distro_info() {
-    if [[ -f /etc/os-release ]]; then
-        source /etc/os-release
-        DISTRO="$ID"
-        DISTRO_VERSION="$VERSION_ID"
-    elif [[ -f /etc/lsb-release ]]; then
-        source /etc/lsb-release
-        DISTRO="$DISTRIB_ID"
-        DISTRO_VERSION="$DISTRIB_RELEASE"
-    fi
-}
-```
-
-## 安全最佳实践
-
-### 敏感数据处理
-
-```bash
-# 不记录敏感命令到历史
-set +o history  # 关闭历史记录
-export SECRET="your_secret"
-set -o history  # 重新启用
-
-# 使用环境变量而非硬编码
-export API_KEY="${API_KEY:-}"
-if [[ -z "$API_KEY" ]]; then
-    error_exit "未设置 API_KEY 环境变量"
-fi
-```
-
-### 权限检查
-
-```bash
-check_root() {
-    if [[ $EUID -ne 0 ]] && [[ -n "$NEED_ROOT" ]]; then
-        error_exit "此脚本需要 root 权限"
-    fi
-}
-
-check_sudo() {
-    if ! sudo -n true 2>/dev/null; then
-        log_warning "可能需要 sudo 权限"
-    fi
-}
-```
-
-> **Windows 特别说明**：Windows 11 通常无管理员权限，run_once 脚本不得依赖 root/sudo。字体安装等需要系统目录写入的操作，应使用 PowerShell COM 对象（无需管理员）或跳过低权限操作。详见上方「Windows 安装原则（无管理员权限）」。
-
-### 文件权限设置
-
-```bash
-# 设置安全的文件权限
-chmod 600 ~/.ssh/id_rsa         # 私钥仅所有者可读写
-chmod 644 ~/.ssh/id_rsa.pub     # 公钥所有者可读写，其他人只读
-chmod 700 ~/.ssh                # SSH 目录仅所有者可访问
-```
-
-## 性能优化
-
-### 避免不必要的子 shell
-
-```bash
-# 不推荐
-for i in $(seq 1 1000); do
-    echo "$i"
-done
-
-# 推荐
-for ((i=1; i<=1000; i++)); do
-    echo "$i"
-done
-```
-
-### 使用内置命令
-
-```bash
-# 不推荐 - 调用外部命令
-external_basename=$(basename "$file")
-external_dirname=$(dirname "$file")
-
-# 推荐 - 使用内置参数扩展
-internal_basename="${file##*/}"
-internal_dirname="${file%/*}"
-```
-
-### 缓存命令结果
-
-```bash
-if ! command -v apt-get &> /dev/null; then
-    HAS_APT=false
-else
-    HAS_APT=true
-fi
-
-# 后续直接使用变量而非重复调用
-if $HAS_APT; then
-    sudo apt-get update
-fi
-```
-
-### 批量操作
-
-```bash
-# 不推荐 - 多次调用
-install_package "vim"
-install_package "git"
-install_package "curl"
-
-# 推荐 - 批量安装
-case "$PACKAGE_MANAGER" in
-    apt) sudo apt-get install -y vim git curl ;;
-    pacman) sudo pacman -S --noconfirm vim git curl ;;
-    brew) brew install vim git curl ;;
-esac
-```
-
-## 调试技巧
-
-### 启用调试模式
-
-```bash
-# 方式 1: 在脚本顶部
-set -x  # 调试模式
-set +x  # 关闭调试
-
-# 方式 2: 使用 DEBUG 环境变量
-if [[ "${DEBUG:-0}" == "1" ]]; then
-    set -x
-fi
-```
-
-### 打印变量值
-
-```bash
-debug_var() {
-    local var_name="$1"
-    echo "${var_name}=${!var_name}"
-}
-
-debug_var "PROJECT_ROOT"
-```
-
-### 追踪函数调用
-
-```bash
-trap 'echo "函数调用栈: ${FUNCNAME[*]}"' DEBUG
-```
-
-### 检查脚本语法
-
-```bash
-bash -n script.sh      # 语法检查
-shellcheck script.sh   # 静态分析
-```
-
-## 配置文件管理
-
-### Chezmoi 配置结构
-
-```yaml
-# chezmoi.yaml
-data:
-  name: "Your Name"
-  email: "your.email@example.com"
-  git:
-    user_name: "{{ .data.name }}"
-    user_email: "{{ .data.email }}"
-```
-
-### 使用模板变量
-
-```bash
-# .chezmoi.toml.tmpl
-[user]
-name = "{{ .data.name }}"
-email = "{{ .data.email }}"
-```
-
-### 环境特定配置
-
-```bash
-{{- if eq .chezmoi.hostname "workstation" -}}
-# 工作站特定配置
-{{- else if eq .chezmoi.hostname "laptop" -}}
-# 笔记本特定配置
-{{- end -}}
-```
-
-## 跨平台兼容性
-
-### 路径处理
-
-```bash
-# 获取脚本目录的跨平台方式
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-
-# 路径拼接
-join_path() {
-    local base="$1"
-    local rel="$2"
-    echo "${base}/${rel}" | sed 's|//|/|g'
-}
-```
-
-### 检测平台特定功能
-
-```bash
-check_sed_compatibility() {
-    if echo "test" | sed -nE 's/test/replaced/p' &> /dev/null; then
-        SED_EXTENDED="-E"
-    else
-        SED_EXTENDED="-r"
-    fi
-}
-```
-
-### 处理 Windows 路径
-
-```bash
-# 在 Windows Git Bash 中转换路径
-if [[ "$OS" =~ ^(MINGW|MSYS|CYGWIN) ]]; then
-    WINDOWS_PATH=$(cygpath -w "$linux_path")
-fi
-```
-
-## 版本控制最佳实践
-
-### 提交信息格式
+**提交信息格式：Conventional Commits**（与本仓 `git log` 实际风格一致）
 
 ```
-[类型] 简短描述
+<type>(<scope>): <简短描述>
 
-详细说明（可选）
+<可选正文，说明「为什么」而非「做了什么」>
 
-类型:
-- feat: 新功能
-- fix: 修复 bug
-- docs: 文档更新
-- style: 代码格式（不影响功能）
-- refactor: 重构
-- perf: 性能优化
-- test: 测试
-- chore: 构建/工具变更
+<可选 footer>
 ```
 
-### 分支命名
+- **type**：`feat` `fix` `refactor` `perf` `docs` `style` `test` `chore` `build` `ci`
+- **scope**：受影响的子系统，如 `macos` `windows` `linux` `install` `dotfiles` `chezmoi` `docs` `tests`
+- 例：`fix(macos): skip Intel brew upgrades that rebuild ImageMagick`
 
-```
-feature/功能名称
-fix/问题描述
-docs/文档说明
-```
+**分支命名**：`feature/<名称>`、`fix/<描述>`、`docs/<说明>`
 
-### Git 配置
+**换行符**：已由 `.gitattributes` 统一（见 `docs/ENCODING_AND_LINE_ENDINGS.md`），
+**不要**再单独 `git config core.autocrlf`——会与 `.gitattributes` 叠加产生二次转换。
 
-```bash
-# 设置正确的换行符处理
-git config --global core.autocrlf input  # Linux/macOS
-git config --global core.autocrlf true   # Windows
-git config --global core.safecrlf true
-```
-
-### 忽略文件
-
-```
-# .gitignore 示例
-*.backup
-*.swp
-*~
-.chezmoi.toml.local
-.chezmoi.yaml.local
-.DS_Store
-```
-
-## 常见问题解决
-
-### 脚本无法执行
-
-```bash
-# 检查文件权限
-ls -l script.sh
-
-# 添加执行权限
-chmod +x script.sh
-
-# 检查 shebang
-head -n1 script.sh  # 应该是 #!/usr/bin/env bash
-```
-
-### 换行符问题
-
-```bash
-# 检查换行符
-file script.sh  # 应该显示 "with CRLF line terminators" 或 "with LF line terminators"
-
-# 转换换行符
-dos2unix script.sh  # Windows -> Unix
-unix2dos script.sh  # Unix -> Windows
-```
-
-### 权限被拒绝
-
-```bash
-# 检查所有权
-ls -l ~/.ssh/config
-
-# 修复所有权
-sudo chown $USER:$USER ~/.ssh/config
-chmod 600 ~/.ssh/config
-```
-
-### Chezmoi 应用失败
-
-```bash
-# 查看详细输出（须 --force，避免 Windows 交互卡住）
-chezmoi apply -v --force
-
-# 查看差异
-chezmoi diff
-
-# 检查配置
-chezmoi doctor
-```
 
 ## 开发工作流程
 
-### 1. 创建新脚本
+### 1. 新建脚本
 
 ```bash
-# 创建脚本文件
+# 位置按类型选择：库 → scripts/lib/；入口 → scripts/chezmoi/ 或 scripts/deploy_utils/；
+#             独立工具 → scripts/tools/<类别>/；平台脚本 → scripts/{linux,windows}/
 touch scripts/linux/system_basic_env/install_new_software.sh
 chmod +x scripts/linux/system_basic_env/install_new_software.sh
 ```
 
-### 2. 编写脚本
+### 2. 套用头部模板
+
+见上文「Shell 脚本结构」与「库 vs 可执行：两份契约」——**先判断属于哪一类**，
+再套用对应模板。注意 `PROJECT_ROOT` 的向上层数随脚本深度变化，**不要照抄**。
+
+### 3. 验证（三步都必需）
 
 ```bash
-# 遵循模板结构，使用中文注释
-#!/usr/bin/env bash
-set -euo pipefail
-
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source "${SCRIPT_DIR}/../../../common.sh"
-
-start_script "新软件安装"
-# ... 脚本逻辑 ...
-end_script
+bash -n <script>.sh                 # 1) 语法
+bash <script>.sh                    # 2) 实际跑：确认能加载到 common.sh（12 个脚本曾因此 100% 崩溃）
+bash tests/test_syntax.sh           # 3) 全仓回归（含全角标点 + 编码 + 换行符）
 ```
 
-### 3. 测试脚本
+### 4. 编码 / 换行符
 
 ```bash
-# 语法检查
-bash -n scripts/linux/system_basic_env/install_new_software.sh
-
-# 运行测试（可能需要 sudo）
-sudo ./scripts/linux/system_basic_env/install_new_software.sh
+./scripts/tools/standalone_tool_script/check_and_fix_encoding.sh
+./scripts/tools/standalone_tool_script/ensure_lf_line_endings.sh
 ```
 
-### 4. 验证编码和换行符
+### 5. 提交
 
-```bash
-./scripts/common/standalone_tool_script/check_and_fix_encoding.sh
-./scripts/common/standalone_tool_script/ensure_lf_line_endings.sh
-```
+见上文「版本控制与提交规范」。改动 chezmoi 模板后先 `./scripts/manage_dotfiles.sh diff` 预演。
 
-### 5. 提交更改
-
-```bash
-git add .
-git commit -m "feat: 添加新软件安装脚本"
-git push
-```
 
 ## 详细目录结构
 
 项目完整目录结构见 [docs/PROJECT_STRUCTURE.md](docs/PROJECT_STRUCTURE.md)。
 
-脚本目录概览：`scripts/` 下为 `common/`（deploy_utils、standalone_tool_script、project_tools、ffmpeg-magic、git_templates 等）、`linux/`、`windows/`、`chezmoi/`；macOS 平台脚本在 `.chezmoi/run_on_darwin/`。
+脚本目录概览：`scripts/lib/`（库）、`scripts/chezmoi/`（chezmoi 入口）、`scripts/deploy_utils/`（部署辅助）、`scripts/tools/`（独立工具，永不删除）、`scripts/{linux,windows}/`（平台专属）；macOS 平台脚本为 `.chezmoi/run_once_macos-*.sh.tmpl`。
+
 
 ## 脚本分类和命名规范
 
@@ -888,9 +658,9 @@ git push
 | ---------- | -------------------------- | -------------------- | ----------------------------- |
 | 系统安装       | `linux/system_basic_env/`  | `install_<软件名>.sh`   | `install_new_software.sh`  |
 | 系统配置       | `linux/system_basic_env/`  | `configure_<配置名>.sh` | `configure_china_mirrors.sh`  |
-| 工具脚本       | `common/standalone_tool_script/` | `<动作>_<对象>.sh`       | `get_directory_name.sh`       |
-| 项目工具       | `common/project_tools/`    | `<动作>_<对象>.sh`       | `generate_cmake_lists.sh`     |
-| FFmpeg 工具    | `common/ffmpeg-magic/`     | 见目录内脚本               | `open_multiple_ffmpeg_srt.sh`  |
+| 工具脚本       | `tools/standalone_tool_script/` | `<动作>_<对象>.sh`       | `get_directory_name.sh`       |
+| 项目工具       | `tools/project_tools/`    | `<动作>_<对象>.sh`       | `generate_cmake_lists.sh`     |
+| FFmpeg 工具    | `tools/ffmpeg_magic/`（待改 `ffmpeg_magic/`） | 见目录内脚本 | `open_multiple_ffmpeg_srt.sh`  |
 | 测试脚本       | 各目录                        | `test_<功能>.sh`       | `test_mirrors.sh`             |
 | Windows 脚本 | `windows/windows_scripts/` | `<功能描述>.bat`         | `open_multi_vlc.bat`          |
 
@@ -898,7 +668,9 @@ git push
 
 - 普通脚本区（`scripts/**`、`ai-unified-config/scripts/**`（已移除））统一使用 snake_case 文件名，不新增 kebab-case 脚本名。
 - 普通脚本推荐前缀：`install_`、`configure_`、`test_`、`verify_`、`sync_`、`backup_`。
-- 模板执行区（`.chezmoi/run_once*`、`.chezmoi/run_on_*`）可保留现有 `run_once_install-xxx.sh.tmpl` 风格；是否改为下划线需统一迁移后再落地。
+- 模板执行区（`.chezmoi/`）保留 chezmoi 约定的连字符风格：`run_once_install-xxx.sh.tmpl`；
+  平台专属脚本用 `run_once_{linux,macos,windows}-<语义>.sh.tmpl`（如 `run_once_macos-install-ghostty.sh.tmpl`）。
+  `run_on_*/` 子目录**已废弃**（不是 chezmoi 平台目录，详见上文「chezmoi 平台目录陷阱」）。
 - 普通脚本区与模板区命名规则分离管理，禁止跨区混用。
 
 ### 命名治理落地节奏
@@ -907,6 +679,7 @@ git push
 2. **第 2 阶段（新增止血）**：仅对新脚本启用命名检查（告警模式）。
 3. **第 3 阶段（分批迁移）**：按目录小批量重命名历史文件，并同步调用路径与文档引用。
 4. **第 4 阶段（规则收敛）**：命名检查从告警升级为阻断，防止回归。
+
 
 
 ## 参考资源

@@ -7,7 +7,7 @@
 -# 获取项目根目录的绝对路径
 -PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 -# 通用脚本库路径
--COMMON_LIB="${PROJECT_ROOT}/scripts/common.sh"
+-COMMON_LIB="${PROJECT_ROOT}/scripts/lib/common.sh"
 -
 -# 检查通用脚本库是否存在
 -if [[ ! -f "${COMMON_LIB}" ]]; then
@@ -20,7 +20,7 @@
 +    PROJECT_ROOT="${PROJECT_ROOT:-$(cd "${SCRIPT_DIR}/../.." && pwd)}"
 +else
 +    PROJECT_ROOT="${PROJECT_ROOT:-$(cd "${SCRIPT_DIR}/../.." && pwd)}"
-+    COMMON_LIB="${COMMON_LIB:-${PROJECT_ROOT}/scripts/common.sh}"
++    COMMON_LIB="${COMMON_LIB:-${PROJECT_ROOT}/scripts/lib/common.sh}"
 +fi
 +# 引入通用日志/错误处理函数；若不存在则使用脚本内最小实现
 +if [[ -f "${COMMON_LIB:-}" ]]; then

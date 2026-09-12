@@ -1,5 +1,5 @@
 {{- if eq .chezmoi.os "darwin" -}}
-{{ include "run_on_darwin/_bash_profile_darwin.tmpl" }}
+{{ include "_bash_profile_darwin.tmpl" }}
 {{- else if eq .chezmoi.os "windows" -}}
-{{ include "run_on_windows/_bash_profile_windows.tmpl" }}
+{{ include "_bash_profile_windows.tmpl" }}
 {{- end -}}

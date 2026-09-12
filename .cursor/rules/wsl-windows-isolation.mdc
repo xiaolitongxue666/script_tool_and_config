@@ -23,4 +23,4 @@ script_tool_and_config 兼容 Windows Git Bash、WSL、macOS、Linux。**每个�
 - 把 `/mnt/host/*`、`/mnt/wslg/*`、`*fnm_multishells*` 一律当成 Windows（会误伤 WSL 本机 fnm，[4/6] 会 skip claude/codex）。
 - 用 Windows 上的 `claude`/`codex` 证明 WSL Layer 4 已装或跳过 WSL 安装。
 
-判定实现：`_is_windows_interop_path`（[`scripts/chezmoi/package_install.sh`](../../scripts/chezmoi/package_install.sh)）。
+判定实现：`_is_windows_interop_path`（[`scripts/lib/chezmoi/package_install.sh`](../../scripts/lib/chezmoi/package_install.sh)）。

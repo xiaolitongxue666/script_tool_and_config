@@ -1,0 +1,93 @@
+#!/usr/bin/env bash
+
+# ============================================
+# chezmoi 配置路径映射（单一来源）
+# 供 audit_configs.sh、force_apply_configs.sh、diagnose 等复用
+# 格式：目标路径(~/.xxx) -> 仓库内源模板相对路径（相对 PROJECT_ROOT）
+#
+# bash 3.2 兼容：使用平行数组，禁止 declare -A / local -n（macOS 默认 bash 3.2）
+# ============================================
+
+CHEZMOI_MAP_TARGETS=()
+CHEZMOI_MAP_SOURCES=()
+
+_chezmoi_map_reset() {
+    CHEZMOI_MAP_TARGETS=()
+    CHEZMOI_MAP_SOURCES=()
+}
+
+_chezmoi_map_add() {
+    CHEZMOI_MAP_TARGETS+=("$1")
+    CHEZMOI_MAP_SOURCES+=("$2")
+}
+
+# 填充映射；结果写入全局 CHEZMOI_MAP_TARGETS / CHEZMOI_MAP_SOURCES
+# 用法：chezmoi_fill_config_mappings <platform>
+# platform: linux | darwin | windows
+chezmoi_fill_config_mappings() {
+    local platform="${1:-unknown}"
+
+    _chezmoi_map_reset
+
+    # 跨平台（模板内按 os 条件渲染；Windows 上 tmux 模板为空）
+    _chezmoi_map_add "~/.zshrc" ".chezmoi/dot_zshrc.tmpl"
+    _chezmoi_map_add "~/.bashrc" ".chezmoi/dot_bashrc.tmpl"
+    _chezmoi_map_add "~/.bash_profile" ".chezmoi/dot_bash_profile.tmpl"
+    _chezmoi_map_add "~/.zprofile" ".chezmoi/dot_zprofile.tmpl"
+    _chezmoi_map_add "~/.config/starship/starship.toml" ".chezmoi/dot_config/starship/starship.toml.tmpl"
+    _chezmoi_map_add "~/.ssh/config" ".chezmoi/dot_ssh/config.tmpl"
+
+    case "$platform" in
+        linux)
+            _chezmoi_map_add "~/.tmux.conf" ".chezmoi/dot_tmux.conf.tmpl"
+            _chezmoi_map_add "~/.config/alacritty/alacritty.toml" ".chezmoi/dot_config/alacritty/alacritty.toml.tmpl"
+            _chezmoi_map_add "~/.config/i3/config" ".chezmoi/dot_config/i3/config.tmpl"
+            ;;
+        darwin)
+            _chezmoi_map_add "~/.tmux.conf" ".chezmoi/dot_tmux.conf.tmpl"
+            _chezmoi_map_add "~/.config/ghostty/config" ".chezmoi/dot_config/ghostty/config.tmpl"
+            _chezmoi_map_add "~/.yabairc" ".chezmoi/dot_yabairc.tmpl"
+            _chezmoi_map_add "~/.skhdrc" ".chezmoi/dot_skhdrc.tmpl"
+            ;;
+        windows)
+            _chezmoi_map_add "~/.rmux.conf" ".chezmoi/dot_rmux.conf.tmpl"
+            _chezmoi_map_add "~/.config/windows-terminal/settings.json" ".chezmoi/dot_config/windows-terminal/settings.json.tmpl"
+            ;;
+    esac
+}
+
+# 检测当前平台名（与 audit_configs 一致）
+# 平台名（stdout）；优先复用 detect_platform.sh SSOT
+chezmoi_detect_platform_name() {
+    if type detect_platform &>/dev/null; then
+        # detect_platform 日志在 stderr，只取 PLATFORM
+        detect_platform >/dev/null 2>&1 || true
+        if [[ -n "${PLATFORM:-}" ]]; then
+            echo "${PLATFORM}"
+            return 0
+        fi
+    else
+        local _detect
+        _detect="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/detect_platform.sh"
+        if [[ -f "$_detect" ]]; then
+            # shellcheck disable=SC1090
+            source "$_detect"
+            detect_platform >/dev/null 2>&1 || true
+            if [[ -n "${PLATFORM:-}" ]]; then
+                echo "${PLATFORM}"
+                return 0
+            fi
+        fi
+    fi
+    local os
+    os="$(uname -s)"
+    if [[ "$os" == "Darwin" ]]; then
+        echo "darwin"
+    elif [[ "$os" == "Linux" ]]; then
+        echo "linux"
+    elif [[ "$os" =~ ^(MINGW|MSYS|CYGWIN) ]]; then
+        echo "windows"
+    else
+        echo "unknown"
+    fi
+}

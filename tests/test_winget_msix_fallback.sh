@@ -8,7 +8,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 
 # shellcheck disable=SC1091
-source "${PROJECT_ROOT}/scripts/chezmoi/package_install.sh"
+source "${PROJECT_ROOT}/scripts/lib/chezmoi/package_install.sh"
 
 PASSED=0
 FAILED=0
@@ -110,14 +110,14 @@ assert_eq "OMP windows amd64 asset name" \
 
 # Windows PATH 上可能仍是旧 oh-my-posh；成功日志必须报刚写入的 dest 版本
 if grep -q 'oh-my-posh installed to ${dest} ($("$dest" --version' \
-    "${PROJECT_ROOT}/scripts/chezmoi/package_install.sh"; then
+    "${PROJECT_ROOT}/scripts/lib/chezmoi/package_install.sh"; then
     PASSED=$((PASSED + 1))
     echo "[PASS] OMP success reports dest exe version"
 else
     FAILED=$((FAILED + 1))
     echo "[FAIL] OMP success must use dest --version, not PATH oh-my-posh"
 fi
-if grep -n 'oh-my-posh installed to' "${PROJECT_ROOT}/scripts/chezmoi/package_install.sh" \
+if grep -n 'oh-my-posh installed to' "${PROJECT_ROOT}/scripts/lib/chezmoi/package_install.sh" \
     | grep -q '$(oh-my-posh --version'; then
     FAILED=$((FAILED + 1))
     echo "[FAIL] OMP success still reports PATH oh-my-posh --version"

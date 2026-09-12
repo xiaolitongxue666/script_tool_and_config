@@ -1,24 +1,45 @@
 # Git 属性配置文件
 # 用于控制 Git 如何处理文件（换行符、合并策略等）
+#
+# ⚠️ 顺序规则（重要）：gitattributes 中「后面的规则覆盖前面的规则」。
+# 因此兜底规则 `* text=auto eol=lf` 必须放在文件最前面，
+# 否则会推翻其后所有针对 Windows 脚本的 eol=crlf 规则。
+# （2026-09 修复：兜底规则原先位于文件末尾，导致 9 个 .bat/.ps1 中 7 个被检出为 LF）
 
 # ============================================
-# Windows 脚本文件（使用 CRLF）
+# 兜底：所有文本文件默认 LF（必须置顶，勿下移）
 # ============================================
-scripts/windows/**/*.bat text eol=crlf
-scripts/windows/**/*.ps1 text eol=crlf
-scripts/windows/**/*.cmd text eol=crlf
+* text=auto eol=lf
 
 # ============================================
-# Linux/Unix 脚本文件（使用 LF）
+# 二进制文件（不受换行符转换影响）
 # ============================================
-scripts/linux/**/*.sh text eol=lf
-scripts/common.sh text eol=lf
-dotfiles/**/*.sh text eol=lf
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.zip binary
+*.tar binary
+*.gz binary
+*.7z binary
+*.exe binary
+*.dll binary
+*.so binary
+*.dylib binary
 
 # ============================================
-# 所有 Shell 脚本（使用 LF）
+# Windows 脚本文件（使用 CRLF）—— 必须位于兜底规则之后
+# ============================================
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+
+# ============================================
+# Linux/Unix 与 Shell 脚本（使用 LF）
 # ============================================
 *.sh text eol=lf
+*.sh.tmpl text eol=lf
 
 # ============================================
 # 配置文件（使用 LF）
@@ -53,26 +74,3 @@ dotfiles/**/*.sh text eol=lf
 *.md text eol=lf
 *.txt text eol=lf
 README* text eol=lf
-
-# ============================================
-# 二进制文件
-# ============================================
-*.png binary
-*.jpg binary
-*.jpeg binary
-*.gif binary
-*.ico binary
-*.zip binary
-*.tar binary
-*.gz binary
-*.7z binary
-*.exe binary
-*.dll binary
-*.so binary
-*.dylib binary
-
-# ============================================
-# 默认：所有文本文件使用 LF
-# ============================================
-* text=auto eol=lf
-

@@ -32,7 +32,7 @@
 ./install.sh                         # 首次六步
 
 # run_once 模板内
-source "${PROJECT_ROOT}/scripts/chezmoi/common_install.sh"
+source "${PROJECT_ROOT}/scripts/lib/chezmoi/common_install.sh"
 export PROXY="${PROXY:-http://127.0.0.1:7890}"
 load_run_once_context "$SCRIPT_DIR" "install-xxx"
 ```
@@ -41,7 +41,7 @@ load_run_once_context "$SCRIPT_DIR" "install-xxx"
 
 - **SSOT**：`.chezmoi/.chezmoiexternal.toml.tmpl`（仅 linux/darwin）
 - **zsh 二进制**：`run_once_install-zsh.sh.tmpl`
-- **诊断**：`scripts/common/deploy_utils/check_zsh_omz.sh`（deploy 末尾）
+- **诊断**：`scripts/deploy_utils/check_zsh_omz.sh`（deploy 末尾）
 - **手工修复（次要）**：`manual_zsh_setup.sh` — 非常规路径，优先 `manage_dotfiles.sh apply`
 
 ## 注意

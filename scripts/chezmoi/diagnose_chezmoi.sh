@@ -5,9 +5,11 @@
 # 帮助诊断 chezmoi 安装问题
 # ============================================
 
+
+set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
-COMMON_SH="${PROJECT_ROOT}/scripts/common.sh"
+COMMON_SH="${PROJECT_ROOT}/scripts/lib/common.sh"
 
 # 加载通用函数库
 if [ -f "$COMMON_SH" ]; then

@@ -6,7 +6,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
-COMMON_INSTALL="${PROJECT_ROOT}/scripts/chezmoi/common_install.sh"
+COMMON_INSTALL="${PROJECT_ROOT}/scripts/lib/chezmoi/common_install.sh"
 
 source "$COMMON_INSTALL"
 

@@ -5,7 +5,7 @@
 ## 目录结构
 
 - **common.sh**、**README.md**（本文件）
-- **common/**：跨平台脚本（deploy_utils、cursor_clangd、standalone_tool_script、project_tools、ffmpeg-magic、git_templates、patch_examples、shc、auto_edit_redis_config、container_dev_env 等）
+- **common/**：跨平台脚本（deploy_utils、cursor_clangd、standalone_tool_script、project_tools、ffmpeg_magic、git_templates、patch_examples、shc、auto_edit_redis_config、container_dev_env 等）
 - **linux/**：Linux 专用（system_basic_env、network）
 - **darwin/**：macOS 专用
 - **windows/**：Windows 专用（windows_scripts、system_basic_env）
@@ -37,7 +37,7 @@
 - **cursor_clangd/**: clangd 二进制与 Cursor clangd 扩展（见 [docs/CURSOR_CLANGD.md](../docs/CURSOR_CLANGD.md)）
 - **standalone_tool_script/**: 独立工具脚本
 - **project_tools/**: 项目生成和管理工具
-- **ffmpeg-magic/**: FFmpeg 相关脚本（多路推流、音频拼接/混音、SRT 推流、Netint 安装等）
+- **ffmpeg_magic/**: FFmpeg 相关脚本（多路推流、音频拼接/混音、SRT 推流、Netint 安装等）
 - **git_templates/**: Git 模板和配置
 - **patch_examples/**: 补丁使用示例
 - **shc/**: Shell 脚本编译器示例
@@ -50,7 +50,7 @@
 ```bash
 # 加载通用函数库
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source "$SCRIPT_DIR/../../common.sh" 2>/dev/null || {
+source "$SCRIPT_DIR/../../lib/common.sh" 2>/dev/null || {
     echo "错误: 无法加载 common.sh"
     exit 1
 }
@@ -75,6 +75,6 @@ end_script
 - 所有脚本注释已翻译为中文
 - 所有脚本遵循统一的命名规范
 - 优化后的脚本使用 `common.sh` 中的函数
-- `common.sh` 放在 `scripts/` 根目录，便于所有子目录引用
+- 公共库位于 **`scripts/lib/common.sh`**（P4 重构后），统一用 `${PROJECT_ROOT}/scripts/lib/common.sh` 引用
 - 脚本按操作系统分类组织，跨平台脚本位于 `common/` 目录，平台特定脚本位于对应平台目录
 

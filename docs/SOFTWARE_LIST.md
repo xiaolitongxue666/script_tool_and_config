@@ -18,8 +18,7 @@ run_once_90-install-claude-code       ← Layer 4（AI agent CLI，fnm/node 已�
 run_once_91-install-codex             ← Layer 4（AI agent CLI，npm @openai/codex）
 run_once_93-install-cursor            ← Layer 4（GUI 检测，有 GUI 才装）
 run_once_install-{tmux,i3wm,...} ← Layer 5（平台特有）
-run_on_linux/* / run_on_darwin/*      ← Layer 5（平台特有）
-run_on_windows/*                      ← Layer 5（平台特有）
+run_once_linux-* / run_once_macos-* / run_once_windows-*   ← Layer 5（平台特有）
 ```
 
 ---
@@ -30,7 +29,7 @@ run_on_windows/*                      ← Layer 5（平台特有）
 |------|------|--------|------|
 | Layer 0 | `run_once_00-install-version-managers` | **fnm**（Node/npm）、**uv**（Python）；Windows 另 bootstrap `fnm install lts/*` + `uv python install`（默认 3.12，`UV_DEFAULT_PYTHON` 可覆盖）；rustup（可选） | all |
 | Layer 1 | `run_once_install-git` | git, connect-proxy（Linux apt 场景） | all |
-| Layer 1 | `run_once_install-common-tools` | bat, eza, fd, rg, fzf, lazygit, delta, gh, trash-cli, btop, fastfetch（包名 SSOT：[`scripts/chezmoi/packages.conf`](../scripts/chezmoi/packages.conf)） | all |
+| Layer 1 | `run_once_install-common-tools` | bat, eza, fd, rg, fzf, lazygit, delta, gh, trash-cli, btop, fastfetch（包名 SSOT：[`scripts/lib/chezmoi/packages.conf`](../scripts/lib/chezmoi/packages.conf)） | all |
 | Layer 2 | `run_once_install-zsh` + `.chezmoiexternal.toml.tmpl` | zsh 二进制；Oh My Zsh 与插件（autosuggestions/history-substring-search/syntax-highlighting/completions）由 chezmoi external（仅 linux/darwin） | all（Windows 跳过 OMZ） |
 | Layer 2 | `run_once_install-starship` | starship 提示符 | all |
 | Layer 2 | `run_once_install-nerd-fonts` | FiraMono Nerd Font | all |
@@ -40,7 +39,7 @@ run_on_windows/*                      ← Layer 5（平台特有）
 | Layer 4 | `run_once_91-install-codex` | OpenAI Codex CLI（npm i -g @openai/codex） | all |
 | Layer 4 | `run_once_93-install-cursor` | Cursor 编辑器（仅 GUI 环境） | all（检测 GUI） |
 
-> **CodeWhale 已从本仓与 agent-config 移除（勿恢复）**；已删除 `run_once_92-install-codewhale`。**Pi** 仅 [agent-config](../../AI/agent-config) Phase 2；本仓库不再包含 `run_once_94` 或 `dot_pi/`。历史：已删除 `run_once_92-install-deepseek`（勿恢复 cargo 安装路径）。
+> **CodeWhale 已从本仓与 agent-config 移除（勿恢复）**；已删除 `run_once_92-install-codewhale`。**Pi** 仅 [agent-config](../../../AI/agent-config) Phase 2；本仓库不再包含 `run_once_94` 或 `dot_pi/`。历史：已删除 `run_once_92-install-deepseek`（勿恢复 cargo 安装路径）。
 
 **Layer 4 职责（存量双路径）**：本仓库 `run_once_90` / `91` / `93` 仍安装部分 Agent **二进制**/Cursor GUI；**agent-config** `install-tools.sh` 也会安装全部 Agent CLI（Claude / Cursor / Codex / Pi）并负责 MCP/Skills/Harness + CodeGraph。两侧 CLI 安装为已知冗余，**当前保留**（后续再收敛）；Pi 仅 Phase 2。
 
@@ -62,9 +61,9 @@ run_on_windows/*                      ← Layer 5（平台特有）
 | Layer 5 | `run_once_install-lazyssh` | lazyssh | linux（AUR/apt 回退） |
 | Layer 5 | `run_once_install-i3wm` | i3 平铺窗口管理器 | linux |
 | Layer 5 | `run_once_install-dwm` | dwm 动态窗口管理器 | **仅 Arch**（Ubuntu/Debian 自动跳过） |
-| Layer 5 | `run_on_linux/run_once_configure-pacman` | pacman 配置（中国镜像/archlinuxcn/并行下载） | **仅 Arch** |
-| Layer 5 | `run_on_linux/run_once_install-arch-base-packages` | base-devel 等 Arch 基础包 | **仅 Arch** |
-| Layer 5 | `run_on_linux/run_once_install-aur-helper` | yay / paru（AUR 助手） | **仅 Arch** |
+| Layer 5 | `run_once_linux-configure-pacman` | pacman 配置（中国镜像/archlinuxcn/并行下载） | **仅 Arch** |
+| Layer 5 | `run_once_linux-install-arch-base-packages` | base-devel 等 Arch 基础包 | **仅 Arch** |
+| Layer 5 | `run_once_linux-install-aur-helper` | yay / paru（AUR 助手） | **仅 Arch** |
 
 ### WSL 特殊说明
 
@@ -85,10 +84,10 @@ run_on_windows/*                      ← Layer 5（平台特有）
 | Layer 5 | `run_once_install-maccy` | maccy 剪贴板管理器 | darwin |
 | Layer 5 | `run_once_install-yabai` | yabai 平铺窗口管理器 | darwin |
 | Layer 5 | `run_once_install-skhd` | skhd 快捷键守护进程 | darwin |
-| Layer 5 | `run_on_darwin/run_once_configure-homebrew` | Homebrew 配置与国内源 | darwin |
-| Layer 5 | `run_on_darwin/run_once_install-ghostty` | Ghostty 终端 | darwin |
-| Layer 5 | `run_on_darwin/run_once_install-connect` | connect（SSH ProxyCommand） | darwin |
-| Layer 5 | `run_on_darwin/run_onchange_sync_ghostty_config_to_app_support` | Ghostty 配置同步到 Application Support | darwin（内容变化触发） |
+| Layer 5 | `run_once_macos-configure-homebrew` | Homebrew 配置与国内源 | darwin |
+| Layer 5 | `run_once_macos-install-ghostty` | Ghostty 终端 | darwin |
+| Layer 5 | `run_once_macos-install-connect` | connect（SSH ProxyCommand） | darwin |
+| Layer 5 | `run_onchange_macos-sync-ghostty-config-to-app-support` | Ghostty 配置同步到 Application Support | darwin（内容变化触发） |
 | Cursor 编辑器 settings | **agent-config** | `render-cursor-editor-settings.sh` + `sync-cursor-editor-settings.sh` |
 
 ---
@@ -97,10 +96,10 @@ run_on_windows/*                      ← Layer 5（平台特有）
 
 | 层级 | 脚本 | 安装项 | 说明 |
 |------|------|--------|------|
-| Layer 5 | `run_on_windows/run_once_install-windows-terminal` | Windows Terminal | windows |
-| Layer 5 | `run_on_windows/run_once_install-rmux` | rmux v0.5.0（预编译包 → `~/.local/bin`，cargo 回退） | windows |
+| Layer 5 | `run_once_windows-install-windows-terminal` | Windows Terminal | windows |
+| Layer 5 | `run_once_windows-install-rmux` | rmux v0.5.0（预编译包 → `~/.local/bin`，cargo 回退） | windows |
 | Layer 5 | `run_once_install-oh-my-posh` | Oh My Posh 提示符 | windows |
-| Layer 5 | `run_on_windows/run_onchange_sync_windows_terminal_config` | Windows Terminal 配置同步到实际路径 | windows（内容变化触发） |
+| Layer 5 | `run_onchange_windows-sync-terminal-config` | Windows Terminal 配置同步到实际路径 | windows（内容变化触发） |
 
 配置模板（非 run_once）：`dot_config/windows-terminal/settings.json.tmpl` → `~/.config/windows-terminal/settings.json`（Git Bash 默认、PowerShell/CMD/WSL2、`keybindings`、`newTabMenu`、Catppuccin Mocha）；`dot_rmux.conf.tmpl` → `~/.rmux.conf`。
 
@@ -146,7 +145,7 @@ run_on_windows/*                      ← Layer 5（平台特有）
 | `[5/6] 报告` | 三态：未安装 / 已安装 OK / 部分安装或跳过升级 |
 | `[6/6] verify` | 字体、Shell、PATH 等验证 |
 
-**升级策略**（[`software_policies.sh`](../scripts/chezmoi/software_policies.sh)）：
+**升级策略**（[`software_policies.sh`](../scripts/lib/chezmoi/software_policies.sh)）：
 
 | 策略 | 软件示例 |
 |------|----------|

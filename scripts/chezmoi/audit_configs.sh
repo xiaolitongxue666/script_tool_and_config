@@ -9,7 +9,7 @@ set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
-COMMON_SH="${PROJECT_ROOT}/scripts/common.sh"
+COMMON_SH="${PROJECT_ROOT}/scripts/lib/common.sh"
 
 # 加载通用函数库
 if [ -f "$COMMON_SH" ]; then
@@ -61,9 +61,9 @@ if [ ! -d "$CHEZMOI_DIR" ]; then
 fi
 
 # ============================================
-# 定义配置映射（scripts/chezmoi/config_mappings.sh 为单一来源）
+# 定义配置映射（scripts/lib/chezmoi/config_mappings.sh 为单一来源）
 # ============================================
-CONFIG_MAPPINGS_SH="${SCRIPT_DIR}/config_mappings.sh"
+CONFIG_MAPPINGS_SH="${SCRIPT_DIR}/../lib/chezmoi/config_mappings.sh"
 if [[ -f "$CONFIG_MAPPINGS_SH" ]]; then
     # shellcheck disable=SC1090
     source "$CONFIG_MAPPINGS_SH"

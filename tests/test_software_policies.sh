@@ -7,7 +7,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 
-source "${PROJECT_ROOT}/scripts/chezmoi/install_helpers.sh"
+source "${PROJECT_ROOT}/scripts/lib/chezmoi/install_helpers.sh"
 
 PASSED=0
 FAILED=0
@@ -85,7 +85,7 @@ PATH="$_old_path"
 hash -r 2>/dev/null || true
 rm -rf "$_tmpdir"
 
-name="$(extract_software_name_from_script "${CHEZMOI_DIR}/run_on_linux/run_once_configure-pacman.sh.tmpl")"
+name="$(extract_software_name_from_script "${CHEZMOI_DIR}/run_once_linux-configure-pacman.sh.tmpl")"
 assert_eq "configure-pacman name" "configure-pacman" "$name"
 
 has_layer4=0
@@ -136,8 +136,8 @@ else
 fi
 
 # winget 须固定 --source winget（避开 msstore / 0x8a15005e）
-if grep -q 'winget install.*--source winget' "${PROJECT_ROOT}/scripts/chezmoi/package_install.sh" \
-    && grep -q 'winget upgrade.*--source winget' "${PROJECT_ROOT}/scripts/chezmoi/package_install.sh"; then
+if grep -q 'winget install.*--source winget' "${PROJECT_ROOT}/scripts/lib/chezmoi/package_install.sh" \
+    && grep -q 'winget upgrade.*--source winget' "${PROJECT_ROOT}/scripts/lib/chezmoi/package_install.sh"; then
     PASSED=$((PASSED + 1))
     echo "[PASS] winget install/upgrade use --source winget"
 else
@@ -145,9 +145,9 @@ else
     echo "[FAIL] winget install/upgrade missing --source winget"
 fi
 
-if grep -q 'install_github_release_zip_exe' "${PROJECT_ROOT}/scripts/chezmoi/package_install.sh" \
-    && grep -q 'install_rg_from_github' "${PROJECT_ROOT}/scripts/chezmoi/package_install.sh" \
-    && grep -q 'install_delta_from_github' "${PROJECT_ROOT}/scripts/chezmoi/package_install.sh"; then
+if grep -q 'install_github_release_zip_exe' "${PROJECT_ROOT}/scripts/lib/chezmoi/package_install.sh" \
+    && grep -q 'install_rg_from_github' "${PROJECT_ROOT}/scripts/lib/chezmoi/package_install.sh" \
+    && grep -q 'install_delta_from_github' "${PROJECT_ROOT}/scripts/lib/chezmoi/package_install.sh"; then
     PASSED=$((PASSED + 1))
     echo "[PASS] GitHub release fallback helpers present"
 else
@@ -167,7 +167,7 @@ else
 fi
 
 # [4/6] ensure 补装：当前平台无包（packages.conf 为 "-"）时应跳过，不误报 WARNING
-if grep -q '当前平台无此包' "${PROJECT_ROOT}/scripts/chezmoi/package_install.sh"; then
+if grep -q '当前平台无此包' "${PROJECT_ROOT}/scripts/lib/chezmoi/package_install.sh"; then
     PASSED=$((PASSED + 1))
     echo "[PASS] upgrade_common_tools_packages skips missing-pkg items (Windows trash/btop)"
 else
@@ -176,7 +176,7 @@ else
 fi
 
 # uv 经包管理器安装（choco/brew 等）时 self-update 不可用：应提示 INFO 而非 WARNING
-if grep -q '\*chocolatey\*\|\*choco\*' "${PROJECT_ROOT}/scripts/chezmoi/package_install.sh"; then
+if grep -q '\*chocolatey\*\|\*choco\*' "${PROJECT_ROOT}/scripts/lib/chezmoi/package_install.sh"; then
     PASSED=$((PASSED + 1))
     echo "[PASS] ensure_uv_latest recognizes package-manager uv (choco/brew)"
 else
@@ -185,8 +185,8 @@ else
 fi
 
 # macOS Intel：默认仍 brew upgrade（可源码编译）；clangd 无 brew formula，不模糊搜索
-if grep -q 'brew upgrade "$name"' "${PROJECT_ROOT}/scripts/chezmoi/package_install.sh" \
-    && grep -q 'macOS Intel: brew upgrade' "${PROJECT_ROOT}/scripts/chezmoi/package_install.sh"; then
+if grep -q 'brew upgrade "$name"' "${PROJECT_ROOT}/scripts/lib/chezmoi/package_install.sh" \
+    && grep -q 'macOS Intel: brew upgrade' "${PROJECT_ROOT}/scripts/lib/chezmoi/package_install.sh"; then
     PASSED=$((PASSED + 1))
     echo "[PASS] Intel still brew-upgrades installed formulae (source compile allowed)"
 else
@@ -194,8 +194,8 @@ else
     echo "[FAIL] Intel brew upgrade path missing or skipped"
 fi
 
-if grep -q '_brew_should_skip_installed_upgrade' "${PROJECT_ROOT}/scripts/chezmoi/package_install.sh" \
-    || grep -q '_brew_should_skip_installed_upgrade' "${PROJECT_ROOT}/scripts/chezmoi/brew_macos_network.sh"; then
+if grep -q '_brew_should_skip_installed_upgrade' "${PROJECT_ROOT}/scripts/lib/chezmoi/package_install.sh" \
+    || grep -q '_brew_should_skip_installed_upgrade' "${PROJECT_ROOT}/scripts/lib/chezmoi/brew_macos_network.sh"; then
     FAILED=$((FAILED + 1))
     echo "[FAIL] leftover Intel skip-upgrade helper"
 else
@@ -204,7 +204,7 @@ else
 fi
 
 # shellcheck disable=SC1091
-source "${PROJECT_ROOT}/scripts/chezmoi/brew_macos_network.sh"
+source "${PROJECT_ROOT}/scripts/lib/chezmoi/brew_macos_network.sh"
 _fastfetch_dryrun=$(cat <<'EOF'
 ==> Would install 2 dependencies:
 vulkan-headers  1.4.357.0
@@ -250,13 +250,13 @@ else
     FAILED=$((FAILED + 1))
     echo "[FAIL] Intel dry-run parser treated lua as heavy dep"
 fi
-if grep -q '_brew_intel_run_with_heartbeat' "${PROJECT_ROOT}/scripts/chezmoi/package_install.sh" \
+if grep -q '_brew_intel_run_with_heartbeat' "${PROJECT_ROOT}/scripts/lib/chezmoi/package_install.sh" \
     && grep -q '_brew_intel_should_skip_heavy_dep_upgrade' \
-        "${PROJECT_ROOT}/scripts/chezmoi/package_install.sh" \
+        "${PROJECT_ROOT}/scripts/lib/chezmoi/package_install.sh" \
     && grep -q 'upgrade_brew_package "$package_name"' \
-        "${PROJECT_ROOT}/scripts/chezmoi/package_install.sh" \
+        "${PROJECT_ROOT}/scripts/lib/chezmoi/package_install.sh" \
     && grep -q '_brew_link_existing_keg' \
-        "${PROJECT_ROOT}/scripts/chezmoi/brew_macos_network.sh"; then
+        "${PROJECT_ROOT}/scripts/lib/chezmoi/brew_macos_network.sh"; then
     PASSED=$((PASSED + 1))
     echo "[PASS] Intel brew upgrade uses heartbeat, heavy-dep skip, install_package reuse, keg relink"
 else
@@ -273,9 +273,9 @@ else
     echo "[FAIL] clangd still searches brew for clangd/clang/clang-tools-extra"
 fi
 
-if grep -q 'HOMEBREW_NO_ENV_HINTS=1' "${PROJECT_ROOT}/scripts/chezmoi/brew_macos_network.sh" \
+if grep -q 'HOMEBREW_NO_ENV_HINTS=1' "${PROJECT_ROOT}/scripts/lib/chezmoi/brew_macos_network.sh" \
     && grep -q 'HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK=1' \
-        "${PROJECT_ROOT}/scripts/chezmoi/brew_macos_network.sh"; then
+        "${PROJECT_ROOT}/scripts/lib/chezmoi/brew_macos_network.sh"; then
     PASSED=$((PASSED + 1))
     echo "[PASS] brew env suppresses hints and Intel dependents check"
 else
@@ -284,7 +284,7 @@ else
 fi
 
 # Layer 4 npm：超时、已最新跳过、WSL 不走 Windows interop
-_pkg_install="${PROJECT_ROOT}/scripts/chezmoi/package_install.sh"
+_pkg_install="${PROJECT_ROOT}/scripts/lib/chezmoi/package_install.sh"
 if grep -q '_is_windows_interop_path' "$_pkg_install" \
     && grep -q '_wsl_prepend_npm_global_bin' "$_pkg_install" \
     && grep -q '_run_with_timeout' "$_pkg_install" \
@@ -310,7 +310,7 @@ else
 fi
 
 if grep -q '_command_exists_local_not_interop' \
-    "${PROJECT_ROOT}/scripts/chezmoi/install_helpers.sh"; then
+    "${PROJECT_ROOT}/scripts/lib/chezmoi/install_helpers.sh"; then
     PASSED=$((PASSED + 1))
     echo "[PASS] claude/codex installed-check ignores Windows interop paths"
 else

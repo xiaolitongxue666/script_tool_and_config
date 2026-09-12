@@ -2,7 +2,7 @@
 
 本仓库对 **Cursor GUI** 与 **clangd（语言服务）** 分层处理：无 GUI 不装 Cursor；clangd 二进制可在 headless / WSL 无显示环境下安装，供跳转与诊断使用。
 
-相关脚本：[`scripts/common/cursor_clangd/`](../scripts/common/cursor_clangd/)。  
+相关脚本：[`scripts/tools/cursor_clangd/`](../scripts/tools/cursor_clangd/)。  
 Cursor 编辑器 User settings 仍由 **agent-config** 管理（见 [CHEZMOI_USE_GUIDE.md](CHEZMOI_USE_GUIDE.md)「Cursor 用户设置」）。
 
 ---
@@ -23,16 +23,16 @@ Cursor 编辑器 User settings 仍由 **agent-config** 管理（见 [CHEZMOI_USE
 
 ```bash
 # 1) 仅装 clangd（全平台；无 Cursor 也可）
-bash scripts/common/cursor_clangd/install_clangd.sh
+bash scripts/tools/cursor_clangd/install_clangd.sh
 
 # 2) 仅装 Cursor 扩展（需已有 cursor CLI；装不到 Cursor 本体）
-bash scripts/common/cursor_clangd/install_cursor_clangd_extension.sh
+bash scripts/tools/cursor_clangd/install_cursor_clangd_extension.sh
 
 # 3) 组合：clangd +（若有 cursor CLI）扩展
-bash scripts/common/cursor_clangd/setup_cursor_clangd.sh
+bash scripts/tools/cursor_clangd/setup_cursor_clangd.sh
 
 # 冒烟
-bash scripts/common/cursor_clangd/verify_clangd.sh
+bash scripts/tools/cursor_clangd/verify_clangd.sh
 ```
 
 chezmoi apply / `install.sh` / `deploy.sh` 会经 `run_once_install-clangd` 安装 **clangd 二进制**；扩展需在已打开 Cursor（含 WSL Remote）后跑步骤 2，或手动从扩展市场安装。
@@ -133,7 +133,7 @@ Ctrl+Shift+P → clangd: Restart language server
 
 ```bash
 command -v clangd && clangd --version
-bash scripts/common/cursor_clangd/verify_clangd.sh
+bash scripts/tools/cursor_clangd/verify_clangd.sh
 
 # 已装 Cursor CLI 时
 cursor --list-extensions 2>/dev/null | grep -i clangd

@@ -2,6 +2,9 @@
 
 本文件为**本仓库专属**的可提交记忆，供 Cursor / Claude Code / Copilot 等 Agent 读取。用户级 claude-mem 数据仍在 `.claude-mem/`（已 gitignore，不提交）。
 
+> **改结构 / 加脚本前必读**：§[项目结构与 chezmoi 机制契约（2026-09 P1–P6，实测）](#项目结构与-chezmoi-机制契约2026-09-p1p6实测)
+> —— 目录分层、库 vs 入口两份契约、chezmoi 机制实测（状态键 / `.chezmoiscripts/` / `.chezmoiignore` 取反 / `include` 相对源根 / 执行排序）、质量门禁与本轮高危缺陷。
+
 ## Agent 体系总览（2026-06）
 
 ### 两阶段架构
@@ -11,7 +14,7 @@
 | Phase 1（本仓库） | `./deploy.sh` | fnm/uv、dotfiles、Layer 4 CLI（存量双路径，**当前保留**） |
 | Phase 2（agent-config） | `bash scripts/install-tools.sh` | 全部 AI Agent CLI + MCP/Skills + Harness（含 **Pi**） |
 
-agent-config 路径：`../../AI/agent-config`（相对本仓库）；详见 [DEPLOY_TWO_PHASE.md](DEPLOY_TWO_PHASE.md)。Layer 4（`90`/`91`/`93`）与 Phase 2 均可装部分 CLI；**Pi 仅 Phase 2**；**CodeWhale 已从本仓与 agent-config 移除（勿恢复）**；后续再收敛。
+agent-config 路径：`../../AI/agent-config`（**相对本仓库根目录**；在 `docs/` 下写作 `../../../AI/agent-config`）；详见 [DEPLOY_TWO_PHASE.md](DEPLOY_TWO_PHASE.md)。Layer 4（`90`/`91`/`93`）与 Phase 2 均可装部分 CLI；**Pi 仅 Phase 2**；**CodeWhale 已从本仓与 agent-config 移除（勿恢复）**；后续再收敛。
 
 ### Layer 4 主 Agent
 
@@ -20,18 +23,18 @@ agent-config 路径：`../../AI/agent-config`（相对本仓库）；详见 [DEP
 | Claude Code | `run_once_90-install-claude-code`（存量） | CLI + MCP + Skills + hooks + slash | `CLAUDE.md` |
 | Codex | `run_once_91-install-codex`（存量） | CLI + `~/.codex/config.toml`；prompts 桥接 | `.codex/AGENTS.md` → `AGENTS.md` |
 | Cursor | `run_once_93-install-cursor`（GUI，存量） | MCP + Skills + **Cursor Commands** | 本仓库 `.cursor/rules/*.mdc` |
-| Pi | 无（已迁出） | CLI + Harness `~/.pi/agent/` | [agent-config/docs/PI.md](../../AI/agent-config/docs/PI.md) |
+| Pi | 无（已迁出） | CLI + Harness `~/.pi/agent/` | [agent-config/docs/pi/README.md](../../../AI/agent-config/docs/pi/README.md) |
 
-辅助层：GitHub Copilot（`.github/copilot-instructions.md`）、claude-mem（Shell `claude()`）、OpenSpec（`openspec/AGENTS.md`）。
+辅助层：GitHub Copilot（`.github/copilot-instructions.md`）、claude-mem（Shell `claude()`）。
 
-**Cursor 分工**：本仓库 `.cursor/` 仅 **rules**（项目级）；全局 **Cursor Commands**（`/commit-push` 等）在 `~/.cursor/commands/`，由 agent-config `apply-config.sh` 写入。clangd 二进制 / 扩展：`docs/CURSOR_CLANGD.md` + `scripts/common/cursor_clangd/`（`run_once_install-clangd`；`93` 无 GUI 不装 Cursor）。
+**Cursor 分工**：本仓库 `.cursor/` 仅 **rules**（项目级）；全局 **Cursor Commands**（`/commit-push` 等）在 `~/.cursor/commands/`，由 agent-config `apply-config.sh` 写入。clangd 二进制 / 扩展：`docs/CURSOR_CLANGD.md` + `scripts/tools/cursor_clangd/`（`run_once_install-clangd`；`93` 无 GUI 不装 Cursor）。
 
 ### 全局配置（每个 Agent 必备）
 
 | 配置项 | 要求 | 管理方 |
 |--------|------|--------|
-| 中文回复 | 与用户交互、注释、文档说明使用中文；`log_*` 运行时输出英文 | agent-config `common-agent-policy.md` + 各 platform `agent.md` |
-| 7890 代理 | 外网默认启用：WSL → `http://<resolv nameserver>:7890`；headless 原生 Linux（VPS）→ 探测 `PROXY_PROBE_PORTS`（含 **17890**）；桌面 Linux/macOS/Windows → `127.0.0.1:7890` | Phase 1：`chezmoi_core.sh`；Phase 2：`agent-config/scripts/lib/proxy.sh` |
+| 中文回复 | 与用户交互、注释、文档说明使用中文；`log_*` 运行时输出**分而治之**（库/管道脚本英文，交互脚本中文可接受；前缀一律英文） | agent-config `common-agent-policy.md` + 各 platform `agent.md` |
+| 7890 代理 | 外网默认启用：WSL → `http://<resolv nameserver>:7890`；headless 原生 Linux（VPS）→ 探测 `PROXY_PROBE_PORTS`（含 **17890**）；桌面 Linux/macOS/Windows → `127.0.0.1:7890` | Phase 1：`scripts/lib/chezmoi/chezmoi_core.sh`；Phase 2：`agent-config/scripts/lib/proxy.sh` |
 | **`/commit-push`** | **强制**；语义见下 | agent-config slash/commands + `git-smart-commit` |
 | **`/summary-memory`** | **强制**；语义见下 | agent-config slash/commands + `summary-project-memory.sh` |
 
@@ -66,13 +69,13 @@ canonical 源：agent-config `platforms/{cursor,claude-code,codex,pi}/` 与 `pla
 
 - **CodeWhale 已从本仓与 agent-config 移除（勿恢复）**；已删除 `run_once_92-install-codewhale.sh.tmpl`、`docs/CODEWHALE.md`、`.cursor/rules/codewhale.mdc`。
 - **历史**：已删除 `run_once_92-install-deepseek.sh.tmpl`（勿恢复 `cargo install deepseek`）。
-- AI Agent 配置见 [agent-config](../../AI/agent-config)（Claude / Cursor / Codex / Pi + CodeGraph）。
+- AI Agent 配置见 [agent-config](../../../AI/agent-config)（Claude / Cursor / Codex / Pi + CodeGraph）。
 - WSL 与 Windows **完全独立**：各环境 `$HOME`/fnm/npm/chezmoi 目标不共享。WSL 里 `install.sh` **只装 WSL**，与宿主机 npm **无关**（`:7890` 只是网络出口）。`/mnt/host/wslg/.../fnm_multishells` 是 WSL 本机 fnm；`/mnt/c`、`/mnt/host/c` 才是 Windows。**禁止**从 WSL 调用 `cmd.exe` 或改 Windows npm。见 `.cursor/rules/wsl-windows-isolation.mdc`。
 - 部署：`./deploy.sh` 或 `./scripts/manage_dotfiles.sh apply`（**勿**对 apply 使用 `| rg | head` 管道，会 SIGPIPE 中断）。
 
 ## Pi（已迁入 agent-config，2026-06）
 
-Pi 的安装、Harness、文档 **不在本仓库**。唯一 SSOT：[agent-config/docs/PI.md](../../AI/agent-config/docs/PI.md)（`bash scripts/install-tools.sh` + `apply-config.sh`）。
+Pi 的安装、Harness、文档 **不在本仓库**。唯一 SSOT：[agent-config/docs/pi/README.md](../../../AI/agent-config/docs/pi/README.md)（`bash scripts/install-tools.sh` + `apply-config.sh`）。
 
 ## Windows Git Bash chezmoi 部署（2026-05 实测）
 
@@ -82,7 +85,7 @@ Pi 的安装、Harness、文档 **不在本仓库**。唯一 SSOT：[agent-confi
 | 全量安装 shell | Git Bash **`--noprofile --norc`**（避免 login 配置污染 stdout → override-data 空 / WT 模板失败） |
 | 禁止 | 对 apply 使用 `\| head` / `\| rg`（SIGPIPE）；在 Windows 依赖 `diagnose_deployment.sh` 的 `apply --dry-run` |
 | 锁 | 中断 apply 后可能残留 `chezmoi.exe` → `timeout obtaining persistent state lock` |
-| 修复 | `taskkill //F //IM chezmoi.exe` → `bash scripts/common/deploy_utils/fix_chezmoi_lock.sh` → 再 apply |
+| 修复 | `taskkill //F //IM chezmoi.exe` → `bash scripts/deploy_utils/fix_chezmoi_lock.sh` → 再 apply |
 | 交互卡住 | `.gitconfig` / `.ssh/config` 被外部修改时，无 `--force` 会弹出 `overwrite/skip/quit` 并永久等待 |
 
 | 问题 | 原因 | 解决 |
@@ -277,7 +280,7 @@ macOS 默认 `/bin/bash` 为 **3.2**，不支持 `declare -A` / `local -n`。部
 
 | 项 | 约定 |
 |----|------|
-| 唯一入口 | `scripts/chezmoi/chezmoi_core.sh` → `chezmoi_detect_proxy` / `chezmoi_setup_proxy` |
+| 唯一入口 | `scripts/lib/chezmoi/chezmoi_core.sh` → `chezmoi_detect_proxy` / `chezmoi_setup_proxy` |
 | 调用方 | `install.sh`、`deploy.sh`、`manage_dotfiles.sh`（`prepare_chezmoi_session_env`）、`install_chezmoi.sh` |
 | 默认行为 | 无 env 时：WSL → 先在宿主机（resolv nameserver）按 `PROXY_PROBE_PORTS` 探测（7890 优先、兼容 17890），失败回退 `http://<nameserver>:7890`；headless 原生 Linux → 探测 `PROXY_PROBE_PORTS`（VPS mihomo **17890**）；Windows/macOS/桌面 Linux → `127.0.0.1:7890` |
 | 通用探测（2026-08-01） | `chezmoi_discover_proxy_url_on_host <host>` 对任意 host 按 `PROXY_PROBE_PORTS` 探测；`chezmoi_discover_headless_proxy_url` 为其 127.0.0.1 封装；WSL 判定已补 `WSLENV`（detect_platform.sh / install_helpers.sh，与 agent-config os.sh 对齐） |
@@ -303,7 +306,7 @@ macOS 默认 `/bin/bash` 为 **3.2**，不支持 `declare -A` / `local -n`。部
 | auto-update | `HOMEBREW_NO_AUTO_UPDATE=1`（与 `UPDATE_HOMEBREW` 默认跳过一致） |
 | Intel 升级 | 叶子 formula **默认仍 upgrade**（含源码）；`HOMEBREW_NO_ENV_HINTS=1`；`HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK=1` 不顺带升级 unrelated dependents。dry-run 依赖段含 imagemagick/llvm 等 → **跳过该 upgrade**（仅 Intel） |
 | clangd | brew **无** `clangd` formula；ensure 已装则跳过 `clangd`/`clang`/`clang-tools-extra` 模糊搜索 |
-| 配置入口 | `run_on_darwin/run_once_configure-homebrew.sh.tmpl` 在跳过 update 时仍可切 remote；[5/6] 报 Missing 可忽略（非命令） |
+| 配置入口 | `run_once_macos-configure-homebrew.sh.tmpl` 在跳过 update 时仍可切 remote；[5/6] 报 Missing 可忽略（非命令） |
 | 文档 | [INSTALL_GUIDE.md](INSTALL_GUIDE.md)「macOS Homebrew 网络」 |
 
 | 问题 | 原因 | 解决 |
@@ -321,11 +324,84 @@ macOS 默认 `/bin/bash` 为 **3.2**，不支持 `declare -A` / `local -n`。部
 | 禁止提交 | `.chezmoi/dot_zshrc` 等非 `*.tmpl` 源（见 `.gitignore`） |
 | 恢复 | 若工作区仅有 `dot_zshrc`：`git checkout HEAD -- .chezmoi/dot_zshrc.tmpl` 后删除 `dot_zshrc` |
 
+## 项目结构与 chezmoi 机制契约（2026-09 P1–P6，实测）
+
+> **改结构 / 加脚本前必读**。验证环境：chezmoi **v2.68.1**（commit `3a8df1b`）。
+> 三条与旧文档/直觉相反的结论：`.chezmoiscripts/` **不是**特殊目录、`.chezmoiignore` **不支持 `!` 取反**、
+> 重命名 `run_once_*` **不会**重跑。
+
+### 目录分层契约（先分类再写代码）
+
+| 层 | 路径 | 契约 |
+|----|------|------|
+| **库** | `scripts/lib/`（`common.sh` + `scripts/lib/chezmoi/` 13 个文件） | 被 `source`：**不设 `+x`**、**禁止 `set -euo pipefail`**（会污染调用方 shell 选项）、不调 `start_script`/`end_script`、加载时无副作用；被 `$()` 捕获的函数**结果走 stdout、日志必须走 stderr** |
+| **chezmoi 入口** | `scripts/chezmoi/` | **仅可执行入口**（`install_chezmoi` / `verify_installation` / `diagnose_chezmoi` / `ensure_ssh_prereqs` / `ensure_platform_software` / `audit_configs`），**不放库** |
+| **部署辅助** | `scripts/deploy_utils/` | 可执行（`#!/usr/bin/env bash` + `set -euo pipefail` + `chmod +x` 必需） |
+| **独立工具** | `scripts/tools/`（9 个子目录） | 可执行；**永不删除**，与部署解耦 |
+| **平台专属** | `scripts/{linux,windows}/` | 可执行；macOS 专属为 `.chezmoi/run_once_macos-*.tmpl` |
+
+- **`scripts/common/` 已取消**（2026-09）：`scripts/common.sh` → `scripts/lib/common.sh`；
+  `scripts/common/deploy_utils/` → `scripts/deploy_utils/`；`scripts/common/*` 工具 → `scripts/tools/*`；
+  `scripts/chezmoi/*` 库 → `scripts/lib/chezmoi/`；`ffmpeg-magic` → **`ffmpeg_magic`**。
+- **判断法**：文件被别的脚本 `source` → **库**；被 `bash <file>` 执行 → **入口**。
+- **命名分区**：普通脚本区（`scripts/**`）一律 **snake_case**；模板区（`.chezmoi/`）保留 chezmoi 连字符约定
+  （`run_once_install-*.sh.tmpl`），**禁止跨区混用**。
+- **库的幂等**：库内 `readonly` 重复 source 会报错 → 加载前用**独有函数探针**守卫：
+
+```bash
+if ! declare -F echo_color_message >/dev/null 2>&1; then
+    source "${_COMMON_SH_PATH}"
+fi
+```
+
+### chezmoi 机制实测（反直觉，务必遵守）
+
+| 机制 | 实测结论 |
+|------|----------|
+| `run_once_*` 状态键 | **`sha256(渲染后内容)`**，与路径无关 → **重命名 / 移动脚本不会重跑**，只有改内容才重跑 |
+| `.chezmoiscripts/` | v2.68.1 **不是**特殊目录（已实测）→ run_once 脚本必须放 `.chezmoi/` **源根** |
+| `.chezmoiignore` | **是模板**（可用 `.chezmoi.os`）；但**不支持 `!` 取反** —— 实测取反会让该目录下脚本一起被忽略、**永不执行** |
+| `include` 函数 | 相对**源根**解析，**不是** `.chezmoitemplates/` |
+| 含脚本的源子目录 | 会在 `$HOME` **创建同名目录**（`~/run_on_linux/` 这类空目录由此而来） |
+| 执行排序 | 按**目标名 ASCII 字母序**（剥掉 `run_once_` 与 `.tmpl`）：`00-` → `90-`/`91-`/`93-` → `install-*` → `linux-`/`macos-`/`windows-`（`'0'<'9'<'i'<'l'<'m'<'w'`） |
+| `darwin` ↔ `macos-` | 平台由**文件名前缀**表达，不是目录；`$PLATFORM` 在 macOS 为 **`darwin`** 而前缀是 **`macos-`**，映射由 `extract_software_name_from_script()` 完成（剥掉 `run_once_<platform>-` 后取语义名，如 `ghostty` / `configure-pacman`），供平台过滤、[5/6] 报告别名、升级策略共用 |
+| `run_on_*` 子目录 | **已全部移除且不得新建**（从来不是 chezmoi 平台目录）；平台专属 dotfile 放源根 + `.chezmoiignore` 按 OS 过滤 |
+
+**验证命令**（只读，安全）：
+
+```bash
+chezmoi --source .chezmoi execute-template < .chezmoi/.chezmoiignore   # 渲染后的忽略清单（当前 OS）
+chezmoi --source .chezmoi ignored                                      # 实际被忽略目标（macOS 实测 7 项）
+chezmoi --source .chezmoi managed | grep -E 'install-|^[0-9]' | sort   # 核对执行排序
+```
+
+### 质量门禁
+
+| 门禁 | 内容 |
+|------|------|
+| `tests/test_contracts.sh` | **结构 / 契约回归**（当前 24 项断言）：目录分层、库 vs 入口（`+x` 与 `set -euo pipefail`）、旧路径零容忍、文档相对链接、编码 / 换行 / 命名、**部署入口职责分离** |
+| `.github/workflows/ci.yml` | ubuntu + macos 矩阵；`test_syntax` / `test_contracts` / 全部单元测试 / 编码检查 = **硬性阻断**；shellcheck = **软性观测**（`continue-on-error`）。**只跑只读检查**，不执行 `install.sh` / `chezmoi apply` |
+| `.gitattributes` | 兜底 `* text=auto eol=lf` **必须放在文件最前**（现第 12 行）：曾把它写在末尾，覆盖了后面所有 CRLF 规则，9 个 Windows 文件里 7 个被规范化成 LF |
+| `openspec/` | **已删除**（CLI 从未安装、`specs/`/`changes/` 从未建立、零代码引用）；如需规范驱动开发重新 `openspec init` |
+
+### 本轮修复的高危缺陷（有回归价值）
+
+| # | 缺陷 | 后果 | 修复 |
+|---|------|------|------|
+| B6 | 12 个脚本的 `$SCRIPT_DIR/../../../common.sh` 层数错（库下沉一层后） | **100% 崩溃**，其中 11 个 exit 1 | 按新深度修正相对层数；**改目录深度后必须 `bash <script>` 实跑**，只跑 `bash -n` 查不出来 |
+| B7 | `chezmoi_run_status` / `chezmoi_run_diff` 日志打到 **stdout** | `install.sh` 的「已最新则跳过 apply」判定被污染 → **快速路径成死代码**，每次 install 都全量 apply | 函数内日志改 `>&2`，stdout 只留纯结果（现 `chezmoi_apply.sh:351/358`） |
+| B8 | `grep -c ... \|\| echo "0"` | `grep -c` 无匹配时**已输出 `0` 且退出码 1** → 捕获到 `"0\n0"`，数值比较崩溃 | 全部改为 `grep -c ... \|\| true` |
+| B9 | `common_install.sh` **从未 source `common.sh`** | 28 个 run_once 模板静默落到 4 函数兜底实现 | 加载前加探针守卫 `declare -F echo_color_message`（`common_install.sh:16-21`） |
+| B0 | `deploy.sh` 曾被 `install.sh` 的内容**整体覆盖** | 增量部署入口丢失诊断逻辑 | 由 `git show HEAD:deploy.sh` 恢复并迁移路径；新增 6 项断言守护（`cmp -s install.sh deploy.sh` 必须不同、`install.sh` 含 `[1/6]`、`deploy.sh` 含 `DIAGNOSE_SCRIPT`） |
+
 ## 通用 Agent 约束（摘要）
 
-1. 独立工具脚本（`scripts/common/standalone_tool_script/` 等）**永不删除**。
+1. 独立工具脚本（`scripts/tools/standalone_tool_script/` 等）**永不删除**。
 2. 部署变更仅通过 chezmoi 模板 + `manage_dotfiles.sh` / `install.sh` / `deploy.sh`。
-3. 运行时日志英文；注释与文档中文。
+3. 运行时日志**分而治之**：库与被管道消费的脚本用英文，面向用户的交互脚本中文可接受；日志前缀一律英文。注释与文档一律中文。
 4. Windows run_once **无管理员**依赖。
 5. **WSL 与 Windows 完全独立**：各 OS 的 `$HOME`/fnm/npm/chezmoi 目标不共享。WSL 里 `install.sh` **只装 WSL**，与宿主机 npm **无关**。WSL 本机 fnm 可在 `/mnt/host/wslg/runtime-dir/fnm_multishells`；Windows npm 在 `/mnt/c`、`/mnt/host/c`、`AppData/Roaming/npm`。禁止从 WSL 改 Windows 包或调用 `cmd.exe`。见 `.cursor/rules/wsl-windows-isolation.mdc`。
 6. 紧凑记忆索引：[PROJECT_MEMORY.md](PROJECT_MEMORY.md)；变更时同步 `AGENTS.md`、`CLAUDE.md`、`.cursor/rules/`。
+7. **禁止新建 `run_on_*/` 子目录**（从来不是 chezmoi 平台目录）：平台专属**脚本**用 `run_once_{linux,macos,windows}-*` 前缀；平台专属 **dotfile** 放源根 + `.chezmoiignore` 按 OS 过滤。详见上文「chezmoi 机制实测」。
+8. **部署入口职责分离**：`install.sh`（首次安装，含 `[1/6]`…`[6/6]`）≠ `deploy.sh`（增量 + 诊断 + 锁处理）；由 `tests/test_contracts.sh` 断言守护，**勿互相整体覆盖**。
+9. **改库目录深度后必须实跑脚本**（`bash <script>`，不能只 `bash -n`）；`root`/相对路径层数错会让脚本 100% 崩溃（见 B6）。

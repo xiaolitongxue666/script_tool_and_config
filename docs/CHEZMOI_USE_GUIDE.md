@@ -1,5 +1,10 @@
 # chezmoi 使用指南
 
+> ⚠️ **命令已更正（2026-09）**：chezmoi CLI **不读** `CHEZMOI_SOURCE_DIR` 环境变量。
+> 本文档历史版本中的 `export CHEZMOI_SOURCE_DIR=... && chezmoi ...` 写法**无效**，
+> 已统一替换为 `./scripts/manage_dotfiles.sh <cmd>`（内部用 `--config` 指定 sourceDir）。
+> 直接调 chezmoi 时须显式带 `--source <repo>/.chezmoi`（或 `--config ~/.config/chezmoi/chezmoi.toml`）。
+
 本指南介绍如何使用 chezmoi 管理 dotfiles 配置。
 
 ## 目录
@@ -61,7 +66,7 @@ git clone <repo-url>
 cd script_tool_and_config
 
 # 设置源状态目录
-export CHEZMOI_SOURCE_DIR="$(pwd)/.chezmoi"
+# chezmoi 不读 CHEZMOI_SOURCE_DIR；用 ./scripts/manage_dotfiles.sh <status|diff|apply>
 
 # 应用所有配置
 chezmoi apply -v
@@ -82,7 +87,7 @@ chezmoi apply -v
 ./scripts/manage_dotfiles.sh install
 
 # 或手动设置
-export CHEZMOI_SOURCE_DIR="$(pwd)/.chezmoi"
+# chezmoi 不读 CHEZMOI_SOURCE_DIR；用 ./scripts/manage_dotfiles.sh <status|diff|apply>
 ```
 
 ### 核心操作命令
@@ -335,8 +340,8 @@ chezmoi 支持 `run_once_` 前缀的脚本，这些脚本只会在首次应用�
 .chezmoi/run_once_install-neovim.sh.tmpl
 
 # 平台特定安装脚本
-.chezmoi/run_on_linux/run_once_install-i3wm.sh.tmpl
-.chezmoi/run_on_darwin/run_once_install-yabai.sh.tmpl
+.chezmoi/run_once_install-i3wm.sh.tmpl
+.chezmoi/run_once_install-yabai.sh.tmpl
 ```
 
 ### 自动提交和推送
@@ -405,7 +410,7 @@ SSH 配置文件（`~/.ssh/config`）已纳入 chezmoi 管理，可以通过 laz
 - **macOS**：必须使用 **connect 的绝对路径**（`macos_connect_path`）：Apple Silicon 多为 `/opt/homebrew/bin/connect`，Intel 多为 `/usr/local/bin/connect`。若只写 `connect`，从 Dock/Spotlight 启动的 GUI（如 Obsidian Git）会因 PATH 不含该目录而报 `exec: connect: not found` 导致 push 失败。代理类型由 `macos_proxy_connect_opt` 控制（`-H` HTTP / `-S` SOCKS）。
 - **Linux**：使用 `nc -X connect -x ...`，需 netcat-openbsd。
 
-详见 `scripts/common/deploy_utils/SSH_CONFIG_SETUP.md`。
+详见 `docs/SSH_CONFIG_SETUP.md`。
 
 ### 首次纳入管理
 
@@ -413,12 +418,12 @@ SSH 配置文件（`~/.ssh/config`）已纳入 chezmoi 管理，可以通过 laz
 
 ```bash
 # 1. 备份现有配置（SSH + Git）
-./scripts/common/deploy_utils/backup_ssh_config.sh
-./scripts/common/deploy_utils/backup_git_config.sh
+./scripts/deploy_utils/backup_ssh_config.sh
+./scripts/deploy_utils/backup_git_config.sh
 
 # 2. 将配置纳入 chezmoi 管理
-export CHEZMOI_SOURCE_DIR="$(pwd)/.chezmoi"
-chezmoi add ~/.ssh/config
+# chezmoi 不读 CHEZMOI_SOURCE_DIR；原文的 `export ...` 写法无效
+./scripts/manage_dotfiles.sh add
 
 # 3. 验证配置
 chezmoi diff ~/.ssh/config
@@ -439,7 +444,7 @@ git push
 
 ```bash
 # 方法一：使用部署脚本（推荐）
-./scripts/common/deploy_utils/setup_ssh_config.sh
+./scripts/deploy_utils/setup_ssh_config.sh
 
 # 方法二：手动部署
 # 1. 确保 ~/.ssh 目录存在
@@ -447,8 +452,8 @@ mkdir -p ~/.ssh
 chmod 700 ~/.ssh
 
 # 2. 应用配置
-export CHEZMOI_SOURCE_DIR="$(pwd)/.chezmoi"
-chezmoi apply ~/.ssh/config
+# chezmoi 不读 CHEZMOI_SOURCE_DIR；原文的 `export ...` 写法无效
+./scripts/manage_dotfiles.sh apply
 chmod 600 ~/.ssh/config
 ```
 
@@ -493,8 +498,8 @@ chezmoi status ~/.ssh/config
 
 ```bash
 # 使用备份脚本（SSH + Git）
-./scripts/common/deploy_utils/backup_ssh_config.sh
-./scripts/common/deploy_utils/backup_git_config.sh
+./scripts/deploy_utils/backup_ssh_config.sh
+./scripts/deploy_utils/backup_git_config.sh
 
 # 或手动备份
 cp ~/.ssh/config ~/.ssh/config.backup.$(date +%Y%m%d_%H%M%S)
@@ -673,7 +678,7 @@ Cursor 编辑器 `User/settings.json` **不由本仓库 chezmoi 管理**（已�
 |------|--------|----------------|
 | Cursor 编辑器 User settings | 已迁移至 **agent-config** | `platforms/cursor/settings/editor-settings.jsonc` + `render-cursor-editor-settings.sh` |
 | macOS / Windows | agent-config 同步 | `sync-cursor-editor-settings.sh` → App Support / `%APPDATA%` |
-| clangd 二进制 / Cursor clangd 扩展 | 本仓库 | [CURSOR_CLANGD.md](CURSOR_CLANGD.md) + `scripts/common/cursor_clangd/`；`run_once_install-clangd`（无 GUI 也可装二进制） |
+| clangd 二进制 / Cursor clangd 扩展 | 本仓库 | [CURSOR_CLANGD.md](CURSOR_CLANGD.md) + `scripts/tools/cursor_clangd/`；`run_once_install-clangd`（无 GUI 也可装二进制） |
 
 **无 GUI（Linux/WSL 无 DISPLAY/WAYLAND）**：`run_once_93-install-cursor` **跳过**，不装 Cursor。clangd 仍可由 `run_once_install-clangd` 安装。WSL 上需把扩展装到 **Remote（WSL）侧**，详见 [CURSOR_CLANGD.md](CURSOR_CLANGD.md)。
 
@@ -688,7 +693,7 @@ VPS Host 名与路径在 **agent-config** 的 `config/local.env`（复制 `confi
 手动装扩展（已有 `cursor` CLI 时，含 WSL Remote）：
 
 ```bash
-bash scripts/common/cursor_clangd/setup_cursor_clangd.sh
+bash scripts/tools/cursor_clangd/setup_cursor_clangd.sh
 ```
 
 ### Remote SSH CLI
@@ -829,7 +834,7 @@ chezmoi apply -v
 chezmoi --source="$(pwd)/.chezmoi" apply -v --force
 ```
 
-配置路径映射见 `scripts/chezmoi/config_mappings.sh`。Windows rmux 专项见 [RMUX_WINDOWS.md](RMUX_WINDOWS.md)。
+配置路径映射见 `scripts/lib/chezmoi/config_mappings.sh`。Windows rmux 专项见 [RMUX_WINDOWS.md](RMUX_WINDOWS.md)。
 
 #### 1b. Windows run_once 报「%1 is not a valid Win32 application」
 
@@ -1046,8 +1051,8 @@ extract file.zip  # 解压文件
 
 ```bash
 cd ~/Code/DotfilesAndScript/script_tool_and_config
-export CHEZMOI_SOURCE_DIR="$(pwd)/.chezmoi"
-chezmoi apply ~/.zshrc
+# chezmoi 不读 CHEZMOI_SOURCE_DIR；原文的 `export ...` 写法无效
+./scripts/manage_dotfiles.sh apply
 source ~/.zshrc
 ```
 

@@ -3,14 +3,14 @@
 
 # ============================================
 # 通用工具安装（chezmoi run_once_）
-# 包名 SSOT：scripts/chezmoi/packages.conf（经 software_policies.sh）
+# 包名 SSOT：scripts/lib/chezmoi/packages.conf（经 software_policies.sh）
 # ============================================
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="${CHEZMOI_PROJECT_ROOT:-$(cd "${SCRIPT_DIR}/../.." && pwd 2>/dev/null || echo "$HOME")}"
-COMMON_INSTALL="${PROJECT_ROOT}/scripts/chezmoi/common_install.sh"
+COMMON_INSTALL="${PROJECT_ROOT}/scripts/lib/chezmoi/common_install.sh"
 if [ ! -f "$COMMON_INSTALL" ]; then
-    COMMON_INSTALL="$HOME/.local/share/chezmoi/scripts/chezmoi/common_install.sh"
+    COMMON_INSTALL="$HOME/.local/share/chezmoi/scripts/lib/chezmoi/common_install.sh"
 fi
 if [ -f "$COMMON_INSTALL" ]; then
     # shellcheck disable=SC1090
@@ -23,7 +23,7 @@ fi
 export PROXY="${PROXY:-{{ env "http_proxy" | default "http://127.0.0.1:7890" }}}"
 load_run_once_context "$SCRIPT_DIR" "install-common-tools" || exit 1
 
-SOFTWARE_POLICIES="${PROJECT_ROOT}/scripts/chezmoi/software_policies.sh"
+SOFTWARE_POLICIES="${PROJECT_ROOT}/scripts/lib/chezmoi/software_policies.sh"
 if [ -f "$SOFTWARE_POLICIES" ]; then
     # shellcheck disable=SC1090
     source "$SOFTWARE_POLICIES"
