@@ -103,7 +103,11 @@ done < <(find scripts/chezmoi scripts/deploy_utils scripts/linux scripts/windows
 # ============================================
 head2 "文档链接"
 
+# 只校验「仓内」相对链接。指向同级仓库的跨仓链接（如 ../../AI/agent-config）
+# 在 CI 单仓检出下必然不可解析，属本测试的辖区之外，单独计数跳过。
+REPO_ROOT="$(pwd -P)"
 link_broken=0
+link_crossrepo=0
 while IFS= read -r md; do
     [[ -f "$md" ]] || continue
     dir="$(dirname "$md")"
@@ -113,12 +117,27 @@ while IFS= read -r md; do
         # 去掉锚点
         t="${target%%#*}"
         [[ -n "$t" ]] || continue
+        # 目标所在目录能否解析到仓库外 → 跨仓链接，跳过。
+        # 注意：不能直接用 dirname 解析（中间层级可能不存在，如 ../../AI/agent-config
+        # 的 ../../AI 并不存在），须向上回退到第一个真实存在的祖先再判断。
+        probe="${dir}/${t}"
+        while [[ ! -e "$probe" ]]; do
+            parent="$(dirname "$probe")"
+            [[ "$parent" == "$probe" ]] && break
+            probe="$parent"
+        done
+        # probe 可能是文件（目标就是外部文件）→ 取其所在目录再判断
+        [[ -f "$probe" ]] && probe="$(dirname "$probe")"
+        resolved="$(cd "$probe" 2>/dev/null && pwd -P)" || resolved=""
+        if [[ -n "$resolved" ]] && [[ "$resolved" != "$REPO_ROOT"* ]]; then
+            link_crossrepo=$((link_crossrepo + 1)); continue
+        fi
         if [[ ! -e "${dir}/${t}" ]]; then
             echo "       ✗ ${md} → ${target}"; link_broken=$((link_broken + 1))
         fi
     done < <(grep -oE '\]\([^)#]+' "$md" 2>/dev/null | sed 's/^](//')
 done < <(find docs scripts/chezmoi scripts/deploy_utils scripts/tools scripts/linux scripts/windows -name '*.md' 2>/dev/null; echo README.md; echo AGENTS.md; echo CLAUDE.md)
-[[ "$link_broken" -eq 0 ]] && ok "文档相对链接全部可解析" \
+[[ "$link_broken" -eq 0 ]] && ok "仓内文档链接全部可解析（跨仓链接 ${link_crossrepo} 处跳过）" \
     || bad "$link_broken 个失效文档链接"
 
 # ============================================
