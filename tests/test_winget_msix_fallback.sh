@@ -104,9 +104,26 @@ case "$deps" in
 esac
 
 # --- OMP GitHub asset name ---
+# 该函数只在 Windows（Git Bash）上被调用，用 uname -m 判架构（Git Bash 的 uname -m
+# 正确反映 Windows 宿主架构）。直接断言会让期望值随 runner 架构漂移 ——
+# GitHub 的 macos-latest 已是 arm64，会误判为失败。
+# 因此用 PATH 上的假 uname 固定架构，使断言与宿主无关，并顺带覆盖 arm64 分支。
+_fake_uname_arch() {
+    local arch="$1" d
+    d="$(mktemp -d)"
+    printf '#!/bin/sh\necho %s\n' "$arch" > "${d}/uname"
+    chmod +x "${d}/uname"
+    ( hash -r; PATH="${d}:${PATH}"; oh_my_posh_windows_github_asset )
+    rm -rf "$d"
+}
+
 assert_eq "OMP windows amd64 asset name" \
     "posh-windows-amd64.exe" \
-    "$(oh_my_posh_windows_github_asset)"
+    "$(_fake_uname_arch x86_64)"
+
+assert_eq "OMP windows arm64 asset name" \
+    "posh-windows-arm64.exe" \
+    "$(_fake_uname_arch aarch64)"
 
 # Windows PATH 上可能仍是旧 oh-my-posh；成功日志必须报刚写入的 dest 版本
 if grep -q 'oh-my-posh installed to ${dest} ($("$dest" --version' \
