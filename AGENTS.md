@@ -578,9 +578,15 @@ ensure_directory() {
 │   ├── windows/                # Windows 专属（system_basic_env、windows_scripts）
 │   ├── manage_dotfiles.sh      # dotfiles 运维入口
 │   └── README.md
-├── tests/                      # 测试目录
-│   ├── test_syntax.sh          # 批量语法检查
-│   └── test_proxy.sh           # 代理逻辑测试
+├── tests/                      # 测试目录（8 个；全部纳入 CI 硬性阻断）
+│   ├── test_contracts.sh       # ★ 结构与命名契约（目录分层/库vs入口/+x/链接/格式/部署入口）
+│   ├── test_syntax.sh          # 全仓 .sh/.tmpl 语法检查 + 全角标点回归
+│   ├── test_proxy.sh           # 代理地址检测/补全逻辑
+│   ├── test_semver_compare.sh  # 版本号比较
+│   ├── test_software_policies.sh    # software_policies 策略与脚本发现
+│   ├── test_install_report_status.sh # install [5/6] 软件报告状态
+│   ├── test_winget_msix_fallback.sh # winget MSIX sideload 回退与主包选择
+│   └── test_bashrc_prompt_guard.sh  # bashrc 提示符 / TERM 守卫
 ├── docs/                       # 文档目录
 │   └── PROJECT_STRUCTURE.md    # 项目结构权威文档
 ```
@@ -606,6 +612,18 @@ ensure_directory() {
 
 **换行符**：已由 `.gitattributes` 统一（见 `docs/ENCODING_AND_LINE_ENDINGS.md`），
 **不要**再单独 `git config core.autocrlf`——会与 `.gitattributes` 叠加产生二次转换。
+
+⚠️ **`.gitattributes` 规则顺序陷阱**：catch-all 规则 `* text=auto eol=lf`
+**必须写在文件最前面**。它若排在末尾，会覆盖其后所有更具体的规则
+（如 Windows 脚本的 `*.bat text eol=crlf`），把 `.bat`/`.ps1`/`.cmd` 静默转成 LF。
+（2026-09 实测踩坑：catch-all 置尾导致 8 个 Windows 文件被误转，需重新规范化。）
+
+改完 `.gitattributes` 后用 `git check-attr` 逐类验证，不要只看文件内容：
+
+```bash
+git check-attr text eol -- install.sh deploy.sh scripts/windows/windows_scripts/open_multi_vlc.bat
+# 期望：.sh → eol: lf；.bat → eol: crlf
+```
 
 
 ## 开发工作流程
@@ -660,7 +678,7 @@ bash tests/test_syntax.sh           # 3) 全仓回归（含全角标点 + 编码
 | 系统配置       | `linux/system_basic_env/`  | `configure_<配置名>.sh` | `configure_china_mirrors.sh`  |
 | 工具脚本       | `tools/standalone_tool_script/` | `<动作>_<对象>.sh`       | `get_directory_name.sh`       |
 | 项目工具       | `tools/project_tools/`    | `<动作>_<对象>.sh`       | `generate_cmake_lists.sh`     |
-| FFmpeg 工具    | `tools/ffmpeg_magic/`（待改 `ffmpeg_magic/`） | 见目录内脚本 | `open_multiple_ffmpeg_srt.sh`  |
+| FFmpeg 工具    | `tools/ffmpeg_magic/`      | 见目录内脚本             | `open_multiple_ffmpeg_srt.sh`  |
 | 测试脚本       | 各目录                        | `test_<功能>.sh`       | `test_mirrors.sh`             |
 | Windows 脚本 | `windows/windows_scripts/` | `<功能描述>.bat`         | `open_multi_vlc.bat`          |
 

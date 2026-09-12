@@ -197,9 +197,20 @@ chezmoi 按**目标名**（剥掉 `run_once_` 与 `.tmpl`）的字母序执行�
 
 ### 测试
 
-- `tests/test_syntax.sh` — 批量语法检查，输出到 `logs/`
-- `tests/test_proxy.sh` — 代理检测逻辑测试
-- 所有测试脚本输出到 `logs/` 目录
+`tests/` 共 **8 个**测试，全部纳入 CI 硬性阻断：
+
+- `tests/test_contracts.sh` — ★ 结构与命名契约（目录分层 / 库 vs 入口 / `+x` / 文档链接 / 格式 / 部署入口唯一性）
+- `tests/test_syntax.sh` — 全仓 `.sh`/`.tmpl` 语法检查 + 全角标点回归，输出到 `logs/`
+- `tests/test_proxy.sh` — 代理地址检测/补全逻辑
+- `tests/test_semver_compare.sh` — 版本号比较
+- `tests/test_software_policies.sh` — software_policies 策略与脚本发现
+- `tests/test_install_report_status.sh` — `install.sh [5/6]` 软件报告状态
+- `tests/test_winget_msix_fallback.sh` — winget MSIX sideload 回退与主包选择
+- `tests/test_bashrc_prompt_guard.sh` — bashrc 提示符 / TERM 守卫
+
+- 统一入口：`for t in tests/test_*.sh; do bash "$t"; done`
+- 测试的临时目录写在 `logs/` 下（自身 `mkdir -p`，故 `logs/` 可安全删除，会自动重建）
+- **新增测试须与宿主环境解耦**（不要断言 `uname -m`/宿主路径等；CI 的 `macos-latest` 已是 arm64）
 
 ## chezmoi 模板说明
 
