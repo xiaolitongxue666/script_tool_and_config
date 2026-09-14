@@ -82,7 +82,7 @@ Pi 的安装、Harness、文档 **不在本仓库**。唯一 SSOT：[agent-confi
 | 项 | 约定 |
 |----|------|
 | apply 参数 | **必须** `-v --force`；`chezmoi_run_apply` 与 `manage_dotfiles.sh apply` 已自动补 `--force` |
-| 全量安装 shell | Git Bash **`--noprofile --norc`**（避免 login 配置污染 stdout → override-data 空 / WT 模板失败） |
+| 全量安装 shell | Git Bash **`--noprofile --norc`**（避免 login 配置污染 stdout → override-data 空 / WT 模板失败）。须用 Git for Windows `bash.exe`；**勿**用 Cursor/msys64 `/c/msys64/usr/bin/bash` 或 `C:\Windows\system32\bash`（WSL 启动器） |
 | 禁止 | 对 apply 使用 `\| head` / `\| rg`（SIGPIPE）；在 Windows 依赖 `diagnose_deployment.sh` 的 `apply --dry-run` |
 | 锁 | 中断 apply 后可能残留 `chezmoi.exe` → `timeout obtaining persistent state lock` |
 | 修复 | `taskkill //F //IM chezmoi.exe` → `bash scripts/deploy_utils/fix_chezmoi_lock.sh` → 再 apply |
