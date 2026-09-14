@@ -485,7 +485,7 @@ ensure_directory() {
 ### 平台特定代码
 
 - 项目支持多 OS（Win10、macOS Intel、Linux Ubuntu/Arch）与 WSL（Ubuntu）；WSL 视为 Linux，共用 Linux 专属脚本（`run_once_linux-*`），脚本内通过 WSL 检测区分代理与路径。
-- **WSL 与 Windows 宿主机完全独立**：`$HOME`/fnm/npm/chezmoi 目标不共享。WSL 里跑 `install.sh` **只装 WSL**，与宿主机 npm **无关**（宿主机仅 Clash `:7890` 出口）。`/mnt/host/wslg/.../fnm_multishells` 是 WSL 本机 fnm；`/mnt/c`、`/mnt/host/c` 才是 Windows。禁止从 WSL 改 Windows npm 或调用 `cmd.exe`。见 `.cursor/rules/wsl-windows-isolation.mdc`。
+- **多 OS 兼容、环境独立**：一套脚本能跑各 OS，`$HOME`/fnm/npm/chezmoi 不共享；平台专有分支不得改其它 OS。WSL 里跑 `install.sh` **只装 WSL**，与宿主机 npm **无关**（宿主机仅 Clash `:7890` 出口）。`/mnt/host/wslg/.../fnm_multishells` 是 WSL 本机 fnm；`/mnt/c`、`/mnt/host/c` 才是 Windows。禁止从 WSL 改 Windows npm 或调用 `cmd.exe`。见 `.cursor/rules/wsl-windows-isolation.mdc`。
 - 平台专属**脚本**：源根 + `run_once_{linux,macos,windows}-*` 前缀；平台专属 **dotfile**：源根 +
   `.chezmoiignore` 的 OS 条件过滤。**禁止**新建 `run_on_*/` 子目录（详见上文「chezmoi 平台目录陷阱」）。
 - 安装脚本中的平台特定逻辑使用模板条件判断

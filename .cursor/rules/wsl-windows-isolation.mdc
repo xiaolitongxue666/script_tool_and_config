@@ -1,20 +1,34 @@
 ---
-description: WSL 与 Windows 宿主机环境隔离（多 OS 独立）
+description: 多 OS 兼容且环境独立（WSL 与 Windows 不混用）
 alwaysApply: true
 ---
 
-# WSL / Windows 环境隔离
+# 多 OS 兼容 · 环境独立
 
-script_tool_and_config 兼容 Windows Git Bash、WSL、macOS、Linux。**每个环境完全独立**：`$HOME`、fnm、npm global、chezmoi 目标目录都不共享。
+script_tool_and_config **一套脚本**兼容 Windows Git Bash、WSL、macOS、Linux。**兼容不等于共用状态**。
 
-在 WSL 里跑 `install.sh` / `deploy.sh` **只安装 WSL 这一套**，与 Windows 宿主机的 npm / CLI **无关**。不要用 Windows 上的 `claude`/`codex` 证明 WSL 已装，也不要从 WSL 改 Windows 包。
+| 维度 | 含义 |
+|------|------|
+| 兼容 | 同一仓库在各 OS 能跑；跨平台函数可共用 |
+| 独立 | 每个 OS / 每个 WSL distro 各自一套 `$HOME`、fnm、npm global、chezmoi 目标 |
+| 不串味 | 当前环境的安装、升级、卸载、已装判定、PATH **只写/只认本环境**；平台专有分支不得改其它 OS 的文件或前缀 |
+
+一次 `install.sh` / `deploy.sh` **只服务正在跑的那一套**。WSL 与 Windows 宿主机尤其容易混：同机、能看见对方磁盘，但 **不是同一套软件**。
+
+## WSL 与 Windows
+
+在 WSL 里跑入口 **只装 WSL**，与宿主机 npm / CLI **无关**。不要用 Windows 上的 `claude`/`codex` 证明 WSL 已装，也不要从 WSL 改 Windows 包。
+
+- `/mnt/host/wslg/runtime-dir/fnm_multishells` 是 WSLg 下的 **WSL 本机** fnm，不是 Windows。
+- `/mnt/c`、`/mnt/d`、`/mnt/host/c`、`C:\`、`AppData/Roaming/npm` 在 WSL 里是 **Windows interop**，不算本机已装。
+- `:7890` 只是网络出口，不是环境混合。
 
 ## 必须
 
-- WSL 安装/升级只用 **WSL 内** fnm/npm。`/mnt/host/wslg/runtime-dir/fnm_multishells` 是 WSLg 下的 **WSL 本机** fnm，不是 Windows。
-- 已装判定看当前环境的 `command -v` / `npm prefix -g` / `npm root -g`。Windows 盘符（`/mnt/c`、`/mnt/d`、`/mnt/host/c`、`C:\`、`AppData/Roaming/npm`）在 WSL 里 **不算已装**。
-- 各 OS / 各 WSL distro 分别跑 `install.sh` / `deploy.sh`；Phase 2 在对应环境再跑 agent-config `install-tools.sh`。
-- 代理可以指向宿主机 Clash `:7890`（网络出口），这不是软件环境混合。
+- 已装判定看**当前环境**的 `command -v` / `npm prefix -g` / `npm root -g`。interop 路径 **不算已装**。
+- 安装/升级只用当前环境的 fnm/npm（WSL 用 WSL 内的）。
+- 各 OS / 各 WSL distro **分别**跑 `install.sh` / `deploy.sh`；Phase 2 在对应环境再跑 agent-config `install-tools.sh`。
+- 改共享脚本时：平台专有逻辑（`run_once_windows-*` / `run_once_linux-*` / `run_once_macos-*`、Windows junction、`cmd.exe`）必须按当前 OS 门控；**不得**让 Linux/WSL 分支写 Windows 路径，也不得让 Windows 分支写 WSL/`/home` 目标。
 
 ## 禁止
 
@@ -22,5 +36,6 @@ script_tool_and_config 兼容 Windows Git Bash、WSL、macOS、Linux。**每个�
 - 从 WSL 调用 `cmd.exe` / `powershell.exe` 装、卸、清 Windows 包。
 - 把 `/mnt/host/*`、`/mnt/wslg/*`、`*fnm_multishells*` 一律当成 Windows（会误伤 WSL 本机 fnm，[4/6] 会 skip claude/codex）。
 - 用 Windows 上的 `claude`/`codex` 证明 WSL Layer 4 已装或跳过 WSL 安装。
+- 为「方便」把一套 `$HOME`/prefix 当多 OS 共用，或把某 OS 的配置复制进另一 OS 的家目录。
 
 判定实现：`_is_windows_interop_path`（[`scripts/lib/chezmoi/package_install.sh`](../../scripts/lib/chezmoi/package_install.sh)）。

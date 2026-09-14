@@ -134,9 +134,9 @@ chezmoi 按**目标名**（剥掉 `run_once_` 与 `.tmpl`）的字母序执行�
 - **chezmoi 不读取 `CHEZMOI_SOURCE_DIR` 环境变量**；`sourceDir` 须写在 `~/.config/chezmoi/chezmoi.toml`（`chezmoi_ensure_user_config`）。配置路径映射单一来源：`scripts/lib/chezmoi/config_mappings.sh`
 - Windows：`[interpreters.sh]` 必须指向 Git Bash，否则 run_once 报 `%1 is not a valid Win32 application`
 
-### WSL 与 Windows 隔离
+### 多 OS 兼容 · 环境独立
 
-- 各 OS / WSL 的 `$HOME`、fnm、npm global **完全独立**，须在对应环境各跑一遍 install/apply
+- 一套脚本兼容 Win/WSL/macOS/Linux；**兼容不等于共用状态**。各 OS / WSL 的 `$HOME`、fnm、npm global **独立**，须在对应环境各跑一遍 install/apply；平台专有分支不得改其它 OS
 - WSL 里跑 `install.sh` **只装 WSL**，与宿主机 Windows npm **无关**（`:7890` 只是网络出口）
 - 当前在 WSL：只用 WSL fnm/npm。`/mnt/host/wslg/runtime-dir/fnm_multishells` 是 **WSL 本机**，不是 Windows
 - `/mnt/c`、`/mnt/host/c`、`C:\`、`AppData/Roaming/npm` 在 WSL 里不算已装；禁止从 WSL 改 Windows npm 或调用 `cmd.exe`
