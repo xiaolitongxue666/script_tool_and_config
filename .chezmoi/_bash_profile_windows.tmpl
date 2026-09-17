@@ -234,8 +234,8 @@ alias open='explorer'
 # Make 命令（使用 MinGW 版本）
 alias make='mingw32-make'
 
-# Python 别名
-alias python='python3.10'
+# Python：走 PATH 上的 uv managed 解释器，不 alias 钉死 3.10
+# （UV_PYTHON_PREFERENCE=only-managed；不 export PYTHONHOME）
 
 # Lua 别名（可选，已注释）
 # alias lua='lua5.1'

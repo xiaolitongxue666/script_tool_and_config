@@ -6,7 +6,7 @@ Different platforms use different default shells. Template files are maintained 
 
 - **macOS / Linux / WSL** → zsh → `.chezmoi/dot_zshrc.tmpl`
 - **Windows Terminal** → `.chezmoi/dot_config/windows-terminal/settings.json.tmpl` (host only)
-- **Windows Git Bash** → `.chezmoi/dot_bashrc.tmpl` (windows branch) + `_bash_profile_windows.tmpl` (source root, include-only)
+- **Windows Git Bash** → `.chezmoi/dot_bashrc.tmpl` (windows branch) + `_bash_profile_windows.tmpl` (source root, include-only; uv glob + `UV_PYTHON_PREFERENCE=only-managed`, no `PYTHONHOME`, no `alias python=python3.10`)
 - **Windows multiplexer** → rmux (`dot_rmux.conf.tmpl`, manual start; no WT auto-attach)
 - **Linux/macOS multiplexer** → tmux (`dot_tmux.conf.tmpl` + TPM)
 - **Linux (bash fallback)** → bash → `.chezmoi/dot_bashrc.tmpl` (linux branch)

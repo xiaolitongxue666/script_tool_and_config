@@ -490,6 +490,7 @@ ensure_directory() {
   `.chezmoiignore` 的 OS 条件过滤。**禁止**新建 `run_on_*/` 子目录（详见上文「chezmoi 平台目录陷阱」）。
 - 安装脚本中的平台特定逻辑使用模板条件判断
 - Win10 下推荐在 Git Bash 中执行 `install.sh`；若使用 Alacritty，需保证其 shell 与 PATH 与 Git Bash 一致（见 [docs/INSTALL_GUIDE.md](docs/INSTALL_GUIDE.md)）。
+- **Windows uv Python**：`_bash_profile_windows.tmpl` / `dot_zprofile.tmpl` 用 `$HOME` glob `cpython-*-windows-*` + `UV_PYTHON_PREFERENCE=only-managed`；**不** `export PYTHONHOME`，**不** `alias python=python3.10`（会钉死旧解释器并污染 peon/graphify 子进程）。
 
 ### Git 子模块
 

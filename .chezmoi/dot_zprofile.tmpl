@@ -25,13 +25,15 @@ elif [ -f /usr/local/bin/brew ]; then
     eval "$(/usr/local/bin/brew shellenv)"
 fi
 {{ else if eq .chezmoi.os "windows" }}
-# Windows Git Bash 特定路径
+# Windows：~/.local/bin + uv managed Python（glob，不钉单一版本、不设 PYTHONHOME）
 if [ -d "/c/Users/{{ .chezmoi.username }}/.local/bin" ]; then
     export PATH="/c/Users/{{ .chezmoi.username }}/.local/bin:$PATH"
 fi
-if [ -d "/c/Users/{{ .chezmoi.username }}/AppData/Roaming/uv/python" ]; then
-    export PATH="/c/Users/{{ .chezmoi.username }}/AppData/Roaming/uv/python/cpython-3.10.16-windows-x86_64-none:$PATH"
-fi
+for _uv_py in "$HOME"/AppData/Roaming/uv/python/cpython-*-windows-x86_64-none; do
+    [ -d "$_uv_py" ] && [[ ":$PATH:" != *":$_uv_py:"* ]] && export PATH="$_uv_py:$PATH"
+done
+unset _uv_py
+export UV_PYTHON_PREFERENCE="${UV_PYTHON_PREFERENCE:-only-managed}"
 {{ end }}
 
 # ============================================

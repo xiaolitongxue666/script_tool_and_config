@@ -158,7 +158,7 @@ Git for Windows 可能装在 **C:** 或 **D:**（如 `D:\Program Files\Git`）�
 | 项 | 约定 |
 |----|------|
 | Node | **fnm**（Layer 0）；新开 Git Bash 自动 `fnm env`，无需手敲 eval |
-| Python | **uv**（Layer 0）；`uv python install` 默认 **3.12**（`UV_DEFAULT_PYTHON` 覆盖） |
+| Python | **uv**（Layer 0）；`uv python install` 默认 **3.12**（`UV_DEFAULT_PYTHON` 覆盖）；PATH 用 glob `cpython-*-windows-*`；**不** `export PYTHONHOME`；**不** `alias python=python3.10` |
 | 多 Windows 用户 | **Administrator / xiaoli** 等各跑一遍 Phase 1 + Phase 2（`AppData` 不共享） |
 | WT 配置 | `settings.json.tmpl` + `detect_windows_git_paths.sh` + apply 后 `chezmoi_sync_windows_terminal_config`（C/D 盘 Git 路径） |
 

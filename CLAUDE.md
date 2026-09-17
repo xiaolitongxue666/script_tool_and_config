@@ -30,7 +30,7 @@
 - **`dot_bashrc.tmpl`** — Linux bash 与 Windows Git Bash（`OS==windows` 分支），**仅 `claude()`**
 
 > ⚠️ `_bash_profile_windows.tmpl`（源根，仅 include）**不含** claude-mem 逻辑（已实测 grep = 0 命中），
-> 它只做登录 PATH 与 `source ~/.bashrc`。`claude-global()` **仅存在于 `dot_zshrc.tmpl`**，bash 下不可用。
+> 它只做登录 PATH 与 `source ~/.bashrc`。Windows uv：glob + `UV_PYTHON_PREFERENCE=only-managed`，**不** `export PYTHONHOME`，**不** `alias python=python3.10`。`claude-global()` **仅存在于 `dot_zshrc.tmpl`**，bash 下不可用。
 
 ### 功能
 

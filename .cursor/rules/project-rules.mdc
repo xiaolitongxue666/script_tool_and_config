@@ -15,7 +15,7 @@ globs:
 
 - **macOS / Linux / WSL** → `dot_zshrc.tmpl`（zsh 配置）
 - **Windows Terminal 层** → `dot_config/windows-terminal/settings.json.tmpl`（窗口/profile/字体，不含 shell 逻辑）
-- **Windows Git Bash 层** → `dot_bashrc.tmpl`（windows 分支）+ `_bash_profile_windows.tmpl`（源根，登录 PATH/代理）
+- **Windows Git Bash 层** → `dot_bashrc.tmpl`（windows 分支）+ `_bash_profile_windows.tmpl`（源根，登录 PATH/代理；uv 用 glob + `UV_PYTHON_PREFERENCE=only-managed`，不 `export PYTHONHOME`，不 `alias python=python3.10`）
 - **Linux bash（备选）** → `dot_bashrc.tmpl`（linux 分支）
 - **Windows 多路复用** → rmux（`dot_rmux.conf.tmpl`，手动 `rmux new`/`rmux a`）；Linux/macOS → tmux + TPM
 
