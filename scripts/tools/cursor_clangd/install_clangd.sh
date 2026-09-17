@@ -74,6 +74,61 @@ ensure_brew_llvm_on_path() {
     fi
 }
 
+# Windows：winget LLVM.LLVM 装完后当前 shell 常看不到 PATH（MSI 也未必写入 User PATH）
+_find_windows_llvm_bin() {
+    local candidate=""
+    local drive=""
+    for drive in c d e; do
+        for candidate in \
+            "/${drive}/Program Files/LLVM/bin" \
+            "/${drive}/Program Files (x86)/LLVM/bin" \
+            "${LOCALAPPDATA:-}/Programs/LLVM/bin" \
+            "${HOME}/AppData/Local/Programs/LLVM/bin"; do
+            if [[ -x "${candidate}/clangd.exe" ]] || [[ -x "${candidate}/clangd" ]]; then
+                printf '%s\n' "$candidate"
+                return 0
+            fi
+        done
+    done
+    return 1
+}
+
+_ensure_windows_llvm_user_path() {
+    local llvm_bin="$1"
+    local win_path=""
+    if ! command -v cygpath >/dev/null 2>&1; then
+        return 0
+    fi
+    win_path="$(cygpath -w "$llvm_bin" 2>/dev/null || true)"
+    [[ -z "$win_path" ]] && return 0
+    # 用户级 PATH（无需管理员）；已存在则跳过
+    powershell.exe -NoProfile -Command "
+        \$bin = '${win_path}' -replace '/', '\\'
+        \$userPath = [Environment]::GetEnvironmentVariable('Path', 'User')
+        if ([string]::IsNullOrEmpty(\$userPath)) { \$userPath = '' }
+        \$parts = \$userPath -split ';' | Where-Object { \$_ -ne '' }
+        if (\$parts -contains \$bin) { exit 0 }
+        \$newPath = if (\$userPath) { \$userPath.TrimEnd(';') + ';' + \$bin } else { \$bin }
+        [Environment]::SetEnvironmentVariable('Path', \$newPath, 'User')
+        exit 0
+    " >/dev/null 2>&1 || true
+}
+
+ensure_windows_llvm_on_path() {
+    if [[ "$PLATFORM" != "windows" ]]; then
+        return 0
+    fi
+    if clangd_available; then
+        return 0
+    fi
+    local llvm_bin=""
+    llvm_bin="$(_find_windows_llvm_bin)" || return 0
+    export PATH="${llvm_bin}:${PATH}"
+    log_info "Added LLVM bin to PATH for this session: ${llvm_bin}"
+    _ensure_windows_llvm_user_path "$llvm_bin"
+    log_info "Ensured LLVM bin is on User PATH (new shells will pick it up)"
+}
+
 install_linux() {
     case "$PACKAGE_MANAGER" in
         apt)
@@ -155,6 +210,7 @@ if clangd_available; then
 fi
 
 ensure_brew_llvm_on_path
+ensure_windows_llvm_on_path
 if clangd_available; then
     log_success "clangd available after PATH fix: $(command -v clangd) ($(print_clangd_version))"
     exit 0
@@ -174,6 +230,7 @@ case "$PLATFORM" in
 esac
 
 ensure_brew_llvm_on_path
+ensure_windows_llvm_on_path
 
 if clangd_available; then
     log_success "clangd installed: $(command -v clangd) ($(print_clangd_version))"

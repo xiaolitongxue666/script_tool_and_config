@@ -500,5 +500,8 @@ tests/*.log
 # Literal %SystemDrive% directory (Windows cmd expansion artifact)
 %SystemDrive%/
 
+# Literal %USERPROFILE% directory (Windows env expansion artifact under repo root)
+%USERPROFILE%/
+
 # Literal ${APPDATA}\npm directory (Windows env expansion artifact under repo root)
 ${APPDATA}\npm/

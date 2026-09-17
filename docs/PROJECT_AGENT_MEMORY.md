@@ -305,7 +305,7 @@ macOS 默认 `/bin/bash` 为 **3.2**，不支持 `declare -A` / `local -n`。部
 | remote | 有代理时 `_brew_macos_prefer_github_remote` 将 tuna/ustc/aliyun → `https://github.com/Homebrew/brew.git` |
 | auto-update | `HOMEBREW_NO_AUTO_UPDATE=1`（与 `UPDATE_HOMEBREW` 默认跳过一致） |
 | Intel 升级 | 叶子 formula **默认仍 upgrade**（含源码）；`HOMEBREW_NO_ENV_HINTS=1`；`HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK=1` 不顺带升级 unrelated dependents。dry-run 依赖段含 imagemagick/llvm 等 → **跳过该 upgrade**（仅 Intel） |
-| clangd | brew **无** `clangd` formula；ensure 已装则跳过 `clangd`/`clang`/`clang-tools-extra` 模糊搜索 |
+| clangd | brew **无** `clangd` formula；ensure 已装则跳过 `clangd`/`clang`/`clang-tools-extra` 模糊搜索。**Windows**：winget `LLVM.LLVM` 装完后会话常无 PATH、MSI 也可能不写 User PATH → `scripts/tools/cursor_clangd/install_clangd.sh` 的 `ensure_windows_llvm_on_path` 探测 `Program Files/LLVM/bin` 并写入会话 + User PATH（2026-09-17；否则 `exit 1` 拖垮 apply） |
 | 配置入口 | `run_once_macos-configure-homebrew.sh.tmpl` 在跳过 update 时仍可切 remote；[5/6] 报 Missing 可忽略（非命令） |
 | 文档 | [INSTALL_GUIDE.md](INSTALL_GUIDE.md)「macOS Homebrew 网络」 |
 

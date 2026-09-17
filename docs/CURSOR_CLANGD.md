@@ -83,7 +83,7 @@ chezmoi apply / `install.sh` / `deploy.sh` 会经 `run_once_install-clangd` 安�
 | Arch | `sudo pacman -S --noconfirm clang`（提供 `clangd`） |
 | Fedora | `sudo dnf install -y clang-tools-extra` |
 | macOS | 优先 Xcode CLT：`xcode-select --install`（常有 `/usr/bin/clangd`）；或 `brew install llvm` 并用 `$(brew --prefix llvm)/bin/clangd` |
-| Windows (winget) | `winget install -e --id LLVM.LLVM --source winget` |
+| Windows (winget) | `winget install -e --id LLVM.LLVM --source winget`；装完若 `clangd` 不在 PATH，`install_clangd.sh` 会探测 `Program Files/LLVM/bin` 并写入**当前会话 + User PATH** |
 | Windows (MSYS2) | `pacman -S --noconfirm mingw-w64-x86_64-clang-tools-extra` |
 
 ---
