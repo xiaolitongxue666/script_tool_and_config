@@ -64,7 +64,7 @@ _brew_macos_prefer_github_remote() {
     unset HOMEBREW_API_DOMAIN HOMEBREW_BOTTLE_DOMAIN HOMEBREW_BREW_GIT_REMOTE 2>/dev/null || true
 }
 
-# Intel Mac：Homebrew 2026-09 起不再提供 x86_64 bottle，upgrade 常走源码编译
+# Intel Mac：Homebrew 2026-09 起不再提供新的 x86_64 bottle
 _brew_is_intel_macos() {
     [[ "$(uname -s)" == "Darwin" ]] || return 1
     case "$(uname -m)" in
@@ -88,6 +88,7 @@ _brew_macos_prepare_env() {
     __BREW_MACOS_SAVED_NO_AUTO="${HOMEBREW_NO_AUTO_UPDATE:-}"
     __BREW_MACOS_SAVED_NO_HINTS="${HOMEBREW_NO_ENV_HINTS:-}"
     __BREW_MACOS_SAVED_NO_DEPS="${HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK:-}"
+    __BREW_MACOS_SAVED_NO_CLEANUP="${HOMEBREW_NO_INSTALL_CLEANUP:-}"
     export HOMEBREW_NO_AUTO_UPDATE=1
     export HOMEBREW_NO_ENV_HINTS=1
 
@@ -95,9 +96,12 @@ _brew_macos_prepare_env() {
         return 0
     fi
 
+    # 仅 Darwin：避免超过 30 天自动 brew cleanup 刷掉大量缓存
+    export HOMEBREW_NO_INSTALL_CLEANUP=1
+
     case "$(uname -m)" in
         x86_64|i386|i686)
-            # 仍升级目标 formula；不顺带检查/升级 installed dependents
+            # 不顺带检查/升级 installed dependents；formula 自身是否升级由 bottle 判断
             export HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK=1
             ;;
     esac
@@ -116,7 +120,9 @@ _brew_macos_restore_env() {
     _brew_macos_restore_one HOMEBREW_NO_AUTO_UPDATE "${__BREW_MACOS_SAVED_NO_AUTO:-}"
     _brew_macos_restore_one HOMEBREW_NO_ENV_HINTS "${__BREW_MACOS_SAVED_NO_HINTS:-}"
     _brew_macos_restore_one HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK "${__BREW_MACOS_SAVED_NO_DEPS:-}"
+    _brew_macos_restore_one HOMEBREW_NO_INSTALL_CLEANUP "${__BREW_MACOS_SAVED_NO_CLEANUP:-}"
     unset __BREW_MACOS_SAVED_NO_AUTO __BREW_MACOS_SAVED_NO_HINTS __BREW_MACOS_SAVED_NO_DEPS
+    unset __BREW_MACOS_SAVED_NO_CLEANUP
 }
 
 # Intel 无 bottle 时，这些依赖源码编译常 10–30+ 分钟且 Xcode 警告后几乎无输出
@@ -124,7 +130,7 @@ _brew_intel_is_heavy_dep() {
     local name="${1:-}"
     [[ -n "$name" ]] || return 1
     case "$name" in
-        imagemagick|ghostscript|llvm|gcc|rust|boost|ffmpeg|opencv|glib|harfbuzz|pango|qt|qt@5|qt@6|node|openjdk|openjdk@*|python@*|webkitgtk)
+        imagemagick|ghostscript|llvm|gcc|rust|boost|ffmpeg|opencv|glib|harfbuzz|pango|qt|qt@5|qt@6|node|openjdk|openjdk@*|python@*|webkitgtk|openssl|openssl@*)
             return 0
             ;;
     esac
@@ -139,11 +145,13 @@ _brew_intel_dryrun_mentions_heavy_dep() {
     local line name
     while IFS= read -r line || [[ -n "$line" ]]; do
         case "$line" in
-            "==> Would install"*"dependencies:"*|*"Would install"*"dependencies:"*)
+            "==> Would install"*"dependencies:"*|*"Would install"*"dependencies:"*| \
+                "==> Would install"*"dependency:"*|*"Would install"*"dependency:"*)
                 in_deps=1
                 continue
                 ;;
-            "==> Would upgrade"*"dependencies:"*|*"Would upgrade"*"dependencies:"*)
+            "==> Would upgrade"*"dependencies:"*|*"Would upgrade"*"dependencies:"*| \
+                "==> Would upgrade"*"dependency:"*|*"Would upgrade"*"dependency:"*)
                 in_deps=1
                 continue
                 ;;
@@ -160,7 +168,17 @@ _brew_intel_dryrun_mentions_heavy_dep() {
     return 1
 }
 
-# 已装 formula 的 Intel 升级：若 dry-run 会源码编重型依赖则跳过（非致命）
+# dry-run 文本：没有可倒出的 bottle（要源码编译，或依赖含 openssl 等重型包）
+# 返回 0 = 应停在已装版本 / 不要新装
+_brew_intel_dryrun_lacks_bottle() {
+    local text="${1:-}"
+    if printf '%s\n' "$text" | grep -q 'would build from source'; then
+        return 0
+    fi
+    _brew_intel_dryrun_mentions_heavy_dep "$text"
+}
+
+# 已装 formula 的 Intel 升级：若 dry-run 没有 bottle 则跳过（非致命）
 # 仅 Darwin x86_64；Linux / Windows / Apple Silicon 不调用
 _brew_intel_should_skip_heavy_dep_upgrade() {
     local name="${1:-}"
@@ -169,7 +187,32 @@ _brew_intel_should_skip_heavy_dep_upgrade() {
     command -v brew >/dev/null 2>&1 || return 1
     local dry_out
     dry_out="$(brew upgrade --dry-run --formula "$name" 2>&1 || true)"
-    _brew_intel_dryrun_mentions_heavy_dep "$dry_out"
+    _brew_intel_dryrun_lacks_bottle "$dry_out"
+}
+
+# 参数: upgrade|install formula名。stdout 为 brew dry-run 文本
+_brew_intel_formula_dry_run() {
+    local action="${1:-}"
+    local name="${2:-}"
+    [[ -n "$name" ]] || return 1
+    if [[ "$action" == "install" ]]; then
+        brew install --dry-run --formula "$name" 2>&1 || true
+    else
+        brew upgrade --dry-run --formula "$name" 2>&1 || true
+    fi
+}
+
+# Ctrl+C 时结束心跳拉起的后台 brew。ENSURE_ABORT_ON_INT=1 时退出 130
+_brew_intel_on_heartbeat_int() {
+    local pid="${__BREW_INTEL_CHILD_PID:-}"
+    __BREW_INTEL_INTERRUPTED=1
+    if [[ -n "$pid" ]]; then
+        kill "$pid" 2>/dev/null || true
+    fi
+    if [[ "${ENSURE_ABORT_ON_INT:-}" == "1" ]]; then
+        wait "$pid" 2>/dev/null || true
+        exit 130
+    fi
 }
 
 # Intel：brew 在 "Xcode is outdated" 后可能数分钟无输出。心跳避免被当成卡死。
@@ -185,19 +228,38 @@ _brew_intel_run_with_heartbeat() {
         return $?
     fi
     echo "[INFO] Starting brew for ${label}. 'Xcode is outdated' is a warning, not a hang; Intel source compile may print nothing for several minutes." >&2
+    local prev_int elapsed interval rc
+    prev_int="$(trap -p INT || true)"
+    __BREW_INTEL_INTERRUPTED=0
+    __BREW_INTEL_CHILD_PID=""
     "$@" &
-    local brew_pid=$!
-    local elapsed=0
-    local interval=20
-    local rc=0
-    while kill -0 "$brew_pid" 2>/dev/null; do
-        sleep "$interval"
-        if kill -0 "$brew_pid" 2>/dev/null; then
+    __BREW_INTEL_CHILD_PID=$!
+    trap '_brew_intel_on_heartbeat_int' INT
+    elapsed=0
+    interval=20
+    rc=0
+    while kill -0 "$__BREW_INTEL_CHILD_PID" 2>/dev/null; do
+        sleep "$interval" || true
+        if [[ "${__BREW_INTEL_INTERRUPTED:-0}" == "1" ]]; then
+            rc=130
+            break
+        fi
+        if kill -0 "$__BREW_INTEL_CHILD_PID" 2>/dev/null; then
             elapsed=$((elapsed + interval))
             echo "[INFO] brew still running for ${label} (${elapsed}s). Not stuck; compiling after Xcode warning." >&2
         fi
     done
-    wait "$brew_pid" || rc=$?
+    if [[ "$rc" -ne 130 ]]; then
+        wait "$__BREW_INTEL_CHILD_PID" || rc=$?
+    else
+        wait "$__BREW_INTEL_CHILD_PID" 2>/dev/null || true
+    fi
+    if [[ -n "$prev_int" ]]; then
+        eval "$prev_int"
+    else
+        trap - INT
+    fi
+    unset __BREW_INTEL_CHILD_PID __BREW_INTEL_INTERRUPTED
     return "$rc"
 }
 

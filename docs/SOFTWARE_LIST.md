@@ -156,7 +156,7 @@ run_once_linux-* / run_once_macos-* / run_once_windows-*   ← Layer 5（平台�
 
 **关闭升级**：`./install.sh --no-upgrade` 或 `SKIP_SOFTWARE_UPGRADE=1 ./install.sh`
 
-**macOS Intel**：叶子 formula 默认仍 `brew upgrade`（无 bottle 则源码编译）。若会源码编 imagemagick/llvm 等重型依赖则跳过该 upgrade。只关升级：`./install.sh --no-upgrade`。
+**macOS Intel**：只升到仍有 bottle 或官方 x86_64/universal 包的最后一版。dry-run 要源码编译，或依赖 openssl/imagemagick/llvm 时，保留已装版本。`/Applications/Cursor.app` 已存在则跳过 brew cask。只关升级：`./install.sh --no-upgrade`。
 
 **代理**：外网下载/npm 默认走 `7890`（WSL 自动解析宿主机 IP）；可 `--proxy http://host:7890`
 

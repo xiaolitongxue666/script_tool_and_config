@@ -32,6 +32,17 @@ globs:
 - macOS 默认 bash 3.2：`deploy.sh` 末尾仅 Zsh/OMZ **检查**（不安装；OMZ 由 `.chezmoiexternal.toml.tmpl`）；详见 `docs/PROJECT_AGENT_MEMORY.md`「macOS bash 3.2」
 - common-tools 包名 SSOT：`scripts/lib/chezmoi/packages.conf`
 
+## macOS Intel 与 Cursor
+
+只作用于 Darwin + x86_64。Apple Silicon、Windows winget、Linux/WSL 的包管理器路径不变。
+
+- Homebrew 自 2026-09 起 Intel 为 Tier 3，不再提供新 bottle。`upgrade_brew_package` 只在 `brew upgrade --dry-run` 仍是 bottle 时升级。
+- dry-run 含 `would build from source`，或依赖含 openssl / openssl@* / imagemagick / llvm，则保留已装版本，不源码编译。
+- fnm / uv / Neovim / starship 只跟仍带 x86_64 或 universal macOS 包的 release。不为 bat、eza、fd 等再写一套 GitHub 安装器，最后一版 Intel 二进制就是最后一瓶 bottle。
+- `/Applications/Cursor.app` 已存在时，`run_once_93` 与 `upgrade_brew_cask` 都跳过，不 `brew install --cask cursor`。cask 失败不 fallback 成 formula。
+- Darwin 设 `HOMEBREW_NO_INSTALL_CLEANUP=1`。ensure 退出 130/143 时 `install.sh` 停止，不进入 `[5/6]`。
+- 不安装 MacPorts，不 `brew trust` / `brew untap`，不删除或升级本机 Xcode。
+
 ## Windows Terminal / Git Bash 路径（C 或 D 盘）
 
 - Git for Windows 可能在 `C:` 或 `D:`；**禁止**在 `.chezmoidata.toml` 或 WT 模板写死 `C:\Program Files\Git`

@@ -140,7 +140,13 @@ install_neovim_linux_deb() {
 # 根据平台安装或升级 Neovim 到 0.11+
 case "$PLATFORM" in
     macos)
-        if [[ "$PACKAGE_MANAGER" == "brew" ]]; then
+        if type _brew_is_intel_macos &>/dev/null && _brew_is_intel_macos; then
+            if is_nvim_version_ge_0_11; then
+                echo "[INFO] Neovim already >= 0.11 on Intel; keep current binary"
+            elif ! install_macos_intel_neovim_release; then
+                echo "[WARNING] Intel Neovim tarball missing or below 0.11; skip brew source compile"
+            fi
+        elif [[ "$PACKAGE_MANAGER" == "brew" ]]; then
             if command -v nvim &> /dev/null; then
                 brew upgrade neovim 2>/dev/null || brew install neovim
             else

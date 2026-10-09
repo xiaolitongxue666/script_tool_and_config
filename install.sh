@@ -312,8 +312,13 @@ if [[ -f "$ENSURE_SOFTWARE_SCRIPT" ]]; then
         ENSURE_ARGS+=(--no-upgrade)
     fi
     # bash 3.2: 空数组展开需用 ${arr[@]+"${arr[@]}"} 避免 set -u 下 unbound variable
-    if bash "$ENSURE_SOFTWARE_SCRIPT" ${ENSURE_ARGS[@]+"${ENSURE_ARGS[@]}"}; then
+    bash "$ENSURE_SOFTWARE_SCRIPT" ${ENSURE_ARGS[@]+"${ENSURE_ARGS[@]}"}
+    ensure_rc=$?
+    if [[ "$ensure_rc" -eq 0 ]]; then
         log_success "Platform software ensure completed"
+    elif [[ "$ensure_rc" -eq 130 || "$ensure_rc" -eq 143 ]]; then
+        log_warning "Platform software ensure interrupted"
+        exit "$ensure_rc"
     else
         log_warning "Platform software ensure finished with warnings"
     fi

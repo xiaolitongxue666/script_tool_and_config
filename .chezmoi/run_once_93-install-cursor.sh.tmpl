@@ -79,7 +79,11 @@ fi
 
 echo "[INFO] GUI detected, checking Cursor..."
 
-# 检查 Cursor 是否已安装
+# 检查 Cursor 是否已安装（Darwin 上 App 已在则不再 brew install --cask）
+if [[ "$PLATFORM" == "darwin" && -d /Applications/Cursor.app ]]; then
+    echo "[INFO] Cursor.app already present: /Applications/Cursor.app"
+    exit 0
+fi
 if command -v cursor &>/dev/null; then
     echo "[INFO] Cursor already installed: $(cursor --version 2>/dev/null | head -n1)"
     exit 0

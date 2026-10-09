@@ -436,20 +436,20 @@ upgrade_brew_package() {
     # 始终 HOMEBREW_NO_AUTO_UPDATE=1，避免 upgrade 隐式 brew update 卡住
     _brew_macos_prepare_env
     local ret=0
+    local dry_out=""
     if brew list "$name" &>/dev/null; then
         if type _brew_is_intel_macos &>/dev/null && _brew_is_intel_macos; then
-            echo "[INFO] macOS Intel: brew upgrade $name (no bottles; may compile from source for several minutes)" >&2
-            # HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK 不拦 formula 自己的 outdated 依赖；
-            # fastfetch 会拖 imagemagick 源码编译，Xcode 警告后长时间无输出（易被当成卡死）
-            if type _brew_intel_should_skip_heavy_dep_upgrade &>/dev/null \
-                && _brew_intel_should_skip_heavy_dep_upgrade "$name"; then
-                echo "[INFO] Skip brew upgrade $name: would rebuild heavy deps from source (imagemagick/llvm/...). Keep installed version." >&2
-                if type _brew_link_existing_keg &>/dev/null; then
-                    _brew_link_existing_keg "$name"
-                fi
+            # 有 bottle 才升级。要源码编译或重型依赖（openssl/imagemagick）则停在最后一版 Intel 二进制
+            if type _brew_intel_formula_dry_run &>/dev/null; then
+                dry_out="$(_brew_intel_formula_dry_run upgrade "$name")"
+            fi
+            if type _brew_intel_dryrun_lacks_bottle &>/dev/null \
+                && _brew_intel_dryrun_lacks_bottle "$dry_out"; then
+                echo "[INFO] macOS Intel: keep ${name} (newer build has no bottle; last Intel binary stays)" >&2
                 _brew_macos_restore_env
                 return 0
             fi
+            echo "[INFO] macOS Intel: brew upgrade ${name} (bottle available)" >&2
             if type _brew_intel_run_with_heartbeat &>/dev/null; then
                 _brew_intel_run_with_heartbeat "$name" brew upgrade "$name" || ret=1
             else
@@ -460,7 +460,16 @@ upgrade_brew_package() {
         fi
     else
         if type _brew_is_intel_macos &>/dev/null && _brew_is_intel_macos; then
-            echo "[INFO] macOS Intel: brew install $name (no bottles; may compile from source for several minutes)" >&2
+            if type _brew_intel_formula_dry_run &>/dev/null; then
+                dry_out="$(_brew_intel_formula_dry_run install "$name")"
+            fi
+            if type _brew_intel_dryrun_lacks_bottle &>/dev/null \
+                && _brew_intel_dryrun_lacks_bottle "$dry_out"; then
+                echo "[WARNING] macOS Intel: skip brew install ${name} (would build from source; no Intel bottle)" >&2
+                _brew_macos_restore_env
+                return 0
+            fi
+            echo "[INFO] macOS Intel: brew install ${name} (bottle available)" >&2
             if type _brew_intel_run_with_heartbeat &>/dev/null; then
                 _brew_intel_run_with_heartbeat "$name" brew install "$name" || ret=1
             else
@@ -485,11 +494,26 @@ upgrade_brew_cask() {
     fi
     echo "[INFO] Upgrading cask via brew: $name" >&2
     _brew_macos_prepare_env
+    # App 已在 /Applications 时不下载 cask（会替换正在使用的 Cursor）
+    if [[ "$name" == "cursor" && -d /Applications/Cursor.app ]]; then
+        echo "[INFO] Cursor.app already present; skip brew cask" >&2
+        _brew_macos_restore_env
+        return 0
+    fi
     local ret=0
+    local output=""
     if brew list --cask "$name" &>/dev/null; then
-        brew upgrade --cask "$name" || ret=1
+        output="$(brew upgrade --cask "$name" 2>&1)" || ret=1
     else
-        brew install --cask "$name" || ret=1
+        output="$(brew install --cask "$name" 2>&1)" || ret=1
+    fi
+    if [[ -n "$output" ]]; then
+        printf '%s\n' "$output" >&2
+    fi
+    if [[ "$ret" -ne 0 ]] && printf '%s\n' "$output" | grep -qiE 'already an App|already installed|Not upgrading'; then
+        echo "[INFO] Cask ${name} already satisfied; skip" >&2
+        _brew_macos_restore_env
+        return 0
     fi
     _brew_macos_restore_env
     return $ret
@@ -873,6 +897,193 @@ _npm_latest_version() {
     printf '%s' "$line"
 }
 
+# GitHub releases JSON 里第一个匹配 asset 的 browser URL。找不到则失败
+github_release_json_first_asset_url() {
+    local json="${1:-}"
+    local asset_name="${2:-}"
+    local escaped url
+    [[ -n "$json" && -n "$asset_name" ]] || return 1
+    escaped="$(printf '%s' "$asset_name" | sed 's/\./\\./g')"
+    url="$(printf '%s\n' "$json" | grep -oE "https://[^\"]*${escaped}" | head -n 1 || true)"
+    [[ -n "$url" ]] || return 1
+    printf '%s\n' "$url"
+}
+
+# 从最新若干条 release 里取仍包含该 asset 的下载地址（列表按时间新到旧）
+github_release_asset_url() {
+    local owner="$1"
+    local repo="$2"
+    local asset_name="$3"
+    local json
+    [[ -n "$owner" && -n "$repo" && -n "$asset_name" ]] || return 1
+    if type ensure_proxy_for_download &>/dev/null; then
+        ensure_proxy_for_download
+    fi
+    json="$(curl -fsSL --max-time 30 \
+        "https://api.github.com/repos/${owner}/${repo}/releases?per_page=20" 2>/dev/null || true)"
+    github_release_json_first_asset_url "$json" "$asset_name"
+}
+
+# 把 GitHub release 压缩包里的可执行文件放到 ~/.local/bin（仅 Darwin Intel）
+# 参数: owner repo asset_filename binary_name
+install_macos_intel_github_binary() {
+    local owner="$1"
+    local repo="$2"
+    local asset_name="$3"
+    local binary_name="$4"
+    local url tmp_dir archive_path extract_dir found dest_dir
+    if ! type _brew_is_intel_macos &>/dev/null || ! _brew_is_intel_macos; then
+        return 1
+    fi
+    [[ -n "$owner" && -n "$repo" && -n "$asset_name" && -n "$binary_name" ]] || return 1
+    url="$(github_release_asset_url "$owner" "$repo" "$asset_name")" || return 1
+    dest_dir="${HOME}/.local/bin"
+    mkdir -p "$dest_dir" || return 1
+    tmp_dir="$(mktemp -d 2>/dev/null || mktemp -d -t ghrel)" || return 1
+    extract_dir="${tmp_dir}/extract"
+    mkdir -p "$extract_dir"
+    archive_path="${tmp_dir}/${asset_name}"
+    echo "[INFO] Downloading Intel macOS asset ${asset_name} from ${owner}/${repo}" >&2
+    if ! curl -fsSL --max-time 180 -o "$archive_path" "$url"; then
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+    case "$asset_name" in
+        *.zip)
+            if ! command -v unzip >/dev/null 2>&1 || ! unzip -qo "$archive_path" -d "$extract_dir"; then
+                rm -rf "$tmp_dir"
+                return 1
+            fi
+            ;;
+        *.tar.gz|*.tgz)
+            if ! tar -xzf "$archive_path" -C "$extract_dir"; then
+                rm -rf "$tmp_dir"
+                return 1
+            fi
+            ;;
+        *)
+            rm -rf "$tmp_dir"
+            return 1
+            ;;
+    esac
+    found="$(find "$extract_dir" -type f -name "$binary_name" 2>/dev/null | head -n 1 || true)"
+    if [[ -z "$found" || ! -f "$found" ]]; then
+        echo "[WARNING] ${binary_name} not found in ${asset_name}" >&2
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+    cp -f "$found" "${dest_dir}/${binary_name}" || {
+        rm -rf "$tmp_dir"
+        return 1
+    }
+    chmod +x "${dest_dir}/${binary_name}" 2>/dev/null || true
+    export PATH="${dest_dir}:${PATH}"
+    hash -r 2>/dev/null || true
+    rm -rf "$tmp_dir"
+    echo "[INFO] Installed ${binary_name} to ${dest_dir} (last Intel/universal macOS asset)" >&2
+    return 0
+}
+
+install_macos_intel_starship_release() {
+    install_macos_intel_github_binary "starship" "starship" \
+        "starship-x86_64-apple-darwin.tar.gz" "starship"
+}
+
+# Neovim：官方 tarball 解到 ~/.local，并链到 ~/.local/bin/nvim。不低于 0.11
+install_macos_intel_neovim_release() {
+    local url ver tmp_dir archive_path extract_dir dest_root bin_dir nvim_bin
+    if ! type _brew_is_intel_macos &>/dev/null || ! _brew_is_intel_macos; then
+        return 1
+    fi
+    url="$(github_release_asset_url "neovim" "neovim-releases" "nvim-macos-x86_64.tar.gz")" || return 1
+    ver="$(printf '%s\n' "$url" | grep -oE 'v?[0-9]+\.[0-9]+\.[0-9]+' | head -n 1 || true)"
+    if [[ -n "$ver" ]] && ! compare_semver "$ver" ge "0.11.0"; then
+        echo "[WARNING] Newest Intel Neovim asset ${ver} is below 0.11.0; skip" >&2
+        return 1
+    fi
+    dest_root="${HOME}/.local/share/nvim-macos"
+    bin_dir="${HOME}/.local/bin"
+    mkdir -p "$dest_root" "$bin_dir" || return 1
+    tmp_dir="$(mktemp -d 2>/dev/null || mktemp -d -t nvimrel)" || return 1
+    archive_path="${tmp_dir}/nvim-macos-x86_64.tar.gz"
+    extract_dir="${tmp_dir}/extract"
+    mkdir -p "$extract_dir"
+    echo "[INFO] Downloading Neovim Intel tarball ${url}" >&2
+    if ! curl -fsSL --max-time 180 -o "$archive_path" "$url"; then
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+    if ! tar -xzf "$archive_path" -C "$extract_dir"; then
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+    rm -rf "$dest_root"
+    mkdir -p "$(dirname "$dest_root")"
+    # tarball 顶层目录名固定为 nvim-macos-x86_64
+    if [[ -d "${extract_dir}/nvim-macos-x86_64" ]]; then
+        mv "${extract_dir}/nvim-macos-x86_64" "$dest_root"
+    else
+        mv "$extract_dir" "$dest_root"
+    fi
+    nvim_bin="${dest_root}/bin/nvim"
+    if [[ ! -x "$nvim_bin" && ! -f "$nvim_bin" ]]; then
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+    chmod +x "$nvim_bin" 2>/dev/null || true
+    ln -sfn "$nvim_bin" "${bin_dir}/nvim"
+    if command -v brew >/dev/null 2>&1 && brew list --formula neovim >/dev/null 2>&1; then
+        brew unlink neovim >/dev/null 2>&1 || true
+    fi
+    export PATH="${bin_dir}:${PATH}"
+    hash -r 2>/dev/null || true
+    rm -rf "$tmp_dir"
+    echo "[INFO] Installed Neovim to ${bin_dir}/nvim from Intel tarball" >&2
+    return 0
+}
+
+# Intel：官方 fnm-macos.zip（universal）。没有该文件或已不低于该版本则保持现状
+_fnm_install_macos_intel_zip() {
+    local before="${1:-}"
+    local url tag dest_dir tmp_dir archive_path extract_dir found
+    url="$(github_release_asset_url "Schniz" "fnm" "fnm-macos.zip")" || return 1
+    tag="$(printf '%s\n' "$url" | grep -oE 'v?[0-9]+\.[0-9]+\.[0-9]+' | head -n 1 || true)"
+    if [[ -n "$before" && -n "$tag" ]] && compare_semver "$before" ge "$tag"; then
+        echo "[INFO] fnm is up to date: ${before} (Intel/universal zip ${tag})" >&2
+        return 0
+    fi
+    dest_dir="${HOME}/.local/share/fnm"
+    mkdir -p "$dest_dir" || return 1
+    tmp_dir="$(mktemp -d 2>/dev/null || mktemp -d -t fnmrel)" || return 1
+    extract_dir="${tmp_dir}/extract"
+    mkdir -p "$extract_dir"
+    archive_path="${tmp_dir}/fnm-macos.zip"
+    echo "[INFO] Downloading fnm-macos.zip ${tag:-unknown}" >&2
+    if ! curl -fsSL --max-time 180 -o "$archive_path" "$url"; then
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+    if ! command -v unzip >/dev/null 2>&1 || ! unzip -qo "$archive_path" -d "$extract_dir"; then
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+    found="$(find "$extract_dir" -type f -name fnm 2>/dev/null | head -n 1 || true)"
+    if [[ -z "$found" ]]; then
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+    cp -f "$found" "${dest_dir}/fnm" || {
+        rm -rf "$tmp_dir"
+        return 1
+    }
+    chmod +x "${dest_dir}/fnm" 2>/dev/null || true
+    export PATH="${dest_dir}:${PATH}"
+    hash -r 2>/dev/null || true
+    rm -rf "$tmp_dir"
+    echo "[INFO] Installed fnm to ${dest_dir}/fnm" >&2
+    return 0
+}
+
 # fnm 升级（多 OS/WSL 兼容）
 # 注意：新版 fnm（>=1.36）已移除 self-update 子命令（1.38.1 实测 unrecognized subcommand），
 # 升级路径：包管理器（brew/winget/pacman）→ 官方安装脚本（Linux/WSL/Git Bash）
@@ -896,6 +1107,13 @@ ensure_fnm_latest() {
     # 1) 包管理器优先：brew（macOS）/ winget（Windows）/ pacman（Arch）
     case "${PACKAGE_MANAGER:-}" in
         brew)
+            if type _brew_is_intel_macos &>/dev/null && _brew_is_intel_macos; then
+                if _fnm_install_macos_intel_zip "$before"; then
+                    return 0
+                fi
+                echo "[INFO] fnm stays at ${before:-unknown} (no newer Intel/universal macOS zip)" >&2
+                return 0
+            fi
             upgrade_brew_package "fnm" 2>/dev/null && _fnm_verify_upgrade "$before" && return 0
             ;;
         winget)
@@ -954,7 +1172,8 @@ ensure_uv_latest() {
 
     echo "[INFO] Updating uv (current: ${before:-unknown})..." >&2
 
-    # standalone 安装（官方安装脚本）支持 self-update
+    # standalone 安装（官方安装脚本）支持 self-update。
+    # Intel：安装器不再提供 x86_64-apple-darwin 时保留当前版本，不改走 brew 源码编译
     if uv self update 2>/dev/null; then
         hash -r 2>/dev/null || true
         after="$(uv --version 2>/dev/null | head -n1 || true)"
@@ -963,6 +1182,11 @@ ensure_uv_latest() {
         else
             echo "[INFO] uv is up to date: ${before:-unknown}" >&2
         fi
+        return 0
+    fi
+
+    if type _brew_is_intel_macos &>/dev/null && _brew_is_intel_macos; then
+        echo "[INFO] uv self update did not provide a newer Intel build; keep ${before:-unknown}" >&2
         return 0
     fi
 

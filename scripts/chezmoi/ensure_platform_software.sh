@@ -63,6 +63,7 @@ else
     UPGRADE_SOFTWARE="${UPGRADE_SOFTWARE:-1}"
 fi
 
+export ENSURE_ABORT_ON_INT=1
 export CHEZMOI_PROJECT_ROOT="${CHEZMOI_PROJECT_ROOT:-$PROJECT_ROOT}"
 CHEZMOI_DIR="${CHEZMOI_SOURCE_DIR:-${PROJECT_ROOT}/.chezmoi}"
 export CHEZMOI_SOURCE_DIR="$CHEZMOI_DIR"
@@ -132,7 +133,7 @@ _upgrade_software_by_name() {
             target="$(get_cursor_upgrade_target)"
             case "$target" in
                 brew:*)
-                    upgrade_brew_cask "${target#brew:}" || upgrade_brew_package "${target#brew:}" || return 1
+                    upgrade_brew_cask "${target#brew:}" || return 1
                     ;;
                 winget:*)
                     upgrade_winget_id "${target#winget:}" || return 1
@@ -282,7 +283,11 @@ fi
 
 while IFS= read -r script; do
     [[ -z "$script" ]] && continue
-    _process_one_script "$script" || true
+    script_rc=0
+    _process_one_script "$script" || script_rc=$?
+    if [[ "$script_rc" -eq 130 || "$script_rc" -eq 143 ]]; then
+        exit "$script_rc"
+    fi
 done <<< "$local_scripts"
 
 log_info "Ensure summary: installed=${STATS_INSTALLED}, upgraded=${STATS_UPGRADED}, skipped=${STATS_SKIPPED}, failed=${STATS_FAILED}"

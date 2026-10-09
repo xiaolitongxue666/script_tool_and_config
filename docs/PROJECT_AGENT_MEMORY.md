@@ -288,7 +288,7 @@ macOS 默认 `/bin/bash` 为 **3.2**，不支持 `declare -A` / `local -n`。部
 | 日志 | 检测来源写 stderr；`chezmoi_detect_proxy` stdout 仅 URL（避免 `$()` 污染） |
 | 测试 | `bash tests/test_proxy.sh`（12 项：none/NO_PROXY/WSL mock/headless 17890/指定 host 探测/WSL 宿主机 17890）+ `test_syntax.sh` |
 | 不变 | Pacman/apt 直连国内源；chezmoi 模板内 proxy 仍用静态 `awk`/`grep`（无新增 exec） |
-| macOS brew | 有代理 → 保留代理 + origin→GitHub；`HOMEBREW_NO_AUTO_UPDATE=1` + `HOMEBREW_NO_ENV_HINTS=1`；Intel 叶子 formula 仍 upgrade；dry-run 重型依赖（imagemagick/llvm）则跳过；无代理才可用 tuna |
+| macOS brew | 有代理 → 保留代理 + origin→GitHub；`HOMEBREW_NO_AUTO_UPDATE=1` + `HOMEBREW_NO_ENV_HINTS=1` + Darwin `HOMEBREW_NO_INSTALL_CLEANUP=1`；Intel 只在 dry-run 仍是 bottle 时 upgrade，要源码编译则保留已装版本；无代理才可用 tuna |
 
 | 问题 | 原因 | 解决 |
 |------|------|------|
@@ -300,11 +300,11 @@ macOS 默认 `/bin/bash` 为 **3.2**，不支持 `declare -A` / `local -n`。部
 | 项 | 约定 |
 |----|------|
 | 卡死主因 | `[4/6]` `brew upgrade` 在 tap 过期时隐式 `brew update`；清华 `origin` 高峰返回 `Waiting in queue`（实测 Position 300+） |
-| Intel 假卡死 | 无 x86_64 bottle；`Xcode is outdated` 只是警告，随后 cmake/make 可数分钟无输出。日志有心跳（20s）。**不是卡死** |
+| Intel 假卡死 | 无 x86_64 bottle 时旧逻辑会进入 cmake/make，数分钟无输出。现已在 dry-run 阶段保留已装版本，不再源码编译。`Xcode is outdated` 仍只是警告。bottle 升级路径仍有 20s 心跳 |
 | 代理策略 | macOS **有代理则保留**（勿 unset）；`brew_macos_network.sh` → `_brew_macos_prepare_env` |
 | remote | 有代理时 `_brew_macos_prefer_github_remote` 将 tuna/ustc/aliyun → `https://github.com/Homebrew/brew.git` |
 | auto-update | `HOMEBREW_NO_AUTO_UPDATE=1`（与 `UPDATE_HOMEBREW` 默认跳过一致） |
-| Intel 升级 | 叶子 formula **默认仍 upgrade**（含源码）；`HOMEBREW_NO_ENV_HINTS=1`；`HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK=1` 不顺带升级 unrelated dependents。dry-run 依赖段含 imagemagick/llvm 等 → **跳过该 upgrade**（仅 Intel） |
+| Intel 升级 | 只升到仍有 bottle 或官方 x86_64/universal 包的最后一版。dry-run 含 `would build from source`，或依赖 openssl/imagemagick/llvm → **保留已装版本**（仅 Intel）。Apple Silicon 仍 `brew upgrade`。`/Applications/Cursor.app` 已存在则跳过 brew cask |
 | clangd | brew **无** `clangd` formula；ensure 已装则跳过 `clangd`/`clang`/`clang-tools-extra` 模糊搜索。**Windows**：winget `LLVM.LLVM` 装完后会话常无 PATH、MSI 也可能不写 User PATH → `scripts/tools/cursor_clangd/install_clangd.sh` 的 `ensure_windows_llvm_on_path` 探测 `Program Files/LLVM/bin` 并写入会话 + User PATH（2026-09-17；否则 `exit 1` 拖垮 apply） |
 | 配置入口 | `run_once_macos-configure-homebrew.sh.tmpl` 在跳过 update 时仍可切 remote；[5/6] 报 Missing 可忽略（非命令） |
 | 文档 | [INSTALL_GUIDE.md](INSTALL_GUIDE.md)「macOS Homebrew 网络」 |
@@ -312,8 +312,9 @@ macOS 默认 `/bin/bash` 为 **3.2**，不支持 `declare -A` / `local -n`。部
 | 问题 | 原因 | 解决 |
 |------|------|------|
 | `Upgrading via brew: connect` 表面挂死 | 隐式 update + tuna 排队 + 曾 `2>/dev/null` | `NO_AUTO_UPDATE` + 切 GitHub + 保留代理/可见日志 |
-| Intel `brew upgrade gh` 表面挂死 | 无 bottle，正在 `make bin/gh` | 默认继续源码升级；Ctrl+C 后下次 ensure 会再编 |
-| `fastfetch` 升了 ImageMagick/glib 等一堆包 | `brew upgrade` 会升级 formula **自己的** outdated 依赖；`NO_INSTALLED_DEPENDENTS_CHECK` **拦不住** | Intel：`_brew_intel_should_skip_heavy_dep_upgrade` dry-run 依赖段含 imagemagick 则跳过该 formula |
+| Intel `brew upgrade gh` 表面挂死 | 无 bottle，正在 `make bin/gh` | dry-run 写明源码编译则保留已装版本；Ctrl+C（130）停掉 install |
+| Cursor cask 在 App 已存在时仍下载 darwin/x64 zip | cask 比本机 App 新，或 `brew info` 版本解析失败，版本比较放行下载，会替换正在使用的 App | `/Applications/Cursor.app` 存在即跳过；cask 失败不 fallback 成 formula |
+| `fastfetch` 升了 ImageMagick/glib 等一堆包 | `brew upgrade` 会升级 formula **自己的** outdated 依赖；`NO_INSTALLED_DEPENDENTS_CHECK` **拦不住** | Intel：`_brew_intel_dryrun_lacks_bottle` 在依赖段含 imagemagick/openssl 或 `would build from source` 时跳过 |
 | 卸代理「直连镜像」仍慢/卡 | tuna git 限流排队，非代理本身 | 有 7890 时走 GitHub；无代理再考虑镜像 |
 
 ## chezmoi 源文件命名（2026-05）

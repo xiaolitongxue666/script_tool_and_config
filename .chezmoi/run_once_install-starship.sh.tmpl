@@ -78,7 +78,12 @@ echo "[INFO] 开始安装 Starship..."
 # 根据平台安装 Starship
 case "$PLATFORM" in
     macos)
-        if [[ "$PACKAGE_MANAGER" == "brew" ]]; then
+        if type _brew_is_intel_macos &>/dev/null && _brew_is_intel_macos; then
+            if ! install_macos_intel_starship_release; then
+                echo "[WARNING] Intel starship release has no x86_64 asset; skip source compile"
+                exit 0
+            fi
+        elif [[ "$PACKAGE_MANAGER" == "brew" ]]; then
             install_package "starship"
         else
             echo "[INFO] 使用官方安装脚本..."

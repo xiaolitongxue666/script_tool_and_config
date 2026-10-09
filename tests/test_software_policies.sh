@@ -184,14 +184,15 @@ else
     echo "[FAIL] ensure_uv_latest missing package-manager path detection"
 fi
 
-# macOS Intel：默认仍 brew upgrade（可源码编译）；clangd 无 brew formula，不模糊搜索
+# macOS Intel：有 bottle 才 brew upgrade；要源码编译则停在已装版本。clangd 无 formula，不模糊搜索
 if grep -q 'brew upgrade "$name"' "${PROJECT_ROOT}/scripts/lib/chezmoi/package_install.sh" \
-    && grep -q 'macOS Intel: brew upgrade' "${PROJECT_ROOT}/scripts/lib/chezmoi/package_install.sh"; then
+    && grep -q 'macOS Intel: brew upgrade' "${PROJECT_ROOT}/scripts/lib/chezmoi/package_install.sh" \
+    && grep -q 'last Intel binary stays' "${PROJECT_ROOT}/scripts/lib/chezmoi/package_install.sh"; then
     PASSED=$((PASSED + 1))
-    echo "[PASS] Intel still brew-upgrades installed formulae (source compile allowed)"
+    echo "[PASS] Intel brew-upgrades only when a bottle is available"
 else
     FAILED=$((FAILED + 1))
-    echo "[FAIL] Intel brew upgrade path missing or skipped"
+    echo "[FAIL] Intel bottle-only upgrade path missing"
 fi
 
 if grep -q '_brew_should_skip_installed_upgrade' "${PROJECT_ROOT}/scripts/lib/chezmoi/package_install.sh" \
@@ -229,6 +230,20 @@ lua          5.4.8     -> 5.5.1
 fastfetch 2.67.1 -> 2.68.1
 EOF
 )
+_openssl_dep_dryrun=$(cat <<'EOF'
+==> Would install 1 dependency:
+openssl@4  4.0.3
+==> Would upgrade 1 requested outdated package
+tmux 3.7c -> 3.8
+EOF
+)
+_source_build_dryrun=$(cat <<'EOF'
+==> Would upgrade 1 requested outdated package
+tmux 3.7c -> 3.8
+==> 1 homebrew/core formula that would build from source
+tmux
+EOF
+)
 if _brew_intel_dryrun_mentions_heavy_dep "$_fastfetch_dryrun"; then
     PASSED=$((PASSED + 1))
     echo "[PASS] Intel dry-run parser skips fastfetch when imagemagick is a dep"
@@ -250,18 +265,39 @@ else
     FAILED=$((FAILED + 1))
     echo "[FAIL] Intel dry-run parser treated lua as heavy dep"
 fi
+if _brew_intel_dryrun_lacks_bottle "$_openssl_dep_dryrun"; then
+    PASSED=$((PASSED + 1))
+    echo "[PASS] Intel dry-run keeps installed formula when openssl@4 is a dependency"
+else
+    FAILED=$((FAILED + 1))
+    echo "[FAIL] Intel dry-run did not treat openssl@4 dependency as no-bottle"
+fi
+if _brew_intel_dryrun_lacks_bottle "$_source_build_dryrun"; then
+    PASSED=$((PASSED + 1))
+    echo "[PASS] Intel dry-run keeps installed formula when it would build from source"
+else
+    FAILED=$((FAILED + 1))
+    echo "[FAIL] Intel dry-run missed would-build-from-source"
+fi
+if ! _brew_intel_dryrun_lacks_bottle "$_bat_dryrun"; then
+    PASSED=$((PASSED + 1))
+    echo "[PASS] Intel dry-run still upgrades when only a bottle is needed"
+else
+    FAILED=$((FAILED + 1))
+    echo "[FAIL] Intel dry-run skipped a bottle-only upgrade"
+fi
 if grep -q '_brew_intel_run_with_heartbeat' "${PROJECT_ROOT}/scripts/lib/chezmoi/package_install.sh" \
-    && grep -q '_brew_intel_should_skip_heavy_dep_upgrade' \
+    && grep -q '_brew_intel_dryrun_lacks_bottle' \
         "${PROJECT_ROOT}/scripts/lib/chezmoi/package_install.sh" \
     && grep -q 'upgrade_brew_package "$package_name"' \
         "${PROJECT_ROOT}/scripts/lib/chezmoi/package_install.sh" \
     && grep -q '_brew_link_existing_keg' \
         "${PROJECT_ROOT}/scripts/lib/chezmoi/brew_macos_network.sh"; then
     PASSED=$((PASSED + 1))
-    echo "[PASS] Intel brew upgrade uses heartbeat, heavy-dep skip, install_package reuse, keg relink"
+    echo "[PASS] Intel brew upgrade uses heartbeat, bottle check, install_package reuse, keg relink"
 else
     FAILED=$((FAILED + 1))
-    echo "[FAIL] Intel brew upgrade missing heartbeat, skip, install_package reuse, or keg relink"
+    echo "[FAIL] Intel brew upgrade missing heartbeat, bottle check, install_package reuse, or keg relink"
 fi
 
 if grep -q 'clangd already present, skip brew formula search' \
@@ -275,12 +311,61 @@ fi
 
 if grep -q 'HOMEBREW_NO_ENV_HINTS=1' "${PROJECT_ROOT}/scripts/lib/chezmoi/brew_macos_network.sh" \
     && grep -q 'HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK=1' \
+        "${PROJECT_ROOT}/scripts/lib/chezmoi/brew_macos_network.sh" \
+    && grep -q 'HOMEBREW_NO_INSTALL_CLEANUP=1' \
         "${PROJECT_ROOT}/scripts/lib/chezmoi/brew_macos_network.sh"; then
     PASSED=$((PASSED + 1))
-    echo "[PASS] brew env suppresses hints and Intel dependents check"
+    echo "[PASS] brew env suppresses hints, Intel dependents check, and periodic cleanup"
 else
     FAILED=$((FAILED + 1))
     echo "[FAIL] brew_macos_network.sh missing Intel brew env flags"
+fi
+
+if ! grep -q 'upgrade_brew_package' "${PROJECT_ROOT}/scripts/chezmoi/ensure_platform_software.sh" \
+    || ! grep -A6 '93-install-cursor' "${PROJECT_ROOT}/scripts/chezmoi/ensure_platform_software.sh" \
+        | grep -q 'upgrade_brew_package'; then
+    PASSED=$((PASSED + 1))
+    echo "[PASS] Cursor brew cask does not fall back to formula install"
+else
+    FAILED=$((FAILED + 1))
+    echo "[FAIL] Cursor brew target still calls upgrade_brew_package"
+fi
+
+if grep -q 'Cursor.app already present; skip brew cask' \
+    "${PROJECT_ROOT}/scripts/lib/chezmoi/package_install.sh"; then
+    PASSED=$((PASSED + 1))
+    echo "[PASS] existing Cursor.app skips brew cask download"
+else
+    FAILED=$((FAILED + 1))
+    echo "[FAIL] upgrade_brew_cask still downloads over an existing Cursor.app"
+fi
+
+if grep -q 'ensure_rc' "${PROJECT_ROOT}/install.sh" \
+    && grep -q '130' "${PROJECT_ROOT}/install.sh"; then
+    PASSED=$((PASSED + 1))
+    echo "[PASS] install.sh exits when ensure is interrupted"
+else
+    FAILED=$((FAILED + 1))
+    echo "[FAIL] install.sh does not treat ensure exit 130 as fatal"
+fi
+
+# shellcheck disable=SC1091
+source "${PROJECT_ROOT}/scripts/lib/chezmoi/package_install.sh"
+_gh_json='{"browser_download_url":"https://github.com/Schniz/fnm/releases/download/v1.39.0/fnm-macos.zip"}'
+_gh_url="$(github_release_json_first_asset_url "$_gh_json" "fnm-macos.zip" || true)"
+if [[ "$_gh_url" == *fnm-macos.zip ]]; then
+    PASSED=$((PASSED + 1))
+    echo "[PASS] GitHub release JSON finds Intel/universal fnm asset"
+else
+    FAILED=$((FAILED + 1))
+    echo "[FAIL] GitHub release JSON missed fnm-macos.zip"
+fi
+if ! github_release_json_first_asset_url "$_gh_json" "fnm-macos-arm64.zip" >/dev/null; then
+    PASSED=$((PASSED + 1))
+    echo "[PASS] GitHub release JSON rejects a missing Intel asset"
+else
+    FAILED=$((FAILED + 1))
+    echo "[FAIL] GitHub release JSON returned a URL for a missing asset"
 fi
 
 # Layer 4 npm：超时、已最新跳过、WSL 不走 Windows interop
