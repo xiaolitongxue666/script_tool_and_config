@@ -21,6 +21,8 @@
 - **仅 Windows**：`run_once_windows-install-rmux.sh.tmpl` 安装 rmux v0.5.0；`dot_rmux.conf.tmpl` → `~/.rmux.conf`（由 tmux 配置精简，**无插件**）。
 - WT 仍默认 Git Bash；**不**改 `settings.json.tmpl` 自动进 rmux；**不**在 bashrc 里 `attach`。
 - 排错与部署陷阱见 [docs/RMUX_WINDOWS.md](docs/RMUX_WINDOWS.md)。
+- 独立 Git Bash（mintty，Win10 与 Win11 共用）用 `dot_minttyrc.tmpl`：`Charset=UTF-8`，字体 `CaskaydiaCove NFM`。非 Windows 由 `.chezmoiignore` 忽略。`LANG` 仍用 `zh_CN.UTF-8`。WT 模板里的 `%USERPROFILE%` 由终端展开，不要改成别的路径。
+- Git for Windows 默认 `core.filemode=false`。`tests/test_contracts.sh` 这时用 git 索引的 `100755`/`100644` 判定可执行位。
 
 ## claude-mem 项目级记忆自动检测
 

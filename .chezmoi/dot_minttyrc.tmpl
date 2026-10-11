@@ -1,0 +1,12 @@
+{{- if eq .chezmoi.os "windows" -}}
+# Git Bash（mintty）字符集与字体
+# 中文 Windows 的默认 ANSI 代码页是 GBK。bash 按 LANG=zh_CN.UTF-8 输出 UTF-8，
+# mintty 未设 Charset 时按 GBK 解码，启动画面和中文会乱码。
+# 字体与 Windows Terminal 的 CaskaydiaCove NFM 一致，Starship 的 Powerline 字形才能显示。
+Charset=UTF-8
+Locale=zh_CN
+Font=CaskaydiaCove NFM
+FontHeight=14
+Term=xterm-256color
+BoldAsFont=no
+{{- end -}}

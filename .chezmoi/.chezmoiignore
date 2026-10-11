@@ -22,6 +22,7 @@
 {{ end }}
 {{ if ne .chezmoi.os "windows" }}
 secure_crt
+.minttyrc
 {{ end }}
 
 # ---------- 仅作模板 include 用，不部署到 $HOME ----------

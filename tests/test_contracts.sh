@@ -17,6 +17,27 @@ ok()   { PASSED=$((PASSED + 1)); echo "[PASS] $1"; }
 bad()  { FAILED=$((FAILED + 1)); echo "[FAIL] $1"; }
 head2() { echo ""; echo "--- $1"; }
 
+# Git for Windows 默认 core.filemode=false：带 shebang 的文件 [[ -x ]] 恒为真，
+# 无 shebang 的 100755 恒为假，chmod 也不落盘。这时以 git 索引 mode 为准。
+git_filemode_unreliable() {
+    local fm
+    fm="$(git config --get core.filemode 2>/dev/null || true)"
+    [[ "$fm" == "false" ]]
+}
+
+path_is_exec() {
+    local f="$1"
+    local mode=""
+    if git_filemode_unreliable; then
+        mode="$(git ls-files -s -- "$f" 2>/dev/null | awk 'NR==1 { print $1 }')"
+        if [[ -n "$mode" ]]; then
+            [[ "$mode" == "100755" ]]
+            return
+        fi
+    fi
+    [[ -x "$f" ]]
+}
+
 # ============================================
 # 1. 目录结构契约
 # ============================================
@@ -54,7 +75,7 @@ while IFS= read -r -d '' f; do
     if grep -qE '^set -euo pipefail' "$f"; then
         echo "       ✗ 库不应写 set -euo pipefail: $f"; lib_bad_set=$((lib_bad_set + 1))
     fi
-    if [[ -x "$f" ]]; then
+    if path_is_exec "$f"; then
         echo "       ✗ 库不应设可执行位: $f"; lib_bad_x=$((lib_bad_x + 1))
     fi
 done < <(find scripts/lib -name '*.sh' -print0 2>/dev/null)
@@ -73,7 +94,7 @@ while IFS= read -r f; do
     if grep -rqs "source.*$(basename "$f")" --include='*.sh' --include='*.sh.tmpl' scripts .chezmoi 2>/dev/null; then
         continue
     fi
-    if [[ ! -x "$f" ]]; then
+    if ! path_is_exec "$f"; then
         echo "       ✗ 文档以 ./ 调用但缺 +x: $f"; missing_x=$((missing_x + 1))
     fi
 done < <(grep -rhoE '\./[A-Za-z0-9_/.-]+\.sh' --include='*.md' --include='*.mdc' docs README.md AGENTS.md CLAUDE.md 2>/dev/null \
@@ -92,9 +113,12 @@ while IFS= read -r -d '' f; do
     if grep -rqs "source.*$(basename "$f")" --include='*.sh' --include='*.sh.tmpl' scripts .chezmoi 2>/dev/null; then
         continue
     fi
+    if path_is_exec "$f"; then
+        continue
+    fi
     echo "       ✗ 可执行位置缺 +x: $f"; noexec=$((noexec + 1))
 done < <(find scripts/chezmoi scripts/deploy_utils scripts/linux scripts/windows scripts/tools tests \
-             -name '*.sh' ! -perm -u+x -print0 2>/dev/null)
+             -name '*.sh' -print0 2>/dev/null)
 [[ "$noexec" -eq 0 ]] && ok "可执行位置脚本均已 chmod +x" \
     || bad "$noexec 个可执行位置脚本缺 +x"
 

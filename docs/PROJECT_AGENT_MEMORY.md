@@ -98,6 +98,8 @@ Pi 的安装、Harness、文档 **不在本仓库**。唯一 SSOT：[agent-confi
 | 多次 apply 报 lock timeout | 前次 chezmoi 进程未退出 | `taskkill //F //IM chezmoi.exe`，运行 `fix_chezmoi_lock.sh` |
 | `manage_dotfiles apply` 曾缺 force | 调用 `chezmoi_run_apply "-v"` 覆盖默认 | 已修复：`chezmoi_core` 自动补 `--force` |
 
+独立 Git Bash（mintty，Win10 与 Win11 共用）中文乱码：`dot_minttyrc.tmpl` → `~/.minttyrc`，`Charset=UTF-8`，字体 `CaskaydiaCove NFM`（缺字体则回退）。非 Windows 由 `.chezmoiignore` 忽略。`LANG` 保持本机存在的 `zh_CN.UTF-8`。仓库根的 `%USERPROFILE%` / `%SystemDrive%` / `${APPDATA}` 是未展开路径，不是用户配置。`core.filemode=false` 时 `tests/test_contracts.sh` 读 git 索引 mode。
+
 ## Windows Terminal：Git Bash 路径 C/D 盘（2026-05 实测）
 
 Git for Windows 可能装在 **C:** 或 **D:**（如 `D:\Program Files\Git`）。WT 启动 Git Bash 报 **`0x80070002`** 时，通常是 profile 仍指向不存在的 `C:\Program Files\Git\bin\bash.exe`。

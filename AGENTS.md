@@ -263,6 +263,8 @@ chezmoi 按**目标名（剥掉 `run_once_` 前缀与 `.tmpl` 后的名字）的
   - 字体安装使用 `powershell.exe` 的 `Shell.Application` COM 对象（`Namespace(0x14).CopyHere()`），无需管理员权限
   - 任何需要管理员权限的操作（如注册字体、修改系统 PATH）必须提供非管理员回退方案（如用户级安装、跳过并提示）
 - **路径原则**：不依赖绝对路径（如 `/c/Users/Administrator/`），使用 `$HOME`、`$LOCALAPPDATA`、`$APPDATA` 等环境变量
+- **mintty**：独立 Git Bash（Win10 与 Win11 共用）用 `dot_minttyrc.tmpl`（`Charset=UTF-8`，字体 `CaskaydiaCove NFM`）。非 Windows 由 `.chezmoiignore` 忽略。`LANG` 仍用 `zh_CN.UTF-8`。WT 的 `%USERPROFILE%` 起始目录保持由终端展开
+- **可执行位**：`core.filemode=false` 时 `tests/test_contracts.sh` 读 `git ls-files -s` 的 `100755`/`100644`，不用 `[[ -x ]]`
 
 ### run_once 脚本失败处理规则
 
