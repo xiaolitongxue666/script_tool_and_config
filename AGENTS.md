@@ -528,6 +528,10 @@ ensure_directory() {
 
 **chezmoi 注意**：CLI 不读 `CHEZMOI_SOURCE_DIR`；`sourceDir` 在 `~/.config/chezmoi/chezmoi.toml`（`chezmoi_ensure_user_config`）。配置映射见 `scripts/lib/chezmoi/config_mappings.sh`。Windows Git/WT 路径 C/D 盘检测见 `docs/PROJECT_AGENT_MEMORY.md`；Windows rmux 见 `docs/RMUX_WINDOWS.md`。
 
+### SSH 密钥与登录对象
+
+私钥不入库。`github.com` 用 `~/.ssh/id_ed25519_desktop-win-2026-10-C4` 登录 GitHub；`vps` 用 `~/.ssh/id_ed25519_desktop-win-2026-10-j0` 登录 VPS。两把密钥不共用。WSL `Ubuntu-24.04` 的 `/root/.ssh` 保存这两把的副本；WSL 没有 sshd，VPS 也还不能登录本机。设备、指纹和尚未轮换的机器见 `docs/DEVICE_ACCESS.md`，步骤见 `docs/SSH_KEY_ROTATION.md`。
+
 ### connect.exe 路径检测（Windows）
 
 `scripts/chezmoi/ensure_ssh_prereqs.sh` 在 Windows 上的**实际**检测顺序（行号对应源码）：

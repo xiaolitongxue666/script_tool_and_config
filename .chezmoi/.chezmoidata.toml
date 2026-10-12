@@ -15,5 +15,4 @@ macos_proxy_connect_opt = "-S"
 # command -v zsh（Intel 为 /usr/local/bin/zsh，Apple Silicon 为 /opt/homebrew/bin/zsh）。
 # 如需强制指定，请在 ~/.config/chezmoi/chezmoi.toml.local 的 [data] 中覆盖；
 # 不要在此写死，否则会覆盖掉另一架构机器的正确探测结果（2026-09 修复）。
-identity_file = "~/.ssh/id_rsa"
 # Cursor Remote SSH：见 agent-config config/local.env.example

@@ -102,7 +102,7 @@ cd /home/leonli/Code/DotfilesAndScript/script_tool_and_config
 
 - **host**: 远端服务器地址
 - **username**: SSH 用户名
-- **privateKeyPath**: SSH 私钥路径
+- **privateKeyPath**: SSH 私钥路径。示例里的 `~/.ssh/id_rsa` 已于 2026-10 从本机删除。`192.168.1.109` 不在当前密钥关系里，见 [DEVICE_ACCESS.md](DEVICE_ACCESS.md)。不要改用 GitHub 的 `id_ed25519_desktop-win-2026-10-C4` 或 VPS 的 `id_ed25519_desktop-win-2026-10-j0` 来登录这台机器。
 - **remotePath**: 远端项目路径
 - **uploadOnSave**: 保存时自动上传
 - **concurrency**: 并发连接数（已优化为 3，提高同步速度）
@@ -291,7 +291,7 @@ cd /home/leonli/Code/DotfilesAndScript/script_tool_and_config
 
 **解决**：
 1. 检查网络连接
-2. 检查 SSH 密钥配置：`ssh -i ~/.ssh/id_rsa leonli@192.168.1.109`
+2. 检查 SSH 密钥配置。本机 `id_rsa` 已删除，`192.168.1.109` 目前没有对应密钥，见 [DEVICE_ACCESS.md](DEVICE_ACCESS.md)
 3. 检查 `.vscode/sftp.json` 中的配置
 4. 查看 VS Code 输出面板中的 SFTP 日志
 

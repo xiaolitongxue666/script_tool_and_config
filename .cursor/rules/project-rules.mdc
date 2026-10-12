@@ -31,6 +31,7 @@ globs:
 - `chezmoi_ensure_user_config`（`chezmoi_core.sh`）维护 `sourceDir` 与 Windows `[interpreters.sh]`
 - macOS 默认 bash 3.2：`deploy.sh` 末尾仅 Zsh/OMZ **检查**（不安装；OMZ 由 `.chezmoiexternal.toml.tmpl`）；详见 `docs/PROJECT_AGENT_MEMORY.md`「macOS bash 3.2」
 - common-tools 包名 SSOT：`scripts/lib/chezmoi/packages.conf`
+- SSH 密钥不入库。`github.com` 用 `~/.ssh/id_ed25519_desktop-win-2026-10-C4` 登录 GitHub；`vps` 用 `~/.ssh/id_ed25519_desktop-win-2026-10-j0` 登录 VPS。二者不共用。WSL `/root/.ssh` 是这两把的副本，不要软链接到 Windows 盘。设备与指纹见 `docs/DEVICE_ACCESS.md`，轮换步骤见 `docs/SSH_KEY_ROTATION.md`
 
 ## macOS Intel 与 Cursor
 

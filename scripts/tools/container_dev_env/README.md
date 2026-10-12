@@ -18,7 +18,7 @@
 - 条件镜像源配置（有代理不修改源，无代理使用中国镜像源）
 - 自动挂载项目目录
 - 支持 SSH Agent Forwarding（容器可使用宿主机的 SSH 密钥，无需复制密钥文件）
-- 自动备份 SSH 关键文件（启动前备份 id_rsa, id_rsa.pub, known_hosts, config）
+- 自动备份 SSH 关键文件（启动前备份 `id_ed25519_desktop-win-2026-10-C4`、`id_ed25519_desktop-win-2026-10-j0` 及其公钥、known_hosts、config）。GitHub 与 VPS 登录不是同一把密钥，见 `docs/DEVICE_ACCESS.md`
 
 ## 前置要求
 
@@ -368,15 +368,15 @@ git clone git@github.com:xiaolitongxue666/nvim.git ~/.config/nvim
 
 1. **自动备份 SSH 文件**
    - 在配置 SSH Agent Forwarding 之前，脚本会自动备份以下文件到压缩包：
-     - `id_rsa` (私钥)
-     - `id_rsa.pub` (公钥)
+     - `id_ed25519_desktop-win-2026-10-C4`（GitHub）
+     - `id_ed25519_desktop-win-2026-10-j0`（登录 VPS）
      - `known_hosts`
      - `config`
    - 备份文件保存在 `~/.ssh/ssh_backup_YYYYMMDD_HHMMSS.tar.gz`
    - 备份文件权限设置为 600，确保安全性
 
 2. **自动加载私钥**
-   - 脚本会自动检查并加载 `id_rsa` 私钥到 SSH Agent
+   - 脚本会自动检查并加载 `id_ed25519_desktop-win-2026-10-C4` 与 `id_ed25519_desktop-win-2026-10-j0`
    - Linux 系统下，如果 SSH Agent 未运行，脚本会尝试自动启动
    - macOS 系统下，需要确保 SSH Agent 已运行
    - Windows 系统下，SSH Agent 支持有限，建议使用 WSL2
@@ -400,7 +400,7 @@ git clone git@github.com:xiaolitongxue666/nvim.git ~/.config/nvim
 
 2. **加载密钥到 SSH Agent**
    ```bash
-   ssh-add ~/.ssh/id_rsa
+   ssh-add ~/.ssh/id_ed25519_desktop-win-2026-10-C4
    ```
 
 3. **启动容器**
@@ -456,7 +456,7 @@ git clone git@github.com:xiaolitongxue666/nvim.git ~/.config/nvim
    # 如果显示 "Could not open a connection to your authentication agent"
    # 需要启动 SSH Agent
    eval $(ssh-agent)
-   ssh-add ~/.ssh/id_rsa
+   ssh-add ~/.ssh/id_ed25519_desktop-win-2026-10-C4
    ```
 
 2. **检查密钥是否已加载**

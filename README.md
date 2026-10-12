@@ -43,7 +43,7 @@ bash scripts/chezmoi/install_chezmoi.sh  # 或直接跑 ./install.sh
 chezmoi apply -v --force
 ```
 
-SSH 配置由 `.chezmoi/dot_ssh/config.tmpl` 管理，预置包含 `github.com`、`alchemy-vnc`（正式）、`moicen-vnc`（测试）；使用 `ssh alchemy-vnc` / `ssh moicen-vnc` 便捷登录，lazyssh 会直接识别。
+SSH 配置由 `.chezmoi/dot_ssh/config.tmpl` 管理，预置 `github.com` 与 Tailscale 别名 `vps`（`xiaolitongxue-vps` 指向同一台）。密钥文件名和登录关系见 `docs/DEVICE_ACCESS.md`。
 
 ### Windows 快速安装
 

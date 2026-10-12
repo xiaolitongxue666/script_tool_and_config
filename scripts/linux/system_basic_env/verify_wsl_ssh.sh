@@ -34,7 +34,7 @@ if ssh-add -l 2>&1; then
     log_success "已加载至少一个密钥"
 else
     log_warning "未加载密钥或 agent 未就绪（Could not open a connection to your authentication agent）"
-    log_info "宿主机密钥：确保 ~/.ssh 软链接与 /etc/wsl.conf [automount] options = \"metadata\"，并 chmod 600 ~/.ssh/id_rsa"
+    log_info "本机 WSL 使用 /root/.ssh 里的密钥副本（ext4，chmod 600）：id_ed25519_desktop-win-2026-10-C4 与 id_ed25519_desktop-win-2026-10-j0。不要把 ~/.ssh 软链接到 /mnt/host。对应关系见 docs/DEVICE_ACCESS.md"
     log_info "npiperelay：确保 .bashrc/.zprofile 中建立 SSH_AUTH_SOCK 的 socat 在登录时执行"
 fi
 echo ""

@@ -116,9 +116,12 @@ setup_wsl_ssh_agent() {
     if command -v ssh-agent &> /dev/null; then
         if eval "$(ssh-agent -s)" 2>/dev/null; then
             # 尝试加载默认密钥
-            if [[ -f "$HOME/.ssh/id_rsa" ]]; then
-                ssh-add "$HOME/.ssh/id_rsa" 2>/dev/null || true
-            fi
+            local key_name
+            for key_name in id_ed25519_desktop-win-2026-10-C4 id_ed25519_desktop-win-2026-10-j0 id_ed25519_vps-2026-10-JM id_ed25519_github id_ed25519_vps_login; do
+                if [[ -f "$HOME/.ssh/${key_name}" ]]; then
+                    ssh-add "$HOME/.ssh/${key_name}" 2>/dev/null || true
+                fi
+            done
             if [[ -n "$SSH_AUTH_SOCK" ]]; then
                 log_success "使用 WSL 内置 ssh-agent"
                 return 0

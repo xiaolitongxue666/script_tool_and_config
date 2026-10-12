@@ -15,16 +15,17 @@ Host github.com
     Port 443
     User git
     # 仅列出本机存在的密钥，避免 OpenSSH “no such identity” 警告
-    # 优先个人密钥；其次 id_rsa；再回退 id_ed25519
+    # 文件名：id_ed25519_<Tailscale 名>-<YYYY-MM>-<指纹末两位>
+    # 本机 desktop-win 与 VPS 各用自己的文件；没有新文件时回退旧名，避免尚未轮换的设备被 apply 拿掉
 {{- $ssh_dir := joinPath .chezmoi.homeDir ".ssh" }}
-{{- if stat (joinPath $ssh_dir "id_ed25519_github_personal") }}
+{{- if stat (joinPath $ssh_dir "id_ed25519_desktop-win-2026-10-C4") }}
+    IdentityFile ~/.ssh/id_ed25519_desktop-win-2026-10-C4
+{{- else if stat (joinPath $ssh_dir "id_ed25519_vps-2026-10-JM") }}
+    IdentityFile ~/.ssh/id_ed25519_vps-2026-10-JM
+{{- else if stat (joinPath $ssh_dir "id_ed25519_github") }}
+    IdentityFile ~/.ssh/id_ed25519_github
+{{- else if stat (joinPath $ssh_dir "id_ed25519_github_personal") }}
     IdentityFile ~/.ssh/id_ed25519_github_personal
-{{- end }}
-{{- if stat (joinPath $ssh_dir "id_rsa") }}
-    IdentityFile ~/.ssh/id_rsa
-{{- end }}
-{{- if and (not (stat (joinPath $ssh_dir "id_ed25519_github_personal"))) (not (stat (joinPath $ssh_dir "id_rsa"))) (stat (joinPath $ssh_dir "id_ed25519")) }}
-    IdentityFile ~/.ssh/id_ed25519
 {{- end }}
     IdentitiesOnly yes
 {{- if index . "ssh_use_proxy" }}
@@ -41,40 +42,28 @@ Host github.com
 {{- end }}
 {{- end }}
 
-# --- Gitea（ci.moicen.com / weli 组织）---
-Host ci.moicen.com
-    HostName ci.moicen.com
-    Port 2222
-    User git
-    IdentityFile {{ .identity_file | default "~/.ssh/id_rsa" }}
-    IdentitiesOnly yes
-
-# --- Alchemy / Moicen VNC（ssh to alchemy/moicen through VNC）---
-Host alchemy-vnc
-    HostName alchemy-studio.cn
-    User leonli
-    LocalForward 5901 localhost:5901
-
-Host moicen-vnc
-    HostName moicen.com
-    User leonli
-    LocalForward 5904 localhost:5901
-
-# --- 小同学 VPS（Cursor Remote SSH / 日常运维）---
-# CLI: cursor --remote ssh-remote+xiaolitongxue-vps /home/ubuntu/rss -n
-# 勿用 cursor -n "vscode-remote://..."（会被当成本地路径）；详见 Cursor User settings 模板注释
+# --- VPS（Tailscale 名 vps；Cursor Remote SSH / 日常运维）---
+# 主别名 vps 走 Tailscale MagicDNS。xiaolitongxue-vps 仍指向同一台，已有的
+# cursor --remote ssh-remote+xiaolitongxue-vps 不用改。
+# 勿用 cursor -n "vscode-remote://..."（会被当成本地路径）
 # 注：SetEnv TERM 需远端 sshd AcceptEnv TERM；默认未开时由 ~/.zprofile 在 SSH 会话内设置 TERM=xterm-256color
-Host xiaolitongxue-vps
-    HostName xiaolitongxue.com.cn
+Host vps xiaolitongxue-vps
+    HostName vps
     User ubuntu
     Port 22
-    # 仅列出本机存在的密钥（个人优先，再 id_ed25519）
+    # 登录密钥文件名带本机 Tailscale 名。没有新文件时保留旧回退
 {{- $ssh_dir := joinPath .chezmoi.homeDir ".ssh" }}
+{{- if stat (joinPath $ssh_dir "id_ed25519_desktop-win-2026-10-j0") }}
+    IdentityFile ~/.ssh/id_ed25519_desktop-win-2026-10-j0
+{{- else if stat (joinPath $ssh_dir "id_ed25519_vps_login") }}
+    IdentityFile ~/.ssh/id_ed25519_vps_login
+{{- else }}
 {{- if stat (joinPath $ssh_dir "id_ed25519_github_personal") }}
     IdentityFile ~/.ssh/id_ed25519_github_personal
 {{- end }}
 {{- if stat (joinPath $ssh_dir "id_ed25519") }}
     IdentityFile ~/.ssh/id_ed25519
+{{- end }}
 {{- end }}
     IdentitiesOnly yes
     ServerAliveInterval 60

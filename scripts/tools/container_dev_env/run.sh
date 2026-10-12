@@ -125,8 +125,8 @@ while [[ $# -gt 0 ]]; do
             echo ""
             echo "SSH 文件备份:"
             echo "  脚本会在配置 SSH Agent Forwarding 之前自动备份以下文件："
-            echo "  - id_rsa (私钥)"
-            echo "  - id_rsa.pub (公钥)"
+            echo "  - id_ed25519_desktop-win-2026-10-C4（GitHub）"
+            echo "  - id_ed25519_desktop-win-2026-10-j0（登录 VPS）"
             echo "  - known_hosts"
             echo "  - config"
             echo "  备份文件保存在 ~/.ssh/ssh_backup_YYYYMMDD_HHMMSS.tar.gz"
@@ -135,7 +135,7 @@ while [[ $# -gt 0 ]]; do
             echo "  脚本会自动检测并配置 SSH Agent Forwarding，使容器能够使用宿主机的 SSH 密钥"
             echo "  通过 SSH Agent 套接字挂载实现，无需在容器中复制密钥文件，更安全。"
             echo "  如果 SSH Agent 未运行，脚本会尝试启动（仅 Linux）。"
-            echo "  如果未检测到密钥，可能需要运行: ssh-add ~/.ssh/id_rsa"
+            echo "  如果未检测到密钥，可能需要运行: ssh-add ~/.ssh/id_ed25519_desktop-win-2026-10-C4"
             echo ""
             echo "Windows 环境说明:"
             echo "  Windows + Docker + SSH Agent 存在无法解决的技术限制："
@@ -175,7 +175,7 @@ done
 # ============================================
 backup_ssh_files() {
     local ssh_dir="${HOME}/.ssh"
-    local files_to_backup=("id_rsa" "id_rsa.pub" "known_hosts" "config")
+    local files_to_backup=("id_ed25519_desktop-win-2026-10-C4" "id_ed25519_desktop-win-2026-10-C4.pub" "id_ed25519_desktop-win-2026-10-j0" "id_ed25519_desktop-win-2026-10-j0.pub" "id_ed25519_vps-2026-10-JM" "id_ed25519_vps-2026-10-JM.pub" "id_ed25519_github" "id_ed25519_github.pub" "id_ed25519_vps_login" "id_ed25519_vps_login.pub" "known_hosts" "config")
     local files_found=()
 
     # 检查 SSH 目录
@@ -224,11 +224,20 @@ backup_ssh_files() {
 # ============================================
 ensure_ssh_key_loaded() {
     local ssh_dir="${HOME}/.ssh"
-    local private_key="${ssh_dir}/id_rsa"
+    local key_names=("id_ed25519_desktop-win-2026-10-C4" "id_ed25519_desktop-win-2026-10-j0" "id_ed25519_vps-2026-10-JM" "id_ed25519_github" "id_ed25519_vps_login")
+    local private_key=""
+    local key_name
 
-    # 检查私钥文件是否存在
-    if [[ ! -f "$private_key" ]]; then
-        log_warning "私钥文件不存在: ${private_key}，跳过加载"
+    for key_name in "${key_names[@]}"; do
+        if [[ -f "${ssh_dir}/${key_name}" ]]; then
+            private_key="${ssh_dir}/${key_name}"
+            break
+        fi
+    done
+
+    # 检查私钥文件是否存在。GitHub 与 VPS 登录密钥不是同一把，见 docs/DEVICE_ACCESS.md
+    if [[ -z "$private_key" ]]; then
+        log_warning "未找到 GitHub 或 VPS 登录密钥，跳过加载"
         return 1
     fi
 
@@ -255,21 +264,24 @@ ensure_ssh_key_loaded() {
         fi
     fi
 
-    # 检查私钥是否已加载
-    if ssh-add -l 2>/dev/null | grep -q "id_rsa"; then
-        log_info "私钥已加载到 SSH Agent"
-        return 0
-    fi
-
-    # 尝试加载私钥
-    log_info "加载私钥到 SSH Agent: $private_key"
-    if ssh-add "$private_key" 2>/dev/null; then
-        log_success "私钥已成功加载到 SSH Agent"
-        return 0
-    else
-        log_warning "加载私钥失败，可能需要输入密码或检查文件权限"
-        return 1
-    fi
+    local loaded_any=0
+    for key_name in "${key_names[@]}"; do
+        private_key="${ssh_dir}/${key_name}"
+        [[ -f "$private_key" ]] || continue
+        if ssh-add -l 2>/dev/null | grep -q "$key_name"; then
+            log_info "私钥已加载到 SSH Agent: ${key_name}"
+            loaded_any=1
+            continue
+        fi
+        log_info "加载私钥到 SSH Agent: $private_key"
+        if ssh-add "$private_key" 2>/dev/null; then
+            log_success "私钥已成功加载到 SSH Agent: ${key_name}"
+            loaded_any=1
+        else
+            log_warning "加载私钥失败: ${key_name}，可能需要输入密码或检查文件权限"
+        fi
+    done
+    [[ "$loaded_any" -eq 1 ]]
 }
 
 # ============================================
@@ -327,7 +339,7 @@ setup_ssh_agent_forwarding() {
         if ssh-add -l &> /dev/null; then
             log_info "检测到已加载的 SSH 密钥"
         else
-            log_warning "SSH Agent 中未检测到密钥，可能需要运行: ssh-add ~/.ssh/id_rsa"
+            log_warning "SSH Agent 中未检测到密钥，可能需要运行: ssh-add ~/.ssh/id_ed25519_desktop-win-2026-10-C4"
         fi
     fi
 

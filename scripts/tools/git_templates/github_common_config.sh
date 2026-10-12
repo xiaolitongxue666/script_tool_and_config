@@ -9,17 +9,10 @@ git config user.email
 # 设置 UI 颜色
 git config --global color.ui auto
 
-# 设置 SSH 密钥
-ssh-keygen -t rsa -C "your_email@example.com"
-# 生成公钥/私钥 RSA 密钥对
-# 输入保存密钥的文件
-# (/Users/your_user_directory/.ssh/id_rsa):  "按 Enter"
-# 输入密码短语（空表示无密码）:  "输入密码"
-# 再次输入相同的密码短语:  "再次输入密码"
-
-# 现在应该显示以下文本
-# 您的身份已保存在 /Users/your_user_directory/.ssh/id_rsa
-# 您的公钥已保存在 /Users/your_user_directory/.ssh/id_rsa.pub
+# 设置 SSH 密钥。当前仓库的做法见 docs/SSH_KEY_ROTATION.md：
+# 文件名 id_ed25519_<Tailscale 名>-<YYYY-MM>-<指纹末两位>
+# 本机 GitHub：~/.ssh/id_ed25519_desktop-win-2026-10-C4
+# 本机登录 VPS：~/.ssh/id_ed25519_desktop-win-2026-10-j0
 # 密钥指纹是:
 # 指纹值 your_email@example.com
 # 密钥的随机艺术图像是:
@@ -28,7 +21,7 @@ ssh-keygen -t rsa -C "your_email@example.com"
 # | = o O . |
 
 # 添加 SSH 密钥
-cat ~/.ssh/id_rsa.pub
+cat ~/.ssh/id_ed25519_desktop-win-2026-10-C4.pub
 # ssh-rsa  "公钥" your_email@example.com
 ssh -T git@github.com
 # 无法确认主机 'github.com (207.97.227.239)' 的真实性

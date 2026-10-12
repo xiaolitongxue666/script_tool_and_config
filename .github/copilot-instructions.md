@@ -21,6 +21,7 @@ Different platforms use different default shells. Template files are maintained 
 - Windows: `[interpreters.sh]` must point to Git Bash or run_once fails with Win32 error
 - Git for Windows may be on **C:** or **D:**; WT Git Bash path via `detect_windows_git_paths.sh` + `chezmoi_run_apply --override-data-file`; WT `0x80070002` → re-apply and restart WT (see `docs/PROJECT_AGENT_MEMORY.md`)
 - See `docs/RMUX_WINDOWS.md` for rmux-specific troubleshooting
+- SSH keys stay out of git. `github.com` uses `~/.ssh/id_ed25519_desktop-win-2026-10-C4` for GitHub; `vps` uses `~/.ssh/id_ed25519_desktop-win-2026-10-j0` for the VPS. WSL `/root/.ssh` holds copies of those two keys. Map: `docs/DEVICE_ACCESS.md`
 
 ## claude-mem Auto Detection
 

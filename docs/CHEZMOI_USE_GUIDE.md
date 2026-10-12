@@ -390,7 +390,9 @@ SSH 配置文件（`~/.ssh/config`）已纳入 chezmoi 管理，可以通过 laz
 **相对安全的原因：**
 - `~/.ssh/config` 文件本身**不包含私钥**，只包含连接配置信息
 - 文件内容主要是：主机别名、用户名、端口、端口转发规则、代理配置等
-- 私钥文件（`id_rsa`, `id_ed25519` 等）已在 `.gitignore` 和 `.chezmoiignore` 中被排除，不会被纳入管理
+- 私钥文件（`id_ed25519_desktop-win-2026-10-C4`、`id_ed25519_desktop-win-2026-10-j0` 等）已在 `.gitignore` 和 `.chezmoiignore` 中被排除，不会被纳入管理
+
+当前对应关系见 [DEVICE_ACCESS.md](DEVICE_ACCESS.md)。`github.com` 用 `~/.ssh/id_ed25519_desktop-win-2026-10-C4` 登录 GitHub；`vps` 用 `~/.ssh/id_ed25519_desktop-win-2026-10-j0` 登录 VPS。两把密钥不共用。轮换步骤见 [SSH_KEY_ROTATION.md](SSH_KEY_ROTATION.md)。
 
 **需要注意的敏感信息：**
 - 主机名和 IP 地址
@@ -597,8 +599,7 @@ ssh mini-server-container-vnc          # 进入 shell + 开启所有隧道
 # alchemy-studio-vnc: 本地 5901 → 远程 5901
 ssh -f -N alchemy-studio-vnc
 
-# moicen-vnc: 本地 5904 → 远程 5901
-ssh -f -N moicen-vnc
+# moicen-vnc 已从 SSH 模板删除，暂不使用
 ```
 
 #### 简化命令（推荐使用别名）
@@ -612,8 +613,7 @@ alias vnc-mini='ssh -f -N mini-server-container-vnc'
 # alchemy-studio 主机 VNC
 alias vnc-alchemy='ssh -f -N alchemy-studio-vnc'
 
-# moicen 主机 VNC
-alias vnc-moicen='ssh -f -N moicen-vnc'
+# moicen-vnc 已从 SSH 模板删除
 
 # 只开跳板隧道（如果单独需要）
 alias tunnel-jump='ssh -f -N alchemy-studio-tunnel'
@@ -624,7 +624,6 @@ alias tunnel-jump='ssh -f -N alchemy-studio-tunnel'
 ```bash
 vnc-mini        # 一键开启最常用的双层 VNC 隧道
 vnc-alchemy     # 开启 alchemy-studio VNC
-vnc-moicen      # 开启 moicen VNC
 ```
 
 #### 检查隧道状态
@@ -713,7 +712,7 @@ cursor --folder-uri "vscode-remote://ssh-remote+xiaolitongxue-vps/home/ubuntu/rs
 
 远程路径须为绝对路径（如 `/home/ubuntu/rss`）。UI 连接：`Cmd+Shift+P` → **Remote-SSH: Connect to Host...** → `xiaolitongxue-vps`（勿选 `github.com-personal` 等 Git SSH Host）。
 
-SSH Host 定义见 `.chezmoi/dot_ssh/config.tmpl` 中的 `xiaolitongxue-vps`。
+SSH Host 定义见 `.chezmoi/dot_ssh/config.tmpl` 中的 `vps`（`xiaolitongxue-vps` 是同一条），身份文件是 `~/.ssh/id_ed25519_desktop-win-2026-10-j0`，不是 GitHub 那把 `id_ed25519_desktop-win-2026-10-C4`。
 
 ## Claude Code 项目记忆自动检测
 

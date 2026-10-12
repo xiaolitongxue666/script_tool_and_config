@@ -94,7 +94,7 @@ Pi 的安装、Harness、文档 **不在本仓库**。唯一 SSOT：[agent-confi
 | apply 停在 `.gitconfig has changed` | 缺 `--force`，等待交互 | 使用 `chezmoi apply -v --force` 或 `chezmoi_run_apply` |
 | apply 后丢失 `safe.directory` | `dot_gitconfig.tmpl` 整文件覆盖 `~/.gitconfig`，模板不含 `[safe]` | apply 后 `git config --global --add safe.directory <path>`；或私有项放 `~/.config/git/config` / `include.path`（见 CHEZMOI_USE_GUIDE） |
 | apply 冲掉 bash 私有段（如 Phase2 dsh） | 私有块曾写进 A 管理的 `~/.bashrc` | Phase1 仅在 `dot_bashrc.tmpl` **最末尾** `source ~/.bashrc.local`；私有内容写 `~/.bashrc.local`（Windows Git Bash；对称于 `~/.zshrc.local`） |
-| `git pull` 报 `no such identity: .../id_ed25519_github_personal` | SSH 模板硬编码不存在的 IdentityFile | `dot_ssh/config.tmpl` 用 `stat` 仅写入本机已有密钥 |
+| `git pull` 报 `no such identity` | SSH 模板写了本机没有的 IdentityFile | `dot_ssh/config.tmpl` 用 `stat` 只写入已有文件。本机 GitHub 是 `id_ed25519_desktop-win-2026-10-C4`，登录 VPS 是 `id_ed25519_desktop-win-2026-10-j0`。WSL `/root/.ssh` 是这两把的副本。关系见 `docs/DEVICE_ACCESS.md` |
 | 多次 apply 报 lock timeout | 前次 chezmoi 进程未退出 | `taskkill //F //IM chezmoi.exe`，运行 `fix_chezmoi_lock.sh` |
 | `manage_dotfiles apply` 曾缺 force | 调用 `chezmoi_run_apply "-v"` 覆盖默认 | 已修复：`chezmoi_core` 自动补 `--force` |
 
