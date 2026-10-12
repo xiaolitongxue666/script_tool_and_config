@@ -275,6 +275,8 @@ chezmoi-override-merged.*.toml
 **/identity.pub
 # 轮换时放在家目录或仓库里的私钥备份、渲染后的 config 备份
 **/.ssh-key-backup-*/
+# MSYS .ssh 联到 %USERPROFILE%\.ssh 之前留下的目录备份
+**/.ssh.bak-*
 **/config.bak.*
 # 回家配置用的临时公钥包。私钥不在包里，仍不要入库
 ssh-home-kit-*/

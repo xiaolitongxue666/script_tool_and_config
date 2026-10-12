@@ -77,7 +77,7 @@ VPS `ubuntu` 的 `authorized_keys` 现在只剩：
 
 GitHub 上另外保留的认证公钥：`mac mini`（`SHA256:YebAJXn40LJ4I0vm4k/YUySEr0PseF2k86j40UZFmNA`）。`Work_company_key` 已删除。
 
-MSYS2 的 `ssh` 另读 `C:\msys64\home\Administrator\.ssh\config`，不由 chezmoi 部署。这份里的 `github.com` 和 VPS Host 已改成新密钥。其中 `192.168.1.211`（Gitblit，用户 `liyong`，端口 `29418`）原来用 `id_ed25519` 和 `id_rsa`，2026-10-12 用这两把密钥登录被拒绝。
+MSYS2 的 `ssh` 经目录联接使用 `%USERPROFILE%\.ssh`（本机 `C:\Users\Administrator\.ssh`），不再另维护一份 config。`run_once_windows-link-msys-ssh.sh` 把 `C:\msys64\home\<用户>\.ssh` 接到该目录；原来的 MSYS 目录改名为同级 `.ssh.bak-日期`，不删除。其中曾有 `192.168.1.211`（Gitblit，用户 `liyong`，端口 `29418`），2026-10-12 用已删除的 `id_ed25519` 和 `id_rsa` 登录被拒绝，未并入 chezmoi 模板。
 
 WSL `Ubuntu-24.04` 的默认用户是 `root`，家目录 `/root`。2026-10-12 已把本机 GitHub、VPS、手机、Mac、平板这几把私钥和渲染后的 `~/.ssh/config` 复制进去（权限 600）。平板 Host 还没写，因为用户名未知。旧的 `id_rsa`（`SHA256:SpqzZfj+gI3OeL+4ykMk1tc04jV6iSAlLnTOSaG4LIg`）和 `id_ed25519`（`SHA256:VnzXG8fdsIHdxlQE2hd+HVeof6NXuBebj5BIvN9WB1E`）已从该目录删除。
 
@@ -85,14 +85,15 @@ WSL `Ubuntu-24.04` 的默认用户是 `root`，家目录 `/root`。2026-10-12 �
 
 - 本机：完成。密钥文件已改成 `desktop-win-2026-10-C4` / `desktop-win-2026-10-j0`
 - VPS：完成。GitHub 密钥文件已改成 `id_ed25519_vps-2026-10-JM`。复制来的 `id_ed25519_github_personal` 已删除
-- 本机 → VPS：Tailscale 上 `ssh vps` 已测通（`100.110.122.106 → 100.74.201.82`）
+- 本机 → VPS：2026-10-12 联接后重测。`ssh vps` 与 `ssh xiaolitongxue-vps` 都登录成功（`100.110.122.106 → 100.74.201.82:22`，主机名 `VM-0-8-ubuntu`）
 - WSL → VPS：已测通，出口仍是本机 Tailscale 地址
 - 手机 → 本机：`ssh desktop-win` 已测通。公钥在 `administrators_authorized_keys`
-- 本机 → 手机：`ssh phone-personal-android` 已测通。密码登录被拒绝，只剩公钥
+- 本机 → 手机：2026-10-12 重测 `ssh phone-personal-android` 连接 `8022` 超时。Tailscale 显示离线，约 1 小时前最后在线。密码登录仍关闭
 - VPS → 本机、WSL → 本机：22 端口通。这两边还没有登录本机的密钥
 - 本机 → WSL、VPS → WSL：WSL 没有 `sshd`，`192.168.205.215:22` 连不上
 - 本机、WSL、VPS 访问 GitHub：`ssh -T git@github.com` 都返回 `Hi xiaolitongxue666!`
 - 手机 → Mac mini：别名 `mac-mini` 已写，公钥还没放进 Mac
-- 本机 → Mac、本机 → 平板：密钥已生成，公钥还没装到目标设备
+- 本机 → Mac：2026-10-12 重测时 Tailscale 在线，SSH 有应答。`known_hosts` 没有 `mac-mini` 的 ED25519 主机钥，严格校验停在登录前。公钥仍未装到 `leonli`
+- 本机 → 平板：密钥已生成，公钥还没装到平板。2026-10-12 Tailscale 仍离线约 142 天，且没有 Host
 - Mac、平板自己的密钥：回家后在设备上生成，再把公钥装进已经配好的机器。见 [SSH_KEY_ROTATION.md](SSH_KEY_ROTATION.md)
 - 笔记本，以及手机的 GitHub 密钥：未开始

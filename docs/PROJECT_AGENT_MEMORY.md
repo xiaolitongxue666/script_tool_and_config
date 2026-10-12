@@ -70,7 +70,7 @@ canonical 源：agent-config `platforms/{cursor,claude-code,codex,pi}/` 与 `pla
 - **CodeWhale 已从本仓与 agent-config 移除（勿恢复）**；已删除 `run_once_92-install-codewhale.sh.tmpl`、`docs/CODEWHALE.md`、`.cursor/rules/codewhale.mdc`。
 - **历史**：已删除 `run_once_92-install-deepseek.sh.tmpl`（勿恢复 `cargo install deepseek`）。
 - AI Agent 配置见 [agent-config](../../../AI/agent-config)（Claude / Cursor / Codex / Pi + CodeGraph）。
-- **多 OS 兼容、环境独立**：各环境 `$HOME`/fnm/npm/chezmoi 目标不共享；平台专有分支不得改其它 OS。WSL 里 `install.sh` **只装 WSL**，与宿主机 npm **无关**（`:7890` 只是网络出口）。`/mnt/host/wslg/.../fnm_multishells` 是 WSL 本机 fnm；`/mnt/c`、`/mnt/host/c` 才是 Windows。**禁止**从 WSL 调用 `cmd.exe` 或改 Windows npm。见 `.cursor/rules/wsl-windows-isolation.mdc`。
+- **多 OS 兼容、环境独立**：各环境 `$HOME`/fnm/npm/chezmoi 目标不共享；平台专有分支不得改其它 OS。WSL 里 `install.sh` **只装 WSL**，与宿主机 npm **无关**（`:7890` 只是网络出口）。`/mnt/host/wslg/.../fnm_multishells` 是 WSL 本机 fnm；`/mnt/c`、`/mnt/host/c` 才是 Windows。**禁止**从 WSL 调用 `cmd.exe` 或改 Windows npm。Windows SSH 只认 `%USERPROFILE%\.ssh`，MSYS2 `.ssh` 经 `run_once_windows-link-msys-ssh.sh` 联接过去；WSL `/root/.ssh` 仍是副本。见 `.cursor/rules/wsl-windows-isolation.mdc`。
 - 部署：`./deploy.sh` 或 `./scripts/manage_dotfiles.sh apply`（**勿**对 apply 使用 `| rg | head` 管道，会 SIGPIPE 中断）。
 
 ## Pi（已迁入 agent-config，2026-06）
@@ -403,7 +403,7 @@ chezmoi --source .chezmoi managed | grep -E 'install-|^[0-9]' | sort   # 核对�
 2. 部署变更仅通过 chezmoi 模板 + `manage_dotfiles.sh` / `install.sh` / `deploy.sh`。
 3. 运行时日志**分而治之**：库与被管道消费的脚本用英文，面向用户的交互脚本中文可接受；日志前缀一律英文。注释与文档一律中文。
 4. Windows run_once **无管理员**依赖。
-5. **多 OS 兼容、环境独立**：各 OS 的 `$HOME`/fnm/npm/chezmoi 目标不共享；平台专有分支不得改其它 OS。WSL 里 `install.sh` **只装 WSL**，与宿主机 npm **无关**。WSL 本机 fnm 可在 `/mnt/host/wslg/runtime-dir/fnm_multishells`；Windows npm 在 `/mnt/c`、`/mnt/host/c`、`AppData/Roaming/npm`。禁止从 WSL 改 Windows 包或调用 `cmd.exe`。见 `.cursor/rules/wsl-windows-isolation.mdc`。
+5. **多 OS 兼容、环境独立**：各 OS 的 `$HOME`/fnm/npm/chezmoi 目标不共享；平台专有分支不得改其它 OS。WSL 里 `install.sh` **只装 WSL**，与宿主机 npm **无关**。WSL 本机 fnm 可在 `/mnt/host/wslg/runtime-dir/fnm_multishells`；Windows npm 在 `/mnt/c`、`/mnt/host/c`、`AppData/Roaming/npm`。禁止从 WSL 改 Windows 包或调用 `cmd.exe`。Windows SSH 只认 `%USERPROFILE%\.ssh`，MSYS2 `.ssh` 经 `run_once_windows-link-msys-ssh.sh` 联接过去；WSL `/root/.ssh` 仍是副本。见 `.cursor/rules/wsl-windows-isolation.mdc`。
 6. 紧凑记忆索引：[PROJECT_MEMORY.md](PROJECT_MEMORY.md)；变更时同步 `AGENTS.md`、`CLAUDE.md`、`.cursor/rules/`。
 7. **禁止新建 `run_on_*/` 子目录**（从来不是 chezmoi 平台目录）：平台专属**脚本**用 `run_once_{linux,macos,windows}-*` 前缀；平台专属 **dotfile** 放源根 + `.chezmoiignore` 按 OS 过滤。详见上文「chezmoi 机制实测」。
 8. **部署入口职责分离**：`install.sh`（首次安装，含 `[1/6]`…`[6/6]`）≠ `deploy.sh`（增量 + 诊断 + 锁处理）；由 `tests/test_contracts.sh` 断言守护，**勿互相整体覆盖**。

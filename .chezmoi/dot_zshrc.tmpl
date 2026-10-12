@@ -9,9 +9,11 @@
 # 检测操作系统
 if [[ "$OSTYPE" =~ ^(msys|mingw|cygwin) ]]; then
     # Windows Git Bash 环境
-    # 修复 HOME 变量：Git Bash 启动的 zsh 中 HOME 可能被设置为 /home/Administrator
-    # 或者可能是 Windows 路径格式 c:/users/administrator，需要转换为 /c/Users/Administrator
-    # 注意：此修复必须在任何其他配置之前执行，因为 Oh My Zsh 和其他工具依赖正确的 HOME
+    # 修复 shell 的 HOME：Git Bash 启动的 zsh 里 HOME 可能是 /home/<用户>（MSYS passwd）
+    # 或 Windows 路径 c:/users/<用户>，需要变成 /<盘>/Users/<用户>
+    # 这只影响当前 shell。MSYS ssh 的 ~ 仍由 db_home 决定，.ssh 靠
+    # run_once_windows-link-msys-ssh.sh 联到 %USERPROFILE%\.ssh
+    # 此修复必须在其他配置之前执行，Oh My Zsh 和其他工具依赖正确的 HOME
 
     # 首先，如果 HOME 是 Windows 路径格式（c:/users/administrator），转换为 Unix 格式
     if [[ "$HOME" =~ ^[a-zA-Z]: ]]; then

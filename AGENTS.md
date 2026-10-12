@@ -487,7 +487,7 @@ ensure_directory() {
 ### 平台特定代码
 
 - 项目支持多 OS（Win10、macOS Intel、Linux Ubuntu/Arch）与 WSL（Ubuntu）；WSL 视为 Linux，共用 Linux 专属脚本（`run_once_linux-*`），脚本内通过 WSL 检测区分代理与路径。
-- **多 OS 兼容、环境独立**：一套脚本能跑各 OS，`$HOME`/fnm/npm/chezmoi 不共享；平台专有分支不得改其它 OS。WSL 里跑 `install.sh` **只装 WSL**，与宿主机 npm **无关**（宿主机仅 Clash `:7890` 出口）。`/mnt/host/wslg/.../fnm_multishells` 是 WSL 本机 fnm；`/mnt/c`、`/mnt/host/c` 才是 Windows。禁止从 WSL 改 Windows npm 或调用 `cmd.exe`。见 `.cursor/rules/wsl-windows-isolation.mdc`。
+- **多 OS 兼容、环境独立**：一套脚本能跑各 OS，`$HOME`/fnm/npm/chezmoi 不共享；平台专有分支不得改其它 OS。WSL 里跑 `install.sh` **只装 WSL**，与宿主机 npm **无关**（宿主机仅 Clash `:7890` 出口）。`/mnt/host/wslg/.../fnm_multishells` 是 WSL 本机 fnm；`/mnt/c`、`/mnt/host/c` 才是 Windows。禁止从 WSL 改 Windows npm 或调用 `cmd.exe`。Windows SSH 只认 `%USERPROFILE%\.ssh`，MSYS2 `.ssh` 经 `run_once_windows-link-msys-ssh.sh` 联接过去；WSL `/root/.ssh` 仍是副本。见 `.cursor/rules/wsl-windows-isolation.mdc`。
 - 平台专属**脚本**：源根 + `run_once_{linux,macos,windows}-*` 前缀；平台专属 **dotfile**：源根 +
   `.chezmoiignore` 的 OS 条件过滤。**禁止**新建 `run_on_*/` 子目录（详见上文「chezmoi 平台目录陷阱」）。
 - 安装脚本中的平台特定逻辑使用模板条件判断
@@ -530,7 +530,7 @@ ensure_directory() {
 
 ### SSH 密钥与登录对象
 
-私钥不入库。本机与 Mac 可登录全部设备；手机与平板只登录本机和 Mac。新设备的私钥在该设备上生成，只把公钥装进已经配好的机器。清单见 `docs/DEVICE_ACCESS.md`，步骤见 `docs/SSH_KEY_ROTATION.md`。
+私钥不入库。本机与 Mac 可登录全部设备；手机与平板只登录本机和 Mac。新设备的私钥在该设备上生成，只把公钥装进已经配好的机器。Windows 只认 `%USERPROFILE%\.ssh`。MSYS2 `ssh` 的 `~` 仍是 `C:\msys64\home\<用户>`（`db_home: cygwin desc`），`run_once_windows-link-msys-ssh.sh` 把其中的 `.ssh` 联接到用户目录，不改 `db_home`，也不写死用户名。WSL `/root/.ssh` 是 ext4 副本，不软链接到 Windows 盘。清单见 `docs/DEVICE_ACCESS.md`，步骤见 `docs/SSH_KEY_ROTATION.md`。
 
 ### connect.exe 路径检测（Windows）
 

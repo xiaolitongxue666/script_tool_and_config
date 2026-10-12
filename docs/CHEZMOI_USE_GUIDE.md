@@ -383,7 +383,7 @@ Windows 特定的配置和脚本位于 `run_on_windows/` 目录：
 
 ## SSH 配置管理
 
-SSH 配置文件（`~/.ssh/config`）已纳入 chezmoi 管理，可以通过 lazyssh 或直接编辑进行管理。
+SSH 配置文件（`~/.ssh/config`）已纳入 chezmoi 管理，可以通过 lazyssh 或直接编辑进行管理。Windows 上这份文件只在 `%USERPROFILE%\.ssh`。MSYS2 的 `ssh` 不另存 config：`run_once_windows-link-msys-ssh.sh` 把 `C:\msys64\home\<用户>\.ssh` 联接到该目录。WSL 使用 `/root/.ssh` 里的副本，不软链接到 Windows 盘。
 
 ### 安全性说明
 

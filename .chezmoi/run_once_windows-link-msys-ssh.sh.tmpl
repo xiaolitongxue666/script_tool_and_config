@@ -1,0 +1,199 @@
+{{- if eq .chezmoi.os "windows" -}}
+#!/usr/bin/env bash
+
+# ============================================
+# 把 MSYS2 家目录里的 .ssh 接到 Windows 用户目录
+# 仅 Windows。Linux / macOS / WSL 不渲染、不执行。
+# MSYS ssh 按 db_home: cygwin 展开 ~，shell 里改 HOME 影响不到它。
+# 目录联接之后，~/.ssh 与 %USERPROFILE%\.ssh 是同一份文件。
+# 不改 nsswitch，不碰 WSL /root/.ssh，不改 known_hosts 内容。
+# ============================================
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="${CHEZMOI_PROJECT_ROOT:-$(cd "${SCRIPT_DIR}/../../.." && pwd 2>/dev/null || echo "$HOME")}"
+COMMON_INSTALL="${PROJECT_ROOT}/scripts/lib/chezmoi/common_install.sh"
+
+if [[ ! -f "$COMMON_INSTALL" ]]; then
+    COMMON_INSTALL="$HOME/.local/share/chezmoi/scripts/lib/chezmoi/common_install.sh"
+fi
+
+if [[ -f "$COMMON_INSTALL" ]]; then
+    # shellcheck disable=SC1090
+    source "$COMMON_INSTALL"
+else
+    function log_info() { echo "[INFO] $*" >&2; }
+    function log_success() { echo "[SUCCESS] $*" >&2; }
+    function log_warning() { echo "[WARNING] $*" >&2; }
+    function log_error() { echo "[ERROR] $*" >&2; }
+fi
+
+if [[ ! "$(uname -s)" =~ ^(MINGW|MSYS|CYGWIN) ]]; then
+    log_error "This script supports Windows (Git Bash / MSYS) only"
+    exit 1
+fi
+
+# 传给 cmd / fsutil 的 Windows 路径不能被 MSYS 再转换一次
+run_windows() {
+    MSYS_NO_PATHCONV=1 MSYS2_ARG_CONV_EXCL='*' "$@"
+}
+
+normalize_win_path() {
+    local input="$1"
+    local win
+    if [[ "$input" =~ ^[A-Za-z]: ]]; then
+        win="$input"
+    else
+        win="$(cygpath -w "$input")"
+    fi
+    win="${win//\\//}"
+    win="$(printf '%s' "$win" | tr '[:upper:]' '[:lower:]')"
+    win="${win%/}"
+    printf '%s' "$win"
+}
+
+# 中文系统上 fsutil 的 Print Name 不是英文，改读 PowerShell 的 Target。
+# 不是重解析点时返回空，不让 set -e 中止。
+reparse_print_name() {
+    local win_path="$1"
+    local target
+    target="$(run_windows powershell.exe -NoProfile -Command "\$item = Get-Item -LiteralPath '${win_path}' -Force -ErrorAction SilentlyContinue; if (-not \$item) { exit 0 }; if (-not (\$item.Attributes -band 1024)) { exit 0 }; Write-Output @(\$item.Target)[0]" || true)"
+    target="${target//$'\r'/}"
+    target="${target//$'\n'/}"
+    printf '%s' "$target"
+}
+
+find_msys_root() {
+    local candidate candidates=()
+    local program_files program_files_x86
+    candidates+=("/c/msys64" "/c/msys32")
+    if [[ -n "${PROGRAMFILES:-}" ]]; then
+        program_files="$(cygpath -u "$PROGRAMFILES")"
+        candidates+=("${program_files}/msys64")
+    fi
+    program_files_x86="$(printenv 'ProgramFiles(x86)' 2>/dev/null || true)"
+    if [[ -n "$program_files_x86" ]]; then
+        candidates+=("$(cygpath -u "$program_files_x86")/msys64")
+    fi
+    for candidate in "${candidates[@]}"; do
+        if [[ -x "${candidate}/usr/bin/bash.exe" ]]; then
+            printf '%s' "$candidate"
+            return 0
+        fi
+    done
+    return 1
+}
+
+# passwd 里的 /home/用户 是 MSYS 前缀内的路径，不能按当前 shell 的 /home 解析
+msys_home_from_prefix() {
+    local msys_root="$1"
+    local passwd="${msys_root}/etc/passwd"
+    local windows_user field
+    windows_user="${USERNAME:-${USER:-}}"
+    field=""
+    if [[ -n "$windows_user" && -f "$passwd" ]]; then
+        field="$(awk -F: -v name="$windows_user" 'tolower($1) == tolower(name) { print $6; exit }' "$passwd")"
+    fi
+    if [[ "$field" == /home/* ]]; then
+        printf '%s' "${msys_root}${field}"
+        return 0
+    fi
+    if [[ "$field" =~ ^[A-Za-z]: ]]; then
+        cygpath -u "$field"
+        return 0
+    fi
+    if [[ -z "$windows_user" ]]; then
+        return 1
+    fi
+    printf '%s' "${msys_root}/home/${windows_user}"
+}
+
+link_msys_ssh() {
+    local profile_ssh msys_root msys_home msys_ssh
+    local profile_norm msys_norm link_win target_win print_name print_norm
+    local backup_name backup_path
+
+    if [[ -z "${USERPROFILE:-}" ]]; then
+        log_error "USERPROFILE 未设置，无法定位 Windows SSH 目录"
+        exit 1
+    fi
+    if ! command -v cygpath >/dev/null 2>&1; then
+        log_error "需要 cygpath（Git Bash 或 MSYS）"
+        exit 1
+    fi
+
+    profile_ssh="$(cygpath -u "${USERPROFILE}")/.ssh"
+    if [[ ! -d "$profile_ssh" ]]; then
+        log_error "Windows SSH 目录不存在: ${profile_ssh}"
+        exit 1
+    fi
+
+    if ! msys_root="$(find_msys_root)"; then
+        log_info "未安装 MSYS2，跳过"
+        exit 0
+    fi
+    if ! msys_home="$(msys_home_from_prefix "$msys_root")"; then
+        log_error "无法确定 MSYS 家目录: ${msys_root}"
+        exit 1
+    fi
+    if [[ ! -d "$msys_home" ]]; then
+        log_error "MSYS 家目录不存在: ${msys_home}"
+        exit 1
+    fi
+
+    msys_ssh="${msys_home}/.ssh"
+    profile_norm="$(normalize_win_path "$profile_ssh")"
+    msys_norm="$(normalize_win_path "$msys_ssh")"
+    if [[ "$msys_norm" == "$profile_norm" ]]; then
+        log_info "MSYS 家目录已是 Windows 用户目录，无需联接"
+        exit 0
+    fi
+
+    link_win="$(cygpath -w "$msys_ssh")"
+    target_win="$(cygpath -w "$profile_ssh")"
+
+    if [[ -e "$msys_ssh" || -L "$msys_ssh" ]]; then
+        print_name="$(reparse_print_name "$link_win")"
+        if [[ -n "$print_name" ]]; then
+            print_norm="$(normalize_win_path "$print_name")"
+            if [[ "$print_norm" == "$profile_norm" ]]; then
+                log_info "MSYS .ssh 已指向 ${profile_ssh}"
+                exit 0
+            fi
+            log_error "MSYS .ssh 已是指向别处的联接: ${print_name}"
+            exit 1
+        fi
+        if [[ ! -d "$msys_ssh" ]]; then
+            log_error "MSYS .ssh 不是目录: ${msys_ssh}"
+            exit 1
+        fi
+        backup_name=".ssh.bak-$(date +%Y%m%d)"
+        backup_path="${msys_home}/${backup_name}"
+        if [[ -e "$backup_path" ]]; then
+            backup_name=".ssh.bak-$(date +%Y%m%d-%H%M%S)"
+            backup_path="${msys_home}/${backup_name}"
+        fi
+        log_info "备份现有 MSYS .ssh 到 ${backup_path}"
+        mv "$msys_ssh" "$backup_path"
+    fi
+
+    log_info "创建目录联接 ${msys_ssh} -> ${profile_ssh}"
+    # PowerShell New-Item：cmd mklink 的引号在 MSYS_NO_PATHCONV 下会拆坏；
+    # 中文系统的 fsutil 不打印英文 Print Name，读取目标也走 Target
+    run_windows powershell.exe -NoProfile -Command "New-Item -ItemType Junction -Path '${link_win}' -Target '${target_win}' | Out-Null"
+    print_name="$(reparse_print_name "$link_win")"
+    if [[ -z "$print_name" ]]; then
+        log_error "联接创建后读不到目标: ${msys_ssh}"
+        exit 1
+    fi
+    print_norm="$(normalize_win_path "$print_name")"
+    if [[ "$print_norm" != "$profile_norm" ]]; then
+        log_error "联接创建后目标不符: ${print_name:-<empty>}"
+        exit 1
+    fi
+    log_success "MSYS ssh 使用 ${profile_ssh}"
+}
+
+link_msys_ssh
+{{- end -}}

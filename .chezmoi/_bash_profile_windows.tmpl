@@ -194,8 +194,8 @@ curl() {
 # 环境变量配置
 # ============================================
 
-# 确保 HOME 变量正确设置（Windows Git Bash 环境）
-# 在 Git Bash 中，HOME 应该指向 Windows 用户目录
+# 确保 shell 的 HOME 指向 Windows 用户目录（USERPROFILE）
+# 这不改变 MSYS ssh 对 ~ 的展开；那份 .ssh 由 run_once_windows-link-msys-ssh.sh 联接
 if [[ "$OSTYPE" =~ ^(msys|mingw|cygwin) ]]; then
     # 确保 HOME 指向 Windows 用户目录（优先 USERPROFILE / cygpath）
     if [[ "$HOME" == /home/* ]] || [ -z "$HOME" ] || [ ! -d "$HOME" ]; then
