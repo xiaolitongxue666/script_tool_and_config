@@ -69,6 +69,30 @@ Host vps xiaolitongxue-vps
     ServerAliveInterval 60
     ServerAliveCountMax 3
 
+# --- 手机 Termux（Tailscale 名 phone-personal-android，端口 8022）---
+# 这把密钥只登录手机，不用于 GitHub 或 VPS
+Host phone-personal-android
+    HostName phone-personal-android
+    User u0_a0
+    Port 8022
+{{- $ssh_dir := joinPath .chezmoi.homeDir ".ssh" }}
+{{- if stat (joinPath $ssh_dir "id_ed25519_desktop-win-2026-10-6c") }}
+    IdentityFile ~/.ssh/id_ed25519_desktop-win-2026-10-6c
+{{- end }}
+    IdentitiesOnly yes
+
+# --- Mac mini（Tailscale 名 mac-mini）---
+# 这把密钥只登录 Mac 上的 leonli，不用于 GitHub 或 VPS
+Host mac-mini
+    HostName mac-mini
+    User leonli
+    Port 22
+{{- $ssh_dir := joinPath .chezmoi.homeDir ".ssh" }}
+{{- if stat (joinPath $ssh_dir "id_ed25519_desktop-win-2026-10-A8") }}
+    IdentityFile ~/.ssh/id_ed25519_desktop-win-2026-10-A8
+{{- end }}
+    IdentitiesOnly yes
+
 # 其他 Host（如内网 Git 服务器）请在本机或 lazyssh 中单独添加
 # --- 其他 Host 默认 ---
 Host *

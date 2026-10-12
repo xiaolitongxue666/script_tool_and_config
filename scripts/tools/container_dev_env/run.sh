@@ -175,7 +175,7 @@ done
 # ============================================
 backup_ssh_files() {
     local ssh_dir="${HOME}/.ssh"
-    local files_to_backup=("id_ed25519_desktop-win-2026-10-C4" "id_ed25519_desktop-win-2026-10-C4.pub" "id_ed25519_desktop-win-2026-10-j0" "id_ed25519_desktop-win-2026-10-j0.pub" "id_ed25519_vps-2026-10-JM" "id_ed25519_vps-2026-10-JM.pub" "id_ed25519_github" "id_ed25519_github.pub" "id_ed25519_vps_login" "id_ed25519_vps_login.pub" "known_hosts" "config")
+    local files_to_backup=("id_ed25519_desktop-win-2026-10-C4" "id_ed25519_desktop-win-2026-10-C4.pub" "id_ed25519_desktop-win-2026-10-j0" "id_ed25519_desktop-win-2026-10-j0.pub" "id_ed25519_desktop-win-2026-10-6c" "id_ed25519_desktop-win-2026-10-6c.pub" "id_ed25519_desktop-win-2026-10-A8" "id_ed25519_desktop-win-2026-10-A8.pub" "id_ed25519_desktop-win-2026-10-Tg" "id_ed25519_desktop-win-2026-10-Tg.pub" "id_ed25519_vps-2026-10-JM" "id_ed25519_vps-2026-10-JM.pub" "id_ed25519_github" "id_ed25519_github.pub" "id_ed25519_vps_login" "id_ed25519_vps_login.pub" "known_hosts" "config")
     local files_found=()
 
     # 检查 SSH 目录
@@ -224,7 +224,7 @@ backup_ssh_files() {
 # ============================================
 ensure_ssh_key_loaded() {
     local ssh_dir="${HOME}/.ssh"
-    local key_names=("id_ed25519_desktop-win-2026-10-C4" "id_ed25519_desktop-win-2026-10-j0" "id_ed25519_vps-2026-10-JM" "id_ed25519_github" "id_ed25519_vps_login")
+    local key_names=("id_ed25519_desktop-win-2026-10-C4" "id_ed25519_desktop-win-2026-10-j0" "id_ed25519_desktop-win-2026-10-6c" "id_ed25519_desktop-win-2026-10-A8" "id_ed25519_desktop-win-2026-10-Tg" "id_ed25519_vps-2026-10-JM" "id_ed25519_github" "id_ed25519_vps_login")
     local private_key=""
     local key_name
 

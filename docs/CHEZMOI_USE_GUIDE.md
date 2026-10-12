@@ -392,7 +392,7 @@ SSH 配置文件（`~/.ssh/config`）已纳入 chezmoi 管理，可以通过 laz
 - 文件内容主要是：主机别名、用户名、端口、端口转发规则、代理配置等
 - 私钥文件（`id_ed25519_desktop-win-2026-10-C4`、`id_ed25519_desktop-win-2026-10-j0` 等）已在 `.gitignore` 和 `.chezmoiignore` 中被排除，不会被纳入管理
 
-当前对应关系见 [DEVICE_ACCESS.md](DEVICE_ACCESS.md)。`github.com` 用 `~/.ssh/id_ed25519_desktop-win-2026-10-C4` 登录 GitHub；`vps` 用 `~/.ssh/id_ed25519_desktop-win-2026-10-j0` 登录 VPS。两把密钥不共用。轮换步骤见 [SSH_KEY_ROTATION.md](SSH_KEY_ROTATION.md)。
+当前对应关系见 [DEVICE_ACCESS.md](DEVICE_ACCESS.md)。本机与 Mac 可登录全部设备；手机与平板只登录本机和 Mac。新设备的私钥在该设备上生成，只把公钥装进已经配好的机器。轮换步骤见 [SSH_KEY_ROTATION.md](SSH_KEY_ROTATION.md)。
 
 **需要注意的敏感信息：**
 - 主机名和 IP 地址

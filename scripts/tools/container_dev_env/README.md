@@ -18,7 +18,7 @@
 - 条件镜像源配置（有代理不修改源，无代理使用中国镜像源）
 - 自动挂载项目目录
 - 支持 SSH Agent Forwarding（容器可使用宿主机的 SSH 密钥，无需复制密钥文件）
-- 自动备份 SSH 关键文件（启动前备份 `id_ed25519_desktop-win-2026-10-C4`、`id_ed25519_desktop-win-2026-10-j0` 及其公钥、known_hosts、config）。GitHub 与 VPS 登录不是同一把密钥，见 `docs/DEVICE_ACCESS.md`
+- 自动备份 SSH 关键文件（启动前备份本机 `id_ed25519_desktop-win-2026-10-*` 及其公钥、known_hosts、config）。哪把密钥登录哪里见 `docs/DEVICE_ACCESS.md`
 
 ## 前置要求
 

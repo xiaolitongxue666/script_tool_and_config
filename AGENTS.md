@@ -530,7 +530,7 @@ ensure_directory() {
 
 ### SSH 密钥与登录对象
 
-私钥不入库。`github.com` 用 `~/.ssh/id_ed25519_desktop-win-2026-10-C4` 登录 GitHub；`vps` 用 `~/.ssh/id_ed25519_desktop-win-2026-10-j0` 登录 VPS。两把密钥不共用。WSL `Ubuntu-24.04` 的 `/root/.ssh` 保存这两把的副本；WSL 没有 sshd，VPS 也还不能登录本机。设备、指纹和尚未轮换的机器见 `docs/DEVICE_ACCESS.md`，步骤见 `docs/SSH_KEY_ROTATION.md`。
+私钥不入库。本机与 Mac 可登录全部设备；手机与平板只登录本机和 Mac。新设备的私钥在该设备上生成，只把公钥装进已经配好的机器。清单见 `docs/DEVICE_ACCESS.md`，步骤见 `docs/SSH_KEY_ROTATION.md`。
 
 ### connect.exe 路径检测（Windows）
 

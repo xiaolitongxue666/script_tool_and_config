@@ -37,6 +37,6 @@ script_tool_and_config **一套脚本**兼容 Windows Git Bash、WSL、macOS、L
 - 把 `/mnt/host/*`、`/mnt/wslg/*`、`*fnm_multishells*` 一律当成 Windows（会误伤 WSL 本机 fnm，[4/6] 会 skip claude/codex）。
 - 用 Windows 上的 `claude`/`codex` 证明 WSL Layer 4 已装或跳过 WSL 安装。
 - 为「方便」把一套 `$HOME`/prefix 当多 OS 共用，或把某 OS 的配置复制进另一 OS 的家目录。
-- SSH 是唯一例外：本机 WSL `Ubuntu-24.04` 的 `/root/.ssh` 保存 Windows 上 `desktop-win` 那两把私钥的副本和同一份渲染后的 `config`（复制进 ext4，权限 600）。不要把 `~/.ssh` 软链接到 `/mnt/host/c`（drvfs 上权限变成 777，OpenSSH 会拒钥）。这不表示 fnm、npm、chezmoi 目标可以共用。
+- SSH 是唯一例外：本机 WSL `Ubuntu-24.04` 的 `/root/.ssh` 保存 Windows 上 `desktop-win` 私钥的副本和同一份渲染后的 `config`（复制进 ext4，权限 600）。不要把 `~/.ssh` 软链接到 `/mnt/host/c`（drvfs 上权限变成 777，OpenSSH 会拒钥）。这不表示 fnm、npm、chezmoi 目标可以共用。
 
 判定实现：`_is_windows_interop_path`（[`scripts/lib/chezmoi/package_install.sh`](../../scripts/lib/chezmoi/package_install.sh)）。

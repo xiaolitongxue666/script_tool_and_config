@@ -70,13 +70,32 @@ VPS 自己访问 GitHub 时，在 VPS 上单独生成 `~/.ssh/id_ed25519_vps-202
 4. 再测一次 VPS 登录和两边的 `ssh -T`。
 5. 最后才删除本机旧私钥文件。
 
-## 手机
+## 回家后在 Mac 和平板上生成
 
-在 Termux 里：
+私钥在那台设备上生成，只把 `.pub` 追加到已经配好的机器。旧公钥先留着，新登录测通后再删。本机登录 Mac 用的是已经生成的 `id_ed25519_desktop-win-2026-10-A8`，本机登录平板用的是 `id_ed25519_desktop-win-2026-10-Tg`。这两把不是 Mac 或平板上新生成的密钥。
 
-```bash
-pkg install openssh
-ssh-keygen -t ed25519 -a 100 -C "phone-android-YYYY-MM" -f ~/.ssh/id_ed25519_phone-android_tmp -N ""
-```
+本机与 Mac 可以登录全部设备。手机与平板只登录本机和 Mac。
 
-只把 `.pub` 那一行交出来，用 `gh ssh-key add` 上传。
+### Mac mini
+
+在 Mac 上生成两把，文件名 `id_ed25519_mac-mini-2026-10-<指纹末两位>`：
+
+1. 一把只登录 GitHub。公钥加到账号 `xiaolitongxue666`。标题 `mac mini` 的旧公钥先留着，`ssh -T git@github.com` 成功后再删。
+2. 另一把登录本机、手机、平板和 VPS。公钥追加到：
+   - 本机 `C:\ProgramData\ssh\administrators_authorized_keys`
+   - 手机 `~/.ssh/authorized_keys`（在 Termux 里本地追加；密码登录已关闭）
+   - 平板 `~/.ssh/authorized_keys`（`sshd` 起来之后）
+   - VPS `ubuntu` 的 `~/.ssh/authorized_keys`。不要删除 `SHA256:rmAlw93NjZFtTHiTRAqJlNbmMfb4zVzoSMZxleCbyLc`
+
+同时把本机 `id_ed25519_desktop-win-2026-10-A8.pub` 和手机 `id_ed25519_phone-personal-android-2026-10-dM.pub` 追加到 Mac 上 `leonli` 的 `authorized_keys`。
+
+### 平板
+
+在平板 Termux 上生成一把。当前 MagicDNS 仍是 `personal-pad-android` 时，文件名用 `id_ed25519_personal-pad-android-2026-10-<指纹末两位>`。打开 Termux 时启动 `sshd`，端口 `8022`。别名只写 `desktop-win` 和 `mac-mini`。
+
+公钥只追加到：
+
+- 本机 `C:\ProgramData\ssh\administrators_authorized_keys`
+- Mac 上 `leonli` 的 `authorized_keys`
+
+不装进手机、VPS 或 GitHub。本机用 `id_ed25519_desktop-win-2026-10-Tg` 登录成功之后，再关闭平板的密码登录。用户名以平板上的 `whoami` 为准。

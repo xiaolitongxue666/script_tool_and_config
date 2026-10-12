@@ -12,7 +12,7 @@ git config --global color.ui auto
 # 设置 SSH 密钥。当前仓库的做法见 docs/SSH_KEY_ROTATION.md：
 # 文件名 id_ed25519_<Tailscale 名>-<YYYY-MM>-<指纹末两位>
 # 本机 GitHub：~/.ssh/id_ed25519_desktop-win-2026-10-C4
-# 本机登录 VPS：~/.ssh/id_ed25519_desktop-win-2026-10-j0
+# 登录 VPS / 手机 / Mac / 平板用另外的密钥，见 docs/DEVICE_ACCESS.md
 # 密钥指纹是:
 # 指纹值 your_email@example.com
 # 密钥的随机艺术图像是:

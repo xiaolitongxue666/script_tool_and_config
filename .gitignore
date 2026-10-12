@@ -276,6 +276,9 @@ chezmoi-override-merged.*.toml
 # 轮换时放在家目录或仓库里的私钥备份、渲染后的 config 备份
 **/.ssh-key-backup-*/
 **/config.bak.*
+# 回家配置用的临时公钥包。私钥不在包里，仍不要入库
+ssh-home-kit-*/
+ssh-home-kit-*.zip
 
 # 通用凭据与本地配置覆盖（可能含 token、密码、主机信息）
 .netrc

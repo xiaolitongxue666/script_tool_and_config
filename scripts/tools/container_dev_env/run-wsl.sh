@@ -117,7 +117,7 @@ setup_wsl_ssh_agent() {
         if eval "$(ssh-agent -s)" 2>/dev/null; then
             # 尝试加载默认密钥
             local key_name
-            for key_name in id_ed25519_desktop-win-2026-10-C4 id_ed25519_desktop-win-2026-10-j0 id_ed25519_vps-2026-10-JM id_ed25519_github id_ed25519_vps_login; do
+            for key_name in id_ed25519_desktop-win-2026-10-C4 id_ed25519_desktop-win-2026-10-j0 id_ed25519_desktop-win-2026-10-6c id_ed25519_desktop-win-2026-10-A8 id_ed25519_desktop-win-2026-10-Tg id_ed25519_vps-2026-10-JM id_ed25519_github id_ed25519_vps_login; do
                 if [[ -f "$HOME/.ssh/${key_name}" ]]; then
                     ssh-add "$HOME/.ssh/${key_name}" 2>/dev/null || true
                 fi
