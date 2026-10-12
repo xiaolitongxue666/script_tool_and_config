@@ -271,6 +271,7 @@ chezmoi-override-merged.*.toml
 **/*_dsa
 **/*.pub
 **/known_hosts
+**/known_hosts.old
 **/authorized_keys
 **/identity
 **/identity.pub

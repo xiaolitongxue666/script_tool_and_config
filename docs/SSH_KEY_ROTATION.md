@@ -108,10 +108,10 @@ VPS 自己访问 GitHub 时，在 VPS 上单独生成 `~/.ssh/id_ed25519_vps-202
 
 这两个域名共用一把密钥，Mac 与 desktop-pc 各放同一份私钥。文件名不用 `mac-mini` 或 `desktop-win`，避免模板里按完整文件名 `stat` 的分支选中它。
 
-2026-10-12 已在 Mac 上生成 `id_ed25519_moicen-alchemy-2026-10-Nc`，指纹 `SHA256:HwrCuLR1DInospwk2130e6GxXYRxqUHP1xEl00PTtNc`，并复制到本机 `C:\Users\Administrator\.ssh`。空密码。登录用户 `leonli`。`IdentitiesOnly yes`，`ForwardAgent no`，登录这两个域名时不回退到 `GY` 或 `j0`。不拷进 WSL、手机、平板或 Tailscale VPS。
+2026-10-12 已在 Mac 上生成 `id_ed25519_moicen-alchemy-2026-10-Nc`，指纹 `SHA256:HwrCuLR1DInospwk2130e6GxXYRxqUHP1xEl00PTtNc`，并复制到本机 `C:\Users\Administrator\.ssh`。空密码。`moicen.com` 用户 `xiaoli`，`alchemy-studio.cn` 用户 `leonli`。`IdentitiesOnly yes`，`ForwardAgent no`，登录这两个域名时不回退到 `GY` 或 `j0`。不拷进 WSL、手机、平板或 Tailscale VPS。
 
 公钥已加到 GitHub 账号 `xiaolitongxue666`，标题 `moicen-alchemy-2026-10-Nc`（id `166186184`），类型 `authentication`。只用这把密钥测过 `ssh -T`，正文是 `Hi xiaolitongxue666!`。Mac 的 `github.com` 仍用 `5s`，本机仍用 `C4`。模板里只有 `C4`、`5s`、`JM` 都不存在时，`github.com` 才指向 `Nc`。
 
-两台生产 VPS 要用这把拉取和提交。2026-10-12 公钥已交给管理员，尚未确认写入。确认前私钥留在 Mac 和本机。此前 `alchemy-studio.cn` 返回 `Permission denied (publickey)`。`moicen.com` 的主机钥与 `known_hosts` 不一致，没有改记录，也没有登录。确认写入并核对主机钥之后，把这份私钥放到该机 `leonli` 的 `~/.ssh`，`github.com` 只引用它，再跑 `ssh -T git@github.com`。传到 desktop-pc 时用 `scp -O`。
+两台都已登录：`xiaoli@moicen.com`（主机名 `moicen.com`），`leonli@alchemy-studio.cn`（主机名 `alchemy`）。`moicen.com` 主机钥已换成 `SHA256:cuIY6e2AY1s8XPMB4JmScEdxzRx3AMpjbl3hg1ac5CI`。管理员还说 `leonli@huiwings.cn` 用同一把公钥，模板未写、未测。要在机器上拉取 GitHub 时，再把这份私钥放到对应用户的 `~/.ssh`，`github.com` 只引用它，然后跑 `ssh -T git@github.com`。传到 desktop-pc 时用 `scp -O`。改 desktop-pc 的 `config` 用 `awk`，不要用 Windows `python` 按默认 gbk 读 UTF-8。
 
 生成方式与上面相同：临时文件、`ssh-keygen -lf` 取指纹末两位、改注释后改名。末两位已经是 `Nc`，不要再生成第二把。

@@ -132,11 +132,23 @@ Host desktop-win
 {{- end }}
     IdentitiesOnly yes
 
-# --- 生产域名 moicen.com 与 alchemy-studio.cn ---
-# 同一把密钥，Mac 与 desktop-pc 各放一份。登录这两个域名的 leonli。
+# --- 生产域名 ---
+# 同一把密钥，Mac 与 desktop-pc 各放一份。
+# moicen.com 用户是 xiaoli。alchemy-studio.cn 用户是 leonli。
+# huiwings.cn 管理员说也是 leonli、同一把公钥，模板未写、未测。
 # 公钥也在 GitHub。Mac 有 5s、desktop-pc 有 C4 时，github.com 仍用那两把。
 # 只有 C4、5s、JM 都不存在时，github.com 才用这把。不回退到 GY 或 j0。
-Host moicen.com alchemy-studio.cn
+Host moicen.com
+    User xiaoli
+    Port 22
+{{- $ssh_dir := joinPath .chezmoi.homeDir ".ssh" }}
+{{- if stat (joinPath $ssh_dir "id_ed25519_moicen-alchemy-2026-10-Nc") }}
+    IdentityFile ~/.ssh/id_ed25519_moicen-alchemy-2026-10-Nc
+{{- end }}
+    IdentitiesOnly yes
+    ForwardAgent no
+
+Host alchemy-studio.cn
     User leonli
     Port 22
 {{- $ssh_dir := joinPath .chezmoi.homeDir ".ssh" }}
