@@ -31,7 +31,7 @@ globs:
 - `chezmoi_ensure_user_config`（`chezmoi_core.sh`）维护 `sourceDir` 与 Windows `[interpreters.sh]`
 - macOS 默认 bash 3.2：`deploy.sh` 末尾仅 Zsh/OMZ **检查**（不安装；OMZ 由 `.chezmoiexternal.toml.tmpl`）；详见 `docs/PROJECT_AGENT_MEMORY.md`「macOS bash 3.2」
 - common-tools 包名 SSOT：`scripts/lib/chezmoi/packages.conf`
-- SSH 密钥不入库。本机与 Mac 可登录全部设备；手机与平板只登录本机和 Mac。新设备的私钥在该设备上生成，只把公钥装进已经配好的机器。Windows 只认 `%USERPROFILE%\.ssh`；MSYS2 的 `.ssh` 由 `run_once_windows-link-msys-ssh.sh` 联接到该目录，不另存一份 config。WSL `/root/.ssh` 保存本机密钥副本，不要软链接到 Windows 盘。设备与指纹见 `docs/DEVICE_ACCESS.md`，轮换步骤见 `docs/SSH_KEY_ROTATION.md`
+- SSH 密钥不入库。本机与 Mac 可登录全部设备；手机与平板只登录本机和 Mac。新设备的私钥在该设备上生成，只把公钥装进已经配好的机器。登录 desktop-pc 的 shell 是 Git Bash（`D:\Program Files\Git\usr\bin\bash.exe`），不是 PowerShell；客户端不要写 `RemoteCommand`。Windows 只认 `%USERPROFILE%\.ssh`；MSYS2 的 `.ssh` 由 `run_once_windows-link-msys-ssh.sh` 联接到该目录，不另存一份 config。WSL `/root/.ssh` 保存本机密钥副本，不要软链接到 Windows 盘。别名、用户和测试见 `docs/DEVICE_ACCESS.md`，轮换步骤见 `docs/SSH_KEY_ROTATION.md`
 
 ## macOS Intel 与 Cursor
 

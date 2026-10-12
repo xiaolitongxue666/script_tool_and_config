@@ -20,12 +20,16 @@ Host github.com
 {{- $ssh_dir := joinPath .chezmoi.homeDir ".ssh" }}
 {{- if stat (joinPath $ssh_dir "id_ed25519_desktop-win-2026-10-C4") }}
     IdentityFile ~/.ssh/id_ed25519_desktop-win-2026-10-C4
+{{- else if stat (joinPath $ssh_dir "id_ed25519_mac-mini-2026-10-5s") }}
+    IdentityFile ~/.ssh/id_ed25519_mac-mini-2026-10-5s
 {{- else if stat (joinPath $ssh_dir "id_ed25519_vps-2026-10-JM") }}
     IdentityFile ~/.ssh/id_ed25519_vps-2026-10-JM
 {{- else if stat (joinPath $ssh_dir "id_ed25519_github") }}
     IdentityFile ~/.ssh/id_ed25519_github
-{{- else if stat (joinPath $ssh_dir "id_ed25519_github_personal") }}
+{{- else }}
+{{- if stat (joinPath $ssh_dir "id_ed25519_github_personal") }}
     IdentityFile ~/.ssh/id_ed25519_github_personal
+{{- end }}
 {{- end }}
     IdentitiesOnly yes
 {{- if index . "ssh_use_proxy" }}
@@ -55,6 +59,8 @@ Host vps xiaolitongxue-vps
 {{- $ssh_dir := joinPath .chezmoi.homeDir ".ssh" }}
 {{- if stat (joinPath $ssh_dir "id_ed25519_desktop-win-2026-10-j0") }}
     IdentityFile ~/.ssh/id_ed25519_desktop-win-2026-10-j0
+{{- else if stat (joinPath $ssh_dir "id_ed25519_mac-mini-2026-10-GY") }}
+    IdentityFile ~/.ssh/id_ed25519_mac-mini-2026-10-GY
 {{- else if stat (joinPath $ssh_dir "id_ed25519_vps_login") }}
     IdentityFile ~/.ssh/id_ed25519_vps_login
 {{- else }}
@@ -78,18 +84,49 @@ Host phone-personal-android
 {{- $ssh_dir := joinPath .chezmoi.homeDir ".ssh" }}
 {{- if stat (joinPath $ssh_dir "id_ed25519_desktop-win-2026-10-6c") }}
     IdentityFile ~/.ssh/id_ed25519_desktop-win-2026-10-6c
+{{- else if stat (joinPath $ssh_dir "id_ed25519_mac-mini-2026-10-GY") }}
+    IdentityFile ~/.ssh/id_ed25519_mac-mini-2026-10-GY
+{{- end }}
+    IdentitiesOnly yes
+
+# --- 平板 Termux（Tailscale 名 personal-pad-android，端口 8022）---
+# 这把密钥只登录平板，不用于 GitHub 或 VPS
+Host personal-pad-android
+    HostName personal-pad-android
+    User u0_a71
+    Port 8022
+{{- $ssh_dir := joinPath .chezmoi.homeDir ".ssh" }}
+{{- if stat (joinPath $ssh_dir "id_ed25519_desktop-win-2026-10-Tg") }}
+    IdentityFile ~/.ssh/id_ed25519_desktop-win-2026-10-Tg
+{{- else if stat (joinPath $ssh_dir "id_ed25519_mac-mini-2026-10-GY") }}
+    IdentityFile ~/.ssh/id_ed25519_mac-mini-2026-10-GY
 {{- end }}
     IdentitiesOnly yes
 
 # --- Mac mini（Tailscale 名 mac-mini）---
-# 这把密钥只登录 Mac 上的 leonli，不用于 GitHub 或 VPS
+# 这把密钥只登录 Mac 上的 liyong，不用于 GitHub 或 VPS
 Host mac-mini
     HostName mac-mini
-    User leonli
+    User liyong
     Port 22
 {{- $ssh_dir := joinPath .chezmoi.homeDir ".ssh" }}
 {{- if stat (joinPath $ssh_dir "id_ed25519_desktop-win-2026-10-A8") }}
     IdentityFile ~/.ssh/id_ed25519_desktop-win-2026-10-A8
+{{- end }}
+    IdentitiesOnly yes
+
+# --- desktop-win（MagicDNS 显示名仍是 company-pc-win10）---
+# Mac 登录密钥只在本机存在时写入。Windows 上没有这把文件，不会写出 IdentityFile
+# 服务端默认 shell 已是 D:\Program Files\Git\usr\bin\bash.exe（HKLM\SOFTWARE\OpenSSH
+# DefaultShell，命令选项 -lc）。直接 ssh desktop-win 即进 Git Bash。
+# 不要在客户端写 RemoteCommand：有远程命令时会报 Cannot execute command-line and remote command。
+Host desktop-win
+    HostName company-pc-win10
+    User Administrator
+    Port 22
+{{- $ssh_dir := joinPath .chezmoi.homeDir ".ssh" }}
+{{- if stat (joinPath $ssh_dir "id_ed25519_mac-mini-2026-10-GY") }}
+    IdentityFile ~/.ssh/id_ed25519_mac-mini-2026-10-GY
 {{- end }}
     IdentitiesOnly yes
 

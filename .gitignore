@@ -281,6 +281,10 @@ chezmoi-override-merged.*.toml
 # 回家配置用的临时公钥包。私钥不在包里，仍不要入库
 ssh-home-kit-*/
 ssh-home-kit-*.zip
+# 从其他设备整包拷回的 .ssh 归档，以及临时解出的私钥目录
+ssh.rar
+**/*.ssh.rar
+desktop-ssh-*/
 
 # 通用凭据与本地配置覆盖（可能含 token、密码、主机信息）
 .netrc

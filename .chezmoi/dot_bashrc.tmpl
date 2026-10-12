@@ -251,8 +251,8 @@ CC_GIT_BASH_CANDS
         unset _omp_config MSYS2_PS1
     fi
 
-    # 打开默认路径：仅在非编辑器终端中执行，避免 Cursor/VS Code 终端被切到固定目录（保持项目根目录）
-    if [ -z "${TERM_PROGRAM:-}" ]; then
+    # 打开默认路径：仅交互式、且非编辑器终端。SSH 远程命令是 bash -lc，非交互，不能切目录或打印欢迎语。
+    if [[ $- == *i* ]] && [ -z "${TERM_PROGRAM:-}" ]; then
         cd /d/Code 2>/dev/null || cd ~
         echo "Welcome! 😊"
     fi

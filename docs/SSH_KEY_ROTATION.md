@@ -2,7 +2,7 @@
 
 每台设备一把 GitHub 密钥，私钥不在设备之间复制，也不入库。当前哪把密钥登录哪里，见 [DEVICE_ACCESS.md](DEVICE_ACCESS.md) 的「密钥与登录关系」。
 
-2026-10-12：本机与 VPS 已轮换。GitHub 上的 `Work_company_key`（本机旧 `id_rsa`）已删除。标题 `mac mini` 的公钥仍保留。
+2026-10-12：本机、VPS、Mac、手机、平板已按 [DEVICE_ACCESS.md](DEVICE_ACCESS.md) 打通。GitHub 认证公钥只留 `desktop-win-2026-10-C4`、`vps-2026-10-JM`、`mac-mini-2026-10-5s`。标题 `mac mini`（id `50838450`）和 `Work_company_key` 已删除。
 
 先生成并改好配置，确认能登录，再删除旧密钥。任一步登录失败就停，旧私钥留在原地。
 
@@ -65,7 +65,7 @@ VPS 自己访问 GitHub 时，在 VPS 上单独生成 `~/.ssh/id_ed25519_vps-202
 然后：
 
 1. 从 GitHub 删除已经对上指纹的旧认证公钥。对不上设备的公钥留下。
-2. 从 VPS `authorized_keys` 删除已经替换的旧行。指纹 `SHA256:rmAlw93NjZFtTHiTRAqJlNbmMfb4zVzoSMZxleCbyLc` 没有对应私钥，禁止删除。
+2. 从 VPS `authorized_keys` 删除已经替换的旧行。指纹 `SHA256:rmAlw93NjZFtTHiTRAqJlNbmMfb4zVzoSMZxleCbyLc` 是 Mac 上的 `~/.ssh/id_ed25519`，仍能登录 VPS，禁止删除。
 3. 删掉 VPS 上复制来的 `id_ed25519_github_personal`。
 4. 再测一次 VPS 登录和两边的 `ssh -T`。
 5. 最后才删除本机旧私钥文件。
@@ -75,6 +75,8 @@ VPS 自己访问 GitHub 时，在 VPS 上单独生成 `~/.ssh/id_ed25519_vps-202
 私钥在那台设备上生成，只把 `.pub` 追加到已经配好的机器。旧公钥先留着，新登录测通后再删。本机登录 Mac 用的是已经生成的 `id_ed25519_desktop-win-2026-10-A8`，本机登录平板用的是 `id_ed25519_desktop-win-2026-10-Tg`。这两把不是 Mac 或平板上新生成的密钥。
 
 本机与 Mac 可以登录全部设备。手机与平板只登录本机和 Mac。
+
+登录本机（`ssh desktop-win` 或 `Administrator@100.110.122.106`）的 shell 是 Git Bash：`D:\Program Files\Git\usr\bin\bash.exe`。注册表 `HKLM\SOFTWARE\OpenSSH` 的 `DefaultShell` 指向它，`DefaultShellCommandOption` 是 `-lc`，所以交互登录和远程命令都走这把 bash，PATH 含 Git `usr/bin`。不要在客户端再加 `RemoteCommand`，否则带命令的 `ssh` 会失败。以前手动写的 `ssh ... -t "\"D:\\Program Files\\Git\\usr\\bin\\bash.exe\""` 与现在的默认登录是同一把 bash。
 
 ### Mac mini
 
@@ -87,15 +89,17 @@ VPS 自己访问 GitHub 时，在 VPS 上单独生成 `~/.ssh/id_ed25519_vps-202
    - 平板 `~/.ssh/authorized_keys`（`sshd` 起来之后）
    - VPS `ubuntu` 的 `~/.ssh/authorized_keys`。不要删除 `SHA256:rmAlw93NjZFtTHiTRAqJlNbmMfb4zVzoSMZxleCbyLc`
 
-同时把本机 `id_ed25519_desktop-win-2026-10-A8.pub` 和手机 `id_ed25519_phone-personal-android-2026-10-dM.pub` 追加到 Mac 上 `leonli` 的 `authorized_keys`。
+同时把本机 `id_ed25519_desktop-win-2026-10-A8.pub` 和手机 `id_ed25519_phone-personal-android-2026-10-dM.pub` 追加到 Mac 上 `liyong` 的 `authorized_keys`（`/Users/liyong/.ssh/authorized_keys`）。本机没有用户 `leonli`。
 
 ### 平板
+
+2026-10-12 已完成。用户 `u0_a71`。密钥 `id_ed25519_personal-pad-android-2026-10-ik`，指纹 `SHA256:xXECkG7eDhSd0Z3bGczxDEiT/TIHf4XRGQXelJW9Dik`。密码登录已关闭。
 
 在平板 Termux 上生成一把。当前 MagicDNS 仍是 `personal-pad-android` 时，文件名用 `id_ed25519_personal-pad-android-2026-10-<指纹末两位>`。打开 Termux 时启动 `sshd`，端口 `8022`。别名只写 `desktop-win` 和 `mac-mini`。
 
 公钥只追加到：
 
 - 本机 `C:\ProgramData\ssh\administrators_authorized_keys`
-- Mac 上 `leonli` 的 `authorized_keys`
+- Mac 上 `liyong` 的 `authorized_keys`
 
 不装进手机、VPS 或 GitHub。本机用 `id_ed25519_desktop-win-2026-10-Tg` 登录成功之后，再关闭平板的密码登录。用户名以平板上的 `whoami` 为准。

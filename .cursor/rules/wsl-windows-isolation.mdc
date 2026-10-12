@@ -37,7 +37,7 @@ script_tool_and_config **一套脚本**兼容 Windows Git Bash、WSL、macOS、L
 - 把 `/mnt/host/*`、`/mnt/wslg/*`、`*fnm_multishells*` 一律当成 Windows（会误伤 WSL 本机 fnm，[4/6] 会 skip claude/codex）。
 - 用 Windows 上的 `claude`/`codex` 证明 WSL Layer 4 已装或跳过 WSL 安装。
 - 为「方便」把一套 `$HOME`/prefix 当多 OS 共用，或把某 OS 的配置复制进另一 OS 的家目录。
-- SSH 按环境各认一份目录，不把某一份软链接进另一个 OS。
+- SSH 按环境各认一份目录，不把某一份软链接进另一个 OS。登录 desktop-pc 的 shell 是 Git Bash（`D:\Program Files\Git\usr\bin\bash.exe`），不是 PowerShell。
   - Windows 只认 `%USERPROFILE%\.ssh`（本机是 `C:\Users\Administrator\.ssh`）。chezmoi 部署到这里。MSYS2 的 `ssh` 按 `db_home: cygwin desc` 把 `~` 展开成 `C:\msys64\home\<用户>`，shell 里改 `HOME` 改变不了这个展开。`run_once_windows-link-msys-ssh.sh` 只把该家目录下的 `.ssh` 做成指向 `%USERPROFILE%\.ssh` 的目录联接。不改 `db_home`，不在 MSYS 家目录再维护一份 config，脚本里不写死用户名。
   - WSL `Ubuntu-24.04` 的 `/root/.ssh` 是复制进 ext4 的副本（权限 600）。不要把 `~/.ssh` 软链接到 `/mnt/host/c`（drvfs 上权限变成 777，OpenSSH 会拒钥）。这不表示 fnm、npm、chezmoi 目标可以共用。
 
