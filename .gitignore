@@ -287,6 +287,9 @@ ssh-home-kit-*.zip
 ssh.rar
 **/*.ssh.rar
 desktop-ssh-*/
+# Tailscale 节点状态含 node key。peer relay 步骤在 docs/TAILSCALE_PEER_RELAY.md，不要把 tailscaled.state 拷进仓库
+tailscaled.state
+**/tailscaled.state
 
 # 通用凭据与本地配置覆盖（可能含 token、密码、主机信息）
 .netrc

@@ -95,6 +95,7 @@ Pi 的安装、Harness、文档 **不在本仓库**。唯一 SSOT：[agent-confi
 | apply 后丢失 `safe.directory` | `dot_gitconfig.tmpl` 整文件覆盖 `~/.gitconfig`，模板不含 `[safe]` | apply 后 `git config --global --add safe.directory <path>`；或私有项放 `~/.config/git/config` / `include.path`（见 CHEZMOI_USE_GUIDE） |
 | apply 冲掉 bash 私有段（如 Phase2 dsh） | 私有块曾写进 A 管理的 `~/.bashrc` | Phase1 仅在 `dot_bashrc.tmpl` **最末尾** `source ~/.bashrc.local`；私有内容写 `~/.bashrc.local`（Windows Git Bash；对称于 `~/.zshrc.local`） |
 | `git pull` 报 `no such identity` | SSH 模板写了本机没有的 IdentityFile | `dot_ssh/config.tmpl` 用 `stat` 只写入已有文件。本机与 Mac 可登录全部设备；手机与平板只登录本机和 Mac。登录 desktop-pc 是 Git Bash，不要加客户端 `RemoteCommand`。别名和测试见 `docs/DEVICE_ACCESS.md`。`moicen-alchemy-2026-10-Nc` 已加到 GitHub。Mac 的 `github.com` 仍用 `5s`，desktop-pc 仍用 `C4`。两台生产 VPS 已登录：`xiaoli@moicen.com`、`leonli@alchemy-studio.cn`。`huiwings.cn` 未写入模板、未测。私钥先不拷过去。改 desktop-pc 的 config 用 awk，不用 Windows python（gbk） |
+| Tailscale 远程桌面或 SSH 先卡几百毫秒 | 打洞未完成时走美国 DERP（常见 `sfo` / `lax`） | 退路是 VPS peer relay：UDP `40000`，腾讯云防火墙协议必须是 UDP，`grants` 用 `100.x`（MagicDNS 名会 `invalid address`）。直连优先。不装 `derper`，不设 `OmitDefaultRegions`。生产域名不进尾网。步骤和判定见 `docs/TAILSCALE_PEER_RELAY.md` |
 | 多次 apply 报 lock timeout | 前次 chezmoi 进程未退出 | `taskkill //F //IM chezmoi.exe`，运行 `fix_chezmoi_lock.sh` |
 | `manage_dotfiles apply` 曾缺 force | 调用 `chezmoi_run_apply "-v"` 覆盖默认 | 已修复：`chezmoi_core` 自动补 `--force` |
 

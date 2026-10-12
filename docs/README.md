@@ -31,6 +31,7 @@
 |------|------|
 | [CHEZMOI_USE_GUIDE.md](CHEZMOI_USE_GUIDE.md) | chezmoi 详细使用指南（SSH、lazyssh、配置管理） |
 | [DEVICE_ACCESS.md](DEVICE_ACCESS.md) | 设备、登录用户、SSH 别名、指纹和测试（不含私钥） |
+| [TAILSCALE_PEER_RELAY.md](TAILSCALE_PEER_RELAY.md) | 大陆 VPS 的 Tailscale peer relay：端口、防火墙和策略已生效 |
 | [SSH_KEY_ROTATION.md](SSH_KEY_ROTATION.md) | 每台设备独立 SSH 密钥的生成、测试与删除顺序 |
 | [PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md) | 项目目录结构说明（权威来源） |
 

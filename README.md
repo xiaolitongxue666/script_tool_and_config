@@ -43,7 +43,7 @@ bash scripts/chezmoi/install_chezmoi.sh  # 或直接跑 ./install.sh
 chezmoi apply -v --force
 ```
 
-SSH 配置由 `.chezmoi/dot_ssh/config.tmpl` 管理，预置 `github.com`、Tailscale 别名 `vps`（`xiaolitongxue-vps` 指向同一台），以及生产域名 `moicen.com`（用户 `xiaoli`）、`alchemy-studio.cn`（用户 `leonli`）。密钥文件名和登录关系见 `docs/DEVICE_ACCESS.md`。
+SSH 配置由 `.chezmoi/dot_ssh/config.tmpl` 管理，预置 `github.com`、Tailscale 别名 `vps`（`xiaolitongxue-vps` 指向同一台），以及生产域名 `moicen.com`（用户 `xiaoli`）、`alchemy-studio.cn`（用户 `leonli`）。密钥文件名和登录关系见 `docs/DEVICE_ACCESS.md`。打洞失败时的 Tailscale 退路见 `docs/TAILSCALE_PEER_RELAY.md`。
 
 ### Windows 快速安装
 

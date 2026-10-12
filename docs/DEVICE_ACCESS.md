@@ -25,6 +25,10 @@ tailscale set --hostname=<目标名>
 
 名称只能是小写字母、数字和连字符。
 
+## 大陆 VPS 作为 peer relay
+
+2026-10-12 已在 `vps`（`100.74.201.82`，公网 `123.207.13.22`）打开 UDP `40000`，轻量应用服务器防火墙和尾网 `grants` 都已生效。直连仍然优先。打洞失败时先经这台 VPS（约 68ms），再退回官方 DERP。没有安装 `derper`，也没有关闭默认 DERP。`moicen.com` 与 `alchemy-studio.cn` 不在尾网里。步骤见 [TAILSCALE_PEER_RELAY.md](TAILSCALE_PEER_RELAY.md)。
+
 ## 密钥与登录关系
 
 文件名是 `id_ed25519_<Tailscale 名>-<YYYY-MM>-<指纹末两位>`。末两位取指纹字符串的最后两个字符。

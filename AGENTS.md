@@ -530,7 +530,7 @@ ensure_directory() {
 
 ### SSH 密钥与登录对象
 
-私钥不入库。本机与 Mac 可登录全部设备；手机与平板只登录本机和 Mac。新设备的私钥在该设备上生成，只把公钥装进已经配好的机器。登录 desktop-pc 的 shell 是 Git Bash（`D:\Program Files\Git\usr\bin\bash.exe`，OpenSSH `DefaultShell`，命令选项 `-lc`），不是 PowerShell；客户端不要再写 `RemoteCommand`。Windows 只认 `%USERPROFILE%\.ssh`。MSYS2 `ssh` 的 `~` 仍是 `C:\msys64\home\<用户>`（`db_home: cygwin desc`），`run_once_windows-link-msys-ssh.sh` 把其中的 `.ssh` 联接到用户目录，不改 `db_home`，也不写死用户名。WSL `/root/.ssh` 是 ext4 副本，不软链接到 Windows 盘。`moicen.com` 用户是 `xiaoli`，`alchemy-studio.cn` 用户是 `leonli`，共用 `id_ed25519_moicen-alchemy-2026-10-Nc`。这把也是 GitHub 认证密钥。Mac 的 `github.com` 仍用 `5s`，desktop-pc 仍用 `C4`。两台都已登录。清单见 `docs/DEVICE_ACCESS.md`，步骤见 `docs/SSH_KEY_ROTATION.md`。
+私钥不入库。本机与 Mac 可登录全部设备；手机与平板只登录本机和 Mac。新设备的私钥在该设备上生成，只把公钥装进已经配好的机器。登录 desktop-pc 的 shell 是 Git Bash（`D:\Program Files\Git\usr\bin\bash.exe`，OpenSSH `DefaultShell`，命令选项 `-lc`），不是 PowerShell；客户端不要再写 `RemoteCommand`。Windows 只认 `%USERPROFILE%\.ssh`。MSYS2 `ssh` 的 `~` 仍是 `C:\msys64\home\<用户>`（`db_home: cygwin desc`），`run_once_windows-link-msys-ssh.sh` 把其中的 `.ssh` 联接到用户目录，不改 `db_home`，也不写死用户名。WSL `/root/.ssh` 是 ext4 副本，不软链接到 Windows 盘。`moicen.com` 用户是 `xiaoli`，`alchemy-studio.cn` 用户是 `leonli`，共用 `id_ed25519_moicen-alchemy-2026-10-Nc`。这把也是 GitHub 认证密钥。Mac 的 `github.com` 仍用 `5s`，desktop-pc 仍用 `C4`。两台都已登录。清单见 `docs/DEVICE_ACCESS.md`，步骤见 `docs/SSH_KEY_ROTATION.md`。打洞失败时的 Tailscale 退路是 VPS peer relay（UDP `40000`，`grants` 用 `100.x`），见 `docs/TAILSCALE_PEER_RELAY.md`。不装 `derper`，不设 `OmitDefaultRegions`。生产域名不进尾网。
 
 ### connect.exe 路径检测（Windows）
 
