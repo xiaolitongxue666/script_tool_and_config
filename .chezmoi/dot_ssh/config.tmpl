@@ -24,6 +24,8 @@ Host github.com
     IdentityFile ~/.ssh/id_ed25519_mac-mini-2026-10-5s
 {{- else if stat (joinPath $ssh_dir "id_ed25519_vps-2026-10-JM") }}
     IdentityFile ~/.ssh/id_ed25519_vps-2026-10-JM
+{{- else if stat (joinPath $ssh_dir "id_ed25519_moicen-alchemy-2026-10-Nc") }}
+    IdentityFile ~/.ssh/id_ed25519_moicen-alchemy-2026-10-Nc
 {{- else if stat (joinPath $ssh_dir "id_ed25519_github") }}
     IdentityFile ~/.ssh/id_ed25519_github
 {{- else }}
@@ -129,6 +131,20 @@ Host desktop-win
     IdentityFile ~/.ssh/id_ed25519_mac-mini-2026-10-GY
 {{- end }}
     IdentitiesOnly yes
+
+# --- 生产域名 moicen.com 与 alchemy-studio.cn ---
+# 同一把密钥，Mac 与 desktop-pc 各放一份。登录这两个域名的 leonli。
+# 公钥也在 GitHub。Mac 有 5s、desktop-pc 有 C4 时，github.com 仍用那两把。
+# 只有 C4、5s、JM 都不存在时，github.com 才用这把。不回退到 GY 或 j0。
+Host moicen.com alchemy-studio.cn
+    User leonli
+    Port 22
+{{- $ssh_dir := joinPath .chezmoi.homeDir ".ssh" }}
+{{- if stat (joinPath $ssh_dir "id_ed25519_moicen-alchemy-2026-10-Nc") }}
+    IdentityFile ~/.ssh/id_ed25519_moicen-alchemy-2026-10-Nc
+{{- end }}
+    IdentitiesOnly yes
+    ForwardAgent no
 
 # 其他 Host（如内网 Git 服务器）请在本机或 lazyssh 中单独添加
 # --- 其他 Host 默认 ---

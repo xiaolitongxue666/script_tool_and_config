@@ -12,6 +12,8 @@ git config --global color.ui auto
 # 设置 SSH 密钥。当前仓库的做法见 docs/SSH_KEY_ROTATION.md：
 # 文件名 id_ed25519_<Tailscale 名>-<YYYY-MM>-<指纹末两位>
 # 本机 GitHub：~/.ssh/id_ed25519_desktop-win-2026-10-C4
+# Mac GitHub：~/.ssh/id_ed25519_mac-mini-2026-10-5s
+# moicen.com 与 alchemy-studio.cn 共用 id_ed25519_moicen-alchemy-2026-10-Nc，也已加到 GitHub
 # 登录 VPS / 手机 / Mac / 平板用另外的密钥，见 docs/DEVICE_ACCESS.md
 # 密钥指纹是:
 # 指纹值 your_email@example.com

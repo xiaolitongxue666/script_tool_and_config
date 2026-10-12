@@ -117,7 +117,7 @@ chezmoi 按**目标名**（剥掉 `run_once_` 与 `.tmpl`）的字母序执行�
 
 ### SSH 密钥与登录对象
 
-私钥不入库。本机与 Mac 可登录全部设备；手机与平板只登录本机和 Mac。新设备的私钥在该设备上生成，只把公钥装进已经配好的机器。登录 desktop-pc 的 shell 是 Git Bash（`D:\Program Files\Git\usr\bin\bash.exe`，OpenSSH `DefaultShell`，命令选项 `-lc`），不是 PowerShell；客户端不要再写 `RemoteCommand`。清单见 [docs/DEVICE_ACCESS.md](docs/DEVICE_ACCESS.md)，步骤见 [docs/SSH_KEY_ROTATION.md](docs/SSH_KEY_ROTATION.md)。
+私钥不入库。本机与 Mac 可登录全部设备；手机与平板只登录本机和 Mac。新设备的私钥在该设备上生成，只把公钥装进已经配好的机器。登录 desktop-pc 的 shell 是 Git Bash（`D:\Program Files\Git\usr\bin\bash.exe`，OpenSSH `DefaultShell`，命令选项 `-lc`），不是 PowerShell；客户端不要再写 `RemoteCommand`。`moicen.com` 与 `alchemy-studio.cn` 共用 `id_ed25519_moicen-alchemy-2026-10-Nc`。这把也是 GitHub 认证密钥。Mac 的 `github.com` 仍用 `5s`，desktop-pc 仍用 `C4`。登录公钥已交给管理员，尚未确认写入。确认前不把私钥拷进那两台，也不改 `moicen.com` 的 `known_hosts`。清单见 [docs/DEVICE_ACCESS.md](docs/DEVICE_ACCESS.md)，步骤见 [docs/SSH_KEY_ROTATION.md](docs/SSH_KEY_ROTATION.md)。
 
 ## 项目规则（Agent 必须遵守）
 

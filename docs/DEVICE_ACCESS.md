@@ -42,14 +42,16 @@ tailscale set --hostname=<目标名>
 - 平板 `~/.ssh/id_ed25519_personal-pad-android-2026-10-ik` 登录本机和 Mac。私钥只在平板上。指纹 `SHA256:xXECkG7eDhSd0Z3bGczxDEiT/TIHf4XRGQXelJW9Dik`。
 - 本机与 Mac mini 同一档，可以登录本机、Mac、手机、平板、VPS、GitHub。手机与平板同一档，只登录本机和 Mac。新设备的私钥在那台设备上生成，只把公钥追加到已经配好的机器。步骤见 [SSH_KEY_ROTATION.md](SSH_KEY_ROTATION.md)。
 - VPS 自己的 `~/.ssh/id_ed25519_vps-2026-10-JM` 只登录同一个 GitHub 账号。私钥不复制到本机。GitHub 标题同为 `vps-2026-10-JM`。
-- `ci.moicen.com`、`alchemy-vnc`、`moicen-vnc` 已从 chezmoi 的 SSH 模板删掉。
+- `id_ed25519_moicen-alchemy-2026-10-Nc` 登录 `moicen.com` 与 `alchemy-studio.cn` 的用户 `leonli`，并且是 GitHub 认证公钥，标题 `moicen-alchemy-2026-10-Nc`（id `166186184`）。指纹 `SHA256:HwrCuLR1DInospwk2130e6GxXYRxqUHP1xEl00PTtNc`。同一份私钥在 Mac `~/.ssh` 和本机 `C:\Users\Administrator\.ssh`。Mac 的 `github.com` 仍用 `5s`，本机仍用 `C4`。两台生产 VPS 上用这把拉取和提交。不拷进 WSL、手机、平板或 Tailscale VPS。
+- `ci.moicen.com`、`alchemy-vnc`、`moicen-vnc` 已从 chezmoi 的 SSH 模板删掉。不要把它们加回来。
 
 ## SSH 与 Git
 
 | 用途 | 地址 | 用户 | 端口 | 密钥文件 | 状态 |
 |---|---|---|---|---|---|
-| GitHub | `ssh.github.com` | `git` | `443` | 本机 `id_ed25519_desktop-win-2026-10-C4`；Mac `id_ed25519_mac-mini-2026-10-5s`；VPS `id_ed25519_vps-2026-10-JM` | 账号 `xiaolitongxue666`。每台设备各自生成，不复制私钥 |
+| GitHub | `ssh.github.com` | `git` | `443` | 本机 `id_ed25519_desktop-win-2026-10-C4`；Mac `id_ed25519_mac-mini-2026-10-5s`；VPS `id_ed25519_vps-2026-10-JM`；生产域名 `id_ed25519_moicen-alchemy-2026-10-Nc` | 账号 `xiaolitongxue666`。Mac 与本机不改用 `Nc`。`Nc` 供两台生产 VPS 拉取和提交 |
 | 登录 VPS | Tailscale `vps` / `100.74.201.82` | `ubuntu` | `22` | 本机 `id_ed25519_desktop-win-2026-10-j0`；Mac `id_ed25519_mac-mini-2026-10-GY`；Mac `id_ed25519` | Host 名 `vps`，`xiaolitongxue-vps` 是同一条。公网名 `xiaolitongxue.com.cn` 仍接受同一把主机钥 |
+| 生产域名 | `moicen.com`、`alchemy-studio.cn` | `leonli` | `22` | Mac 与本机同一份 `id_ed25519_moicen-alchemy-2026-10-Nc` | 2026-10-12 公钥已交给管理员，尚未确认写入。`alchemy-studio.cn` 此前拒绝公钥。`moicen.com` 主机钥与 `known_hosts` 不一致，未改记录 |
 | 登录本机 | Tailscale `company-pc-win10` / `100.110.122.106` | `Administrator` | `22` | Mac `id_ed25519_mac-mini-2026-10-GY`；手机 `id_ed25519_phone-personal-android-2026-10-dM`；平板 `id_ed25519_personal-pad-android-2026-10-ik` | 管理员公钥在 `C:\ProgramData\ssh\administrators_authorized_keys`。登录 shell 是 Git Bash |
 | 登录手机 | Tailscale `phone-personal-android` / `100.65.16.28` | `u0_a0` | `8022` | 本机 `id_ed25519_desktop-win-2026-10-6c`；Mac `id_ed25519_mac-mini-2026-10-GY` | 密码登录已关闭。划掉 Termux 后 `sshd` 会停 |
 | 登录 Mac | Tailscale `mac-mini` / `100.114.18.98` | `liyong` | `22` | 本机 `id_ed25519_desktop-win-2026-10-A8`；手机 `id_ed25519_phone-personal-android-2026-10-dM`；平板 `id_ed25519_personal-pad-android-2026-10-ik` | 公钥写入 `/Users/liyong/.ssh/authorized_keys` |
@@ -67,6 +69,7 @@ tailscale set --hostname=<目标名>
 - 手机登录本机 `id_ed25519_phone-personal-android-2026-10-dM`：`SHA256:56gmjE1TyWhlEqa9phBsq3WX9E+rHGId3xCtA2SyEdM`。私钥只在手机上
 - 平板登录本机 `id_ed25519_personal-pad-android-2026-10-ik`：`SHA256:xXECkG7eDhSd0Z3bGczxDEiT/TIHf4XRGQXelJW9Dik`。私钥只在平板上
 - VPS GitHub `id_ed25519_vps-2026-10-JM`：`SHA256:nEhVyEo0fs1q/tfxDCjDShSAT2E6MydxteWK9KjsgJM`。私钥只在 VPS 上。GitHub 标题 `vps-2026-10-JM`（id `166149945`）
+- 生产域名 `id_ed25519_moicen-alchemy-2026-10-Nc`：`SHA256:HwrCuLR1DInospwk2130e6GxXYRxqUHP1xEl00PTtNc`。Mac 与本机各一份
 
 已从本机删除、备份仍在 `~/.ssh-key-backup-20261012`（仓库外）：
 
@@ -80,7 +83,7 @@ VPS `ubuntu` 的 `authorized_keys` 现在是这三行，都不要删：
 - `SHA256:DZJ19Ia0hOQPD0CL0TpFPPYJNcxma/LIJTLge6Mddj0`：本机 `id_ed25519_desktop-win-2026-10-j0`
 - `SHA256:AQSe/V8Mm/5LlJMibVD7cEbsM+HDbFQMvkYLVn4XVGY`：Mac `id_ed25519_mac-mini-2026-10-GY`
 
-GitHub 认证公钥保留 `desktop-win-2026-10-C4`、`vps-2026-10-JM`、`mac-mini-2026-10-5s`。标题 `mac mini`（id `50838450`）已删除。`Work_company_key` 此前已删除。
+GitHub 认证公钥保留 `desktop-win-2026-10-C4`、`vps-2026-10-JM`、`mac-mini-2026-10-5s`、`moicen-alchemy-2026-10-Nc`（id `166186184`）。标题 `mac mini`（id `50838450`）已删除。`Work_company_key` 此前已删除。
 
 MSYS2 的 `ssh` 经目录联接使用 `%USERPROFILE%\.ssh`（本机 `C:\Users\Administrator\.ssh`），不再另维护一份 config。`run_once_windows-link-msys-ssh.sh` 把 `C:\msys64\home\<用户>\.ssh` 接到该目录；原来的 MSYS 目录改名为同级 `.ssh.bak-日期`，不删除。其中曾有 `192.168.1.211`（Gitblit，用户 `liyong`，端口 `29418`），2026-10-12 用已删除的 `id_ed25519` 和 `id_rsa` 登录被拒绝，未并入 chezmoi 模板。
 
@@ -103,18 +106,19 @@ WSL `Ubuntu-24.04` 的默认用户是 `root`，家目录 `/root`。2026-10-12 �
 
 | 别名 | HostName | 用户 | 端口 | 身份文件 |
 |---|---|---|---|---|
-| `github.com` | `ssh.github.com` | `git` | `443` | 本机 `C4`；Mac `5s`；VPS `JM`。`IdentitiesOnly yes` |
+| `github.com` | `ssh.github.com` | `git` | `443` | 本机 `C4`；Mac `5s`；VPS `JM`。只有这三把都不在时才用 `Nc`。`IdentitiesOnly yes` |
 | `vps`、`xiaolitongxue-vps` | `vps` | `ubuntu` | `22` | 本机 `j0`；Mac `GY`，没有 `j0` 时才用 `GY` |
 | `desktop-win` | `company-pc-win10` | `Administrator` | `22` | Mac `GY`；手机 `dM`；平板 `ik` |
 | `mac-mini` | `mac-mini` | `liyong` | `22` | 本机 `A8`；手机 `dM`；平板 `ik`。没有用户 `leonli` |
 | `phone-personal-android` | `phone-personal-android` | `u0_a0` | `8022` | 本机 `6c`；Mac 没有 `6c` 时用 `GY` |
 | `personal-pad-android` | `personal-pad-android` | `u0_a71` | `8022` | 本机 `Tg`；Mac 没有 `Tg` 时用 `GY` |
+| `moicen.com`、`alchemy-studio.cn` | 同名域名 | `leonli` | `22` | `moicen-alchemy-2026-10-Nc`。`IdentitiesOnly yes`，`ForwardAgent no`。不回退其他密钥 |
 
 `ssh desktop-win` 的 shell 是 `D:\Program Files\Git\usr\bin\bash.exe`（`HKLM\SOFTWARE\OpenSSH` 的 `DefaultShell`，远程命令选项 `-lc`）。客户端不要写 `RemoteCommand`。
 
 ## 测试
 
-失败就停，留下命令输出。`BatchMode=yes`。不要把私钥拷进另一台设备的 `~/.ssh`。
+失败就停，留下命令输出。`BatchMode=yes`。设备密钥不要拷进另一台设备的 `~/.ssh`。例外只有 `id_ed25519_moicen-alchemy-2026-10-Nc`：Mac 与 desktop-pc 各放同一份，不拷到别处。
 
 规则：
 
@@ -123,6 +127,8 @@ WSL `Ubuntu-24.04` 的默认用户是 `root`，家目录 `/root`。2026-10-12 �
 - 往 `known_hosts` 追加名字之前，主机钥指纹必须和下表一致。
 - `chezmoi apply` 会把 `~/.ssh` 收成 `755`、`config` 收成 `644`。做完后改回 `700` 和 `600`。
 - Windows 管理员公钥只改 `C:\ProgramData\ssh\administrators_authorized_keys`，ACL 保持 `SYSTEM` 与 `Administrators`。
+- 生产域名：公钥交给管理员之后，先 `BatchMode` 探活。`Permission denied (publickey)` 表示还没写入。`moicen.com` 主机钥与下表不一致时停止，不执行 `ssh-keygen -R`。
+- 传到 desktop-pc 用 `scp -O`，目标是 Git Bash 的 `/c/Users/Administrator/.ssh/`。默认 SFTP 认不出 `/c/...`。这份私钥的 ACL 与 `id_ed25519_desktop-win-2026-10-C4` 对齐。
 
 主机钥：
 
@@ -133,6 +139,8 @@ WSL `Ubuntu-24.04` 的默认用户是 `root`，家目录 `/root`。2026-10-12 �
 | 手机 `phone-personal-android:8022` | `SHA256:S80fT4qc9lQWVAhb9EQZotRvoYxBzlUSaLxYZhm6KoU` |
 | 平板 `personal-pad-android:8022` | `SHA256:7qvNYjIaY7zbXy4gSJC61H4tzEqZQ1easd9TD1mgZic` |
 | VPS `vps` | `SHA256:Eg62mCFe6kPCKTHrvos5ROZtDD1eL9wmSxkRkKNvyK0` |
+| `alchemy-studio.cn` | `SHA256:Ho8TIH8AhgunMZGzfuK5Cjey+0hlggBA779AeYGpWjo` |
+| `moicen.com`（本机现有记录，未改） | ED25519 `SHA256:vQDX7+R5TidKV2PxEM3BATw3karVN4bf4LgFf/x55ko` |
 
 从 Mac 测（手机和平板的 `8022` 开着时）：
 
@@ -148,3 +156,39 @@ ssh personal-pad-android 'ssh -n mac-mini whoami; ssh -n desktop-win "echo \$BAS
 ```
 
 期望：GitHub 正文含 `Hi xiaolitongxue666!`；VPS 主机名 `VM-0-8-ubuntu`；本机 `BASH_VERSION` 是 Git Bash，`whoami` 为 `Administrator`；Mac 上是 `liyong`；手机 `u0_a0`；平板 `u0_a71`。笔记本不在这套测试里。
+
+### 生产域名
+
+公钥已于 2026-10-12 交给管理员，尚未确认写入 `authorized_keys`。确认前不把私钥拷进这两台，也不改 `moicen.com` 的 `known_hosts`。此前探过一次：
+
+- `alchemy-studio.cn`：主机钥未变（ED25519 `SHA256:Ho8TIH8AhgunMZGzfuK5Cjey+0hlggBA779AeYGpWjo`）。结果 `Permission denied (publickey)`。
+- `moicen.com`：服务器给出的 ED25519 是 `SHA256:cuIY6e2AY1s8XPMB4JmScEdxzRx3AMpjbl3hg1ac5CI`。本机 `known_hosts` 里仍是 ED25519 `SHA256:vQDX7+R5TidKV2PxEM3BATw3karVN4bf4LgFf/x55ko` 和 ECDSA `SHA256:TA1OPa8kAZ87/R9PGgfFHNpk0/scMy2IOo+Ew1PwRhM`。没有改 `known_hosts`，也没有登录。
+
+管理员装上登录公钥，并且 `moicen.com` 的主机钥核对之后，把 `id_ed25519_moicen-alchemy-2026-10-Nc` 放到该机 `leonli` 的 `~/.ssh`（权限 600），并写上只使用这把密钥的 `github.com`（`ssh.github.com` 端口 `443`，`IdentitiesOnly yes`）。然后：
+
+```bash
+ssh -T git@github.com
+```
+
+成功正文是 `Hi xiaolitongxue666!`。退出码可能是 1。
+
+登录检查：
+
+```bash
+ssh -o BatchMode=yes moicen.com 'whoami; hostname'
+ssh -o BatchMode=yes alchemy-studio.cn 'whoami; hostname'
+```
+
+`whoami` 应为 `leonli`。
+
+本地核对配置、不连这两台机器：
+
+```bash
+ssh -G moicen.com
+ssh -G alchemy-studio.cn
+ssh -G github.com
+ssh -G vps
+ssh -G desktop-win
+```
+
+`moicen.com` 与 `alchemy-studio.cn` 的 `identityfile` 只能是 `id_ed25519_moicen-alchemy-2026-10-Nc`。Mac 上 `github.com` 仍是 `5s`，desktop-pc 上仍是 `C4`。`vps` 与 `desktop-win` 保持原样。
