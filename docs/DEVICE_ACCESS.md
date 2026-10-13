@@ -14,7 +14,7 @@
 | VPS | `vps` | `vps` | `vps.tail926022.ts.net` | `100.74.201.82` | 2026-10-12 已改名。本机 `ssh vps` 经 Tailscale 登录成功（源地址 `100.110.122.106`）。ICMP 仍无回复 |
 | Mac mini | 李勇的Mac mini | `mac-mini` | `mac-mini.tail926022.ts.net` | `100.114.18.98` | 在线。SSH 用户是 `liyong`，本机没有 `leonli` |
 | 笔记本 | `LAPTOP-ANFCJ3NJ` | `laptop-win` | `laptop-huawei.tail926022.ts.net` | `100.124.252.108` | 离线约 142 天。只登记目标名 |
-| 平板 | `Xiaomi Pad 6S Pro 12` | `pad-android` | `personal-pad-android.tail926022.ts.net` | `100.109.45.51` | Termux 用户 `u0_a71`，SSH 端口 `8022`。打开 Termux 时 `~/.bashrc` 会启动 `sshd`。密码登录已关闭 |
+| 平板 | `Xiaomi Pad 6S Pro 12` | `pad-android` | `personal-pad-android.tail926022.ts.net` | `100.109.45.51` | Termux 用户 `u0_a71`，SSH 端口 `8022`。打开 Termux 时 `~/.bashrc` 会启动 `sshd`。密码登录已关闭。提示符字体与手机相同，见「Termux 字体」 |
 | 手机 | `Redmi K70` | `phone-android` | `phone-personal-android.tail926022.ts.net` | `100.65.16.28` | Termux 用户 `u0_a0`，SSH 端口 `8022`。打开 Termux 时 `~/.bashrc` 会启动 `sshd`。密码登录已关闭。提示符字体见「Termux 字体」 |
 
 离线设备不要只在管理后台改显示名。设备下次上线可能用自己的主机名盖回去。上线后在设备上执行：
@@ -125,7 +125,7 @@ WSL `Ubuntu-24.04` 的默认用户是 `root`，家目录 `/root`。2026-10-12 �
 
 ## Termux 字体
 
-核对日期：2026-10-13。手机 Redmi K70（`phone-personal-android`，用户 `u0_a0`）已确认：从 Termux SSH 到 Mac mini 和 desktop-pc，提示符符号都正常。平板没有改。
+核对日期：2026-10-13。手机 Redmi K70（`phone-personal-android`，用户 `u0_a0`）已确认：从 Termux SSH 到 Mac mini 和 desktop-pc，提示符符号都正常。平板 Xiaomi Pad 6S Pro（`personal-pad-android`，用户 `u0_a71`）已写入同一份字体。2026-10-13 用户确认平板上的显示正常。
 
 ### 现象
 
@@ -164,7 +164,9 @@ https://github.com/subframe7536/maple-font/releases/download/v7.9/MapleMonoNL-NF
 /data/data/com.termux/files/home/.termux/font.ttf
 ```
 
-权限 `644`。当时 Termux 版本 `googleplay.2026.06.21`，Android 16。字体包不入库。
+权限 `644`。手机当时 Termux 版本 `googleplay.2026.06.21`，Android 16。字体包不入库。
+
+2026-10-13 平板写入同一路径，文件 20541416 字节，TTF 头 `00 01 00 00`。写入后 sshd 一度不再发 banner，`chmod 644` 和 `termux-reload-settings` 没跑成。文件属主是 `u0_a71`，当时模式是 `600`，Termux 自己能读。划掉 Termux 再打开后字形换上。用户确认平板显示正常。
 
 `✚`（U+271A）、`⚙`（U+2699）、`➦`（U+27A6）和彩色 emoji 不在这份字体里。缺的码位由 Android 绘制时回退到系统字体。2026-10-13 用户确认两条 SSH 的显示都正常。
 
