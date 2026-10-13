@@ -165,11 +165,12 @@ Host laptop-huawei
     IdentitiesOnly yes
 
 # --- 生产域名 ---
-# 同一把密钥，Mac 与 desktop-pc 各放一份。
+# 同一把密钥，Mac、desktop-pc、laptop-huawei 各放一份。
+# 不拷进 WSL、手机、平板或 Tailscale VPS。
 # moicen.com 用户是 xiaoli。alchemy-studio.cn 用户是 leonli。
 # huiwings.cn 管理员说也是 leonli、同一把公钥，模板未写、未测。
-# 公钥也在 GitHub。Mac 有 5s、desktop-pc 有 C4 时，github.com 仍用那两把。
-# 只有 C4、5s、JM 都不存在时，github.com 才用这把。不回退到 GY 或 j0。
+# 公钥也在 GitHub。Mac 有 5s、desktop-pc 有 C4、笔记本有 5A 时，github.com 仍用那三把。
+# 只有 C4、5s、JM、5A 都不存在时，github.com 才用这把。不回退到 GY、j0 或 o4。
 Host moicen.com
     User xiaoli
     Port 22

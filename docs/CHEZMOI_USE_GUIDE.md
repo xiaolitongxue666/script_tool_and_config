@@ -416,7 +416,7 @@ SSH 配置文件（`~/.ssh/config`）已纳入 chezmoi 管理，可以通过 laz
 
 ### 管理机 SSH 与分用途密钥
 
-设备名用 Tailscale MagicDNS。文件名是 `id_ed25519_<名字>-<YYYY-MM>-<指纹末两位>`。GitHub 钥匙只写入 `Host github.com`，登录钥匙只写入设备 Host，`Nc` 只写入 `moicen.com` 与 `alchemy-studio.cn`。本机没有的文件不写 `IdentityFile`。`known_hosts` 不进 chezmoi。
+设备名用 Tailscale MagicDNS。文件名是 `id_ed25519_<名字>-<YYYY-MM>-<指纹末两位>`。GitHub 钥匙只写入 `Host github.com`，登录钥匙只写入设备 Host，`Nc` 只写入 `moicen.com` 与 `alchemy-studio.cn`。`Nc` 私钥在 Mac、desktop-pc、laptop-huawei 各放一份，不拷进 WSL、手机、平板或 Tailscale VPS。GitHub 回退顺序是 `C4`、`5s`、`JM`、`5A` 之后才是 `Nc`。本机没有的文件不写 `IdentityFile`。`known_hosts` 不进 chezmoi。
 
 `laptop-huawei`、`mac-mini`、`company-pc-win10` 可登录全部设备。手机和平板只登录这三台。GitHub 另外包括 `vps`。`company-pc-win10` 与 `desktop-win` 是同一 Host，用户 `Administrator`。`vps` 与 `xiaolitongxue-vps` 是同一 Host，`HostName vps`，用户 `ubuntu`。`mac-mini` 用户 `liyong`。`laptop-huawei` 用户 `xiaoli`。手机用户 `u0_a0`、平板用户 `u0_a71`，端口都是 8022。
 
