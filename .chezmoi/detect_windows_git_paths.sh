@@ -36,6 +36,8 @@ _detect_file() {
 
 case "$_mode" in
     bash)
+        # 这里是 Windows Terminal 用的启动器 bin/bash.exe。
+        # sshd DefaultShell 要用同目录树上的 usr/bin/bash.exe，选项 -lc。
         if _detect_executable \
             "/d/Program Files/Git/bin/bash.exe" \
             "/c/Program Files/Git/bin/bash.exe" \

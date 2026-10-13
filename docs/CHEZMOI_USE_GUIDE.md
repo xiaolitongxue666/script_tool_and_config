@@ -414,6 +414,22 @@ SSH 配置文件（`~/.ssh/config`）已纳入 chezmoi 管理，可以通过 laz
 
 详见 `docs/SSH_CONFIG_SETUP.md`。
 
+### 管理机 SSH 与分用途密钥
+
+设备名用 Tailscale MagicDNS。文件名是 `id_ed25519_<名字>-<YYYY-MM>-<指纹末两位>`。GitHub 钥匙只写入 `Host github.com`，登录钥匙只写入设备 Host，`Nc` 只写入 `moicen.com` 与 `alchemy-studio.cn`。本机没有的文件不写 `IdentityFile`。`known_hosts` 不进 chezmoi。
+
+`laptop-huawei`、`mac-mini`、`company-pc-win10` 可登录全部设备。手机和平板只登录这三台。GitHub 另外包括 `vps`。`company-pc-win10` 与 `desktop-win` 是同一 Host，用户 `Administrator`。`vps` 与 `xiaolitongxue-vps` 是同一 Host，`HostName vps`，用户 `ubuntu`。`mac-mini` 用户 `liyong`。`laptop-huawei` 用户 `xiaoli`。手机用户 `u0_a0`、平板用户 `u0_a71`，端口都是 8022。
+
+本机 Git 在 `C:\Program Files\Git`。sshd `DefaultShell` 设为 `C:\Program Files\Git\usr\bin\bash.exe`，命令选项 `-lc`，SSH 登录后进入 Git Bash，与 desktop-win 相同。不要在客户端写 `RemoteCommand`。`detect_windows_git_paths.sh bash` 打印的是 Windows Terminal 用的 `bin\bash.exe`，不要写进 `DefaultShell`。
+
+`xiaoli` 在 Administrators 组。公钥追加到 `C:\ProgramData\ssh\administrators_authorized_keys`，不要只写 `~/.ssh/authorized_keys`。主机私钥和这个授权文件的所有者用 `icacls /setowner *S-1-5-32-544`，访问权只留 SYSTEM 与 Administrators。所有者仍是当前用户时，sshd 会以 1067 退出，调试日志是 `Bad owner`。
+
+公司电脑原有的按目标分钥匙保持不动：`A8` 登 mac-mini，`j0` 登 vps，`6c` 登手机，`Tg` 登平板。新管理机只追加公钥、补 `Host`，不替换这些 `IdentityFile`。手机和平板的 `~/.ssh/config` 只保留三台管理机。
+
+仓库内回归是 `bash tests/test_ssh_github_identity.sh`。它不连接设备。实机在 `chezmoi apply -v --force ~/.ssh/config` 之后用 `ssh -o BatchMode=yes -T git@github.com` 和 `ssh -o BatchMode=yes <MagicDNS> whoami`。手机或平板 Tailscale 能 ping 通但 8022 超时，是 Termux sshd 没在听。
+
+Git Bash 调用 `reg.exe`、`icacls.exe` 前设置 `MSYS2_ARG_CONV_EXCL='*'`，否则 `/v` 和 `/c/ProgramData` 会被当成路径。外机私钥放在仓库外的临时目录，用完删除。
+
 ### 首次纳入管理
 
 如果当前系统已有 SSH 配置，需要先备份再纳入管理。应用前建议同时备份 `~/.gitconfig`（Git 全局配置由 `dot_gitconfig.tmpl` 管理）：

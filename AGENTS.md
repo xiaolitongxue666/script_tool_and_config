@@ -543,6 +543,10 @@ ensure_directory() {
 
 > 该顺序以源码为准；修改此函数后请同步本节（避免再次出现文档与实现颠倒）。
 
+### SSH 管理机密钥（Tailscale MagicDNS）
+
+设备名用 MagicDNS。钥匙文件 `id_ed25519_<名字>-<YYYY-MM>-<指纹末两位>`，GitHub 与登录分开，缺文件不写 `IdentityFile`。管理机 `laptop-huawei`、`mac-mini`、`company-pc-win10` 可登录全部设备。手机（`u0_a0:8022`）和平板（`u0_a71:8022`）只登录这三台。GitHub 还包含 `vps`。`company-pc-win10`/`desktop-win` 用户 `Administrator`；`vps`/`xiaolitongxue-vps` 的 `HostName` 是 `vps`、用户 `ubuntu`。本机 Git 在 `C:\Program Files\Git`，sshd `DefaultShell` 为 `C:\Program Files\Git\usr\bin\bash.exe`，选项 `-lc`。不要把检测脚本的 `bin\bash.exe` 写成 DefaultShell。管理员公钥在 `C:\ProgramData\ssh\administrators_authorized_keys`，主机私钥所有者须为 Administrators，否则 sshd 1067。`known_hosts` 不进仓库，私钥不跨机器复制。公司电脑按目标分钥匙，只追加不替换。回归 `tests/test_ssh_github_identity.sh`（只读模板）；实机用 `BatchMode` 的 `whoami` 和 `ssh -T`。详见 `docs/PROJECT_AGENT_MEMORY.md`。
+
 部署入口职责矩阵见上文「部署入口职责矩阵（必须遵守）」。
 
 
@@ -585,7 +589,7 @@ ensure_directory() {
 │   ├── windows/                # Windows 专属（system_basic_env、windows_scripts）
 │   ├── manage_dotfiles.sh      # dotfiles 运维入口
 │   └── README.md
-├── tests/                      # 测试目录（8 个；全部纳入 CI 硬性阻断）
+├── tests/                      # 测试目录（9 个；全部纳入 CI 硬性阻断）
 │   ├── test_contracts.sh       # ★ 结构与命名契约（目录分层/库vs入口/+x/链接/格式/部署入口）
 │   ├── test_syntax.sh          # 全仓 .sh/.tmpl 语法检查 + 全角标点回归
 │   ├── test_proxy.sh           # 代理地址检测/补全逻辑
@@ -593,7 +597,8 @@ ensure_directory() {
 │   ├── test_software_policies.sh    # software_policies 策略与脚本发现
 │   ├── test_install_report_status.sh # install [5/6] 软件报告状态
 │   ├── test_winget_msix_fallback.sh # winget MSIX sideload 回退与主包选择
-│   └── test_bashrc_prompt_guard.sh  # bashrc 提示符 / TERM 守卫
+│   ├── test_bashrc_prompt_guard.sh  # bashrc 提示符 / TERM 守卫
+│   └── test_ssh_github_identity.sh  # GitHub 管理机密钥只属于 github.com
 ├── docs/                       # 文档目录
 │   └── PROJECT_STRUCTURE.md    # 项目结构权威文档
 ```

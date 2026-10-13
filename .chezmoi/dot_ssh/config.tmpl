@@ -24,6 +24,8 @@ Host github.com
     IdentityFile ~/.ssh/id_ed25519_mac-mini-2026-10-5s
 {{- else if stat (joinPath $ssh_dir "id_ed25519_vps-2026-10-JM") }}
     IdentityFile ~/.ssh/id_ed25519_vps-2026-10-JM
+{{- else if stat (joinPath $ssh_dir "id_ed25519_laptop-huawei-2026-10-5A") }}
+    IdentityFile ~/.ssh/id_ed25519_laptop-huawei-2026-10-5A
 {{- else if stat (joinPath $ssh_dir "id_ed25519_moicen-alchemy-2026-10-Nc") }}
     IdentityFile ~/.ssh/id_ed25519_moicen-alchemy-2026-10-Nc
 {{- else if stat (joinPath $ssh_dir "id_ed25519_github") }}
@@ -63,6 +65,8 @@ Host vps xiaolitongxue-vps
     IdentityFile ~/.ssh/id_ed25519_desktop-win-2026-10-j0
 {{- else if stat (joinPath $ssh_dir "id_ed25519_mac-mini-2026-10-GY") }}
     IdentityFile ~/.ssh/id_ed25519_mac-mini-2026-10-GY
+{{- else if stat (joinPath $ssh_dir "id_ed25519_laptop-huawei-2026-10-o4") }}
+    IdentityFile ~/.ssh/id_ed25519_laptop-huawei-2026-10-o4
 {{- else if stat (joinPath $ssh_dir "id_ed25519_vps_login") }}
     IdentityFile ~/.ssh/id_ed25519_vps_login
 {{- else }}
@@ -88,6 +92,8 @@ Host phone-personal-android
     IdentityFile ~/.ssh/id_ed25519_desktop-win-2026-10-6c
 {{- else if stat (joinPath $ssh_dir "id_ed25519_mac-mini-2026-10-GY") }}
     IdentityFile ~/.ssh/id_ed25519_mac-mini-2026-10-GY
+{{- else if stat (joinPath $ssh_dir "id_ed25519_laptop-huawei-2026-10-o4") }}
+    IdentityFile ~/.ssh/id_ed25519_laptop-huawei-2026-10-o4
 {{- end }}
     IdentitiesOnly yes
 
@@ -102,6 +108,8 @@ Host personal-pad-android
     IdentityFile ~/.ssh/id_ed25519_desktop-win-2026-10-Tg
 {{- else if stat (joinPath $ssh_dir "id_ed25519_mac-mini-2026-10-GY") }}
     IdentityFile ~/.ssh/id_ed25519_mac-mini-2026-10-GY
+{{- else if stat (joinPath $ssh_dir "id_ed25519_laptop-huawei-2026-10-o4") }}
+    IdentityFile ~/.ssh/id_ed25519_laptop-huawei-2026-10-o4
 {{- end }}
     IdentitiesOnly yes
 
@@ -114,6 +122,8 @@ Host mac-mini
 {{- $ssh_dir := joinPath .chezmoi.homeDir ".ssh" }}
 {{- if stat (joinPath $ssh_dir "id_ed25519_desktop-win-2026-10-A8") }}
     IdentityFile ~/.ssh/id_ed25519_desktop-win-2026-10-A8
+{{- else if stat (joinPath $ssh_dir "id_ed25519_laptop-huawei-2026-10-o4") }}
+    IdentityFile ~/.ssh/id_ed25519_laptop-huawei-2026-10-o4
 {{- end }}
     IdentitiesOnly yes
 
@@ -122,12 +132,34 @@ Host mac-mini
 # 服务端默认 shell 已是 D:\Program Files\Git\usr\bin\bash.exe（HKLM\SOFTWARE\OpenSSH
 # DefaultShell，命令选项 -lc）。直接 ssh desktop-win 即进 Git Bash。
 # 不要在客户端写 RemoteCommand：有远程命令时会报 Cannot execute command-line and remote command。
-Host desktop-win
+Host company-pc-win10 desktop-win
     HostName company-pc-win10
     User Administrator
     Port 22
 {{- $ssh_dir := joinPath .chezmoi.homeDir ".ssh" }}
 {{- if stat (joinPath $ssh_dir "id_ed25519_mac-mini-2026-10-GY") }}
+    IdentityFile ~/.ssh/id_ed25519_mac-mini-2026-10-GY
+{{- else if stat (joinPath $ssh_dir "id_ed25519_laptop-huawei-2026-10-o4") }}
+    IdentityFile ~/.ssh/id_ed25519_laptop-huawei-2026-10-o4
+{{- end }}
+    IdentitiesOnly yes
+
+# --- laptop-huawei（MagicDNS 名。系统主机名 LAPTOP-ANFCJ3NJ）---
+# 用户 xiaoli。Git 在 C:\Program Files\Git。
+# sshd DefaultShell 是 C:\Program Files\Git\usr\bin\bash.exe，选项 -lc。
+# 不要写成 detect_windows_git_paths.sh 打印的 bin\bash.exe。
+# xiaoli 在 Administrators，公钥写 administrators_authorized_keys，所有者须为 Administrators。
+# 不要写 RemoteCommand。
+Host laptop-huawei
+    HostName laptop-huawei
+    User xiaoli
+    Port 22
+{{- $ssh_dir := joinPath .chezmoi.homeDir ".ssh" }}
+{{- if stat (joinPath $ssh_dir "id_ed25519_laptop-huawei-2026-10-o4") }}
+    IdentityFile ~/.ssh/id_ed25519_laptop-huawei-2026-10-o4
+{{- else if stat (joinPath $ssh_dir "id_ed25519_desktop-win-2026-10-A8") }}
+    IdentityFile ~/.ssh/id_ed25519_desktop-win-2026-10-A8
+{{- else if stat (joinPath $ssh_dir "id_ed25519_mac-mini-2026-10-GY") }}
     IdentityFile ~/.ssh/id_ed25519_mac-mini-2026-10-GY
 {{- end }}
     IdentitiesOnly yes

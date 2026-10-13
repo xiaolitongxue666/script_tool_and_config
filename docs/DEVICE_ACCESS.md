@@ -13,7 +13,7 @@
 | 本机 Windows | `LeonLi-DESKTOP` | `desktop-win` | `company-pc-win10.tail926022.ts.net` | `100.110.122.106` | 客户端主机名已设为 `desktop-win`。管理后台里的手动名仍是 `company-pc-win10`，MagicDNS 未跟着变。本次没有 Tailscale API token，管理后台需要登录，所以没有改掉这个显示名 |
 | VPS | `vps` | `vps` | `vps.tail926022.ts.net` | `100.74.201.82` | 2026-10-12 已改名。本机 `ssh vps` 经 Tailscale 登录成功（源地址 `100.110.122.106`）。ICMP 仍无回复 |
 | Mac mini | 李勇的Mac mini | `mac-mini` | `mac-mini.tail926022.ts.net` | `100.114.18.98` | 在线。SSH 用户是 `liyong`，本机没有 `leonli` |
-| 笔记本 | `LAPTOP-ANFCJ3NJ` | `laptop-win` | `laptop-huawei.tail926022.ts.net` | `100.124.252.108` | 离线约 142 天。只登记目标名 |
+| 笔记本 | `LAPTOP-ANFCJ3NJ` | `laptop-huawei` | `laptop-huawei.tail926022.ts.net` | `100.124.252.108` | 2026-10-13 在线。SSH 用户 `xiaoli`。Git 在 `C:\Program Files\Git`。sshd `DefaultShell` 为 `C:\Program Files\Git\usr\bin\bash.exe`，选项 `-lc` |
 | 平板 | `Xiaomi Pad 6S Pro 12` | `pad-android` | `personal-pad-android.tail926022.ts.net` | `100.109.45.51` | Termux 用户 `u0_a71`，SSH 端口 `8022`。打开 Termux 时 `~/.bashrc` 会启动 `sshd`。密码登录已关闭。提示符字体与手机相同，见「Termux 字体」 |
 | 手机 | `Redmi K70` | `phone-android` | `phone-personal-android.tail926022.ts.net` | `100.65.16.28` | Termux 用户 `u0_a0`，SSH 端口 `8022`。打开 Termux 时 `~/.bashrc` 会启动 `sshd`。密码登录已关闭。提示符字体见「Termux 字体」 |
 
@@ -44,7 +44,8 @@ tailscale set --hostname=<目标名>
 - 本机 `~/.ssh/id_ed25519_desktop-win-2026-10-Tg` 只登录平板。Host 名 `personal-pad-android`，端口 `8022`，用户 `u0_a71`。
 - 手机 `~/.ssh/id_ed25519_phone-personal-android-2026-10-dM` 登录本机和 Mac。Host 名 `desktop-win` 的实际地址是 `company-pc-win10`，用户 `Administrator`。`mac-mini` 用户是 `liyong`。公钥已在 Mac `liyong` 的 `authorized_keys`。
 - 平板 `~/.ssh/id_ed25519_personal-pad-android-2026-10-ik` 登录本机和 Mac。私钥只在平板上。指纹 `SHA256:xXECkG7eDhSd0Z3bGczxDEiT/TIHf4XRGQXelJW9Dik`。
-- 本机与 Mac mini 同一档，可以登录本机、Mac、手机、平板、VPS、GitHub。手机与平板同一档，只登录本机和 Mac。新设备的私钥在那台设备上生成，只把公钥追加到已经配好的机器。步骤见 [SSH_KEY_ROTATION.md](SSH_KEY_ROTATION.md)。
+- 笔记本 `laptop-huawei` 与 desktop-pc、Mac mini 同一档。GitHub 钥匙 `id_ed25519_laptop-huawei-2026-10-5A`，登录钥匙 `id_ed25519_laptop-huawei-2026-10-o4`。私钥只在这台笔记本上。用户 `xiaoli` 属于 Administrators，公钥在 `C:\ProgramData\ssh\administrators_authorized_keys`。主机私钥所有者须为 Administrators，否则 sshd 以 1067 退出。
+- desktop-pc 与 Mac mini 可以登录 desktop-pc、Mac、笔记本、手机、平板、VPS、GitHub。手机与平板登录这三台，不登录 VPS。新设备的私钥在那台设备上生成，只把公钥追加到已经配好的机器。步骤见 [SSH_KEY_ROTATION.md](SSH_KEY_ROTATION.md)。
 - VPS 自己的 `~/.ssh/id_ed25519_vps-2026-10-JM` 只登录同一个 GitHub 账号。私钥不复制到本机。GitHub 标题同为 `vps-2026-10-JM`。
 - `id_ed25519_moicen-alchemy-2026-10-Nc` 登录 `xiaoli@moicen.com` 与 `leonli@alchemy-studio.cn`，并且是 GitHub 认证公钥，标题 `moicen-alchemy-2026-10-Nc`（id `166186184`）。指纹 `SHA256:HwrCuLR1DInospwk2130e6GxXYRxqUHP1xEl00PTtNc`。同一份私钥在 Mac `~/.ssh` 和本机 `C:\Users\Administrator\.ssh`。Mac 的 `github.com` 仍用 `5s`，本机仍用 `C4`。两台生产 VPS 上用这把拉取和提交。不拷进 WSL、手机、平板或 Tailscale VPS。管理员还说 `leonli@huiwings.cn` 也用这把公钥，该机没有 `xiaoli`。模板里没有 `huiwings.cn`，也还没测。
 - `ci.moicen.com`、`alchemy-vnc`、`moicen-vnc` 已从 chezmoi 的 SSH 模板删掉。不要把它们加回来。

@@ -264,7 +264,11 @@ chezmoi-override-merged.*.toml
 # SSH / GPG（仓库内任意路径，防止误 add）
 # 设备密钥名 id_ed25519_<Tailscale 名或用途>-<YYYY-MM>-<指纹末两位> 已由 **/id_ed25519* 覆盖
 # 含共享的 id_ed25519_moicen-alchemy-2026-10-Nc，私钥和 .pub 都不入库
+# 2026-10：mac-mini 的 ssh.zip 里有私钥，只在仓库外一次性使用，禁止把压缩包或解压结果加进来
 .ssh/
+ssh.zip
+**/ssh.zip
+__MACOSX/
 **/id_rsa*
 **/id_ed25519*
 **/id_ecdsa*
@@ -273,6 +277,7 @@ chezmoi-override-merged.*.toml
 **/known_hosts
 **/known_hosts.old
 **/authorized_keys
+**/administrators_authorized_keys
 **/identity
 **/identity.pub
 # 轮换时放在家目录或仓库里的私钥备份、渲染后的 config 备份

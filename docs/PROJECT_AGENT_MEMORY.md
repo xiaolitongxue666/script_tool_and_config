@@ -99,6 +99,46 @@ Pi 的安装、Harness、文档 **不在本仓库**。唯一 SSOT：[agent-confi
 | 多次 apply 报 lock timeout | 前次 chezmoi 进程未退出 | `taskkill //F //IM chezmoi.exe`，运行 `fix_chezmoi_lock.sh` |
 | `manage_dotfiles apply` 曾缺 force | 调用 `chezmoi_run_apply "-v"` 覆盖默认 | 已修复：`chezmoi_core` 自动补 `--force` |
 
+## SSH 管理机密钥与 Tailscale 命名（2026-10）
+
+设备名用 Tailscale MagicDNS。不执行 `tailscale up` / `down`，不改 ACL。钥匙文件名是 `id_ed25519_<名字>-<YYYY-MM>-<指纹末两位>`。缺文件不写 `IdentityFile`。`known_hosts` 不进仓库，不整份复制。私钥不跨机器复制。
+
+| 用途 | 现有文件 | 写到哪里 |
+|------|----------|----------|
+| GitHub | `mac-mini-2026-10-5s`、`desktop-win-2026-10-C4`、`vps-2026-10-JM`、`laptop-huawei-2026-10-5A` | 只 `Host github.com` |
+| 登录设备 | `mac-mini-2026-10-GY`、`desktop-win-2026-10-A8`、`laptop-huawei-2026-10-o4` | 只设备 Host |
+| moicen / alchemy | `moicen-alchemy-2026-10-Nc` | 只 `moicen.com`、`alchemy-studio.cn` |
+
+- 管理机 `laptop-huawei`、`mac-mini`、`company-pc-win10` 可登录全部设备。
+- `phone-personal-android`（用户 `u0_a0`，端口 8022）和 `personal-pad-android`（用户 `u0_a71`，端口 8022）只登录三台管理机。
+- GitHub 只给上述三台管理机和 `vps`。
+- 别名放在同一 `Host` 行：`company-pc-win10` 与 `desktop-win`（用户 `Administrator`，`HostName company-pc-win10`）；`vps` 与 `xiaolitongxue-vps`（用户 `ubuntu`，`HostName vps`）。`mac-mini` 用户 `liyong`。`laptop-huawei` 用户 `xiaoli`。
+- 本机 Git 安装在 `C:\Program Files\Git`。sshd 的 `DefaultShell` 用 `C:\Program Files\Git\usr\bin\bash.exe`，`DefaultShellCommandOption` 为 `-lc`，与 desktop-win 一样进入 Git Bash。客户端不写 `RemoteCommand`。
+- `authorized_keys` 只追加。回归：`tests/test_ssh_github_identity.sh`（只读模板）。实机另做 `ssh -o BatchMode=yes -T git@github.com` 和 `ssh -o BatchMode=yes <MagicDNS> whoami`。
+
+### laptop-huawei 接入（2026-10-13）
+
+本机原来只有被 GitHub 拒绝的 `id_rsa`。按 mac-mini 的用途分开新建了 `laptop-huawei-2026-10-5A`（GitHub）和 `laptop-huawei-2026-10-o4`（登录）。`5A` 的 `ssh -T` 成功后，删掉了 GitHub 上的过渡标题 `laptop-huawei`，模板里不再写 `id_ed25519_github_laptop_huawei`。
+
+外机私钥只在仓库外的临时目录里做一次性 `ssh -i`，用完即删，不放进 `~/.ssh`。mac-mini 自己的 `GY` 当时不在它的 `authorized_keys` 里，进不去；公司电脑、VPS、手机、平板接受 `GY`。mac-mini 改由已经获准的手机钥匙跳进去，再追加 `o4`。
+
+公司电脑的登录钥匙按目标分开，保持原样：`A8` 登 mac-mini，`j0` 登 vps，`6c` 登手机，`Tg` 登平板。只追加 `o4` 和给本机用的 `A8`，不改它现有的 `IdentityFile`。手机和平板的客户端只保留三台管理机，不写 VPS 和 `github.com`。
+
+本机 OpenSSH 装在 `C:\Windows\System32\OpenSSH`。`xiaoli` 属于 Administrators，公钥写 `C:\ProgramData\ssh\administrators_authorized_keys`，不写 `~/.ssh/authorized_keys`。
+
+| 问题 | 原因 | 解决 |
+|------|------|------|
+| `git clone` 报 `Permission denied (publickey)` | `IdentitiesOnly` 只提供了 GitHub 拒绝的 `id_rsa` | 本机单独一把 GitHub 钥匙，不回退到登录钥匙或 `id_rsa` |
+| 拿 `GY` 登不上 mac-mini | 这把钥匙是 mac-mini 用来登出的，当时不在它自己的 `authorized_keys` | 从已获准的手机跳进去再追加公钥 |
+| sshd 服务 1067，调试写 `Bad owner` / `too open` | 主机私钥的所有者是创建它的用户。ACL 只剩 SYSTEM 和 Administrators 仍不够 | `icacls /setowner *S-1-5-32-544`，再收成这两个身份的完全控制 |
+| Git Bash 里 `reg` / `icacls` 报无效语法，或配置路径变成 `C:/c/ProgramData` | MSYS 把 `/v`、`/c/...` 当成路径 | `export MSYS2_ARG_CONV_EXCL='*'`，Windows 程序用 `C:\...` |
+| 提权后的 Git Bash 找不到 `date` | PATH 里没有 `/usr/bin` | 脚本开头补上 `/usr/bin` 和 `C:\Windows\System32` |
+| `detect_windows_git_paths.sh bash` 打印 `bin\bash.exe` | 那是 Windows Terminal 的启动器 | sshd `DefaultShell` 用 `usr\bin\bash.exe`，选项 `-lc` |
+| 手机或平板 `tailscale ping` 通、SSH 超时 | Tailscale 在线，Termux 的 sshd 没在听 8022 | 等 8022 恢复再测。不要把超时当成钥匙错误 |
+| 只 `chezmoi apply` 整个家目录 | 会重跑全部 `run_once` | 本机只 `chezmoi apply -v --force ~/.ssh/config`。mac-mini 要等渲染结果仍含 `5s`、`GY`、`Nc` 再 apply |
+
+2026-10-13 实机：四台 GitHub 机器 `ssh -T` 成功。本机登入 mac-mini、公司电脑、VPS，以及当时在听 8022 的手机和平板，`whoami` 分别是 `liyong`、`Administrator`、`ubuntu`、`u0_a0`、`u0_a71`。mac-mini、公司电脑、手机、平板登入本机得到 `xiaoli`，`uname -s` 为 `MSYS_NT`。手机登 VPS 被拒绝。平板客户端没有 `vps` 和 `github.com`；登 VPS 时连接被对端断开，没有进入 shell。
+
 独立 Git Bash（mintty，Win10 与 Win11 共用）中文乱码：`dot_minttyrc.tmpl` → `~/.minttyrc`，`Charset=UTF-8`，字体 `CaskaydiaCove NFM`（缺字体则回退）。非 Windows 由 `.chezmoiignore` 忽略。`LANG` 保持本机存在的 `zh_CN.UTF-8`。仓库根的 `%USERPROFILE%` / `%SystemDrive%` / `${APPDATA}` 是未展开路径，不是用户配置。`core.filemode=false` 时 `tests/test_contracts.sh` 读 git 索引 mode。
 
 ## Windows Terminal：Git Bash 路径 C/D 盘（2026-05 实测）

@@ -117,7 +117,7 @@ chezmoi 按**目标名**（剥掉 `run_once_` 与 `.tmpl`）的字母序执行�
 
 ### SSH 密钥与登录对象
 
-私钥不入库。本机与 Mac 可登录全部设备；手机与平板只登录本机和 Mac。新设备的私钥在该设备上生成，只把公钥装进已经配好的机器。登录 desktop-pc 的 shell 是 Git Bash（`D:\Program Files\Git\usr\bin\bash.exe`，OpenSSH `DefaultShell`，命令选项 `-lc`），不是 PowerShell；客户端不要再写 `RemoteCommand`。`moicen.com` 用户是 `xiaoli`，`alchemy-studio.cn` 用户是 `leonli`，共用 `id_ed25519_moicen-alchemy-2026-10-Nc`。这把也是 GitHub 认证密钥。Mac 的 `github.com` 仍用 `5s`，desktop-pc 仍用 `C4`。两台都已登录。清单见 [docs/DEVICE_ACCESS.md](docs/DEVICE_ACCESS.md)，步骤见 [docs/SSH_KEY_ROTATION.md](docs/SSH_KEY_ROTATION.md)。手机 Termux 的 Powerline 符号由本机 `~/.termux/font.ttf` 绘制（Maple Mono NL NF CN Regular），见该清单「Termux 字体」。打洞失败时的 Tailscale 退路是 VPS peer relay（UDP `40000`，`grants` 用 `100.x`），见 [docs/TAILSCALE_PEER_RELAY.md](docs/TAILSCALE_PEER_RELAY.md)。不装 `derper`，不设 `OmitDefaultRegions`。生产域名不进尾网。
+私钥不入库。desktop-pc 与 Mac 可登录全部设备。`laptop-huawei` 同一档：用户 `xiaoli`，Git 在 `C:\Program Files\Git`，sshd `DefaultShell` 为 `C:\Program Files\Git\usr\bin\bash.exe`，选项 `-lc`。不要把检测脚本的 `bin\bash.exe` 写成 DefaultShell。这台的管理员公钥在 `C:\ProgramData\ssh\administrators_authorized_keys`，主机私钥所有者须为 Administrators，否则服务以 1067 退出。GitHub 钥匙是 `laptop-huawei-2026-10-5A`，登录钥匙是 `laptop-huawei-2026-10-o4`。手机与平板登录 desktop-pc、Mac 和这台笔记本。新设备的私钥在该设备上生成，只把公钥装进已经配好的机器。登录 desktop-pc 的 shell 是 Git Bash（`D:\Program Files\Git\usr\bin\bash.exe`，OpenSSH `DefaultShell`，命令选项 `-lc`），不是 PowerShell；客户端不要再写 `RemoteCommand`。公司电脑按目标分钥匙，只追加不替换。`moicen.com` 用户是 `xiaoli`，`alchemy-studio.cn` 用户是 `leonli`，共用 `id_ed25519_moicen-alchemy-2026-10-Nc`。这把也是 GitHub 认证密钥。Mac 的 `github.com` 仍用 `5s`，desktop-pc 仍用 `C4`。两台都已登录。清单见 [docs/DEVICE_ACCESS.md](docs/DEVICE_ACCESS.md)，步骤见 [docs/SSH_KEY_ROTATION.md](docs/SSH_KEY_ROTATION.md)。手机 Termux 的 Powerline 符号由本机 `~/.termux/font.ttf` 绘制（Maple Mono NL NF CN Regular），见该清单「Termux 字体」。打洞失败时的 Tailscale 退路是 VPS peer relay（UDP `40000`，`grants` 用 `100.x`），见 [docs/TAILSCALE_PEER_RELAY.md](docs/TAILSCALE_PEER_RELAY.md)。不装 `derper`，不设 `OmitDefaultRegions`。生产域名不进尾网。
 
 ## 项目规则（Agent 必须遵守）
 
@@ -203,7 +203,7 @@ chezmoi 按**目标名**（剥掉 `run_once_` 与 `.tmpl`）的字母序执行�
 
 ### 测试
 
-`tests/` 共 **8 个**测试，全部纳入 CI 硬性阻断：
+`tests/` 共 **9 个**测试，全部纳入 CI 硬性阻断：
 
 - `tests/test_contracts.sh` — ★ 结构与命名契约（目录分层 / 库 vs 入口 / `+x` / 文档链接 / 格式 / 部署入口唯一性）
 - `tests/test_syntax.sh` — 全仓 `.sh`/`.tmpl` 语法检查 + 全角标点回归，输出到 `logs/`
@@ -213,6 +213,7 @@ chezmoi 按**目标名**（剥掉 `run_once_` 与 `.tmpl`）的字母序执行�
 - `tests/test_install_report_status.sh` — `install.sh [5/6]` 软件报告状态
 - `tests/test_winget_msix_fallback.sh` — winget MSIX sideload 回退与主包选择
 - `tests/test_bashrc_prompt_guard.sh` — bashrc 提示符 / TERM 守卫
+- `tests/test_ssh_github_identity.sh` — GitHub 管理机密钥只出现在 `Host github.com`
 
 - 统一入口：`for t in tests/test_*.sh; do bash "$t"; done`
 - 测试的临时目录写在 `logs/` 下（自身 `mkdir -p`，故 `logs/` 可安全删除，会自动重建）

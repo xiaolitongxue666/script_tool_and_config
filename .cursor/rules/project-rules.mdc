@@ -79,6 +79,10 @@ Shell 配置模板中内置了 claude-mem 项目级记忆自动检测：
 - AI Agent 配置见 agent-config（Claude / Cursor / Codex / Pi + CodeGraph）。
 - **多 OS 兼容、环境独立**：WSL 里 `install.sh` 只装 WSL，与宿主机 npm 无关。`/mnt/host/wslg/.../fnm_multishells` 是 WSL 本机；`/mnt/c`、`/mnt/host/c` 才是 Windows。禁止从 WSL 改 Windows npm 或调用 `cmd.exe`。见 `.cursor/rules/wsl-windows-isolation.mdc`。
 
+## SSH 管理机密钥（Tailscale MagicDNS）
+
+设备名用 MagicDNS。钥匙文件 `id_ed25519_<名字>-<YYYY-MM>-<指纹末两位>`。GitHub 钥匙只写 `Host github.com`，登录钥匙只写设备 Host。管理机 `laptop-huawei`、`mac-mini`、`company-pc-win10` 可登录全部设备。手机和平板只登录这三台。GitHub 还包含 `vps`。`vps` 与 `xiaolitongxue-vps` 的 `HostName` 是 `vps`。本机 Git 在 `C:\Program Files\Git`，sshd `DefaultShell` 为 `C:\Program Files\Git\usr\bin\bash.exe`，选项 `-lc`。不要把检测脚本的 `bin\bash.exe` 写成 DefaultShell。管理员公钥在 `C:\ProgramData\ssh\administrators_authorized_keys`，主机私钥所有者须为 Administrators。`known_hosts` 不进仓库，私钥不跨机器复制。公司电脑按目标分钥匙，只追加不替换。缺文件不写 `IdentityFile`。详见 `docs/PROJECT_AGENT_MEMORY.md`。
+
 ## Pi
 
 - **不在本仓库**；见 [agent-config/docs/pi/README.md](../../../../AI/agent-config/docs/pi/README.md)。
