@@ -15,7 +15,7 @@
 | Mac mini | 李勇的Mac mini | `mac-mini` | `mac-mini.tail926022.ts.net` | `100.114.18.98` | 在线。SSH 用户是 `liyong`，本机没有 `leonli` |
 | 笔记本 | `LAPTOP-ANFCJ3NJ` | `laptop-win` | `laptop-huawei.tail926022.ts.net` | `100.124.252.108` | 离线约 142 天。只登记目标名 |
 | 平板 | `Xiaomi Pad 6S Pro 12` | `pad-android` | `personal-pad-android.tail926022.ts.net` | `100.109.45.51` | Termux 用户 `u0_a71`，SSH 端口 `8022`。打开 Termux 时 `~/.bashrc` 会启动 `sshd`。密码登录已关闭 |
-| 手机 | `Redmi K70` | `phone-android` | `phone-personal-android.tail926022.ts.net` | `100.65.16.28` | Termux 用户 `u0_a0`，SSH 端口 `8022`。打开 Termux 时 `~/.bashrc` 会启动 `sshd`。密码登录已关闭 |
+| 手机 | `Redmi K70` | `phone-android` | `phone-personal-android.tail926022.ts.net` | `100.65.16.28` | Termux 用户 `u0_a0`，SSH 端口 `8022`。打开 Termux 时 `~/.bashrc` 会启动 `sshd`。密码登录已关闭。提示符字体见「Termux 字体」 |
 
 离线设备不要只在管理后台改显示名。设备下次上线可能用自己的主机名盖回去。上线后在设备上执行：
 
@@ -122,6 +122,57 @@ WSL `Ubuntu-24.04` 的默认用户是 `root`，家目录 `/root`。2026-10-12 �
 | `huiwings.cn` | 未写入模板 | `leonli` | `22` | 管理员说用同一把 `Nc`。该机没有 `xiaoli`。未测 |
 
 `ssh desktop-win` 的 shell 是 `D:\Program Files\Git\usr\bin\bash.exe`（`HKLM\SOFTWARE\OpenSSH` 的 `DefaultShell`，远程命令选项 `-lc`）。客户端不要写 `RemoteCommand`。
+
+## Termux 字体
+
+核对日期：2026-10-13。手机 Redmi K70（`phone-personal-android`，用户 `u0_a0`）已确认：从 Termux SSH 到 Mac mini 和 desktop-pc，提示符符号都正常。平板没有改。
+
+### 现象
+
+Termux 里 `ssh mac-mini` 之后，提示符上很多符号变成方框。连 desktop-pc 是同一类问题。
+
+### 原因
+
+SSH 只传输字符，字形由客户端绘制。手机当时没有 `~/.termux`，也就没有 `font.ttf`，Termux 用系统等宽字体。这套字体没有 Powerline 私用区符号。
+
+| 连接 | 提示符 | 每行都会出现的符号 |
+|---|---|---|
+| Mac mini（用户 `liyong`） | zsh 主题 agnoster。`~/.zshrc` 里 Starship 的 `eval` 仍是注释，没有接管提示符 | `` U+E0B0、`` U+E0A0 |
+| desktop-pc（Git Bash） | Starship，配置在 `~/.config/starship/starship.toml` | `` U+E0B6、`` U+E0B0、`` U+E0A0 |
+
+当时手机 `LANG=en_US.UTF-8`，不是编码错误。Mac 上的 FiraMono、Windows Terminal 和 mintty 的 CaskaydiaCove NFM 只影响那台机器自己的窗口。
+
+### 处理
+
+Termux 只读一个字体文件：`~/.termux/font.ttf`。写好后执行 `termux-reload-settings`（向 `com.termux` 发 `com.termux.app.reload_style`）。画面不刷新时，划掉 Termux 再打开。划掉后 `sshd` 会停，需要重新进入 Termux。
+
+选用 Maple Mono NL NF CN Regular（maple-font v7.9）：
+
+- NL：无连字，提示符对齐不被合字拉开
+- NF：含 Nerd Font / Powerline。cmap 里有 U+E0A0、U+E0B0、U+E0B6
+- CN：同一文件含简体中文。Termux 用 `Typeface.createFromFile` 把这个文件设成主字体，中文放在同一文件里
+
+下载整包后只取出 Regular：
+
+```text
+https://github.com/subframe7536/maple-font/releases/download/v7.9/MapleMonoNL-NF-CN-unhinted.zip
+```
+
+包内文件 `MapleMonoNL-NF-CN-Regular.ttf`，20541416 字节，TTF 头 `00 01 00 00`。安装位置：
+
+```text
+/data/data/com.termux/files/home/.termux/font.ttf
+```
+
+权限 `644`。当时 Termux 版本 `googleplay.2026.06.21`，Android 16。字体包不入库。
+
+`✚`（U+271A）、`⚙`（U+2699）、`➦`（U+27A6）和彩色 emoji 不在这份字体里。缺的码位由 Android 绘制时回退到系统字体。2026-10-13 用户确认两条 SSH 的显示都正常。
+
+### 不要做的事
+
+- 不要为了手机上的方框去改 Mac 或 desktop-pc 的字体
+- 不要把 CaskaydiaCove 拷进 Termux 当作唯一字体：它没有简体中文
+- 平板如果出现同样的方框，只改那台 Termux 的 `~/.termux/font.ttf`
 
 ## 测试
 

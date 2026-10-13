@@ -398,6 +398,14 @@ chezmoi --source .chezmoi managed | grep -E 'install-|^[0-9]' | sort   # 核对�
 | B9 | `common_install.sh` **从未 source `common.sh`** | 28 个 run_once 模板静默落到 4 函数兜底实现 | 加载前加探针守卫 `declare -F echo_color_message`（`common_install.sh:16-21`） |
 | B0 | `deploy.sh` 曾被 `install.sh` 的内容**整体覆盖** | 增量部署入口丢失诊断逻辑 | 由 `git show HEAD:deploy.sh` 恢复并迁移路径；新增 6 项断言守护（`cmp -s install.sh deploy.sh` 必须不同、`install.sh` 含 `[1/6]`、`deploy.sh` 含 `DIAGNOSE_SCRIPT`） |
 
+## Termux 提示符字体（2026-10-13 实测）
+
+手机 Termux SSH 到 Mac mini 或 desktop-pc 时，提示符方框是客户端缺 Powerline 字形，不是远程没装 Nerd Font，也不是 locale。当时手机没有 `~/.termux/font.ttf`，`LANG` 已是 `en_US.UTF-8`。
+
+Mac 的 zsh 主题是 agnoster，每行有 ``（U+E0B0）和 ``（U+E0A0）。desktop-pc 的 Git Bash 用 Starship，另外还有 ``（U+E0B6）。这两处字体（FiraMono、CaskaydiaCove NFM）只画本机窗口。
+
+Termux 只认 `~/.termux/font.ttf`。手机已安装 Maple Mono NL NF CN Regular（maple-font v7.9，`MapleMonoNL-NF-CN-Regular.ttf`，20541416 字节）：无连字、含上述三个 Powerline 码位、同一文件含简体中文。写好后 `termux-reload-settings`。2026-10-13 用户确认两条 SSH 都正常。平板未改。下载地址、路径和不要做的事见 `docs/DEVICE_ACCESS.md`「Termux 字体」。字体包不入库。
+
 ## 通用 Agent 约束（摘要）
 
 1. 独立工具脚本（`scripts/tools/standalone_tool_script/` 等）**永不删除**。

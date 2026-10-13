@@ -523,3 +523,10 @@ tests/*.log
 
 # Literal ${APPDATA}\npm directory (Windows env expansion artifact under repo root)
 ${APPDATA}\npm/
+
+# Termux 字体安装包（装到手机 ~/.termux/font.ttf，不入库）
+MapleMono*.ttf
+MapleMono*.zip
+MapleMono*.tar.xz
+CascadiaCode.tar.xz
+CascadiaCode.zip

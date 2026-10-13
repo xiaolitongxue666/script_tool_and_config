@@ -117,7 +117,7 @@ chezmoi 按**目标名**（剥掉 `run_once_` 与 `.tmpl`）的字母序执行�
 
 ### SSH 密钥与登录对象
 
-私钥不入库。本机与 Mac 可登录全部设备；手机与平板只登录本机和 Mac。新设备的私钥在该设备上生成，只把公钥装进已经配好的机器。登录 desktop-pc 的 shell 是 Git Bash（`D:\Program Files\Git\usr\bin\bash.exe`，OpenSSH `DefaultShell`，命令选项 `-lc`），不是 PowerShell；客户端不要再写 `RemoteCommand`。`moicen.com` 用户是 `xiaoli`，`alchemy-studio.cn` 用户是 `leonli`，共用 `id_ed25519_moicen-alchemy-2026-10-Nc`。这把也是 GitHub 认证密钥。Mac 的 `github.com` 仍用 `5s`，desktop-pc 仍用 `C4`。两台都已登录。清单见 [docs/DEVICE_ACCESS.md](docs/DEVICE_ACCESS.md)，步骤见 [docs/SSH_KEY_ROTATION.md](docs/SSH_KEY_ROTATION.md)。打洞失败时的 Tailscale 退路是 VPS peer relay（UDP `40000`，`grants` 用 `100.x`），见 [docs/TAILSCALE_PEER_RELAY.md](docs/TAILSCALE_PEER_RELAY.md)。不装 `derper`，不设 `OmitDefaultRegions`。生产域名不进尾网。
+私钥不入库。本机与 Mac 可登录全部设备；手机与平板只登录本机和 Mac。新设备的私钥在该设备上生成，只把公钥装进已经配好的机器。登录 desktop-pc 的 shell 是 Git Bash（`D:\Program Files\Git\usr\bin\bash.exe`，OpenSSH `DefaultShell`，命令选项 `-lc`），不是 PowerShell；客户端不要再写 `RemoteCommand`。`moicen.com` 用户是 `xiaoli`，`alchemy-studio.cn` 用户是 `leonli`，共用 `id_ed25519_moicen-alchemy-2026-10-Nc`。这把也是 GitHub 认证密钥。Mac 的 `github.com` 仍用 `5s`，desktop-pc 仍用 `C4`。两台都已登录。清单见 [docs/DEVICE_ACCESS.md](docs/DEVICE_ACCESS.md)，步骤见 [docs/SSH_KEY_ROTATION.md](docs/SSH_KEY_ROTATION.md)。手机 Termux 的 Powerline 符号由本机 `~/.termux/font.ttf` 绘制（Maple Mono NL NF CN Regular），见该清单「Termux 字体」。打洞失败时的 Tailscale 退路是 VPS peer relay（UDP `40000`，`grants` 用 `100.x`），见 [docs/TAILSCALE_PEER_RELAY.md](docs/TAILSCALE_PEER_RELAY.md)。不装 `derper`，不设 `OmitDefaultRegions`。生产域名不进尾网。
 
 ## 项目规则（Agent 必须遵守）
 
