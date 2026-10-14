@@ -25,7 +25,7 @@ script_tool_and_config **一套脚本**兼容 Windows Git Bash、WSL、macOS、L
 
 ## 必须
 
-- 已装判定看**当前环境**的 `command -v` / `npm prefix -g` / `npm root -g`。interop 路径 **不算已装**。
+- 已装判定看**当前环境**的 `command -v` / `npm prefix -g` / `npm root -g`。interop 路径 **不算已装**。WSL 上 `/mnt/c` 的 `cursor.exe` 不代表本环境已装 Cursor。
 - 安装/升级只用当前环境的 fnm/npm（WSL 用 WSL 内的）。
 - 各 OS / 各 WSL distro **分别**跑 `install.sh` / `deploy.sh`；Phase 2 在对应环境再跑 agent-config `install-tools.sh`。
 - 改共享脚本时：平台专有逻辑（`run_once_windows-*` / `run_once_linux-*` / `run_once_macos-*`、Windows junction、`cmd.exe`）必须按当前 OS 门控；**不得**让 Linux/WSL 分支写 Windows 路径，也不得让 Windows 分支写 WSL/`/home` 目标。

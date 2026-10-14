@@ -395,12 +395,15 @@ else
 fi
 
 if grep -q '_command_exists_local_not_interop' \
-    "${PROJECT_ROOT}/scripts/lib/chezmoi/install_helpers.sh"; then
+    "${PROJECT_ROOT}/scripts/lib/chezmoi/install_helpers.sh" \
+    && grep -A8 '93-install-cursor|cursor)' \
+        "${PROJECT_ROOT}/scripts/lib/chezmoi/install_helpers.sh" \
+        | grep -q '_command_exists_local_not_interop "cursor"'; then
     PASSED=$((PASSED + 1))
-    echo "[PASS] claude/codex installed-check ignores Windows interop paths"
+    echo "[PASS] claude/codex/cursor installed-check ignores Windows interop paths"
 else
     FAILED=$((FAILED + 1))
-    echo "[FAIL] install_helpers missing _command_exists_local_not_interop"
+    echo "[FAIL] install_helpers missing interop-aware claude/codex/cursor check"
 fi
 
 if grep -q 'ensure_npm_global_latest "@anthropic-ai/claude-code"' \

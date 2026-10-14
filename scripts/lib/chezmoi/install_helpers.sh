@@ -495,7 +495,8 @@ check_script_software_installed() {
             ;;
         93-install-cursor|cursor)
             # 命令：Linux/macOS 安装后 cursor 在 PATH；macOS 也可能是 .app
-            if check_command_exists "cursor"; then
+            # WSL 上 /mnt/c 的 cursor.exe 不算本环境已装
+            if _command_exists_local_not_interop "cursor"; then
                 return 0
             fi
             if [[ "${PLATFORM:-}" == "darwin" ]] || [[ "$(uname -s)" == "Darwin" ]]; then
