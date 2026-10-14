@@ -444,7 +444,7 @@ chezmoi --source .chezmoi managed | grep -E 'install-|^[0-9]' | sort   # 核对�
 
 Mac 的 zsh 主题是 agnoster，每行有 ``（U+E0B0）和 ``（U+E0A0）。desktop-pc 的 Git Bash 用 Starship，另外还有 ``（U+E0B6）。这两处字体（FiraMono、CaskaydiaCove NFM）只画本机窗口。
 
-Termux 只认 `~/.termux/font.ttf`。手机已安装 Maple Mono NL NF CN Regular（maple-font v7.9，`MapleMonoNL-NF-CN-Regular.ttf`，20541416 字节）：无连字、含上述三个 Powerline 码位、同一文件含简体中文。写好后 `termux-reload-settings`。2026-10-13 用户确认手机两条 SSH 都正常。平板已写入同一文件。划掉 Termux 再打开后，2026-10-13 用户确认平板显示正常。下载地址、路径和不要做的事见 `docs/DEVICE_ACCESS.md`「Termux 字体」。字体包不入库。
+Termux 只认 `~/.termux/font.ttf`。手机已安装 Maple Mono NL NF CN Regular（maple-font v7.9，`MapleMonoNL-NF-CN-Regular.ttf`，20541416 字节）：无连字、含上述三个 Powerline 码位、同一文件含简体中文。写好后 `termux-reload-settings`。2026-10-13 用户确认手机两条 SSH 都正常。平板已写入同一文件。划掉 Termux 再打开后，2026-10-13 用户确认平板显示正常。下载地址、路径和不要做的事见 `docs/DEVICE_ACCESS.md`「Termux 字体」。字体包不入库。手机出站终端见 `docs/MOSHI_PHONE.md`，Termux 仍管 `8022`。
 
 ## 通用 Agent 约束（摘要）
 

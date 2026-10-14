@@ -43,7 +43,7 @@ bash scripts/chezmoi/install_chezmoi.sh  # 或直接跑 ./install.sh
 chezmoi apply -v --force
 ```
 
-SSH 配置由 `.chezmoi/dot_ssh/config.tmpl` 管理，预置 `github.com`、Tailscale 别名 `vps`（`xiaolitongxue-vps` 指向同一台），以及生产域名 `moicen.com`（用户 `xiaoli`）、`alchemy-studio.cn`（用户 `leonli`）。密钥文件名和登录关系见 `docs/DEVICE_ACCESS.md`。手机 Termux 的 Powerline 符号由本机 `~/.termux/font.ttf` 绘制，见该文档「Termux 字体」。打洞失败时的 Tailscale 退路见 `docs/TAILSCALE_PEER_RELAY.md`。
+SSH 配置由 `.chezmoi/dot_ssh/config.tmpl` 管理，预置 `github.com`、Tailscale 别名 `vps`（`xiaolitongxue-vps` 指向同一台），以及生产域名 `moicen.com`（用户 `xiaoli`）、`alchemy-studio.cn`（用户 `leonli`）。密钥文件名和登录关系见 `docs/DEVICE_ACCESS.md`。手机 Termux 的 Powerline 符号由本机 `~/.termux/font.ttf` 绘制，见该文档「Termux 字体」。手机出站终端见 `docs/MOSHI_PHONE.md`，Termux 仍管 `8022`。打洞失败时的 Tailscale 退路见 `docs/TAILSCALE_PEER_RELAY.md`。
 
 ### Windows 快速安装
 
@@ -89,6 +89,7 @@ install.sh
 | [docs/ENCODING_AND_LINE_ENDINGS.md](docs/ENCODING_AND_LINE_ENDINGS.md) | 文件编码与换行符规范 |
 | [docs/DEPLOYMENT_GUIDE.md](docs/DEPLOYMENT_GUIDE.md) | 部署流程（Windows/Arch） |
 | [docs/SFTP_SYNC_GUIDE.md](docs/SFTP_SYNC_GUIDE.md) | SFTP 与同步指南 |
+| [docs/MOSHI_PHONE.md](docs/MOSHI_PHONE.md) | 手机 Moshi：Tailscale 登录三台管理机，以及本地语音 |
 
 ## 💻 支持的平台
 

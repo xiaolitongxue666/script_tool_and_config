@@ -15,7 +15,7 @@
 | Mac mini | 李勇的Mac mini | `mac-mini` | `mac-mini.tail926022.ts.net` | `100.114.18.98` | 在线。SSH 用户是 `liyong`，本机没有 `leonli` |
 | 笔记本 | `LAPTOP-ANFCJ3NJ` | `laptop-huawei` | `laptop-huawei.tail926022.ts.net` | `100.124.252.108` | 2026-10-13 在线。SSH 用户 `xiaoli`。Git 在 `C:\Program Files\Git`。sshd `DefaultShell` 为 `C:\Program Files\Git\usr\bin\bash.exe`，选项 `-lc` |
 | 平板 | `Xiaomi Pad 6S Pro 12` | `pad-android` | `personal-pad-android.tail926022.ts.net` | `100.109.45.51` | Termux 用户 `u0_a71`，SSH 端口 `8022`。打开 Termux 时 `~/.bashrc` 会启动 `sshd`。密码登录已关闭。提示符字体与手机相同，见「Termux 字体」 |
-| 手机 | `Redmi K70` | `phone-android` | `phone-personal-android.tail926022.ts.net` | `100.65.16.28` | Termux 用户 `u0_a0`，SSH 端口 `8022`。打开 Termux 时 `~/.bashrc` 会启动 `sshd`。密码登录已关闭。提示符字体见「Termux 字体」 |
+| 手机 | `Redmi K70` | `phone-android` | `phone-personal-android.tail926022.ts.net` | `100.65.16.28` | Termux 用户 `u0_a0`，SSH 端口 `8022`。打开 Termux 时 `~/.bashrc` 会启动 `sshd`。密码登录已关闭。提示符字体见「Termux 字体」。出站终端见 [MOSHI_PHONE.md](MOSHI_PHONE.md)，Termux 仍管 `8022` |
 
 离线设备不要只在管理后台改显示名。设备下次上线可能用自己的主机名盖回去。上线后在设备上执行：
 
