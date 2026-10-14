@@ -137,12 +137,14 @@ case "$PLATFORM" in
             done
         fi
 
-        # 通用方式：下载 AppImage
+        # downloader.cursor.sh 的固定 AppImage 地址会 SSL_ERROR_SYSCALL。
+        # 稳定入口是 cursor.com 的 download API，再跟着 downloadUrl 下 AppImage。
         echo "[INFO] Downloading Cursor AppImage..."
-        appimage_url="https://downloader.cursor.sh/linux/appImage/x64"
+        appimage_api="https://www.cursor.com/api/download?platform=linux-x64&releaseTrack=stable"
+        appimage_url="$(curl -fsSL --max-time 30 "$appimage_api" | sed -n 's/.*"downloadUrl":"\([^"]*\)".*/\1/p')"
         appimage_path="${dest_dir}/cursor.AppImage"
 
-        if curl -fsSL "$appimage_url" -o "$appimage_path" 2>/dev/null; then
+        if [[ -n "$appimage_url" ]] && curl -fL --retry 3 --retry-delay 2 "$appimage_url" -o "$appimage_path"; then
             chmod +x "$appimage_path"
             ln -sf "$appimage_path" "${dest_dir}/cursor"
             echo "[SUCCESS] Cursor AppImage installed to ${dest_dir}/cursor"

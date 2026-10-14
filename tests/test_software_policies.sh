@@ -406,6 +406,17 @@ else
     echo "[FAIL] install_helpers missing interop-aware claude/codex/cursor check"
 fi
 
+if grep -q 'cursor.com/api/download?platform=linux-x64' \
+    "${PROJECT_ROOT}/.chezmoi/run_once_93-install-cursor.sh.tmpl" \
+    && ! grep -q 'downloader.cursor.sh/linux/appImage' \
+        "${PROJECT_ROOT}/.chezmoi/run_once_93-install-cursor.sh.tmpl"; then
+    PASSED=$((PASSED + 1))
+    echo "[PASS] Cursor AppImage uses cursor.com download API"
+else
+    FAILED=$((FAILED + 1))
+    echo "[FAIL] Cursor AppImage still uses downloader.cursor.sh"
+fi
+
 if grep -q 'ensure_npm_global_latest "@anthropic-ai/claude-code"' \
     "${PROJECT_ROOT}/.chezmoi/run_once_90-install-claude-code.sh.tmpl" \
     && grep -q 'ensure_npm_global_latest "@openai/codex"' \
