@@ -91,7 +91,7 @@ VPS `ubuntu` 的 `authorized_keys` 现在是这三行，都不要删：
 
 GitHub 认证公钥保留 `desktop-win-2026-10-C4`、`vps-2026-10-JM`、`mac-mini-2026-10-5s`、`moicen-alchemy-2026-10-Nc`（id `166186184`）。标题 `mac mini`（id `50838450`）已删除。`Work_company_key` 此前已删除。
 
-MSYS2 的 `ssh` 经目录联接使用 `%USERPROFILE%\.ssh`（本机 `C:\Users\Administrator\.ssh`），不再另维护一份 config。`run_once_windows-link-msys-ssh.sh` 把 `C:\msys64\home\<用户>\.ssh` 接到该目录；原来的 MSYS 目录改名为同级 `.ssh.bak-日期`，不删除。其中曾有 `192.168.1.211`（Gitblit，用户 `liyong`，端口 `29418`），2026-10-12 用已删除的 `id_ed25519` 和 `id_rsa` 登录被拒绝，未并入 chezmoi 模板。
+MSYS2 的 `ssh` 经目录联接使用 `%USERPROFILE%\.ssh`（本机 `C:\Users\Administrator\.ssh`），不再另维护一份 config。`run_once_windows-link-msys-ssh.sh` 把 `C:\msys64\home\<用户>\.ssh` 接到该目录。chezmoi 子进程若没有 `USERPROFILE`，脚本用 `HOME`（cygpath）或 `C:/Users/<用户名>` 定位，不写死用户名。原来的 MSYS 目录改名为同级 `.ssh.bak-日期`，不删除。其中曾有 `192.168.1.211`（Gitblit，用户 `liyong`，端口 `29418`），2026-10-12 用已删除的 `id_ed25519` 和 `id_rsa` 登录被拒绝，未并入 chezmoi 模板。
 
 WSL `Ubuntu-24.04` 的默认用户是 `root`，家目录 `/root`。2026-10-12 已把本机 GitHub、VPS、手机、Mac、平板这几把私钥和渲染后的 `~/.ssh/config` 复制进去（权限 600）。平板 Host `personal-pad-android` 已补上，用户 `u0_a71`，端口 `8022`，密钥 `id_ed25519_desktop-win-2026-10-Tg`。旧的 `id_rsa`（`SHA256:SpqzZfj+gI3OeL+4ykMk1tc04jV6iSAlLnTOSaG4LIg`）和 `id_ed25519`（`SHA256:VnzXG8fdsIHdxlQE2hd+HVeof6NXuBebj5BIvN9WB1E`）已从该目录删除。
 

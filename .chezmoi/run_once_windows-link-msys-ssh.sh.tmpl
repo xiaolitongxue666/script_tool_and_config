@@ -12,11 +12,11 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="${CHEZMOI_PROJECT_ROOT:-$(cd "${SCRIPT_DIR}/../../.." && pwd 2>/dev/null || echo "$HOME")}"
+PROJECT_ROOT="${CHEZMOI_PROJECT_ROOT:-$(cd "${SCRIPT_DIR}/../../.." && pwd 2>/dev/null || echo "${HOME:-}")}"
 COMMON_INSTALL="${PROJECT_ROOT}/scripts/lib/chezmoi/common_install.sh"
 
 if [[ ! -f "$COMMON_INSTALL" ]]; then
-    COMMON_INSTALL="$HOME/.local/share/chezmoi/scripts/lib/chezmoi/common_install.sh"
+    COMMON_INSTALL="${HOME:-}/.local/share/chezmoi/scripts/lib/chezmoi/common_install.sh"
 fi
 
 if [[ -f "$COMMON_INSTALL" ]]; then
@@ -85,6 +85,33 @@ find_msys_root() {
     return 1
 }
 
+# chezmoi 用 Git Bash 跑 run_once 时，父进程的 USERPROFILE 不一定传到脚本。
+# 依次认 USERPROFILE、userprofile、HOME（cygpath），最后才是 C:/Users/<用户名>。
+resolve_windows_profile() {
+    local candidate=""
+    candidate="${USERPROFILE:-${userprofile:-}}"
+    candidate="${candidate//$'\r'/}"
+    if [[ -z "$candidate" && -n "${HOME:-}" ]] && command -v cygpath >/dev/null 2>&1; then
+        candidate="$(cygpath -w "$HOME" 2>/dev/null || true)"
+        candidate="${candidate//$'\r'/}"
+        candidate="${candidate//$'\n'/}"
+    fi
+    if [[ -z "$candidate" ]]; then
+        local user_name="${USERNAME:-${USER:-}}"
+        if [[ -n "$user_name" && -d "/c/Users/${user_name}" ]]; then
+            candidate="C:/Users/${user_name}"
+        fi
+    fi
+    if [[ -z "$candidate" ]]; then
+        return 1
+    fi
+    if command -v cygpath >/dev/null 2>&1; then
+        cygpath -u "$candidate"
+        return 0
+    fi
+    printf '%s\n' "$candidate"
+}
+
 # passwd 里的 /home/用户 是 MSYS 前缀内的路径，不能按当前 shell 的 /home 解析
 msys_home_from_prefix() {
     local msys_root="$1"
@@ -110,20 +137,20 @@ msys_home_from_prefix() {
 }
 
 link_msys_ssh() {
-    local profile_ssh msys_root msys_home msys_ssh
+    local profile_dir profile_ssh msys_root msys_home msys_ssh
     local profile_norm msys_norm link_win target_win print_name print_norm
     local backup_name backup_path
 
-    if [[ -z "${USERPROFILE:-}" ]]; then
-        log_error "USERPROFILE 未设置，无法定位 Windows SSH 目录"
-        exit 1
-    fi
     if ! command -v cygpath >/dev/null 2>&1; then
         log_error "需要 cygpath（Git Bash 或 MSYS）"
         exit 1
     fi
 
-    profile_ssh="$(cygpath -u "${USERPROFILE}")/.ssh"
+    if ! profile_dir="$(resolve_windows_profile)"; then
+        log_error "无法定位 Windows 用户目录（USERPROFILE 与 HOME 都不可用）"
+        exit 1
+    fi
+    profile_ssh="${profile_dir}/.ssh"
     if [[ ! -d "$profile_ssh" ]]; then
         log_error "Windows SSH 目录不存在: ${profile_ssh}"
         exit 1
